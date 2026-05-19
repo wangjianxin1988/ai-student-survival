@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '';
@@ -8,31 +8,49 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey &&
   supabaseUrl !== 'https://your-project.supabase.co' &&
   supabaseAnonKey !== 'your-anon-key');
 
-// Create client with timeout configuration
-// realtime is disabled because Cloudflare Workers don't support WebSocket connections during build
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      global: {
-        fetch: (url, options) => {
-          const controller = new AbortController();
-          const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
-          return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
-        },
-      },
-      realtime: {
-        params: {
-          events: [], // Disable realtime events to avoid WebSocket issues in Workers
-        },
-      },
-    })
-  : createClient('https://placeholder.supabase.co', 'placeholder-key', {
+// Lazy-loaded Supabase client to avoid WebSocket initialization during build
+let _supabase: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+  if (_supabase) return _supabase;
+
+  if (!isSupabaseConfigured) {
+    // Return a client that will fail gracefully - actual API calls won't happen without config
+    return createClient('https://placeholder.supabase.co', 'placeholder-key', {
       auth: { autoRefreshToken: false, persistSession: false },
       global: { fetch: () => Promise.reject(new Error('Supabase not configured')) },
     });
+  }
+
+  _supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+    global: {
+      fetch: (url, options) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+        return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
+      },
+    },
+  });
+
+  return _supabase;
+}
+
+// Proxy that lazily initializes the client
+// This avoids importing/supabase-js during the build phase
+export const supabase = new Proxy({} as SupabaseClient, {
+  get(target, prop) {
+    const client = getSupabaseClient();
+    const value = (client as any)[prop];
+    if (typeof value === 'function') {
+      return value.bind(client);
+    }
+    return value;
+  },
+});
 
 // Database types (snake_case, matches Supabase schema)
 export interface DbTool {
