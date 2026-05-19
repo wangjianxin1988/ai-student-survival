@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ProfilePage from '@/components/user/ProfilePage';
+
+export const prerender = false;
+
+const locale = 'zh';
+---
+
+<Layout title={locale === 'zh' ? '个人中心' : 'Profile'}>
+  <ProfilePage locale={locale} client:only="react" />
+</Layout>

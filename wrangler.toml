@@ -1,0 +1,63 @@
+name = "ai-student-survival"
+compatibility_date = "2024-01-01"
+
+# Cloudflare Pages configuration
+pages_build_output_dir = "dist"
+
+# 环境变量 (通过 Cloudflare Pages > Settings > Environment Variables 设置)
+[vars]
+PUBLIC_SITE_URL = "https://ai-student-survival.pages.dev"
+# PUBLIC_SUPABASE_URL 和 PUBLIC_SUPABASE_ANON_KEY 在 Cloudflare Pages 控制台设置
+# 不要在 wrangler.toml 中写入实际的密钥值
+
+# 头信息配置 - AI爬虫友好
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-Robots-Tag = "all"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# AI爬虫特定头
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Content-Type = "application/json"
+    Access-Control-Allow-Origin = "*"
+
+# 图片缓存
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+[[headers]]
+  for = "/*.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# 静态资源缓存
+[[headers]]
+  for = "/_astro/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# ============================================
+# Supabase 环境变量设置说明 (Cloudflare Pages)
+# ============================================
+# 1. 登录 Cloudflare Dashboard
+# 2. 进入 Pages > ai-student-survival > Settings > Environment Variables
+# 3. 添加以下变量（为 production 环境设置）:
+#    - PUBLIC_SUPABASE_URL: 你的 Supabase 项目 URL
+#    - PUBLIC_SUPABASE_ANON_KEY: 你的 Supabase Anon Key
+# 4. 重新部署以使环境变量生效
+#
+# 获取 Supabase 凭据:
+# 1. 登录 https://supabase.com/dashboard
+# 2. 选择你的项目
+# 3. 进入 Settings > API
+# 4. 复制 Project URL 和 anon public key

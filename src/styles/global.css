@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500;
+  }
+
+  .btn-secondary {
+    @apply btn bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500;
+  }
+
+  .btn-outline {
+    @apply btn border-2 border-gray-300 bg-transparent hover:bg-gray-100 focus:ring-gray-500;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden transition-shadow duration-200 hover:shadow-md;
+  }
+
+  .card-header {
+    @apply px-4 py-3 border-b border-gray-100 bg-gray-50/50;
+  }
+
+  .card-body {
+    @apply p-4;
+  }
+
+  .input {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-free {
+    @apply badge bg-green-100 text-green-800;
+  }
+
+  .badge-paid {
+    @apply badge bg-purple-100 text-purple-800;
+  }
+
+  .badge-freemium {
+    @apply badge bg-blue-100 text-blue-800;
+  }
+
+  .tag {
+    @apply inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors cursor-pointer;
+  }
+
+  /* Rating stars */
+  .rating {
+    @apply flex items-center gap-0.5;
+  }
+
+  .rating-star {
+    @apply w-4 h-4 text-yellow-400 fill-current;
+  }
+
+  /* Tool card */
+  .tool-card {
+    @apply card p-0 flex flex-col;
+  }
+
+  .tool-card-image {
+    @apply h-32 bg-gradient-to-br from-primary-100 to-secondary-100 flex items-center justify-center;
+  }
+
+  .tool-card-body {
+    @apply card-body flex-1 flex flex-col;
+  }
+
+  .tool-card-footer {
+    @apply px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between;
+  }
+
+  /* Navigation */
+  .nav-link {
+    @apply px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors;
+  }
+
+  .nav-link-active {
+    @apply nav-link bg-primary-50 text-primary-700 hover:bg-primary-100;
+  }
+
+  /* Search */
+  .search-trigger {
+    @apply w-full md:w-96 px-4 py-2.5 bg-gray-100 border-0 rounded-xl text-sm text-gray-500 focus:bg-white focus:ring-2 focus:ring-primary-500 transition-all;
+  }
+
+  /* Hero */
+  .hero-gradient {
+    @apply bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-700;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+}
+
+/* JSON-LD Schema.org styles for AI readability */
+[data-schema-mark] {
+  display: none;
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

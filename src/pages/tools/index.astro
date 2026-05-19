@@ -1,0 +1,144 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+import ToolsPageClient from '@/components/tools/ToolsPageClient';
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "AI Tools for Students",
+  "description": "Curated AI tools for international students",
+};
+
+const translations = {
+  title: translate(locale, 'tools.title'),
+  description: translate(locale, 'tools.description'),
+  categories: {
+    all: translate(locale, 'tools.categories.all'),
+    agent: translate(locale, 'tools.categories.agent'),
+    writing: translate(locale, 'tools.categories.writing'),
+    coding: translate(locale, 'tools.categories.coding'),
+    design: translate(locale, 'tools.categories.design'),
+    research: translate(locale, 'tools.categories.research'),
+    communication: translate(locale, 'tools.categories.communication'),
+  },
+  pricing: {
+    all: translate(locale, 'tools.pricing.all'),
+    free: translate(locale, 'tools.pricing.free'),
+    freemium: translate(locale, 'tools.pricing.freemium'),
+    paid: translate(locale, 'tools.pricing.paid'),
+  },
+  showResults: translate(locale, 'tools.showResults', { count: 0 }),
+  free: translate(locale, 'tools.free'),
+  freePlus: translate(locale, 'tools.freePlus'),
+  new: translate(locale, 'tools.new'),
+  viewDetails: translate(locale, 'common.viewDetails'),
+  noResults: translate(locale, 'common.noResults'),
+  clearFilters: translate(locale, 'common.clearFilters'),
+  dbConnected: translate(locale, 'tools.dbConnected'),
+};
+---
+
+<Layout
+  title={translations.title}
+  description={translations.description}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 class="text-3xl font-bold mb-2">{translations.title}</h1>
+      <p class="text-gray-600">
+        {translations.description.split('.')[0]}
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Sidebar Filters -->
+      <aside class="w-full lg:w-64 flex-shrink-0">
+        <div class="bg-white rounded-xl border border-gray-200 p-4 sticky top-24">
+          <h3 class="font-semibold mb-4">{translate(locale, 'common.filters')}</h3>
+
+          <!-- Search -->
+          <form method="get" class="mb-6" id="searchForm">
+            <label class="block text-sm font-medium text-gray-700 mb-2">{translate(locale, 'common.search')}</label>
+            <input
+              type="text"
+              name="q"
+              id="searchInput"
+              placeholder={translate(locale, 'common.searchPlaceholder')}
+              class="input text-sm"
+            />
+          </form>
+
+          <!-- Category Filter -->
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              {translate(locale, 'tools.categories.all').split(' ')[0]}
+            </label>
+            <div class="space-y-2" id="categoryFilters">
+              <a href="/tools" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.categories.all')}
+              </a>
+              <a href="/tools?category=agent" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.categories.agent')}
+              </a>
+              <a href="/tools?category=writing" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.categories.writing')}
+              </a>
+              <a href="/tools?category=coding" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.categories.coding')}
+              </a>
+              <a href="/tools?category=design" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.categories.design')}
+              </a>
+              <a href="/tools?category=research" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.categories.research')}
+              </a>
+              <a href="/tools?category=communication" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.categories.communication')}
+              </a>
+            </div>
+          </div>
+
+          <!-- Pricing Filter -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              {locale === 'en' ? 'Price' : '价格'}
+            </label>
+            <div class="space-y-2" id="pricingFilters">
+              <a href="/tools" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.pricing.all')}
+              </a>
+              <a href="/tools?pricing=free" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.pricing.free')}
+              </a>
+              <a href="/tools?pricing=freemium" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.pricing.freemium')}
+              </a>
+              <a href="/tools?pricing=paid" class="block px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">
+                {translate(locale, 'tools.pricing.paid')}
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content - Client Rendered -->
+      <main class="flex-1">
+        <ToolsPageClient
+          client:only="react"
+          initialLocale={locale}
+          translations={translations}
+        />
+      </main>
+    </div>
+  </div>
+</Layout>

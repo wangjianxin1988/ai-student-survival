@@ -1,0 +1,183 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl, defaultLocale } from '@/i18n';
+
+// Get locale from URL
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+// Helper to generate locale-aware hrefs
+function getLocaleHref(path: string): string {
+  if (locale === defaultLocale) {
+    return path;
+  }
+  return `/${locale}${path}`;
+}
+---
+
+<Layout
+  title={translate(locale, 'nav.contact')}
+  description="联系我们获取帮助、提出建议或建立合作关系。"
+  locale={locale}
+>
+  <!-- Hero Section -->
+  <section class="hero-gradient text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl lg:text-5xl font-bold mb-4">{translate(locale, 'contact.hero.title')}</h1>
+        <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+          {translate(locale, 'contact.hero.subtitle')}
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Info -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-3 gap-8 mb-16">
+        <div class="text-center p-6 bg-gray-50 rounded-xl">
+          <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">{translate(locale, 'contact.info.email.title')}</h3>
+          <p class="text-gray-600">support@mitoai.example.com</p>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-xl">
+          <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">{translate(locale, 'contact.info.social.title')}</h3>
+          <p class="text-gray-600">微信: mitoai_helper</p>
+        </div>
+        <div class="text-center p-6 bg-gray-50 rounded-xl">
+          <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-2">{translate(locale, 'contact.info.hours.title')}</h3>
+          <p class="text-gray-600">{translate(locale, 'contact.info.hours.desc')}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Form -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl font-bold text-center mb-12">{translate(locale, 'contact.form.title')}</h2>
+
+      <form class="bg-white rounded-xl p-8 shadow-sm" id="contact-form">
+        <div class="grid md:grid-cols-2 gap-6 mb-6">
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+              {translate(locale, 'contact.form.name')}
+            </label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder={translate(locale, 'contact.form.namePlaceholder')}
+            />
+          </div>
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700 mb-2">
+              {translate(locale, 'contact.form.email')}
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+              placeholder={translate(locale, 'contact.form.emailPlaceholder')}
+            />
+          </div>
+        </div>
+
+        <div class="mb-6">
+          <label for="subject" class="block text-sm font-medium text-gray-700 mb-2">
+            {translate(locale, 'contact.form.subject')}
+          </label>
+          <select
+            id="subject"
+            name="subject"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+          >
+            <option value="">{translate(locale, 'contact.form.selectSubject')}</option>
+            <option value="general">{translate(locale, 'contact.form.subjectGeneral')}</option>
+            <option value="feedback">{translate(locale, 'contact.form.subjectFeedback')}</option>
+            <option value="bug">{translate(locale, 'contact.form.subjectBug')}</option>
+            <option value="feature">{translate(locale, 'contact.form.subjectFeature')}</option>
+            <option value="collaboration">{translate(locale, 'contact.form.subjectCollab')}</option>
+          </select>
+        </div>
+
+        <div class="mb-6">
+          <label for="message" class="block text-sm font-medium text-gray-700 mb-2">
+            {translate(locale, 'contact.form.message')}
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            rows="6"
+            required
+            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+            placeholder={translate(locale, 'contact.form.messagePlaceholder')}
+          ></textarea>
+        </div>
+
+        <div class="text-center">
+          <button
+            type="submit"
+            class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+          >
+            {translate(locale, 'contact.form.submit')}
+          </button>
+        </div>
+      </form>
+
+      <p class="text-center text-gray-500 mt-6 text-sm">
+        {translate(locale, 'contact.form.responseTime')}
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ Link -->
+  <section class="py-16 bg-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-2xl font-bold mb-4">{translate(locale, 'contact.faq.title')}</h2>
+      <p class="text-gray-600 mb-6">{translate(locale, 'contact.faq.desc')}</p>
+      <a href={getLocaleHref('/about#guide')} class="inline-flex items-center text-primary-600 hover:text-primary-700">
+        {translate(locale, 'nav.useGuide')}
+        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <script>
+    const form = document.getElementById('contact-form') as HTMLFormElement;
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      // Simulate form submission
+      alert('感谢您的反馈！我们会尽快回复您。\n\n(联系功能开发中，暂时模拟提交)');
+      form.reset();
+    });
+  </script>
+</Layout>

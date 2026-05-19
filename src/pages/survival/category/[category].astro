@@ -1,0 +1,27 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import SurvivalClient from '@/components/survival/SurvivalClient';
+import { type Locale, getLocaleFromUrl } from '@/i18n';
+import { SURVIVAL_CATEGORIES } from '@/data/survivalGuides';
+
+export const prerender = false;
+
+const { category } = Astro.params;
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+// Validate category
+const validCategories = ['scam', 'culture', 'safety', 'legal', 'other'];
+if (!category || !validCategories.includes(category)) {
+  return Astro.redirect('/survival');
+}
+
+const categoryInfo = SURVIVAL_CATEGORIES[category as keyof typeof SURVIVAL_CATEGORIES];
+const categoryTitle = locale === 'zh' ? categoryInfo.label : categoryInfo.labelEn;
+---
+
+<Layout
+  title={`${categoryTitle} - ${locale === 'zh' ? '防坑防骗指南' : 'Survival Guides'}`}
+  description={categoryInfo.description}
+>
+  <SurvivalClient locale={locale} client:only="react" />
+</Layout>

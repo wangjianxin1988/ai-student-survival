@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import EnhancedSettings from '@/components/user/EnhancedSettings';
+
+export const prerender = false;
+
+const locale = 'zh';
+---
+
+<Layout title={locale === 'zh' ? '账户设置' : 'Account Settings'}>
+  <EnhancedSettings locale={locale} client:only="react" />
+</Layout>

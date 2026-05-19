@@ -1,0 +1,700 @@
+---
+export const prerender = false;
+
+export function getStaticPaths() {
+  return [];
+}
+
+import Layout from '@/layouts/Layout.astro';
+import { policiesData, findPolicyBySlug, type UniversityPolicy } from '@/data/policies';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+import CommentSection from '@/components/user/CommentSection';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
+import ShareButton from '@/components/common/ShareButton';
+
+// Force English locale for this page
+const locale: Locale = 'en';
+
+// Get policy ID from URL params
+const { id } = Astro.params;
+const policy = findPolicyBySlug(id as string);
+
+if (!policy) {
+  return Astro.redirect('/en/policies');
+}
+
+// Get related policies (same country or region)
+const relatedPolicies = policiesData
+  .filter(p => (p.country === policy.country || p.region === policy.region) && p.id !== policy.id)
+  .slice(0, 6);
+
+// Get other policies for comparison (same region or similar rank)
+const comparisonCandidates = policiesData
+  .filter(p => p.id !== policy.id)
+  .slice(0, 10);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "EducationalOccupationalProgram",
+  "name": `${policy.universityNameEn} AI Policy`,
+  "description": `${policy.universityNameEn}'s AI usage policy`,
+  "url": `https://ai-student-survival.example.com/en/policies/${policy.id}`,
+  "provider": {
+    "@type": "Organization",
+    "name": policy.universityNameEn,
+    "url": `https://ai-student-survival.example.com/en/policies/${policy.id}`
+  },
+  "hasCourse": {
+    "@type": "Course",
+    "name": `AI Tools Usage Policy for ${policy.universityNameEn}`,
+    "description": policy.overallSummary || `${policy.universityNameEn} AI usage policy for students`
+  },
+  "occupationalCredentialAwarded": {
+    "@type": "EducationalOccupationalCredential",
+    "name": policy.overallPolicy === 'allowed' ? 'Allowed' :
+            policy.overallPolicy === 'restricted' ? 'Restricted' :
+            policy.overallPolicy === 'prohibited' ? 'Prohibited' : 'Pending Review',
+    "description": `${policy.universityNameEn} AI policy: ${policy.overallSummary}`
+  },
+  "aggregateRating": policy.ratingCount > 0 ? {
+    "@type": "AggregateRating",
+    "ratingValue": (policy.rating || 4.5).toString(),
+    "ratingCount": policy.ratingCount.toString()
+  } : undefined
+};
+
+function getPolicyColor(policyType: string | null) {
+  switch (policyType) {
+    case 'allowed': return 'bg-green-500';
+    case 'restricted': return 'bg-yellow-500';
+    case 'prohibited': return 'bg-red-500';
+    default: return 'bg-blue-500';
+  }
+}
+
+function getPolicyLabel(policyType: string | null) {
+  switch (policyType) {
+    case 'allowed': return 'Allowed';
+    case 'restricted': return 'Restricted';
+    case 'prohibited': return 'Prohibited';
+    case 'case_by_case': return 'Case by Case';
+    default: return 'To Confirm';
+  }
+}
+
+function getPolicyBadgeBg(policyType: string | null) {
+  switch (policyType) {
+    case 'allowed': return 'bg-green-100 text-green-800 border-green-200';
+    case 'restricted': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'prohibited': return 'bg-red-100 text-red-800 border-red-200';
+    default: return 'bg-blue-100 text-blue-800 border-blue-200';
+  }
+}
+
+// Available tools data for recommendations
+const availableTools = [
+  { id: 'chatgpt', name: 'ChatGPT', category: 'Communication', icon: '💬' },
+  { id: 'claude', name: 'Claude', category: 'Communication', icon: '🤖' },
+  { id: 'copilot', name: 'GitHub Copilot', category: 'Coding', icon: '💻' },
+  { id: 'phind', name: 'Phind', category: 'Search', icon: '🔍' },
+  { id: 'perplexity', name: 'Perplexity', category: 'Search', icon: '🌐' },
+  { id: 'notion', name: 'Notion AI', category: 'Writing', icon: '📝' },
+];
+
+// Tools that are recommended based on policy
+const recommendedTools = availableTools.filter(tool => {
+  const toolNameLower = tool.name.toLowerCase();
+  return policy.allowedTools.some(allowed =>
+    allowed.toLowerCase().includes(toolNameLower) ||
+    toolNameLower.includes(allowed.toLowerCase())
+  );
+});
+
+const restrictedTools = availableTools.filter(tool => {
+  const toolNameLower = tool.name.toLowerCase();
+  return policy.restrictedTools.some(restricted =>
+    restricted.toLowerCase().includes(toolNameLower) ||
+    toolNameLower.includes(restricted.toLowerCase())
+  );
+});
+
+const prohibitedToolsList = availableTools.filter(tool => {
+  const toolNameLower = tool.name.toLowerCase();
+  return policy.prohibitedTools.some(prohibited =>
+    prohibited.toLowerCase().includes(toolNameLower) ||
+    toolNameLower.includes(prohibited.toLowerCase())
+  );
+});
+---
+
+<Layout
+  title={`${policy.universityNameEn} AI Policy`}
+  description={`View ${policy.universityNameEn}'s AI usage policy`}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <nav class="flex items-center gap-2 text-sm flex-wrap">
+        <a href="/en/" class="text-gray-500 hover:text-gray-900">
+          Home
+        </a>
+        <span class="text-gray-400">/</span>
+        <a href="/en/policies" class="text-gray-500 hover:text-gray-900">
+          University Policies
+        </a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-900 font-medium">{policy.universityNameEn}</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <article class="lg:col-span-2">
+        <!-- Header -->
+        <header class="mb-8">
+          <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-3">
+              <span class="text-4xl">{policy.flagEmoji}</span>
+              <div>
+                <h1 class="text-3xl font-bold">{policy.universityNameEn}</h1>
+                <p class="text-gray-500">{policy.universityName}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <FavoriteButton client:load targetType="policy" targetId={policy.id} locale={locale} />
+              <ShareButton client:load title={policy.universityNameEn} description={policy.overallSummary || ''} />
+            </div>
+          </div>
+          <div class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">
+            <span>{policy.country} · {policy.region}</span>
+            {policy.qsRank && <span>· QS #{policy.qsRank}</span>}
+            {policy.timesRank && <span>· Times #{policy.timesRank}</span>}
+            <span>·</span>
+            <span>Updated: {policy.lastUpdated}</span>
+          </div>
+
+          <!-- Overall Policy Badge -->
+          <div class="mt-4">
+            <span class={`inline-flex items-center gap-2 text-sm px-4 py-2 rounded-full border ${getPolicyBadgeBg(policy.overallPolicy)}`}>
+              <span class={`w-2 h-2 rounded-full ${getPolicyColor(policy.overallPolicy)}`}></span>
+              <span class="font-medium">{getPolicyLabel(policy.overallPolicy)}</span>
+            </span>
+          </div>
+        </header>
+
+        <!-- AI Tools Status -->
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">
+            AI Tools Status
+          </h2>
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="grid md:grid-cols-3 gap-6">
+              <!-- Allowed -->
+              <div>
+                <h3 class="font-medium mb-3 flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-green-500"></span>
+                  <span>Allowed</span>
+                </h3>
+                {policy.allowedTools.length > 0 ? (
+                  <ul class="space-y-2">
+                    {policy.allowedTools.map(tool => (
+                      <li class="flex items-center gap-2 text-sm">
+                        <svg class="w-4 h-4 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>{tool}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="text-sm text-gray-500">-</p>
+                )}
+              </div>
+
+              <!-- Prohibited -->
+              <div>
+                <h3 class="font-medium mb-3 flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                  <span>Prohibited</span>
+                </h3>
+                {policy.prohibitedTools.length > 0 ? (
+                  <ul class="space-y-2">
+                    {policy.prohibitedTools.map(tool => (
+                      <li class="flex items-center gap-2 text-sm">
+                        <svg class="w-4 h-4 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        <span>{tool}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="text-sm text-gray-500">-</p>
+                )}
+              </div>
+
+              <!-- Restricted -->
+              <div>
+                <h3 class="font-medium mb-3 flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                  <span>Restricted</span>
+                </h3>
+                {policy.restrictedTools.length > 0 ? (
+                  <ul class="space-y-2">
+                    {policy.restrictedTools.map(tool => (
+                      <li class="flex items-center gap-2 text-sm">
+                        <svg class="w-4 h-4 text-yellow-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span>{tool}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="text-sm text-gray-500">-</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Policy Details -->
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">
+            Detailed Policies
+          </h2>
+
+          <div class="space-y-4">
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-medium mb-3 flex items-center gap-2">
+                <span class="text-xl">📚</span>
+                Teaching Policy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.teachingPolicy}</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-medium mb-3 flex items-center gap-2">
+                <span class="text-xl">📝</span>
+                Assignment Policy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.assignmentPolicy}</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-medium mb-3 flex items-center gap-2">
+                <span class="text-xl">👥</span>
+                Group Project Policy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.groupProjectPolicy}</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-medium mb-3 flex items-center gap-2">
+                <span class="text-xl">📋</span>
+                Exam Policy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.examPolicy}</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-medium mb-3 flex items-center gap-2">
+                <span class="text-xl">🎓</span>
+                Thesis Policy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.thesisPolicy}</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-medium mb-3 flex items-center gap-2">
+                <span class="text-xl">🔬</span>
+                Research Policy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.researchPolicy}</p>
+            </div>
+
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-medium mb-3 flex items-center gap-2">
+                <span class="text-xl">💻</span>
+                Coding Policy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.codingPolicy}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Regulations -->
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">
+            Regulations & Requirements
+          </h2>
+
+          <div class="bg-white rounded-xl border border-gray-200 p-6 space-y-4">
+            <div>
+              <h3 class="font-medium text-sm text-gray-700 mb-1">
+                Citation Requirement
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.citationRequirement}</p>
+            </div>
+            <div>
+              <h3 class="font-medium text-sm text-gray-700 mb-1">
+                Disclosure Requirement
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.disclosureRequirement}</p>
+            </div>
+            <div>
+              <h3 class="font-medium text-sm text-gray-700 mb-1">
+                Penalty for Violations
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.penalty}</p>
+            </div>
+            <div>
+              <h3 class="font-medium text-sm text-gray-700 mb-1">
+                Data Privacy
+              </h3>
+              <p class="text-gray-600 text-sm">{policy.dataPrivacy}</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Source -->
+        <div class="bg-gray-50 rounded-xl p-4 text-sm">
+          <p class="text-gray-500">
+            <strong>Policy Source:</strong>
+            <a href={policy.sourceUrl} target="_blank" rel="noopener noreferrer" class="text-primary-600 hover:underline ml-1">
+              {policy.policyDocumentTitle}
+            </a>
+          </p>
+          <p class="text-gray-400 mt-1">
+            Version: {policy.version} ·
+            Last Updated: {policy.lastUpdated} ·
+            Next Review: {policy.nextReviewDate}
+          </p>
+          {policy.verified && (
+            <p class="text-green-600 mt-1">
+              ✓ Verified by: {policy.verifiedBy}
+            </p>
+          )}
+        </div>
+
+        <!-- Comments Section -->
+        <div class="mt-8">
+          <CommentSection client:load targetType="policy" targetId={policy.id} locale={locale} />
+        </div>
+      </article>
+
+      <!-- Sidebar -->
+      <aside class="lg:col-span-1">
+        <div class="sticky top-24 space-y-6">
+          <!-- Quick Actions -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 class="font-semibold mb-4">Quick Actions</h3>
+            <div class="space-y-3">
+              <button
+                id="addToCompare"
+                class="w-full btn-secondary flex items-center justify-center gap-2"
+                data-policy-id={policy.id}
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Add to Compare
+              </button>
+              <a href="/en/policies/compare" class="block w-full btn-outline text-center">
+                Compare Policies
+              </a>
+              <a href={`/map?university=${policy.id}`} class="block w-full btn-outline text-center">
+                🗺️ Campus Map
+              </a>
+              <a href="/en/survival" class="block w-full btn-outline text-center">
+                ⚠️ Survival Guide
+              </a>
+              <a href="/en/offers" class="block w-full btn-outline text-center">
+                🎓 Student Offers
+              </a>
+              <a href="/en/questions" class="block w-full btn-outline text-center">
+                💬 Q&A Community
+              </a>
+            </div>
+          </div>
+
+          <!-- AI Tools Summary -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 class="font-semibold mb-4">AI Tools Overview</h3>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-500">Allowed</span>
+                <span class="font-medium text-green-600">{policy.allowedTools.length}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-500">Prohibited</span>
+                <span class="font-medium text-red-600">{policy.prohibitedTools.length}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-500">Restricted</span>
+                <span class="font-medium text-yellow-600">{policy.restrictedTools.length}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tool Recommendations -->
+          {recommendedTools.length > 0 && (
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-semibold mb-4">
+                Recommended Tools
+              </h3>
+              <div class="space-y-2">
+                {recommendedTools.map(tool => (
+                  <a href={`/en/tools/${tool.id}`} class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                    <span class="text-xl">{tool.icon}</span>
+                    <div>
+                      <div class="text-sm font-medium">{tool.name}</div>
+                      <div class="text-xs text-gray-500">{tool.category}</div>
+                    </div>
+                    <svg class="w-4 h-4 text-green-500 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- Policy Update Alert -->
+          <div class="bg-primary-50 rounded-xl border border-primary-200 p-6" id="policyAlertSection">
+            <h3 class="font-semibold mb-2 text-primary-900">
+              Policy Update Alert
+            </h3>
+            <p class="text-sm text-primary-700 mb-4">
+              Get notified when this policy is updated
+            </p>
+            <div class="flex gap-2" id="alertSubscribeArea">
+              <input
+                type="email"
+                placeholder="Enter email"
+                class="input flex-1 text-sm"
+                id="alertEmail"
+              />
+              <button class="btn-primary text-sm px-3" id="subscribeAlert">
+                Subscribe
+              </button>
+            </div>
+            <div class="hidden" id="alertSubscribedArea">
+              <div class="flex items-center gap-2 text-sm text-green-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span id="subscribedText"></span>
+              </div>
+              <button class="text-xs text-primary-600 hover:text-primary-700 mt-2 underline" id="unsubscribeAlert">
+                Unsubscribe
+              </button>
+            </div>
+            <div class="flex items-center gap-2 mt-3 text-xs text-primary-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>We will notify you via browser notifications</span>
+            </div>
+          </div>
+
+          <!-- Related Universities -->
+          {relatedPolicies.length > 0 && (
+            <div class="bg-white rounded-xl border border-gray-200 p-6">
+              <h3 class="font-semibold mb-4">
+                Related Universities
+              </h3>
+              <div class="space-y-2">
+                {relatedPolicies.map(related => (
+                  <a href={`/en/policies/${related.id}`} class="block p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-2">
+                      <span class="text-xl">{related.flagEmoji}</span>
+                      <div class="flex-1 min-w-0">
+                        <span class="text-sm font-medium text-gray-900 hover:text-primary-600 block truncate">
+                          {related.universityNameEn}
+                        </span>
+                        <span class={`inline-flex items-center gap-1 text-xs ${getPolicyBadgeBg(related.overallPolicy).split(' ')[0]} ${getPolicyBadgeBg(related.overallPolicy).split(' ')[1]}`}>
+                          <span class={`w-1.5 h-1.5 rounded-full ${getPolicyColor(related.overallPolicy)}`}></span>
+                          {getPolicyLabel(related.overallPolicy)}
+                        </span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- Back Link -->
+          <a href="/en/policies" class="block text-center text-sm text-gray-500 hover:text-gray-700 transition-colors py-2">
+            ← Back to List
+          </a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script define:vars={{ policy, locale }}>
+    // Add to compare functionality
+    const addToCompareBtn = document.getElementById('addToCompare');
+
+    // Initialize compare list from localStorage
+    let compareList = JSON.parse(localStorage.getItem('comparePolicies') || '[]');
+
+    // Update button state based on whether this policy is already in compare list
+    function updateCompareButton() {
+      if (addToCompareBtn) {
+        const isInList = compareList.includes(policy.id);
+        if (isInList) {
+          addToCompareBtn.innerHTML = `
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Added to Compare
+          `;
+          addToCompareBtn.classList.remove('btn-secondary');
+          addToCompareBtn.classList.add('bg-green-100', 'text-green-700', 'border-green-300');
+        } else {
+          addToCompareBtn.innerHTML = `
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Add to Compare
+          `;
+          addToCompareBtn.classList.add('btn-secondary');
+          addToCompareBtn.classList.remove('bg-green-100', 'text-green-700', 'border-green-300');
+        }
+      }
+    }
+
+    if (addToCompareBtn) {
+      addToCompareBtn.addEventListener('click', () => {
+        const index = compareList.indexOf(policy.id);
+        if (index > -1) {
+          compareList.splice(index, 1);
+        } else {
+          if (compareList.length >= 5) {
+            alert('You can compare up to 5 policies at a time');
+            return;
+          }
+          compareList.push(policy.id);
+        }
+        localStorage.setItem('comparePolicies', JSON.stringify(compareList));
+        updateCompareButton();
+      });
+    }
+
+    // Policy Update Alert functionality
+    const POLICY_ALERTS_KEY = 'policy_update_alerts';
+    const subscribeAlertBtn = document.getElementById('subscribeAlert');
+    const unsubscribeAlertBtn = document.getElementById('unsubscribeAlert');
+    const alertEmailInput = document.getElementById('alertEmail');
+    const alertSubscribeArea = document.getElementById('alertSubscribeArea');
+    const alertSubscribedArea = document.getElementById('alertSubscribedArea');
+    const subscribedText = document.getElementById('subscribedText');
+
+    function getPolicyAlerts() {
+      return JSON.parse(localStorage.getItem(POLICY_ALERTS_KEY) || '{}');
+    }
+
+    function savePolicyAlerts(alerts) {
+      localStorage.setItem(POLICY_ALERTS_KEY, JSON.stringify(alerts));
+    }
+
+    function isSubscribed() {
+      const alerts = getPolicyAlerts();
+      return !!alerts[policy.id];
+    }
+
+    function updateAlertUI() {
+      if (isSubscribed()) {
+        if (alertSubscribeArea) alertSubscribeArea.classList.add('hidden');
+        if (alertSubscribedArea) alertSubscribedArea.classList.remove('hidden');
+        const alerts = getPolicyAlerts();
+        if (subscribedText) {
+          subscribedText.textContent = `Subscribed: ${alerts[policy.id].email}`;
+        }
+      } else {
+        if (alertSubscribeArea) alertSubscribeArea.classList.remove('hidden');
+        if (alertSubscribedArea) alertSubscribedArea.classList.add('hidden');
+      }
+    }
+
+    function requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function showBrowserNotification(title, body) {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body, icon: '/favicon.ico' });
+      }
+    }
+
+    // Simulate policy update notification (for demo purposes)
+    function simulatePolicyUpdate() {
+      const lastUpdated = new Date(policy.lastUpdated);
+      const now = new Date();
+      const daysSinceUpdate = Math.floor((now - lastUpdated) / (1000 * 60 * 60 * 24));
+
+      if (daysSinceUpdate > 30 && isSubscribed()) {
+        showBrowserNotification(
+          'Policy Update Available',
+          `${policy.universityNameEn} has updated their AI policy. Check the latest changes!`
+        );
+      }
+    }
+
+    if (subscribeAlertBtn) {
+      subscribeAlertBtn.addEventListener('click', () => {
+        const email = alertEmailInput?.value?.trim();
+        if (!email) {
+          alert('Please enter your email address');
+          return;
+        }
+
+        if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          alert('Please enter a valid email address');
+          return;
+        }
+
+        const alerts = getPolicyAlerts();
+        alerts[policy.id] = {
+          email: email,
+          subscribedAt: new Date().toISOString(),
+          universityName: policy.universityNameEn
+        };
+        savePolicyAlerts(alerts);
+        updateAlertUI();
+        requestNotificationPermission();
+
+        // Show success message
+        showBrowserNotification(
+          'Subscription Confirmed',
+          `You will be notified when ${policy.universityNameEn} updates their policy.`
+        );
+      });
+    }
+
+    if (unsubscribeAlertBtn) {
+      unsubscribeAlertBtn.addEventListener('click', () => {
+        const alerts = getPolicyAlerts();
+        delete alerts[policy.id];
+        savePolicyAlerts(alerts);
+        updateAlertUI();
+        if (alertEmailInput) alertEmailInput.value = '';
+      });
+    }
+
+    // Initialize alert UI state
+    updateAlertUI();
+
+    // Initial button state
+    updateCompareButton();
+  </script>
+</Layout>

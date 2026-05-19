@@ -1,0 +1,243 @@
+---
+export const prerender = true;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate } from '@/i18n';
+
+// Force English locale
+const locale: Locale = 'en';
+
+const allTools = [
+  { id: '1', name: 'ChatGPT', slug: 'chatgpt', category: 'communication', pricing: 'freemium', priceDetail: { monthly: 20, yearly: 200, currency: 'USD' }, imageUrl: 'https://placehold.co/400x200/10b981/ffffff?text=ChatGPT', rating: 4.8, ratingCount: 12500, dimensions: { easeOfUse: 4.5, features: 4.9, value: 4.7 }, features: ['Multi-turn dialogue', 'Code generation', 'Text creation', 'Data analysis'] },
+  { id: '2', name: 'Claude', slug: 'claude', category: 'communication', pricing: 'freemium', priceDetail: { monthly: 20, yearly: 192, currency: 'USD' }, imageUrl: 'https://placehold.co/400x200/8b5cf6/ffffff?text=Claude', rating: 4.7, ratingCount: 8900, dimensions: { easeOfUse: 4.6, features: 4.8, value: 4.5 }, features: ['100K context', 'Long text analysis', 'Creative writing', 'Code review'] },
+  { id: '3', name: 'Midjourney', slug: 'midjourney', category: 'design', pricing: 'paid', priceDetail: { monthly: 10, yearly: 96, currency: 'USD' }, imageUrl: 'https://placehold.co/400x200/ec4899/ffffff?text=Midjourney', rating: 4.6, ratingCount: 6200, dimensions: { easeOfUse: 3.8, features: 4.9, value: 4.4 }, features: ['Text-to-image', 'Various styles', 'High resolution', 'Community sharing'] },
+  { id: '4', name: 'GitHub Copilot', slug: 'github-copilot', category: 'coding', pricing: 'paid', priceDetail: { monthly: 10, yearly: 100, currency: 'USD' }, imageUrl: 'https://placehold.co/400x200/238636/ffffff?text=GitHub+Copilot', rating: 4.5, ratingCount: 9800, dimensions: { easeOfUse: 4.3, features: 4.7, value: 4.2 }, features: ['Code completion', 'Function generation', 'Bug fixing', 'Code explanation'] },
+  { id: '5', name: 'Notion AI', slug: 'notion-ai', category: 'writing', pricing: 'freemium', priceDetail: { monthly: 10, yearly: 96, currency: 'USD' }, imageUrl: 'https://placehold.co/400x200/1a1a1a/ffffff?text=Notion+AI', rating: 4.4, ratingCount: 5600, dimensions: { easeOfUse: 4.7, features: 4.3, value: 4.2 }, features: ['Smart summary', 'Auto continuation', 'Translation', 'Note organization'] },
+  { id: '6', name: 'Perplexity', slug: 'perplexity', category: 'research', pricing: 'freemium', priceDetail: { monthly: 20, yearly: 200, currency: 'USD' }, imageUrl: 'https://placehold.co/400x200/20c997/ffffff?text=Perplexity', rating: 4.6, ratingCount: 7800, dimensions: { easeOfUse: 4.5, features: 4.6, value: 4.5 }, features: ['Real-time search', 'Citation sources', 'Multi-language', 'Continuous dialogue'] },
+];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "AI Tools Comparison",
+  "description": "Compare popular AI tools for international students with comprehensive multi-dimensional analysis",
+  "url": "https://ai-student-survival.example.com/en/compare"
+};
+
+const categoryLabels: Record<string, string> = {
+  writing: 'Writing',
+  coding: 'Coding',
+  design: 'Design',
+  research: 'Research',
+  communication: 'Communication',
+};
+
+const pricingLabels: Record<string, string> = {
+  free: 'Free',
+  freemium: 'Freemium',
+  paid: 'Paid',
+};
+---
+
+<Layout
+  title={translate(locale, 'compare.title')}
+  description={translate(locale, 'compare.description')}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 class="text-3xl font-bold mb-2">{translate(locale, 'compare.title')}</h1>
+      <p class="text-gray-600">{translate(locale, 'compare.description')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Tool Selection Panel -->
+    <div class="mb-8">
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">{translate(locale, 'compare.selectTools')}</h2>
+          <button id="clearAll" class="text-sm text-gray-500 hover:text-gray-700 transition-colors hidden">
+            {translate(locale, 'compare.clearAll')}
+          </button>
+        </div>
+
+        <!-- Selected tools display -->
+        <div id="selectedTools" class="flex flex-wrap gap-3 mb-4 min-h-[44px]">
+          <span class="text-gray-500 text-sm flex items-center h-full" id="placeholder">
+            {translate(locale, 'compare.selectPlaceholder')}
+          </span>
+        </div>
+
+        <!-- Tool selection grid -->
+        <div id="toolGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-[400px] overflow-y-auto">
+          {allTools.map(tool => (
+            <button class="tool-select-btn flex flex-col items-center p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-200 text-left" data-tool-id={tool.id}>
+              <img src={tool.imageUrl} alt={tool.name} class="w-16 h-16 rounded-lg object-cover mb-2" loading="lazy" />
+              <span class="text-sm font-medium text-gray-900 text-center">{tool.name}</span>
+              <span class={`text-xs mt-1 ${tool.pricing === 'free' ? 'text-green-600' : tool.pricing === 'paid' ? 'text-purple-600' : 'text-blue-600'}`}>{pricingLabels[tool.pricing]}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div id="comparisonSection" class="hidden">
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[800px]">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="sticky left-0 bg-gray-50 px-4 py-4 text-left font-semibold text-gray-700 min-w-[140px] z-10 shadow-[2px_0_4px_rgba(0,0,0,0.05)]">Dimensions</th>
+                {[1, 2, 3, 4, 5].map(n => (
+                  <th class="px-4 py-4 text-center min-w-[160px] hidden" data-header-index={n - 1}>
+                    <div class="flex flex-col items-center">
+                      <img src="https://placehold.co/400x200/gray/ffffff?text=..." alt="Tool" class="w-12 h-12 rounded-lg object-cover mb-2" loading="lazy" />
+                      <span class="font-semibold text-gray-900">Tool Name</span>
+                      <button class="remove-tool-btn mt-2 text-xs text-red-500 hover:text-red-700 transition-colors hidden" data-remove-index={n - 1}>{translate(locale, 'compare.remove')}</button>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody id="comparisonBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="text-center py-16">
+      <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+      </svg>
+      <h3 class="text-lg font-semibold text-gray-700 mb-2">{translate(locale, 'compare.noSelection')}</h3>
+      <p class="text-gray-500">{translate(locale, 'compare.selectToCompare')}</p>
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ allTools, locale }}>
+  const MAX_COMPARE = 5;
+  const MIN_COMPARE = 2;
+  let selectedToolIds = [];
+
+  const toolGrid = document.getElementById('toolGrid');
+  const selectedToolsContainer = document.getElementById('selectedTools');
+  const placeholder = document.getElementById('placeholder');
+  const clearAllBtn = document.getElementById('clearAll');
+  const comparisonSection = document.getElementById('comparisonSection');
+  const emptyState = document.getElementById('emptyState');
+  const toolSelectBtns = document.querySelectorAll('.tool-select-btn');
+
+  function getToolById(id) { return allTools.find(t => t.id === id); }
+
+  function renderSelectedTools() {
+    if (selectedToolIds.length === 0) {
+      placeholder.classList.remove('hidden');
+      clearAllBtn.classList.add('hidden');
+      return;
+    }
+    placeholder.classList.add('hidden');
+    clearAllBtn.classList.remove('hidden');
+    selectedToolsContainer.innerHTML = selectedToolIds.map(id => {
+      const tool = getToolById(id);
+      return `<div class="flex items-center gap-2 bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-sm">
+        <img src="${tool.imageUrl}" alt="${tool.name}" class="w-5 h-5 rounded object-cover" />
+        <span>${tool.name}</span>
+        <button class="remove-selected-btn hover:text-primary-900 transition-colors" data-remove-id="${id}">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>`;
+    }).join('');
+    selectedToolsContainer.querySelectorAll('.remove-selected-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); removeToolFromCompare(btn.dataset.removeId); });
+    });
+  }
+
+  function renderComparisonTable() {
+    if (selectedToolIds.length < MIN_COMPARE) {
+      comparisonSection.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      return;
+    }
+    comparisonSection.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    const tools = selectedToolIds.map(id => getToolById(id));
+
+    const headerCells = comparisonSection.querySelectorAll('[data-header-index]');
+    headerCells.forEach((cell, index) => {
+      if (index < tools.length) {
+        cell.innerHTML = `<div class="flex flex-col items-center">
+          <img src="${tools[index].imageUrl}" alt="${tools[index].name}" class="w-12 h-12 rounded-lg object-cover mb-2" />
+          <span class="font-semibold text-gray-900">${tools[index].name}</span>
+          <button class="remove-tool-btn mt-2 text-xs text-red-500 hover:text-red-700 transition-colors" data-remove-index="${index}">Remove</button>
+        </div>`;
+        cell.classList.remove('hidden');
+      } else {
+        cell.classList.add('hidden');
+      }
+    });
+
+    const comparisonBody = document.getElementById('comparisonBody');
+    comparisonBody.innerHTML = `
+      <tr class="bg-gray-50"><td colspan="${tools.length + 1}" class="px-4 py-2 text-sm font-semibold text-gray-700">Basic Info</td></tr>
+      <tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">Category</td>${tools.map(t => `<td class="px-4 py-3 text-center text-sm text-gray-700">${t.category}</td>`).join('')}</tr>
+      <tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">Pricing</td>${tools.map(t => `<td class="px-4 py-3 text-center text-sm text-gray-700">${t.pricing}</td>`).join('')}</tr>
+      <tr class="bg-gray-50"><td colspan="${tools.length + 1}" class="px-4 py-2 text-sm font-semibold text-gray-700">Ratings</td></tr>
+      <tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">Overall Rating</td>${tools.map(t => `<td class="px-4 py-3 text-center text-sm text-gray-700">${t.rating.toFixed(1)} / 5.0</td>`).join('')}</tr>
+      <tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">Rating Count</td>${tools.map(t => `<td class="px-4 py-3 text-center text-sm text-gray-700">${t.ratingCount.toLocaleString()}</td>`).join('')}</tr>
+      <tr class="bg-gray-50"><td colspan="${tools.length + 1}" class="px-4 py-2 text-sm font-semibold text-gray-700">Dimension Scores</td></tr>
+      <tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">Ease of Use</td>${tools.map(t => `<td class="px-4 py-3 text-center text-sm text-gray-700">${t.dimensions.easeOfUse.toFixed(1)}</td>`).join('')}</tr>
+      <tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">Features</td>${tools.map(t => `<td class="px-4 py-3 text-center text-sm text-gray-700">${t.dimensions.features.toFixed(1)}</td>`).join('')}</tr>
+      <tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">Value</td>${tools.map(t => `<td class="px-4 py-3 text-center text-sm text-gray-700">${t.dimensions.value.toFixed(1)}</td>`).join('')}</tr>
+      <tr class="bg-gray-50"><td colspan="${tools.length + 1}" class="px-4 py-2 text-sm font-semibold text-gray-700">Core Features</td></tr>
+      ${tools.map(t => `<tr class="border-b border-gray-100"><td class="px-4 py-3 text-sm font-medium text-gray-600">${t.name}</td><td colspan="${tools.length - 1}" class="px-4 py-3 text-sm text-gray-700">${t.features.slice(0, 3).join(', ')}</td></tr>`).join('')}
+      <tr class="bg-gray-50"><td class="px-4 py-3 text-sm font-medium text-gray-700">Operation</td>${tools.map(tool => `<td class="px-4 py-3 text-center"><a href="/en/tools/${tool.slug}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">View Details →</a></td>`).join('')}</tr>
+    `;
+  }
+
+  function addToolToCompare(toolId) {
+    if (selectedToolIds.includes(toolId)) { removeToolFromCompare(toolId); return; }
+    if (selectedToolIds.length >= MAX_COMPARE) { alert(`You can compare at most ${MAX_COMPARE} tools`); return; }
+    selectedToolIds.push(toolId);
+    updateUI();
+  }
+
+  function removeToolFromCompare(toolId) {
+    selectedToolIds = selectedToolIds.filter(id => id !== toolId);
+    updateUI();
+  }
+
+  function clearAll() { selectedToolIds = []; updateUI(); }
+
+  function updateUI() {
+    renderSelectedTools();
+    renderComparisonTable();
+    toolSelectBtns.forEach(btn => {
+      const toolId = btn.dataset.toolId;
+      btn.classList.toggle('border-primary-500', selectedToolIds.includes(toolId));
+      btn.classList.toggle('bg-primary-50', selectedToolIds.includes(toolId));
+    });
+    localStorage.setItem('compareToolIds', JSON.stringify(selectedToolIds));
+  }
+
+  toolSelectBtns.forEach(btn => { btn.addEventListener('click', () => { addToolToCompare(btn.dataset.toolId); }); });
+  clearAllBtn.addEventListener('click', clearAll);
+
+  // Init from localStorage
+  const saved = localStorage.getItem('compareToolIds');
+  if (saved) { try { selectedToolIds = JSON.parse(saved); } catch (e) {} }
+  updateUI();
+</script>
+
+<style>
+  #toolGrid::-webkit-scrollbar { width: 6px; }
+  #toolGrid::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 3px; }
+  #toolGrid::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+  th:first-child, td:first-child { position: sticky; left: 0; z-index: 10; background: white; }
+  thead th:first-child { background: #f9fafb; }
+</style>

@@ -1,0 +1,1150 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl, translations } from '@/i18n';
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+// Static tool data (same as in tools/index.astro)
+const allTools: Tool[] = [
+  {
+    id: '1',
+    name: 'ChatGPT',
+    slug: 'chatgpt',
+    description: 'OpenAI开发的AI对话助手，支持写作、编程、分析等多种任务',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://chat.openai.com',
+    imageUrl: 'https://placehold.co/400x200/10b981/ffffff?text=ChatGPT',
+    rating: 4.8,
+    ratingCount: 12500,
+    dimensions: { easeOfUse: 4.5, features: 4.9, value: 4.7 },
+    tags: ['写作', '编程', '分析', '对话'],
+    features: ['多轮对话', '代码生成', '文本创作', '数据分析'],
+    alternatives: ['claude', 'gemini'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '2',
+    name: 'Claude',
+    slug: 'claude',
+    description: 'Anthropic开发的AI助手，擅长长文本处理和复杂分析',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://claude.ai',
+    imageUrl: 'https://placehold.co/400x200/8b5cf6/ffffff?text=Claude',
+    rating: 4.7,
+    ratingCount: 8900,
+    dimensions: { easeOfUse: 4.6, features: 4.8, value: 4.5 },
+    tags: ['写作', '长文本', '分析', '研究'],
+    features: ['100K上下文', '长文本分析', '创意写作', '代码审查'],
+    alternatives: ['chatgpt', 'gemini'],
+    isNew: false,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '3',
+    name: 'Midjourney',
+    slug: 'midjourney',
+    description: 'AI图像生成工具，通过文本描述创建高质量图像',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'paid',
+    priceDetail: { monthly: 10, yearly: 96, currency: 'USD' },
+    url: 'https://midjourney.com',
+    imageUrl: 'https://placehold.co/400x200/ec4899/ffffff?text=Midjourney',
+    rating: 4.6,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 3.8, features: 4.9, value: 4.4 },
+    tags: ['图像生成', '设计', '创意', '艺术'],
+    features: ['文生图', '风格多样', '高分辨率', '社区分享'],
+    alternatives: ['dalle', 'stable-diffusion'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '4',
+    name: 'GitHub Copilot',
+    slug: 'github-copilot',
+    description: 'AI编程助手，为开发者提供代码补全和生成功能',
+    category: 'coding',
+    subcategory: 'code-assistant',
+    pricing: 'paid',
+    priceDetail: { monthly: 10, yearly: 100, currency: 'USD' },
+    url: 'https://github.com/features/copilot',
+    imageUrl: 'https://placehold.co/400x200/238636/ffffff?text=GitHub+Copilot',
+    rating: 4.5,
+    ratingCount: 9800,
+    dimensions: { easeOfUse: 4.3, features: 4.7, value: 4.2 },
+    tags: ['编程', '代码补全', 'IDE', '开发者'],
+    features: ['代码补全', '函数生成', 'Bug修复', '代码解释'],
+    alternatives: ['cursor', 'tabnine'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '5',
+    name: 'Notion AI',
+    slug: 'notion-ai',
+    description: '集成在Notion中的AI助手，帮你写文档、整理笔记',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 10, yearly: 96, currency: 'USD' },
+    url: 'https://notion.so',
+    imageUrl: 'https://placehold.co/400x200/1a1a1a/ffffff?text=Notion+AI',
+    rating: 4.4,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.7, features: 4.3, value: 4.2 },
+    tags: ['笔记', '文档', '写作', '整理'],
+    features: ['智能摘要', '自动续写', '翻译', '整理笔记'],
+    alternatives: ['obsidian-ai', 'craft-ai'],
+    isNew: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '6',
+    name: 'Perplexity',
+    slug: 'perplexity',
+    description: 'AI搜索引擎，基于真实网络内容回答问题',
+    category: 'research',
+    subcategory: 'search',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://perplexity.ai',
+    imageUrl: 'https://placehold.co/400x200/20c997/ffffff?text=Perplexity',
+    rating: 4.6,
+    ratingCount: 7800,
+    dimensions: { easeOfUse: 4.5, features: 4.6, value: 4.5 },
+    tags: ['搜索', '研究', '问答', '实时信息'],
+    features: ['实时搜索', '引用来源', '多语言', '连续对话'],
+    alternatives: ['chatgpt-search', 'phind'],
+    isNew: false,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '7',
+    name: 'Jasper',
+    slug: 'jasper',
+    description: '企业级AI写作助手，帮助快速生成营销文案、博客文章和社交内容',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'paid',
+    priceDetail: { monthly: 49, yearly: 468, currency: 'USD' },
+    url: 'https://jasper.ai',
+    imageUrl: 'https://placehold.co/400x200/a855f7/ffffff?text=Jasper',
+    rating: 4.4,
+    ratingCount: 4200,
+    dimensions: { easeOfUse: 4.2, features: 4.7, value: 4.0 },
+    tags: ['写作', '营销', '文案', '博客'],
+    features: ['多模板', '品牌语音', '多语言', 'SEO优化'],
+    alternatives: ['copyai', 'chatgpt'],
+    isNew: false,
+    createdAt: '2024-01-20',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '8',
+    name: 'Copy.ai',
+    slug: 'copyai',
+    description: 'AI文案生成工具，提供超过100种内容模板，适合营销和销售团队',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 49, yearly: 420, currency: 'USD' },
+    url: 'https://copy.ai',
+    imageUrl: 'https://placehold.co/400x200/9333ea/ffffff?text=Copy.ai',
+    rating: 4.3,
+    ratingCount: 3800,
+    dimensions: { easeOfUse: 4.4, features: 4.5, value: 4.1 },
+    tags: ['写作', '文案', '营销', '模板'],
+    features: ['100+模板', '多语言', '团队协作', '品牌工具包'],
+    alternatives: ['jasper', 'writesonic'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '9',
+    name: 'Grammarly',
+    slug: 'grammarly',
+    description: 'AI写作辅助工具，提供语法检查、拼写纠错和风格优化建议',
+    category: 'writing',
+    subcategory: 'grammar-check',
+    pricing: 'freemium',
+    priceDetail: { monthly: 12, yearly: 144, currency: 'USD' },
+    url: 'https://grammarly.com',
+    imageUrl: 'https://placehold.co/400x200/7c3aed/ffffff?text=Grammarly',
+    rating: 4.7,
+    ratingCount: 15000,
+    dimensions: { easeOfUse: 4.8, features: 4.6, value: 4.5 },
+    tags: ['写作', '语法', '校对', '学术'],
+    features: ['语法纠错', '风格建议', '剽窃检测', '多平台集成'],
+    alternatives: ['quillbot', 'languageTool'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '10',
+    name: 'QuillBot',
+    slug: 'quillbot',
+    description: 'AI改写和润色工具，帮助学生和写作者优化句子结构和表达方式',
+    category: 'writing',
+    subcategory: 'paraphrasing',
+    pricing: 'freemium',
+    priceDetail: { monthly: 9.95, yearly: 79.95, currency: 'USD' },
+    url: 'https://quillbot.com',
+    imageUrl: 'https://placehold.co/400x200/8b5cf6/ffffff?text=QuillBot',
+    rating: 4.5,
+    ratingCount: 9200,
+    dimensions: { easeOfUse: 4.7, features: 4.4, value: 4.5 },
+    tags: ['写作', '改写', '润色', '学术'],
+    features: ['改写模式', '同义词替换', '摘要生成', '引用生成'],
+    alternatives: ['grammarly', 'paraphrase'],
+    isNew: false,
+    createdAt: '2024-01-10',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '11',
+    name: 'Tabnine',
+    slug: 'tabnine',
+    description: 'AI代码补全插件，支持所有主流编程语言，通过深度学习提升编码效率',
+    category: 'coding',
+    subcategory: 'code-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://tabnine.com',
+    imageUrl: 'https://placehold.co/400x200/16a34a/ffffff?text=Tabnine',
+    rating: 4.3,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.4, features: 4.5, value: 4.6 },
+    tags: ['编程', '代码补全', 'IDE', '多语言'],
+    features: ['全语言支持', '本地运行', '隐私保护', '私有模型训练'],
+    alternatives: ['github-copilot', 'cursor'],
+    isNew: false,
+    createdAt: '2024-02-10',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '12',
+    name: 'Cursor',
+    slug: 'cursor',
+    description: 'AI代码编辑器，基于GPT-4构建，支持智能补全、代码解释和多文件编辑',
+    category: 'coding',
+    subcategory: 'code-editor',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://cursor.sh',
+    imageUrl: 'https://placehold.co/400x200/15803d/ffffff?text=Cursor',
+    rating: 4.6,
+    ratingCount: 7100,
+    dimensions: { easeOfUse: 4.7, features: 4.7, value: 4.6 },
+    tags: ['编程', 'IDE', '代码生成', '编辑器'],
+    features: ['AI对话', '代码补全', '多文件编辑', '团队协作'],
+    alternatives: ['github-copilot', 'replit'],
+    isNew: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '13',
+    name: 'Replit',
+    slug: 'replit',
+    description: '在线AI编程平台，浏览器内即可编写、运行和部署代码，支持AI Ghostwriter',
+    category: 'coding',
+    subcategory: 'code-platform',
+    pricing: 'freemium',
+    priceDetail: { monthly: 15, yearly: 144, currency: 'USD' },
+    url: 'https://replit.com',
+    imageUrl: 'https://placehold.co/400x200/22c55e/ffffff?text=Replit',
+    rating: 4.4,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 4.8, features: 4.5, value: 4.5 },
+    tags: ['编程', '在线IDE', '部署', '协作'],
+    features: ['在线运行', 'AI代码助手', '一键部署', '社区分享'],
+    alternatives: ['cursor', 'vscode'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '14',
+    name: 'Figma',
+    slug: 'figma',
+    description: 'AI增强的设计工具，支持原型设计、UI设计，集成FigGPT进行AI辅助设计',
+    category: 'design',
+    subcategory: 'ui-design',
+    pricing: 'freemium',
+    priceDetail: { monthly: 15, yearly: 144, currency: 'USD' },
+    url: 'https://figma.com',
+    imageUrl: 'https://placehold.co/400x200/f472b6/ffffff?text=Figma',
+    rating: 4.8,
+    ratingCount: 14000,
+    dimensions: { easeOfUse: 4.5, features: 4.8, value: 4.7 },
+    tags: ['设计', 'UI', '原型', '协作'],
+    features: ['矢量设计', '原型交互', '团队协作', 'FigGPT集成'],
+    alternatives: ['sketch', 'adobe-xd'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '15',
+    name: 'DALL-E 3',
+    slug: 'dalle-3',
+    description: 'OpenAI开发的AI图像生成模型，通过自然语言描述创建高质量图像',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'paid',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://openai.com/dall-e-3',
+    imageUrl: 'https://placehold.co/400x200/db2777/ffffff?text=DALL-E+3',
+    rating: 4.7,
+    ratingCount: 11000,
+    dimensions: { easeOfUse: 4.4, features: 4.8, value: 4.5 },
+    tags: ['图像生成', '设计', '创意', 'AI绘画'],
+    features: ['高精度图像', '文字渲染', '风格多样', 'ChatGPT集成'],
+    alternatives: ['midjourney', 'stable-diffusion'],
+    isNew: true,
+    createdAt: '2024-09-01',
+    updatedAt: '2024-11-01',
+  },
+  {
+    id: '16',
+    name: 'Stable Diffusion',
+    slug: 'stable-diffusion',
+    description: '开源AI图像生成模型，支持本地部署和自定义模型，适合高级用户和研究者',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://stability.ai',
+    imageUrl: 'https://placehold.co/400x200/be185d/ffffff?text=Stable+Diffusion',
+    rating: 4.4,
+    ratingCount: 8900,
+    dimensions: { easeOfUse: 3.6, features: 4.8, value: 4.9 },
+    tags: ['图像生成', '开源', '本地部署', '自定义模型'],
+    features: ['开源免费', '本地运行', 'LoRA模型', 'ControlNet'],
+    alternatives: ['midjourney', 'dalle'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '17',
+    name: 'Kimi',
+    slug: 'kimi',
+    description: '月之暗面开发的AI助手，支持超长上下文和文档分析，专为中文用户优化',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://kimi.moonshot.cn',
+    imageUrl: 'https://placehold.co/400x200/2563eb/ffffff?text=Kimi',
+    rating: 4.6,
+    ratingCount: 6500,
+    dimensions: { easeOfUse: 4.7, features: 4.5, value: 4.8 },
+    tags: ['对话', '长文本', '文档分析', '中文'],
+    features: ['20万字上下文', '文档分析', '联网搜索', '多文件处理'],
+    alternatives: ['chatgpt', 'claude'],
+    isNew: true,
+    createdAt: '2024-03-15',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '18',
+    name: 'Gemini',
+    slug: 'gemini',
+    description: 'Google开发的AI助手，集成在Google生态中，支持搜索、文档和代码生成',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://gemini.google.com',
+    imageUrl: 'https://placehold.co/400x200/3b82f6/ffffff?text=Gemini',
+    rating: 4.5,
+    ratingCount: 9800,
+    dimensions: { easeOfUse: 4.6, features: 4.6, value: 4.4 },
+    tags: ['对话', '搜索', '代码', 'Google生态'],
+    features: ['Google集成', '多模态', '代码生成', '实时信息'],
+    alternatives: ['chatgpt', 'claude'],
+    isNew: true,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '19',
+    name: 'WebPilot',
+    slug: 'webpilot',
+    description: 'AI网页阅读助手，帮助快速总结网页内容、提取关键信息和翻译外文文章',
+    category: 'research',
+    subcategory: 'web-reading',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://webpilot.ai',
+    imageUrl: 'https://placehold.co/400x200/0d9488/ffffff?text=WebPilot',
+    rating: 4.3,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.6 },
+    tags: ['研究', '网页阅读', '摘要', '翻译'],
+    features: ['网页总结', '内容提取', '多语言翻译', '信息整理'],
+    alternatives: ['perplexity', 'chatgpt'],
+    isNew: true,
+    createdAt: '2024-04-01',
+    updatedAt: '2024-05-01',
+  },
+  {
+    id: '20',
+    name: 'Elicit',
+    slug: 'elicit',
+    description: 'AI研究助手，帮助学术研究者快速搜索文献、总结论文要点和生成研究思路',
+    category: 'research',
+    subcategory: 'academic-search',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://elicit.org',
+    imageUrl: 'https://placehold.co/400x200/0f766e/ffffff?text=Elicit',
+    rating: 4.5,
+    ratingCount: 2800,
+    dimensions: { easeOfUse: 4.2, features: 4.7, value: 4.8 },
+    tags: ['研究', '学术', '文献', '论文'],
+    features: ['文献搜索', '论文摘要', '研究思路', '引用生成'],
+    alternatives: ['perplexity', 'consensus'],
+    isNew: false,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-05-01',
+  },
+];
+
+// JSON-LD for comparison page
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "AI工具对比 - MI TO AI留学生存指南",
+  "description": "对比留学生的20款主流AI工具，从易用性、功能、价格等多维度进行全面比较，帮助找到最适合自己的AI工具。",
+  "url": "https://ai-student-survival.example.com/compare",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "MI TO AI留学生存指南",
+    "url": "https://ai-student-survival.example.com"
+  }
+};
+
+// Category mapping for display (using translation keys)
+const categoryLabels: Record<string, string> = {
+  writing: 'tools.categories.writing',
+  coding: 'tools.categories.coding',
+  design: 'tools.categories.design',
+  research: 'tools.categories.research',
+  communication: 'tools.categories.communication',
+};
+
+// Pricing mapping for display (using translation keys)
+const pricingLabels: Record<string, string> = {
+  free: 'tools.pricing.free',
+  freemium: 'tools.pricing.freemium',
+  paid: 'tools.pricing.paid',
+};
+---
+
+<Layout
+  title={translate(locale, 'compare.title')}
+  description={translate(locale, 'compare.description')}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 class="text-3xl font-bold mb-2">{translate(locale, 'compare.title')}</h1>
+      <p class="text-gray-600">{translate(locale, 'compare.description')}</p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Tool Selection Panel -->
+    <div class="mb-8">
+      <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold">{translate(locale, 'compare.selectTools')}</h2>
+          <button
+            id="clearAll"
+            class="text-sm text-gray-500 hover:text-gray-700 transition-colors hidden"
+          >
+            {translate(locale, 'compare.clearAll')}
+          </button>
+        </div>
+
+        <!-- Selected tools display -->
+        <div id="selectedTools" class="flex flex-wrap gap-3 mb-4 min-h-[44px]">
+          <span class="text-gray-500 text-sm flex items-center h-full" id="placeholder">
+            {translate(locale, 'compare.selectPlaceholder')}
+          </span>
+        </div>
+
+        <!-- Start Comparison Button -->
+        <div class="mb-4">
+          <button
+            id="startCompareBtn"
+            class="w-full py-3 px-4 bg-gradient-to-r from-primary-500 to-blue-500 text-white rounded-lg font-medium shadow-sm hover:from-primary-600 hover:to-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-primary-500 disabled:hover:to-blue-500 flex items-center justify-center gap-2"
+            disabled
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span id="compareBtnText">{translate(locale, 'compare.startCompare') || '开始对比'}</span>
+            <span id="compareCount" class="bg-white/20 px-2 py-0.5 rounded-full text-sm hidden">0</span>
+          </button>
+        </div>
+
+        <!-- Category filter for tool selection -->
+        <div class="mb-4">
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="category-filter px-3 py-1.5 text-sm rounded-full bg-primary-100 text-primary-700 font-medium transition-colors"
+              data-category=""
+            >
+              {translate(locale, 'compare.allCategories')}
+            </button>
+            {Object.entries(categoryLabels).map(([key, label]) => (
+              <button
+                class="category-filter px-3 py-1.5 text-sm rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                data-category={key}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <!-- Tool selection grid -->
+        <div id="toolGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[400px] overflow-y-auto">
+          {allTools.map(tool => (
+            <button
+              class="tool-select-btn flex flex-col items-center p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-200 text-left"
+              data-tool-id={tool.id}
+            >
+              <img
+                src={tool.imageUrl}
+                alt={tool.name}
+                class="w-16 h-16 rounded-lg object-cover mb-2"
+                loading="lazy"
+              />
+              <span class="text-sm font-medium text-gray-900 text-center">{tool.name}</span>
+              <span class={`text-xs mt-1 ${tool.pricing === 'free' ? 'text-green-600' : tool.pricing === 'paid' ? 'text-purple-600' : 'text-blue-600'}`}>
+                {pricingLabels[tool.pricing]}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div id="comparisonSection" class="hidden">
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[800px]">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="sticky left-0 bg-gray-50 px-4 py-4 text-left font-semibold text-gray-700 min-w-[140px] z-10 shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
+                  <span class="hidden md:inline">{translate(locale, 'compare.compareDimensions')}</span>
+                  <span class="md:hidden">{translate(locale, 'compare.compareDimensions')}</span>
+                </th>
+                {[1, 2, 3, 4, 5].map(n => (
+                  <th class="px-4 py-4 text-center min-w-[160px] hidden" data-header-index={n - 1}>
+                    <div class="flex flex-col items-center">
+                      <img
+                        src="https://placehold.co/400x200/gray/ffffff?text=..."
+                        alt="Tool"
+                        class="w-12 h-12 rounded-lg object-cover mb-2"
+                        loading="lazy"
+                      />
+                      <span class="font-semibold text-gray-900">Tool Name</span>
+                      <button
+                        class="remove-tool-btn mt-2 text-xs text-red-500 hover:text-red-700 transition-colors hidden"
+                        data-remove-index={n - 1}
+                      >
+                        {translate(locale, 'compare.remove')}
+                      </button>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody id="comparisonBody">
+              <!-- Dynamic content will be inserted here by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyState" class="text-center py-16">
+      <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+      </svg>
+      <h3 class="text-lg font-semibold text-gray-700 mb-2">{translate(locale, 'compare.noSelection')}</h3>
+      <p class="text-gray-500">{translate(locale, 'compare.selectToCompare')}</p>
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ allTools, categoryLabels, pricingLabels, locale, translations }}>
+  const MAX_COMPARE = 5;
+  const MIN_COMPARE = 2;
+  let selectedToolIds = [];
+
+  // Translation helper
+  function getNestedValue(obj, path) {
+    return path.split('.').reduce((current, key) => current?.[key], obj);
+  }
+  function t(key, params) {
+    const translation = getNestedValue(translations[locale], key)
+      ?? getNestedValue(translations['zh'], key)
+      ?? key;
+    if (typeof translation !== 'string') return key;
+    if (params) {
+      return Object.entries(params).reduce((str, [k, v]) => {
+        return str.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v));
+      }, translation);
+    }
+    return translation;
+  }
+
+  // DOM Elements
+  const toolGrid = document.getElementById('toolGrid');
+  const selectedToolsContainer = document.getElementById('selectedTools');
+  const placeholder = document.getElementById('placeholder');
+  const clearAllBtn = document.getElementById('clearAll');
+  const comparisonSection = document.getElementById('comparisonSection');
+  const emptyState = document.getElementById('emptyState');
+  const categoryFilters = document.querySelectorAll('.category-filter');
+  const toolSelectBtns = document.querySelectorAll('.tool-select-btn');
+  const startCompareBtn = document.getElementById('startCompareBtn');
+  const compareCountSpan = document.getElementById('compareCount');
+
+  // Helper functions
+  function getToolById(id) {
+    return allTools.find(t => t.id === id);
+  }
+
+  function getToolBySlug(slug) {
+    return allTools.find(t => t.slug === slug);
+  }
+
+  function getToolIdBySlug(slug) {
+    const tool = getToolBySlug(slug);
+    return tool ? tool.id : null;
+  }
+
+  function formatPrice(tool) {
+    if (tool.pricing === 'free') return t('tools.free');
+    const monthly = tool.priceDetail.monthly || 0;
+    const currency = tool.priceDetail.currency === 'USD' ? '$' : '¥';
+    return `${currency}${monthly}/月`;
+  }
+
+  function renderSelectedTools() {
+    if (selectedToolIds.length === 0) {
+      placeholder.classList.remove('hidden');
+      clearAllBtn.classList.add('hidden');
+      selectedToolsContainer.innerHTML = '';
+      return;
+    }
+
+    placeholder.classList.add('hidden');
+    clearAllBtn.classList.remove('hidden');
+
+    const selectedToolsHtml = selectedToolIds.map(id => {
+      const tool = getToolById(id);
+      return `
+        <div class="flex items-center gap-2 bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-sm">
+          <img src="${tool.imageUrl}" alt="${tool.name}" class="w-5 h-5 rounded object-cover" />
+          <span>${tool.name}</span>
+          <button class="remove-selected-btn hover:text-primary-900 transition-colors" data-remove-id="${id}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    selectedToolsContainer.innerHTML = selectedToolsHtml;
+
+    // Add event listeners to remove buttons
+    selectedToolsContainer.querySelectorAll('.remove-selected-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const removeId = btn.dataset.removeId;
+        removeToolFromCompare(removeId);
+      });
+    });
+  }
+
+  function updateToolGridSelections() {
+    toolSelectBtns.forEach(btn => {
+      const toolId = btn.dataset.toolId;
+      if (selectedToolIds.includes(toolId)) {
+        btn.classList.add('border-primary-500', 'bg-primary-50');
+        btn.classList.remove('hover:border-primary-300', 'hover:bg-primary-50');
+      } else {
+        btn.classList.remove('border-primary-500', 'bg-primary-50');
+        btn.classList.add('hover:border-primary-300', 'hover:bg-primary-50');
+      }
+
+      // Disable if max reached and this tool is not selected
+      if (selectedToolIds.length >= MAX_COMPARE && !selectedToolIds.includes(toolId)) {
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    });
+  }
+
+  function renderComparisonTable() {
+    if (selectedToolIds.length < MIN_COMPARE) {
+      comparisonSection.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      return;
+    }
+
+    comparisonSection.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+
+    const tools = selectedToolIds.map(id => getToolById(id));
+
+    // Update table headers
+    const headerCells = comparisonSection.querySelectorAll('[data-header-index]');
+    headerCells.forEach((cell, index) => {
+      if (index < tools.length) {
+        cell.innerHTML = `
+          <div class="flex flex-col items-center">
+            <img src="${tools[index].imageUrl}" alt="${tools[index].name}" class="w-12 h-12 rounded-lg object-cover mb-2" />
+            <span class="font-semibold text-gray-900">${tools[index].name}</span>
+            <button class="remove-tool-btn mt-2 text-xs text-red-500 hover:text-red-700 transition-colors" data-remove-index="${index}">
+              ${t('compare.remove')}
+            </button>
+          </div>
+        `;
+        cell.classList.remove('hidden');
+        const btn = cell.querySelector('.remove-tool-btn');
+        if (btn) btn.classList.remove('hidden');
+      } else {
+        cell.classList.add('hidden');
+        const btn = cell.querySelector('.remove-tool-btn');
+        if (btn) btn.classList.add('hidden');
+      }
+    });
+
+    // Build comparison rows
+    const comparisonBody = document.getElementById('comparisonBody');
+    const rows = [
+      // Basic Info
+      {
+        category: t('compare.dimensions.basicInfo'),
+        rows: [
+          {
+            label: t('compare.dimensions.category'),
+            values: tools.map(tool => t(categoryLabels[tool.category]) || tool.category)
+          },
+          {
+            label: t('compare.dimensions.pricingModel'),
+            values: tools.map(tool => t(pricingLabels[tool.pricing]) || tool.pricing)
+          },
+          {
+            label: t('compare.dimensions.price'),
+            values: tools.map(t => formatPrice(t))
+          },
+        ]
+      },
+      // Ratings
+      {
+        category: t('compare.dimensions.ratings'),
+        rows: [
+          {
+            label: t('compare.dimensions.overallRating'),
+            values: tools.map(t => t.rating.toFixed(1)),
+            suffix: t('compare.outOf'),
+            highlight: true
+          },
+          {
+            label: t('compare.dimensions.ratingCount'),
+            values: tools.map(t => t.ratingCount.toLocaleString())
+          },
+        ]
+      },
+      // Dimensions
+      {
+        category: t('compare.dimensions.dimensionScores'),
+        rows: [
+          {
+            label: t('compare.dimensions.easeOfUse'),
+            values: tools.map(t => t.dimensions.easeOfUse),
+            isScore: true
+          },
+          {
+            label: t('compare.dimensions.features'),
+            values: tools.map(t => t.dimensions.features),
+            isScore: true
+          },
+          {
+            label: t('compare.dimensions.value'),
+            values: tools.map(t => t.dimensions.value),
+            isScore: true
+          },
+        ]
+      },
+      // Features
+      {
+        category: t('compare.dimensions.coreFeatures'),
+        rows: tools.map(t => ({
+          label: t.name,
+          values: t.features
+        }))
+      },
+    ];
+
+    // Render table body
+    let tbodyHtml = '';
+
+    rows.forEach(section => {
+      tbodyHtml += `
+        <tr class="bg-gray-50">
+          <td colspan="${tools.length + 1}" class="px-4 py-2 text-sm font-semibold text-gray-700">
+            ${section.category}
+          </td>
+        </tr>
+      `;
+
+      section.rows.forEach(row => {
+        tbodyHtml += `<tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">`;
+        tbodyHtml += `<td class="px-4 py-3 text-sm font-medium text-gray-600">${row.label}</td>`;
+
+        row.values.forEach((value, idx) => {
+          if (row.isScore) {
+            const score = parseFloat(value);
+            const percentage = (score / 5) * 100;
+            const bestScore = Math.max(...row.values.map(v => parseFloat(v)));
+            const isBest = score === bestScore;
+
+            tbodyHtml += `
+              <td class="px-4 py-3">
+                <div class="flex flex-col items-center gap-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium ${isBest ? 'text-primary-600' : 'text-gray-900'}">${score.toFixed(1)}</span>
+                    ${row.suffix || ''}
+                    ${isBest ? '<span class="text-xs text-primary-600 font-medium">' + t('compare.best') + '</span>' : ''}
+                  </div>
+                  <div class="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-primary-500 rounded-full transition-all" style="width: ${percentage}%"></div>
+                  </div>
+                </div>
+              </td>
+            `;
+          } else if (Array.isArray(value)) {
+            tbodyHtml += `
+              <td class="px-4 py-3">
+                <div class="flex flex-wrap justify-center gap-1">
+                  ${value.slice(0, 3).map(f => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${f}</span>`).join('')}
+                  ${value.length > 3 ? `<span class="text-xs text-gray-400">+${value.length - 3}</span>` : ''}
+                </div>
+              </td>
+            `;
+          } else {
+            tbodyHtml += `<td class="px-4 py-3 text-center text-sm text-gray-700">${value}</td>`;
+          }
+        });
+
+        tbodyHtml += `</tr>`;
+      });
+    });
+
+    // Add action row
+    tbodyHtml += `
+      <tr class="bg-gray-50">
+        <td class="px-4 py-3 text-sm font-medium text-gray-700">${t('compare.operation')}</td>
+        ${tools.map(tool => `
+          <td class="px-4 py-3 text-center">
+            <a href="/tools/${tool.slug}" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+              ${t('compare.viewDetails')} →
+            </a>
+          </td>
+        `).join('')}
+      </tr>
+    `;
+
+    comparisonBody.innerHTML = tbodyHtml;
+
+    // Add remove button listeners
+    comparisonSection.querySelectorAll('.remove-tool-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const cell = e.currentTarget.closest('th');
+        const index = parseInt(cell.dataset.headerIndex);
+        if (!isNaN(index) && selectedToolIds[index]) {
+          removeToolFromCompare(selectedToolIds[index]);
+        }
+      });
+    });
+  }
+
+  function addToolToCompare(toolId) {
+    if (selectedToolIds.includes(toolId)) {
+      removeToolFromCompare(toolId);
+      return;
+    }
+
+    if (selectedToolIds.length >= MAX_COMPARE) {
+      alert(t('compare.maxCompareAlert', { count: MAX_COMPARE }));
+      return;
+    }
+
+    selectedToolIds.push(toolId);
+    updateUI();
+  }
+
+  function removeToolFromCompare(toolId) {
+    selectedToolIds = selectedToolIds.filter(id => id !== toolId);
+    updateUI();
+  }
+
+  function clearAll() {
+    selectedToolIds = [];
+    // Clear localStorage
+    localStorage.removeItem('compareToolIds');
+    // Dispatch event to update CompareButton components
+    window.dispatchEvent(new CustomEvent('compareListClearAll'));
+    // Reset category filter to show all tools
+    filterByCategory('');
+    updateUI();
+  }
+
+  function scrollToComparison() {
+    comparisonSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function updateUI() {
+    renderSelectedTools();
+    updateToolGridSelections();
+    renderComparisonTable();
+
+    // Update Start Comparison button state
+    if (startCompareBtn && compareCountSpan) {
+      if (selectedToolIds.length >= MIN_COMPARE) {
+        startCompareBtn.disabled = false;
+        compareCountSpan.textContent = selectedToolIds.length.toString();
+        compareCountSpan.classList.remove('hidden');
+      } else {
+        startCompareBtn.disabled = true;
+        compareCountSpan.classList.add('hidden');
+      }
+    }
+
+    // Save to localStorage
+    localStorage.setItem('compareToolIds', JSON.stringify(selectedToolIds));
+  }
+
+  function filterByCategory(category) {
+    toolSelectBtns.forEach(btn => {
+      if (!category) {
+        btn.classList.remove('hidden');
+      } else {
+        const tool = getToolById(btn.dataset.toolId);
+        if (tool.category === category) {
+          btn.classList.remove('hidden');
+        } else {
+          btn.classList.add('hidden');
+        }
+      }
+    });
+
+    // Update active filter button
+    categoryFilters.forEach(btn => {
+      if (btn.dataset.category === category) {
+        btn.classList.add('bg-primary-100', 'text-primary-700', 'font-medium');
+        btn.classList.remove('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+      } else {
+        btn.classList.remove('bg-primary-100', 'text-primary-700', 'font-medium');
+        btn.classList.add('bg-gray-100', 'text-gray-600', 'hover:bg-gray-200');
+      }
+    });
+  }
+
+  // Event Listeners
+  toolSelectBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      addToolToCompare(btn.dataset.toolId);
+    });
+  });
+
+  categoryFilters.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterByCategory(btn.dataset.category);
+    });
+  });
+
+  clearAllBtn.addEventListener('click', clearAll);
+
+  // Start Comparison button handler
+  if (startCompareBtn) {
+    startCompareBtn.addEventListener('click', () => {
+      if (selectedToolIds.length >= MIN_COMPARE) {
+        scrollToComparison();
+      }
+    });
+  }
+
+  // Initialize from URL parameters first, then fall back to localStorage
+  function initializeFromUrl() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const toolsParam = urlParams.get('tools');
+    if (toolsParam) {
+      const slugs = toolsParam.split(',').map(s => s.trim()).filter(Boolean);
+      const ids = slugs.map(getToolIdBySlug).filter(Boolean);
+      if (ids.length > 0) {
+        return ids;
+      }
+    }
+    return null;
+  }
+
+  function initCompareTools() {
+    // First try URL parameters
+    const urlToolIds = initializeFromUrl();
+    if (urlToolIds && urlToolIds.length >= 2) {
+      return urlToolIds;
+    }
+
+    // Then try localStorage
+    const savedToolIds = localStorage.getItem('compareToolIds');
+    if (savedToolIds) {
+      try {
+        const parsed = JSON.parse(savedToolIds);
+        if (Array.isArray(parsed) && parsed.length >= 2) {
+          return parsed;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return [];
+  }
+
+  selectedToolIds = initCompareTools();
+
+  // Listen for compare list changes from CompareButton components
+  window.addEventListener('compareListChange', (e) => {
+    const { toolSlug, isInCompare } = e.detail;
+    const toolId = getToolIdBySlug(toolSlug);
+    if (toolId) {
+      if (isInCompare && !selectedToolIds.includes(toolId)) {
+        selectedToolIds.push(toolId);
+      } else if (!isInCompare) {
+        selectedToolIds = selectedToolIds.filter(id => id !== toolId);
+      }
+      // Also update localStorage to keep in sync
+      localStorage.setItem('compareToolIds', JSON.stringify(selectedToolIds));
+      updateUI();
+    }
+  });
+
+  // Also listen for compareListClearAll event to sync state when tools are cleared from other pages
+  window.addEventListener('compareListClearAll', () => {
+    // Re-read from localStorage in case it was cleared from another page
+    const savedToolIds = localStorage.getItem('compareToolIds');
+    if (savedToolIds) {
+      try {
+        const parsed = JSON.parse(savedToolIds);
+        if (Array.isArray(parsed)) {
+          selectedToolIds = parsed;
+        } else {
+          selectedToolIds = [];
+        }
+      } catch (e) {
+        selectedToolIds = [];
+      }
+    } else {
+      selectedToolIds = [];
+    }
+    updateUI();
+  });
+
+  // Initial render
+  updateUI();
+</script>
+
+<style>
+  /* Custom scrollbar for tool grid */
+  #toolGrid::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #toolGrid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  #toolGrid::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+
+  #toolGrid::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
+
+  /* Table responsiveness */
+  @media (max-width: 768px) {
+    table {
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.5rem;
+    }
+  }
+
+  /* Sticky first column */
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: white;
+  }
+
+  thead th:first-child {
+    background: #f9fafb;
+  }
+
+  /* Animations */
+  .tool-select-btn {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

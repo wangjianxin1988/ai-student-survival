@@ -1,0 +1,130 @@
+---
+import Layout from '@/layouts/Layout.astro';
+---
+
+<Layout title="调试登录" locale="zh">
+  <div class="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+      <h1 class="text-2xl font-bold mb-6 text-center">调试登录</h1>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">1. 测试存储</h2>
+        <button id="test-storage" class="w-full py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+          检查 sessionStorage
+        </button>
+        <div id="storage-result" class="mt-4 p-3 bg-gray-100 rounded text-sm font-mono whitespace-pre-wrap"></div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 class="text-lg font-semibold mb-4">2. 快速登录</h2>
+        <input type="email" id="test-email" value="test@example.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2" placeholder="邮箱" />
+        <input type="password" id="test-password" value="password123" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-2" placeholder="密码" />
+        <input type="text" id="test-name" value="测试用户" class="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4" placeholder="昵称" />
+        <button id="test-login" class="w-full py-2 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600">
+          登录
+        </button>
+        <div id="login-result" class="mt-4 p-3 bg-gray-100 rounded text-sm"></div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h2 class="text-lg font-semibold mb-4">3. 验证状态</h2>
+        <button id="check-status" class="w-full py-2 px-4 bg-purple-500 text-white rounded-lg hover:bg-purple-600">
+          检查当前用户
+        </button>
+        <div id="status-result" class="mt-4 p-3 bg-gray-100 rounded text-sm font-mono whitespace-pre-wrap"></div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script>
+const DEMO_USERS_KEY = 'demo_users';
+const DEMO_SESSION_KEY = 'demo_session';
+
+function generateId() {
+  return 'demo-' + Math.random().toString(36).substring(2, 15);
+}
+
+function getDemoUsers() {
+  const stored = localStorage.getItem(DEMO_USERS_KEY);
+  return stored ? JSON.parse(stored) : {};
+}
+
+function saveDemoUsers(users) {
+  localStorage.setItem(DEMO_USERS_KEY, JSON.stringify(users));
+}
+
+// 检查存储
+document.getElementById('test-storage').addEventListener('click', () => {
+  const result = document.getElementById('storage-result');
+  const session = sessionStorage.getItem(DEMO_SESSION_KEY);
+  const users = localStorage.getItem(DEMO_USERS_KEY);
+
+  result.innerHTML = `sessionStorage['${DEMO_SESSION_KEY}']:\n${session || '(null)'}\n\nlocalStorage['${DEMO_USERS_KEY}']:\n${users || '(null)'}`;
+});
+
+// 快速登录
+document.getElementById('test-login').addEventListener('click', async () => {
+  const result = document.getElementById('login-result');
+  const email = document.getElementById('test-email').value;
+  const password = document.getElementById('test-password').value;
+  const name = document.getElementById('test-name').value;
+
+  result.textContent = '登录中...';
+
+  // 模拟延迟
+  await new Promise(r => setTimeout(r, 500));
+
+  // 查找用户
+  const users = getDemoUsers();
+  const user = Object.values(users).find(u => u.email === email && u.password === password);
+
+  if (user) {
+    const { password: _, ...demoUser } = user;
+    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(demoUser));
+    result.innerHTML = `<span class="text-green-600">登录成功！</span>\n用户: ${JSON.stringify(demoUser, null, 2)}`;
+
+    // 延迟跳转
+    setTimeout(() => {
+      window.location.href = '/user/favorites';
+    }, 1000);
+  } else {
+    // 创建新用户
+    const newUser = {
+      id: generateId(),
+      email,
+      password,
+      name,
+      created_at: new Date().toISOString()
+    };
+    users[newUser.id] = newUser;
+    saveDemoUsers(users);
+
+    const { password: _, ...demoUser } = newUser;
+    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(demoUser));
+    result.innerHTML = `<span class="text-green-600">注册并登录成功！</span>\n用户: ${JSON.stringify(demoUser, null, 2)}`;
+
+    // 延迟跳转
+    setTimeout(() => {
+      window.location.href = '/user/favorites';
+    }, 1000);
+  }
+});
+
+// 检查状态
+document.getElementById('check-status').addEventListener('click', () => {
+  const result = document.getElementById('status-result');
+  const session = sessionStorage.getItem(DEMO_SESSION_KEY);
+
+  if (session) {
+    try {
+      const user = JSON.parse(session);
+      result.innerHTML = `<span class="text-green-600">已登录</span>\n\n用户信息:\n${JSON.stringify(user, null, 2)}`;
+    } catch (e) {
+      result.innerHTML = `<span class="text-red-600">sessionStorage 数据损坏</span>`;
+    }
+  } else {
+    result.innerHTML = `<span class="text-gray-600">未登录 (sessionStorage 为空)</span>`;
+  }
+});
+</script>

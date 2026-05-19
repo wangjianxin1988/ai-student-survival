@@ -1,0 +1,1116 @@
+{
+  "site": {
+    "name": "AI Student Survival Guide",
+    "description": "Comprehensive AI tools guide for Chinese international students - Tool Recommendations, Payment Solutions, University Policies, Prompt Templates"
+  },
+  "nav": {
+    "aiTools": "AI Tools",
+    "payment": "Payment Solutions",
+    "policies": "University Policies",
+    "map": "Campus Map",
+    "prompts": "Prompt Templates",
+    "survival": "Survival Guides",
+    "api": "API Docs",
+    "compare": "Compare Tools",
+    "about": "About Us",
+    "contact": "Contact",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "login": "Login",
+    "register": "Register",
+    "offers": "Offers",
+    "questions": "Q&A Community",
+    "faq": "FAQ",
+    "useGuide": "User Guide"
+  },
+  "footer": {
+    "tagline": "#1 AI tools hub for Chinese international students - from tool selection to successful payment, one-stop solution for all your AI challenges abroad",
+    "toolsCategory": "Tool Categories",
+    "resources": "Resources",
+    "writing": "Writing Tools",
+    "coding": "Coding Tools",
+    "design": "Design Tools",
+    "research": "Research Tools"
+  },
+  "common": {
+    "search": "Search",
+    "searchPlaceholder": "Search tools...",
+    "browse": "Browse",
+    "explore": "Start Exploring",
+    "viewDetails": "View Details",
+    "back": "Back",
+    "results": "results",
+    "tutorials": "tutorials",
+    "universities": "universities",
+    "countries": "countries",
+    "filters": "Filters",
+    "clearFilters": "Clear Filters",
+    "noResults": "No matching results found",
+    "loading": "Loading...",
+    "copyLink": "Copy Link",
+    "share": "Share",
+    "copied": "Copied"
+  },
+  "search": {
+    "history": "Search History",
+    "clear": "Clear",
+    "trending": "Trending",
+    "searching": "Searching...",
+    "noResults": "No results found",
+    "navigate": "Navigate",
+    "navigateLabel": "up/down",
+    "select": "Select",
+    "close": "Close",
+    "trendingChatGPT": "ChatGPT",
+    "trendingClaude": "Claude",
+    "trendingMidjourney": "Midjourney",
+    "trendingPayment": "Payment",
+    "trendingMIT": "MIT",
+    "trendingStanford": "Stanford",
+    "trendingCopilot": "GitHub Copilot",
+    "trendingPrompts": "Prompt Templates"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "noNotifications": "No notifications",
+    "clearAll": "Clear all",
+    "follow": "followed you",
+    "comment": "commented on your content",
+    "favorite": "favorited your content",
+    "rating": "rated your content",
+    "like": "liked your content",
+    "system": "System"
+  },
+  "user": {
+    "profile": "Profile",
+    "favorites": "Favorites",
+    "ratings": "Ratings",
+    "reviews": "Reviews",
+    "offers": "Offers",
+    "followers": "Followers",
+    "following": "Following",
+    "points": "Points",
+    "level": "Level",
+    "joined": "Joined",
+    "noPublicContent": "No public content",
+    "notFound": "User not found",
+    "goBack": "Go Back"
+  },
+  "settings": {
+    "title": "Account Settings",
+    "profileInfo": "Profile Information",
+    "email": "Email",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "Enter nickname",
+    "bio": "Bio",
+    "bioPlaceholder": "Tell us about yourself...",
+    "avatar": "Avatar",
+    "uploadAvatar": "Upload Avatar",
+    "avatarHint": "Click to upload or drag and drop image, supports JPG, PNG, max 2MB",
+    "saveChanges": "Save Changes",
+    "privacy": "Privacy Settings",
+    "privacyPublic": "Public",
+    "privacyPublicDesc": "Other users can view your profile, favorites, and ratings",
+    "privacyPrivate": "Private",
+    "privacyPrivateDesc": "Other users can only see your username",
+    "notifications": "Notification Settings",
+    "notifEmail": "Email Notifications",
+    "notifNewFollower": "New Follower",
+    "notifNewComment": "Comment Alerts",
+    "notifNewFavorite": "Favorite Alerts",
+    "notifNewRating": "Rating Alerts",
+    "notifWeeklyDigest": "Weekly Digest",
+    "dangerZone": "Danger Zone",
+    "signOut": "Sign Out",
+    "deleteAccount": "Delete Account",
+    "deleteConfirm": "Are you sure you want to delete your account? This action cannot be undone.",
+    "saved": "Saved successfully!",
+    "language": "Language",
+    "languageZh": "中文",
+    "languageEn": "English"
+  },
+  "onboarding": {
+    "title": "Welcome to AI Student Survival Guide",
+    "subtitle": "Let us quickly show you the key features",
+    "skip": "Skip",
+    "next": "Next",
+    "done": "Start Exploring"
+  },
+  "qa": {
+    "title": "Q&A",
+    "askQuestion": "Ask Question",
+    "yourQuestion": "Your Question",
+    "questionPlaceholder": "Describe your question...",
+    "submitQuestion": "Submit Question",
+    "noQuestions": "No questions yet",
+    "beFirst": "Be the first to ask",
+    "answers": "answers",
+    "answer": "Answer",
+    "writeAnswer": "Write an answer",
+    "answerPlaceholder": "Write your answer...",
+    "submitAnswer": "Submit Answer",
+    "accepted": "Accepted",
+    "helpful": "Helpful",
+    "views": "views",
+    "similarQuestions": "Similar Questions",
+    "loginToAsk": "Login to ask",
+    "login": "Login"
+  },
+  "home": {
+    "hero": {
+      "title": "Everything You Need to Succeed with AI as a Student",
+      "subtitle": "Tool Map · Payment Solutions · University Policies · Prompt Templates · Offer Showcases",
+      "description": "One-stop solution: tool selection, payment solutions, university policies, real admissions experience. Learn from seniors' authentic sharing to supercharge your study abroad journey",
+      "browseTools": "Start Exploring",
+      "paymentSolutions": "Payment Issues?",
+      "exploreMap": "Browse Tool Map",
+      "exploreTools": "Explore AI Tools",
+      "viewOffers": "See Student Offers",
+      "statTools": "AI Tools",
+      "statPayment": "Payment Solutions",
+      "statPolicies": "University Policies",
+      "statPrompts": "Prompt Templates"
+    },
+    "modules": {
+      "title": "Must-Have AI Toolkit for Students",
+      "subtitle": "With these, you'll never struggle with AI tool selection again",
+      "aiTools": {
+        "title": "AI Tools Library",
+        "description": "500+ mainstream AI tools with multi-dimensional comparisons, real user reviews - find the perfect one for you"
+      },
+      "payment": {
+        "title": "Payment Solutions",
+        "description": "No credit card? Virtual cards, gift cards, regional pricing... 20+ solutions to solve all your payment problems"
+      },
+      "policies": {
+        "title": "University AI Policies",
+        "description": "First comprehensive database of 200+ overseas university AI policies, real-time updates"
+      },
+      "prompts": {
+        "title": "Prompt Templates",
+        "description": "1000+ curated templates for applications, thesis, job interviews - ready to use instantly"
+      }
+    },
+    "painPoints": {
+      "title": "Four Major Pain Points for International Students Using AI Tools",
+      "points": {
+        "1": {
+          "title": "Tool selection paralysis",
+          "description": "With so many AI tools available, which one is best for you? Which delivers the best results?"
+        },
+        "2": {
+          "title": "Payment confusion",
+          "description": "No credit card? Domestic bank cards rejected? Virtual card applications seem daunting?"
+        },
+        "3": {
+          "title": "Policy confusion",
+          "description": "Does your university allow AI usage? Will you face disciplinary action? Total confusion"
+        },
+        "4": {
+          "title": "Prompt frustration",
+          "description": "You have access to AI tools but can't write effective prompts, severely limiting their usefulness"
+        }
+      },
+      "stats": {
+        "tools": "Curated AI Tools",
+        "paymentSolutions": "Payment Solutions",
+        "universityPolicies": "University Policies",
+        "promptTemplates": "Prompt Templates"
+      }
+    }
+  },
+  "tools": {
+    "title": "AI Tools Library",
+    "description": "Curated AI tools for international students including writing, coding, design, research categories with multi-dimensional filtering and comparison",
+    "categories": {
+      "all": "All Categories",
+      "writing": "Writing",
+      "coding": "Coding",
+      "design": "Design",
+      "research": "Research",
+      "communication": "Communication",
+      "agent": "Agent"
+    },
+    "pricing": {
+      "all": "All Prices",
+      "free": "Free",
+      "freemium": "Freemium",
+      "paid": "Paid"
+    },
+    "dbConnected": "[Database Connected]",
+    "showResults": "Showing {count} results",
+    "compareTools": "Compare Tools",
+    "new": "New",
+    "free": "Free",
+    "paidPerMonth": "${price}/mo",
+    "freePlus": "Freemium"
+  },
+  "payment": {
+    "title": "Payment Solutions",
+    "description": "Complete guide to paying for AI tools as an international student, covering virtual cards, gift cards, and regional pricing",
+    "painScore": "Student payment pain point score",
+    "helpedStudents": "students helped with payment issues",
+    "categories": {
+      "virtualCard": {
+        "label": "Virtual Cards",
+        "description": "Virtual credit card services that can be linked to various payment methods"
+      },
+      "giftCard": {
+        "label": "Gift Cards",
+        "description": "Tutorial on purchasing and using gift cards for major platforms"
+      },
+      "regionalPricing": {
+        "label": "Regional Pricing",
+        "description": "Save money by taking advantage of different regional pricing"
+      },
+      "troubleshooting": {
+        "label": "Troubleshooting",
+        "description": "Solutions for common payment problems"
+      }
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "reliability": {
+      "label": "Reliability",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "views": "views",
+    "popularTutorials": "Popular Tutorials",
+    "tutorialInfo": "Tutorial Info",
+    "relatedTutorials": "Related Tutorials",
+    "contactSupport": "Contact Support",
+    "stillHaveQuestions": "Still have questions?",
+    "askCommunity": "If you can't find a solution here, ask in the community and we'll respond quickly"
+  },
+  "survival": {
+    "title": "Survival Guides"
+  },
+  "policies": {
+    "title": "University AI Policy Database",
+    "description": "First comprehensive database of overseas university AI usage policies, helping international students understand university AI regulations",
+    "stats": {
+      "universities": "Universities indexed",
+      "countries": "Countries covered",
+      "updating": "Continuously updated"
+    },
+    "searchPlaceholder": "Search university name...",
+    "allCountries": "All Countries",
+    "legend": {
+      "allowed": "Allowed",
+      "prohibited": "Prohibited",
+      "restricted": "Restricted",
+      "caseByCase": "Case by Case"
+    },
+    "dataStats": {
+      "title": "Data Statistics",
+      "allowed": "Allowed",
+      "restricted": "Restricted",
+      "prohibited": "Prohibited",
+      "caseByCase": "Case by Case"
+    },
+    "updatedAt": "Updated",
+    "viewDetails": "View Details",
+    "noResults": "No matching universities found",
+    "tryAdjustFilters": "Try adjusting your search criteria or browse other universities",
+    "detail": {
+      "aiToolsUsage": "AI Tools Usage",
+      "allowed": "Allowed",
+      "prohibited": "Prohibited",
+      "restricted": "Restricted",
+      "policyDetails": "Policy Details",
+      "generalPolicy": "General Policy",
+      "academicPolicy": "Academic Policy",
+      "codingPolicy": "Coding Policy",
+      "usageGuidelines": "Usage Guidelines",
+      "relatedUniversities": "Universities in Same Region",
+      "aiToolsOverview": "AI Tools Overview",
+      "allowedCount": "Allowed",
+      "prohibitedCount": "Prohibited",
+      "restrictedCount": "Restricted",
+      "stillHaveQuestions": "Still have questions?",
+      "contactUs": "Contact Us",
+      "backToList": "Back to University Policies List",
+      "home": "Home",
+      "universityPolicies": "University Policies",
+      "policySource": "Policy Source",
+      "lastUpdated": "Last updated",
+      "toolsCount": "tools"
+    }
+  },
+  "prompts": {
+    "title": "Prompt Template Library",
+    "subtitle": "40+ high-quality prompt templates covering applications, thesis, job search, daily communication and more - copy and use instantly",
+    "description": "Carefully selected AI prompt templates for international students, covering academic writing, email composition, code review, research assistance and more",
+    "categories": {
+      "all": "All",
+      "application": "Application",
+      "thesis": "Thesis",
+      "job": "Job",
+      "daily": "Daily",
+      "research": "Research"
+    },
+    "sortBy": {
+      "rating": "Highest Rated",
+      "usageCount": "Most Used",
+      "newest": "Newest"
+    },
+    "copyPrompt": "Copy Prompt",
+    "expandContent": "Expand to view full content",
+    "applicableTo": "Applicable to",
+    "copyContent": "Copy Content",
+    "exploreMoreTools": "Explore More AI Tools"
+  },
+  "compare": {
+    "title": "AI Tools Comparison",
+    "description": "Compare 20 popular AI tools for international students with comprehensive multi-dimensional analysis covering usability, features, and pricing",
+    "selectTools": "Select tools to compare",
+    "clearAll": "Clear comparison list",
+    "selectPlaceholder": "Select tools from below (minimum 2)",
+    "startCompare": "Start Comparison",
+    "allCategories": "All",
+    "noSelection": "No tools selected yet",
+    "selectToCompare": "Select 2-5 tools from the list above to start comparing",
+    "compareDimensions": "Compare Dimensions",
+    "dimensions": {
+      "basicInfo": "Basic Info",
+      "category": "Category",
+      "pricingModel": "Pricing Model",
+      "price": "Price",
+      "ratings": "Ratings",
+      "overallRating": "Overall Rating",
+      "ratingCount": "Rating Count",
+      "dimensionScores": "Dimension Scores",
+      "easeOfUse": "Ease of Use",
+      "features": "Features",
+      "value": "Value",
+      "coreFeatures": "Core Features"
+    },
+    "outOf": "/ 5.0",
+    "best": "Best",
+    "operation": "Operation",
+    "viewDetails": "View Details",
+    "remove": "Remove",
+    "maxCompareAlert": "You can compare at most {count} tools"
+  },
+  "api": {
+    "title": "Open API Documentation",
+    "description": "AI Student Survival Guide open API documentation with data endpoints for AI tools, payment solutions, and university policies",
+    "aiSpiderFriendly": "AI Spider Friendly",
+    "tryEndpoint": "Try Tools API",
+    "viewSitemap": "View Sitemap",
+    "baseInfo": {
+      "title": "Basic Information",
+      "responseFormat": "Response Format",
+      "corsOpen": "CORS Open (*)",
+      "aiSpiderIndexable": "AI Spider Indexable",
+      "standardRest": "Standard RESTful"
+    },
+    "requestExample": "Request Example",
+    "endpoints": "Endpoints",
+    "requestParams": "Request Parameters",
+    "responseFields": "Response Fields",
+    "responseExample": "Response Example",
+    "tryEndpointInNewTab": "Test this endpoint in new tab",
+    "statusCodes": "HTTP Status Codes",
+    "spiderOptimization": "AI Spider Optimization",
+    "enabled": "Enabled Optimizations",
+    "userAgents": "AI Spider User-Agents",
+    "paramName": "Parameter",
+    "paramType": "Type",
+    "required": "Required",
+    "description": "Description",
+    "yes": "Yes",
+    "no": "No",
+    "contentType": "Content-Type:",
+    "schemaStandard": "Schema.org-compliant response structure",
+    "robotsAccess": "robots.txt allows /api/ access",
+    "optimizations": {
+      "contentType": "Content-Type: application/json",
+      "cors": "Access-Control-Allow-Origin: *",
+      "robotsTag": "X-Robots-Tag: index, follow",
+      "contentTypeOptions": "X-Content-Type-Options: nosniff",
+      "schemaOrg": "Schema.org-compliant response structure",
+      "robotsTxt": "robots.txt allows /api/ access"
+    },
+    "userAgentsList": {
+      "gptbot": "GPTBot (OpenAI)",
+      "ccbot": "CCBot (Common Crawl)",
+      "claude": "Claude (Anthropic)",
+      "anthropicAi": "anthropic-ai",
+      "googleExtended": "Google-Extended"
+    }
+  },
+  "footer": {
+    "tagline": "#1 AI tools hub for Chinese international students - from tool selection to successful payment, one-stop solution for all your AI challenges abroad",
+    "toolsCategory": "Tool Categories",
+    "resources": "Resources",
+    "writing": "Writing Tools",
+    "coding": "Coding Tools",
+    "design": "Design Tools",
+    "research": "Research Tools"
+  },
+  "chatbot": {
+    "title": "AI Assistant",
+    "placeholder": "Ask me anything about AI tools...",
+    "welcome": "Hello! I'm your AI assistant. I can help you find the right AI tools, understand payment solutions, and check university policies. How can I help you?",
+    "suggestions": ["Recommend a writing AI tool", "Which universities allow ChatGPT?", "How to subscribe to ChatGPT without credit card?"],
+    "send": "Send",
+    "thinking": "Thinking...",
+    "suggestTry": "Try asking:"
+  },
+  "auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "signOut": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "orContinueWith": "or continue with",
+    "googleSignIn": "Sign in with Google",
+    "googleSignUp": "Sign up with Google"
+  },
+  "favorites": {
+    "myFavorites": "My Favorites",
+    "addFavorite": "Add to Favorites",
+    "removeFavorite": "Remove from Favorites",
+    "noFavorites": "No favorites yet"
+  },
+  "offers": {
+    "title": "Offers",
+    "shareYourOffer": "Share Your Offer",
+    "universityName": "University Name",
+    "program": "Program",
+    "admissionResult": "Admission Result",
+    "accepted": "Accepted",
+    "rejected": "Rejected",
+    "waitlisted": "Waitlisted",
+    "background": "Background",
+    "toolsUsed": "Tools Used",
+    "submit": "Submit",
+    "noOffers": "No offers yet",
+    "subTitle": "Share your admission results to help other students make better choices",
+    "filters": "Filters",
+    "clearFilters": "Clear Filters",
+    "sortBy": "Sort By",
+    "newest": "Newest",
+    "hottest": "Hottest",
+    "scholarship": "Scholarship Amount",
+    "allCountries": "All Countries",
+    "allDegrees": "All Degrees",
+    "allResults": "All Results",
+    "searchPlaceholder": "Search university or program...",
+    "submitOffer": "Submit Offer",
+    "showResults": "Showing {count} results",
+    "noResults": "No matching offers found",
+    "degree": "Degree Type",
+    "master": "Master",
+    "phd": "PhD",
+    "postdoc": "Postdoc",
+    "country": "Country/Region",
+    "scholarshipType": "Scholarship Type",
+    "full": "Full",
+    "partial": "Partial",
+    "none": "None",
+    "scholarshipAmount": "Scholarship Amount",
+    "gpa": "GPA",
+    "gre": "GRE",
+    "toefl": "TOEFL",
+    "ielts": "IELTS",
+    "publications": "Publications",
+    "researchExperience": "Research Experience (years)",
+    "internships": "Internships",
+    "aiToolsPlaceholder": "e.g., ChatGPT, Claude, Perplexity (comma separated)",
+    "timeline": "Timeline",
+    "timelinePlaceholder": "e.g., 2025 Fall - Submitted Dec 2024, Result Feb 2025",
+    "advice": "Advice for Others",
+    "advicePlaceholder": "Share your application experience and advice...",
+    "anonymous": "Submit Anonymously",
+    "submitting": "Submitting...",
+    "success": "Submitted successfully! Thank you for sharing",
+    "loginRequired": "Please login to share your offer",
+    "login": "Login",
+    "cancel": "Cancel",
+    "fieldRequired": "This field is required",
+    "detail": {
+      "comments": "Comments",
+      "noComments": "No comments yet",
+      "writeComment": "Write a comment",
+      "commentPlaceholder": "Write your comment...",
+      "submitComment": "Submit",
+      "submittingComment": "Submitting...",
+      "commentSuccess": "Comment submitted successfully",
+      "notFound": "Offer not found",
+      "relatedOffers": "Related Offers",
+      "likes": "Likes"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "About Us",
+      "subtitle": "AI tool navigation platform dedicated to serving international students"
+    },
+    "mission": {
+      "title": "Our Mission",
+      "desc1": "MI TO AI Student Survival Guide is dedicated to helping Chinese international students overcome all challenges in using AI tools.",
+      "desc2": "From tool selection to payment solutions, from university policies to prompt templates, we provide one-stop solutions.",
+      "desc3": "We believe every international student should have equal access to AI-powered convenience."
+    },
+    "features": {
+      "title": "Core Features",
+      "tools": {
+        "title": "AI Tools Library",
+        "desc": "500+ curated AI tools with multi-dimensional comparisons and ratings"
+      },
+      "payment": {
+        "title": "Payment Solutions",
+        "desc": "Complete guide to virtual cards, gift cards, and regional pricing"
+      },
+      "policies": {
+        "title": "University AI Policies",
+        "desc": "First comprehensive database of 200+ university AI usage policies"
+      },
+      "prompts": {
+        "title": "Prompt Templates",
+        "desc": "1000+ high-quality templates covering applications, thesis, and job search"
+      }
+    },
+    "team": {
+      "title": "Our Team",
+      "desc": "We are a team composed of international students, tech experts, content creators, and community volunteers.",
+      "developer": {
+        "title": "Tech Team",
+        "desc": "Responsible for platform development and maintenance"
+      },
+      "content": {
+        "title": "Content Team",
+        "desc": "Responsible for tool reviews and content creation"
+      },
+      "community": {
+        "title": "Community Volunteers",
+        "desc": "Collect feedback and organize events"
+      }
+    },
+    "guide": {
+      "title": "User Guide",
+      "started": {
+        "title": "Getting Started",
+        "desc": "First time here? Follow these steps to start your AI tools journey.",
+        "step1": "Browse the tool map to learn about various AI tools",
+        "step2": "Choose the right tools based on your needs",
+        "step3": "Check payment solutions and university policies"
+      },
+      "tools": {
+        "title": "Using AI Tools",
+        "desc": "Learn how to use AI tools efficiently.",
+        "step1": "Search or browse tool categories",
+        "step2": "View tool details and reviews",
+        "step3": "Use prompt templates to improve results"
+      },
+      "payment": {
+        "title": "Solving Payment Issues",
+        "desc": "No credit card? We offer multiple solutions.",
+        "step1": "Virtual credit cards (Depay, Wise, etc.)",
+        "step2": "Gift card purchase and redemption",
+        "step3": "Save money with regional pricing"
+      },
+      "community": {
+        "title": "Participating in the Community",
+        "desc": "Join Q&A community and share your experiences.",
+        "step1": "Ask and answer questions",
+        "step2": "Share your offer experiences",
+        "step3": "Read survival guides"
+      },
+      "cta": "Start Exploring"
+    },
+    "cta": {
+      "title": "Have More Questions?",
+      "desc": "Contact us for help or suggestions"
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Contact Us",
+      "subtitle": "We'd love to hear your comments, suggestions, and feedback"
+    },
+    "info": {
+      "email": {
+        "title": "Email",
+        "desc": "support@mitoai.example.com"
+      },
+      "social": {
+        "title": "Social Media",
+        "desc": "WeChat: mitoai_helper"
+      },
+      "hours": {
+        "title": "Response Time",
+        "desc": "Weekdays 9:00-18:00"
+      }
+    },
+    "form": {
+      "title": "Send a Message",
+      "name": "Name",
+      "namePlaceholder": "Enter your name",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "subject": "Subject",
+      "selectSubject": "Select a subject",
+      "subjectGeneral": "General Inquiry",
+      "subjectFeedback": "Feedback & Suggestions",
+      "subjectBug": "Report an Issue",
+      "subjectFeature": "Feature Request",
+      "subjectCollab": "Collaboration",
+      "message": "Message",
+      "messagePlaceholder": "Write your message...",
+      "submit": "Send",
+      "responseTime": "We typically respond within 24 hours"
+    },
+    "faq": {
+      "title": "Check FAQ",
+      "desc": "Your question might already have an answer"
+    }
+  },
+  "privacy": {
+    "hero": {
+      "title": "Privacy Policy",
+      "lastUpdate": "Last Updated"
+    },
+    "intro": {
+      "title": "Introduction",
+      "desc": "MI TO AI Student Survival Guide takes user privacy seriously. This Privacy Policy explains how we collect, use, store, and protect your personal information."
+    },
+    "collect": {
+      "title": "Information Collection",
+      "personal": {
+        "title": "Personal Information",
+        "items": {
+          "email": "Email address",
+          "name": "Nickname",
+          "avatar": "Avatar",
+          "preferences": "Preference settings"
+        }
+      },
+      "usage": {
+        "title": "Usage Information",
+        "items": {
+          "usage": "Feature usage data",
+          "device": "Device information",
+          "logs": "Access logs"
+        }
+      },
+      "thirdParty": {
+        "title": "Third-Party Services",
+        "desc": "We use the following third-party services:",
+        "items": {
+          "analytics": "Website analytics (e.g., Google Analytics)",
+          "auth": "Authentication (e.g., Google Sign-in)",
+          "cdn": "Content delivery (e.g., Cloudflare)"
+        }
+      }
+    },
+    "usage": {
+      "title": "Information Usage",
+      "items": {
+        "service": "Provide and improve services",
+        "personalize": "Personalize user experience",
+        "improve": "Analyze usage trends",
+        "communication": "Send important notifications",
+        "security": "Ensure security"
+      }
+    },
+    "protection": {
+      "title": "Data Protection",
+      "items": {
+        "encryption": "Data transmission encryption",
+        "access": "Strict access control",
+        "retention": "Regular data backup",
+        "employees": "Employee privacy training"
+      }
+    },
+    "cookies": {
+      "title": "Cookies",
+      "desc": "We use cookies to improve user experience.",
+      "types": {
+        "title": "Types of Cookies",
+        "essential": {
+          "title": "Essential Cookies",
+          "desc": "Required for website operation"
+        },
+        "analytics": {
+          "title": "Analytics Cookies",
+          "desc": "Help us understand user behavior"
+        },
+        "preferences": {
+          "title": "Preference Cookies",
+          "desc": "Remember user settings"
+        }
+      }
+    },
+    "rights": {
+      "title": "User Rights",
+      "desc": "You have the following rights regarding your personal data:",
+      "access": {
+        "title": "Right to Access",
+        "desc": "View data we hold about you"
+      },
+      "correction": {
+        "title": "Right to Correction",
+        "desc": "Correct inaccurate data"
+      },
+      "deletion": {
+        "title": "Right to Deletion",
+        "desc": "Request deletion of your data"
+      },
+      "portability": {
+        "title": "Right to Portability",
+        "desc": "Get a copy of your data"
+      }
+    },
+    "retention": {
+      "title": "Data Retention",
+      "desc": "We only retain your data for as long as necessary to fulfill the purposes for which it was collected."
+    },
+    "children": {
+      "title": "Children's Privacy",
+      "desc": "Our services are not intended for children under 13."
+    },
+    "changes": {
+      "title": "Policy Changes",
+      "desc": "We may update this Privacy Policy from time to time. Any changes will be posted on this page."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "desc": "If you have any questions about this Privacy Policy, please contact us:"
+    }
+  },
+  "terms": {
+    "hero": {
+      "title": "Terms of Use",
+      "lastUpdate": "Last Updated"
+    },
+    "accept": {
+      "title": "Acceptance of Terms",
+      "desc": "By using MI TO AI Student Survival Guide, you agree to abide by these Terms of Use."
+    },
+    "services": {
+      "title": "Description of Services",
+      "desc": "We provide the following services:",
+      "items": {
+        "tools": "AI tool recommendations and reviews",
+        "payment": "Payment solution guides",
+        "policies": "University AI usage policy lookup",
+        "prompts": "Prompt template library",
+        "community": "User community interaction"
+      }
+    },
+    "accounts": {
+      "title": "User Accounts",
+      "register": {
+        "title": "Account Registration",
+        "desc": "True and accurate information is required during registration."
+      },
+      "security": {
+        "title": "Account Security",
+        "desc": "You are responsible for protecting your account:",
+        "items": {
+          "strongPassword": "Use strong passwords",
+          "keepSecret": "Keep login credentials secure",
+          "notify": "Notify us immediately of any anomalies"
+        }
+      },
+      "terminate": {
+        "title": "Account Termination",
+        "desc": "We reserve the right to terminate accounts that violate these terms."
+      }
+    },
+    "content": {
+      "title": "User Content",
+      "ownership": {
+        "title": "Content Ownership",
+        "desc": "You retain ownership of content you post."
+      },
+      "license": {
+        "title": "Content License",
+        "desc": "You grant us permission to use and copy content you post."
+      },
+      "standards": {
+        "title": "Content Standards",
+        "desc": "Your content must meet the following standards:",
+        "items": {
+          "legal": "Legal and compliant",
+          "respectful": "Respectful of others",
+          "accurate": "True and accurate",
+          "noSpam": "No spam"
+        }
+      }
+    },
+    "prohibited": {
+      "title": "Prohibited Activities",
+      "items": {
+        "illegal": "Engaging in illegal activities",
+        "fraud": "Fraudulent behavior",
+        "harm": "Harming others",
+        "spam": "Sending spam",
+        "scraping": "Scraping website data",
+        "interfere": "Interfering with service operation",
+        "impersonate": "Impersonating others"
+      }
+    },
+    "ip": {
+      "title": "Intellectual Property",
+      "desc": "Our services are protected by intellectual property laws.",
+      "items": {
+        "content": "Website content and design",
+        "software": "Software and code",
+        "trademarks": "Trademarks and logos"
+      }
+    },
+    "thirdParty": {
+      "title": "Third-Party Links",
+      "desc": "Our services may contain links to third-party websites. We are not responsible for third-party content."
+    },
+    "disclaimer": {
+      "title": "Disclaimer",
+      "desc": "Services are provided \"AS IS\" without any express or implied warranties."
+    },
+    "liability": {
+      "title": "Limitation of Liability",
+      "desc": "Under no circumstances shall we be liable for any indirect, incidental, or consequential damages."
+    },
+    "indemnity": {
+      "title": "Indemnification",
+      "desc": "You agree to indemnify us against any losses arising from your violation of these terms."
+    },
+    "changes": {
+      "title": "Changes to Terms",
+      "desc": "We reserve the right to modify these terms at any time. Modifications will be posted on this page."
+    },
+    "governing": {
+      "title": "Governing Law",
+      "desc": "These terms are governed by the laws of the People's Republic of China."
+    },
+    "contact": {
+      "title": "Contact Us",
+      "desc": "For questions, please contact us:"
+    }
+  },
+  "guide": {
+    "hero": {
+      "title": "User Guide",
+      "subtitle": "Learn how to use all features of AI Student Survival Guide"
+    },
+    "nav": {
+      "tools": "Browse Tools",
+      "payment": "Payment Solutions",
+      "policies": "University Policies",
+      "prompts": "Prompt Templates",
+      "community": "Community"
+    },
+    "tools": {
+      "title": "Browsing AI Tools",
+      "search": {
+        "title": "Search Tools",
+        "desc": "Use the search box to quickly find the tools you need.",
+        "step1": "Enter keywords in the search box at the top of the page",
+        "step2": "Browse search results",
+        "step3": "Click to view details"
+      },
+      "filter": {
+        "title": "Filter Tools",
+        "desc": "Use category filters to find specific types of tools."
+      },
+      "compare": {
+        "title": "Compare Tools",
+        "desc": "Select multiple tools for side-by-side comparison."
+      }
+    },
+    "payment": {
+      "title": "Payment Solutions",
+      "virtualCards": {
+        "title": "Virtual Credit Cards",
+        "desc": "Apply for virtual cards online without overseas bank cards.",
+        "step1": "Choose a virtual card provider (Depay, Wise, etc.)",
+        "step2": "Download the app and complete identity verification",
+        "step3": "Top up and link to your AI tool account"
+      },
+      "giftCards": {
+        "title": "Gift Cards",
+        "desc": "Purchase platform gift cards for payment.",
+        "step1": "Purchase gift cards on platforms like Tmall or JD.com",
+        "step2": "Get the card code",
+        "step3": "Redeem on the AI platform"
+      },
+      "regional": {
+        "title": "Regional Pricing",
+        "desc": "Save money by taking advantage of price differences in different regions."
+      }
+    },
+    "policies": {
+      "title": "University AI Policies",
+      "desc": "Understand your school's AI usage rules to avoid violations.",
+      "step1": {
+        "title": "Search for Your School",
+        "desc": "Search for your university in the policy database"
+      },
+      "step2": {
+        "title": "View Policy Details",
+        "desc": "Understand allowed and prohibited AI tool usage scenarios"
+      },
+      "step3": {
+        "title": "Follow the Rules",
+        "desc": "Use AI tools reasonably according to school policies"
+      }
+    },
+    "prompts": {
+      "title": "Prompt Templates",
+      "howToUse": {
+        "title": "How to Use Templates",
+        "step1": "Browse or search for the type of template you need",
+        "step2": "Click to view template details",
+        "step3": "Copy the prompt content",
+        "step4": "Paste into an AI tool to use"
+      },
+      "example": {
+        "title": "Prompt Example",
+        "context": "Academic Paper Polishing",
+        "prompt": "Please help me polish this academic paper to improve its clarity, coherence, and academic tone while maintaining the original meaning..."
+      }
+    },
+    "community": {
+      "title": "Community Interaction",
+      "questions": {
+        "desc": "Ask questions in the Q&A community and get help from other users"
+      },
+      "offers": {
+        "desc": "Share your application experience and help other international students"
+      },
+      "survival": {
+        "desc": "Read survival guides to avoid common pitfalls"
+      },
+      "map": {
+        "desc": "Check campus map to discover more resources"
+      }
+    },
+    "cta": {
+      "title": "Ready to Get Started?",
+      "desc": "Browse the tool map and explore more AI tools"
+    }
+  },
+  "meta": {
+    "keywords": "AI tools, international students, ChatGPT, AI writing, payment solutions, university AI policies, prompt templates"
+  },
+  "community": {
+    "promotion": {
+      "autoPromoted": "Auto-promoted to {category}",
+      "directPromoted": "Direct to {category} Hot",
+      "heatProgress": "Heat Progress",
+      "heatScore": "Heat Score",
+      "heatFormula": "Likes×1 + Comments×2 + Favorites×3 = Score, ≥10 triggers auto-promotion",
+      "directPublish": "Direct Publish",
+      "directPublishCost": "Spend {points} points to publish directly to target board",
+      "hotBoost": "Hot Boost",
+      "hotBoostCost": "Spend {points} points for 24-hour hot exposure",
+      "pointsRequired": "Requires {points} points",
+      "pointsInsufficient": "Insufficient points",
+      "promotionSuccess": "Published successfully",
+      "viewOriginal": "View original",
+      "promotionHint": "{category} Post Promotion Info"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Common questions about the AI Student Survival Guide",
+    "description": "Find answers to common questions about AI tool recommendations, payment solutions, and university policies",
+    "searchPlaceholder": "Search questions...",
+    "categories": {
+      "general": "Getting Started",
+      "tools": "AI Tools",
+      "payment": "Payments",
+      "policy": "University Policies"
+    },
+    "general": {
+      "whatIs": {
+        "title": "What is the AI Student Survival Guide?",
+        "answer": "The AI Student Survival Guide is a navigation platform for AI tools dedicated to serving international students. We feature 500+ curated AI tools, provide 20+ payment solutions, organize AI usage policies from 200+ universities, and offer 1000+ high-quality prompt templates to help international students overcome challenges when using AI tools."
+      },
+      "whoFor": {
+        "title": "Who is this platform for?",
+        "answer": "The platform is primarily designed for Chinese students preparing to study abroad or already studying overseas. Whether you're applying to schools, a new student just enrolled, or an upperclassman, you can find AI tool solutions tailored to your needs here."
+      },
+      "freeUse": {
+        "title": "Is the content on this platform free?",
+        "answer": "Yes, most of the content on the platform is free to use. We provide AI tool recommendations, payment solutions, university policy lookups, and prompt templates as free services. Some advanced features like in-depth comparisons and professional consulting may require a paid subscription."
+      },
+      "howStart": {
+        "title": "How do I get started?",
+        "answer": "You can browse recommended content directly from the homepage or use the search function to find specific AI tools. We recommend starting with the 'Survival Guides' to understand common pitfalls, then choose the right AI tools and payment solutions based on your needs."
+      }
+    },
+    "tools": {
+      "howMany": {
+        "title": "How many AI tools are featured on the platform?",
+        "answer": "We currently feature over 500 AI tools, covering categories like writing, coding, design, research, and conversation. All tools have been filtered and tested by us to ensure quality and practicality."
+      },
+      "whichBest": {
+        "title": "Which AI tool is best for me?",
+        "answer": "It depends on your specific needs. For writing assistance, we recommend ChatGPT or Claude; for coding assistance, GitHub Copilot or Cursor; for image generation, Midjourney or DALL-E 3. You can use our 'Compare Tools' feature to compare different tools side by side."
+      },
+      "pricing": {
+        "title": "How are these AI tools priced?",
+        "answer": "AI tools have different pricing models. Common models include: completely free (like Copilot), freemium (like ChatGPT with free and Plus versions), pay-per-use (like some API services). Our tool detail pages provide detailed pricing information."
+      },
+      "chinaAccess": {
+        "title": "Can I use these tools in China?",
+        "answer": "Some AI tools can be accessed directly in mainland China, but many mainstream tools (like ChatGPT, Claude, etc.) require special network conditions to use. We provide dedicated 'Payment Solutions' to help international students with access and payment issues."
+      }
+    },
+    "payment": {
+      "methods": {
+        "title": "How do I pay for overseas AI tools?",
+        "answer": "We recommend several main payment methods: 1) Virtual credit cards (like Depay, Wise cards); 2) Gift cards (supported by some platforms); 3) Regional pricing (taking advantage of price differences in different regions); 4) Education discounts (student verification). See the 'Payment Solutions' page for detailed tutorials."
+      },
+      "virtualCard": {
+        "title": "What are virtual credit cards and how do I apply for one?",
+        "answer": "A virtual credit card is an online-generated virtual card number that can be used for online purchases. Common options include Depay, Revolut, and TransferWise. Usually, you need to download the app and complete identity verification before applying. See our payment tutorials for specific steps."
+      },
+      "giftCard": {
+        "title": "What is gift card payment?",
+        "answer": "Some AI services (like Apple, Google, OpenAI) support gift card top-ups. You can purchase gift cards for the corresponding country on platforms like Tmall or JD.com, then redeem them to your account. This method doesn't require a credit card and is suitable for users without overseas payment methods."
+      },
+      "safety": {
+        "title": "Are these payment methods safe?",
+        "answer": "As long as you use legitimate channels, these payment methods are safe. Recommendations: 1) Apply for virtual cards through official channels; 2) Don't enter card numbers on non-official websites; 3) Set reasonable spending limits; 4) Check your statements regularly. Our payment solutions are all verified safe methods."
+      }
+    },
+    "policy": {
+      "why": {
+        "title": "Why do I need to know about university AI policies?",
+        "answer": "Different universities have different regulations on AI tool usage. Some allow students to use AI assistance in assignments but require disclosure; some completely prohibit usage; others are still formulating policies. Knowing your school's policy can help you avoid unnecessary trouble."
+      },
+      "checkMethod": {
+        "title": "How do I look up my school's AI usage policy?",
+        "answer": "You can search for your school on our 'University Policies' page. We feature AI usage policies from over 200 universities, including official statements, list of allowable tools, and consequences for violations. If you can't find your school, we recommend contacting your school's relevant department directly."
+      },
+      "violation": {
+        "title": "What are the consequences of violating school AI usage rules?",
+        "answer": "Consequences vary by school, and common ones include: zero on the assignment, course failure, academic warning, and in severe cases, expulsion. We recommend carefully reading your school's academic integrity policy and following the relevant regulations when using AI tools."
+      },
+      "allowAI": {
+        "title": "Which AI tools are allowed by most schools?",
+        "answer": "Generally, tools used for basic assistance like grammar checking and dictionary lookups are usually allowed (like Grammarly). However, using them for writing assignments or checking homework answers may be considered misconduct. Please refer to your school's official policy for specifics."
+      }
+    },
+    "stillHaveQuestions": "Still have questions?",
+    "contactDescription": "If you haven't found the answer you're looking for, you can contact us through the following methods and we'll respond as soon as possible.",
+    "emailUs": "Email Us",
+    "askCommunity": "Ask Community"
+  }
+}

@@ -1,0 +1,19 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ContactForm from '@/components/common/ContactDeveloper';
+
+export const prerender = false;
+
+const locale = 'en';
+---
+
+<Layout
+  title="Contact Developer"
+  description="Have questions or suggestions? Contact us"
+>
+  <div class="min-h-[calc(100vh-200px)] py-12 px-4">
+    <div class="max-w-2xl mx-auto">
+      <ContactForm locale={locale} client:load />
+    </div>
+  </div>
+</Layout>

@@ -1,0 +1,42 @@
+---
+// TinaCMS Provider Component - Client-side only
+const isDev = import.meta.env.DEV;
+const isProdEnabled = !isDev && import.meta.env.PUBLIC_TINA_ENABLED === 'true';
+---
+
+{isDev && (
+  <script is:inline>
+    (function() {
+      import('@tinacms/toolkit').then(function(n) {
+        var TinaCMS = n.TinaCMS;
+        var cms = new TinaCMS({
+          config: {
+            cmsUrl: '/api/tina',
+            useLocalBackend: true
+          }
+        });
+        cms.flags.set('tinaedits', true);
+        window.tinaCMS = cms;
+        console.log('[TinaCMS] Initialized in development mode');
+      });
+    })();
+  </script>
+)}
+
+{isProdEnabled && (
+  <script is:inline>
+    (function() {
+      import('@tinacms/toolkit').then(function(n) {
+        var TinaCMS = n.TinaCMS;
+        var cms = new TinaCMS({
+          config: {
+            clientId: window.PUBLIC_TINA_CLIENT_ID,
+            token: window.TINA_TOKEN
+          }
+        });
+        cms.flags.set('tinaedits', true);
+        window.tinaCMS = cms;
+      });
+    })();
+  </script>
+)}

@@ -1,0 +1,88 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.vercel/
+
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Test files & debug scripts
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+/tests/
+/test_reports/
+/test-results/
+/playwright-report/
+/test-reports/
+*_test.ts
+*_test.cjs
+*_test.mjs
+test-*.cjs
+test-*.mjs
+test_auth*.cjs
+test_auth*.html
+debug-*.cjs
+debug-*.mjs
+verify-*.cjs
+test_*.ts
+test_*.mjs
+test_*.cjs
+test_register.ps1
+/real-test.cjs
+/add_verification*.py
+/write_test.py
+TEST_REPORT_*.md
+
+# Screenshots & debug output
+*.png
+*.jpg
+*.jpeg
+!.public/og-image.png
+
+# TinaCMS local
+tina/__generated__
+
+# wrangler secrets (don't commit actual keys)
+.wrangler/
+
+# Temp files
+*.tmp
+*.temp
+.cache/
+tmp/
+
+# Supabase local dev
+/supabase/**/*.sql
+
+# Build artifacts
+# NOTE: pnpm-lock.yaml IS committed for reproducible builds
+# package-lock.json and yarn.lock are excluded
+
+# Coverage
+coverage/
+.nyc_output/
+
+# ESLint cache
+.eslintcache

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json.schemastore.org/claude_settings",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Write",
+      "Edit",
+      "Bash",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "ReadAll"
+    ],
+    "deny": []
+  },
+  "tools": {
+    "toptiary": {
+      "disabled": false
+    },
+    "webSearch": {
+      "disabled": false,
+      "maxResults": 10
+    },
+    "mcp": {
+      "disabled": false
+    },
+    "gitBranchProtection": {
+      "disabled": false
+    }
+  },
+  "ui": {
+    "showPermittedTools": true,
+    "compactMode": false
+  },
+  "advancement": {
+    "createTaskDocuments": true,
+    "createTaskDocumentsPath": ".claude/tasks"
+  },
+  "completion": {
+    "showSuggestions": true
+  }
+}

@@ -1,0 +1,388 @@
+---
+// Search Modal Component - Ctrl+K to open, ESC to close
+import { type Locale, t as translate } from '@/i18n';
+
+interface Props {
+  locale?: Locale;
+}
+
+const { locale = 'zh' } = Astro.props;
+---
+
+<div id="search-modal" class="fixed inset-0 z-50 hidden" aria-hidden="false">
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="search-backdrop"></div>
+
+  <!-- Modal -->
+  <div class="relative top-[10vh] max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <!-- Search Input -->
+    <div class="flex items-center border-b border-gray-200 px-4">
+      <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input
+        type="text"
+        id="search-input"
+        placeholder={translate(locale, 'common.searchPlaceholder')}
+        class="flex-1 px-4 py-4 text-lg outline-none placeholder-gray-400"
+        autocomplete="off"
+      />
+      <kbd class="hidden sm:inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-500 rounded">ESC</kbd>
+    </div>
+
+    <!-- Search Results -->
+    <div id="search-results" class="max-h-[60vh] overflow-y-auto">
+      <!-- Initial State -->
+      <div id="search-initial" class="p-6 text-center text-gray-500">
+        <div id="search-history-section" class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-sm font-medium text-gray-700">{translate(locale, 'search.history')}</p>
+            <button id="clear-history" class="text-xs text-gray-400 hover:text-gray-600">{translate(locale, 'search.clear')}</button>
+          </div>
+          <div id="search-history-list" class="flex flex-wrap justify-center gap-2 text-sm"></div>
+        </div>
+        <p class="mb-2 text-gray-400">{translate(locale, 'search.trending')}</p>
+        <div class="flex flex-wrap justify-center gap-2 text-sm">
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingChatGPT')}>ChatGPT</span>
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingClaude')}>Claude</span>
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingMidjourney')}>Midjourney</span>
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingPayment')}>{locale === 'zh' ? '支付' : 'Payment'}</span>
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingMIT')}>MIT</span>
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingStanford')}>{locale === 'zh' ? '斯坦福' : 'Stanford'}</span>
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingCopilot')}>GitHub Copilot</span>
+          <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending={translate(locale, 'search.trendingPrompts')}>{locale === 'zh' ? 'Prompt模板' : 'Prompt Templates'}</span>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div id="search-loading" class="hidden p-6 text-center text-gray-500">
+        <div class="animate-spin w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full mx-auto"></div>
+        <p class="mt-2">{translate(locale, 'search.searching')}</p>
+      </div>
+
+      <!-- Results Container -->
+      <div id="search-results-container" class="hidden"></div>
+
+      <!-- No Results -->
+      <div id="search-no-results" class="hidden p-6 text-center text-gray-500">
+        <p>{translate(locale, 'search.noResults')}</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-gray-200 px-4 py-3 bg-gray-50 flex items-center justify-between text-xs text-gray-500">
+      <div class="flex items-center gap-4">
+        <span><kbd class="px-1 py-0.5 bg-gray-200 rounded">{translate(locale, 'search.navigate')}</kbd> {translate(locale, 'search.navigateLabel')}</span>
+        <span><kbd class="px-1 py-0.5 bg-gray-200 rounded">Enter</kbd> {translate(locale, 'search.select')}</span>
+        <span><kbd class="px-1 py-0.5 bg-gray-200 rounded">ESC</kbd> {translate(locale, 'search.close')}</span>
+      </div>
+      <span>{translate(locale, 'site.name')}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  #search-modal.active {
+    display: block;
+  }
+  #search-modal.active[aria-hidden="false"] {
+    display: flex;
+  }
+</style>
+
+<script>
+  // Search data sources
+  const searchData = {
+    tools: [
+      { name: 'ChatGPT', slug: 'chatgpt', category: '对话', description: 'OpenAI开发的AI对话助手' },
+      { name: 'Claude', slug: 'claude', category: '对话', description: 'Anthropic开发的AI助手，擅长长文本处理' },
+      { name: 'Midjourney', slug: 'midjourney', category: '设计', description: 'AI图像生成工具' },
+      { name: 'GitHub Copilot', slug: 'github-copilot', category: '编程', description: 'AI编程助手' },
+      { name: 'Notion AI', slug: 'notion-ai', category: '写作', description: '集成在Notion中的AI助手' },
+      { name: 'Perplexity', slug: 'perplexity', category: '研究', description: 'AI搜索引擎' },
+      { name: 'Kimi', slug: 'kimi', category: '对话', description: '月之暗面开发的AI助手，20万字上下文' },
+      { name: 'Gemini', slug: 'gemini', category: '对话', description: 'Google开发的AI助手' },
+      { name: 'DALL-E 3', slug: 'dalle-3', category: '设计', description: 'OpenAI开发的AI图像生成模型' },
+      { name: 'Stable Diffusion', slug: 'stable-diffusion', category: '设计', description: '开源AI图像生成模型' },
+      { name: 'Figma', slug: 'figma', category: '设计', description: 'AI增强的设计工具' },
+      { name: 'Grammarly', slug: 'grammarly', category: '写作', description: 'AI写作辅助工具' },
+      { name: 'QuillBot', slug: 'quillbot', category: '写作', description: 'AI改写和润色工具' },
+      { name: 'Cursor', slug: 'cursor', category: '编程', description: 'AI代码编辑器' },
+      { name: 'Jasper', slug: 'jasper', category: '写作', description: '企业级AI写作助手' },
+    ],
+    pages: [
+      { name: 'AI工具库', url: '/tools', description: '精选留学生常用的AI工具' },
+      { name: '支付解决方案', url: '/payment', description: '一站式解决AI工具支付难题' },
+      { name: '大学AI政策', url: '/policies', description: '首家全面收录海外大学AI使用政策' },
+      { name: 'Prompt模板库', url: '/prompts', description: '精选留学生常用的Prompt模板' },
+      { name: '工具对比', url: '/compare', description: '横向对比多个AI工具' },
+    ]
+  };
+
+  // Search History Management
+  const SEARCH_HISTORY_KEY = 'demo_search_history';
+  const MAX_HISTORY_ITEMS = 10;
+
+  function getSearchHistory(): string[] {
+    try {
+      const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function addToSearchHistory(query: string) {
+    if (!query.trim()) return;
+    let history = getSearchHistory();
+    // Remove if already exists
+    history = history.filter(item => item !== query);
+    // Add to front
+    history.unshift(query);
+    // Keep only max items
+    if (history.length > MAX_HISTORY_ITEMS) {
+      history = history.slice(0, MAX_HISTORY_ITEMS);
+    }
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+    renderSearchHistory();
+  }
+
+  function clearSearchHistory() {
+    localStorage.removeItem(SEARCH_HISTORY_KEY);
+    renderSearchHistory();
+  }
+
+  function renderSearchHistory() {
+    const historyList = document.getElementById('search-history-list');
+    const historySection = document.getElementById('search-history-section');
+    if (!historyList || !historySection) return;
+
+    const history = getSearchHistory();
+    if (history.length === 0) {
+      historySection.classList.add('hidden');
+      return;
+    }
+
+    historySection.classList.remove('hidden');
+    historyList.innerHTML = history.map(item => `
+      <button class="px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200 cursor-pointer search-history-item">${item}</button>
+    `).join('');
+
+    // Add click handlers
+    historyList.querySelectorAll('.search-history-item').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const text = (e.target as HTMLElement).textContent;
+        if (input) input.value = text;
+        search(text);
+      });
+    });
+  }
+
+  // DOM Elements
+  const modal = document.getElementById('search-modal');
+  const input = document.getElementById('search-input') as HTMLInputElement;
+  const backdrop = document.getElementById('search-backdrop');
+  const initialState = document.getElementById('search-initial');
+  const loadingState = document.getElementById('search-loading');
+  const resultsContainer = document.getElementById('search-results-container');
+  const noResults = document.getElementById('search-no-results');
+  const clearHistoryBtn = document.getElementById('clear-history');
+
+  let selectedIndex = -1;
+  let currentResults: Array<{type: string, name: string, url: string, description: string, category?: string}> = [];
+
+  function openModal() {
+    modal?.classList.add('active');
+    modal?.setAttribute('aria-hidden', 'false');
+    input?.focus();
+    document.body.style.overflow = 'hidden';
+    renderSearchHistory();
+  }
+
+  function closeModal() {
+    modal?.classList.remove('active');
+    modal?.setAttribute('aria-hidden', 'true');
+    if (input) input.value = '';
+    resetToInitialState();
+    document.body.style.overflow = '';
+    selectedIndex = -1;
+  }
+
+  function resetToInitialState() {
+    initialState?.classList.remove('hidden');
+    loadingState?.classList.add('hidden');
+    resultsContainer?.classList.add('hidden');
+    noResults?.classList.add('hidden');
+    if (resultsContainer) resultsContainer.innerHTML = '';
+  }
+
+  function showLoading() {
+    initialState?.classList.add('hidden');
+    loadingState?.classList.remove('hidden');
+    resultsContainer?.classList.add('hidden');
+    noResults?.classList.add('hidden');
+  }
+
+  function showResults(results: typeof currentResults) {
+    loadingState?.classList.add('hidden');
+    initialState?.classList.add('hidden');
+    noResults?.classList.add('hidden');
+    resultsContainer?.classList.remove('hidden');
+
+    if (results.length === 0) {
+      resultsContainer?.classList.add('hidden');
+      noResults?.classList.remove('hidden');
+      return;
+    }
+
+    currentResults = results;
+    selectedIndex = -1;
+
+    if (!resultsContainer) return;
+    resultsContainer.innerHTML = `
+      <div class="py-2">
+        ${results.map((item, i) => `
+          <a href="${item.url}"
+             class="search-result flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+             data-index="${i}">
+            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
+              ${item.type === 'tool' ? `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              ` : `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              `}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-900">${item.name}</span>
+                ${item.category ? `<span class="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">${item.category}</span>` : ''}
+              </div>
+              <p class="text-sm text-gray-500 truncate">${item.description}</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        `).join('')}
+      </div>
+    `;
+
+    // Add hover effect for keyboard navigation
+    updateSelection();
+  }
+
+  function updateSelection() {
+    const items = document.querySelectorAll('.search-result');
+    items.forEach((item, i) => {
+      if (i === selectedIndex) {
+        item.classList.add('bg-primary-50', 'border-l-2', 'border-primary-500');
+      } else {
+        item.classList.remove('bg-primary-50', 'border-l-2', 'border-primary-500');
+      }
+    });
+  }
+
+  function search(query: string) {
+    if (!query.trim()) {
+      resetToInitialState();
+      return;
+    }
+
+    showLoading();
+
+    // Add to search history
+    addToSearchHistory(query);
+
+    const q = query.toLowerCase();
+
+    // Simulate async search
+    setTimeout(() => {
+      const results: typeof currentResults = [];
+
+      // Search tools
+      searchData.tools.forEach(tool => {
+        if (
+          tool.name.toLowerCase().includes(q) ||
+          tool.description.toLowerCase().includes(q) ||
+          tool.category.toLowerCase().includes(q)
+        ) {
+          results.push({ type: 'tool', ...tool, url: `/tools/${tool.slug}` });
+        }
+      });
+
+      // Search pages
+      searchData.pages.forEach(page => {
+        if (
+          page.name.toLowerCase().includes(q) ||
+          page.description.toLowerCase().includes(q)
+        ) {
+          results.push({ type: 'page', ...page });
+        }
+      });
+
+      showResults(results.slice(0, 10));
+    }, 150);
+  }
+
+  // Event Listeners
+  document.addEventListener('keydown', (e) => {
+    // Open modal with Ctrl+K or Cmd+K
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openModal();
+    }
+
+    // Close with ESC
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+      closeModal();
+    }
+
+    // Keyboard navigation in modal
+    if (modal?.classList.contains('active')) {
+      const items = document.querySelectorAll('.search-result');
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+        updateSelection();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        updateSelection();
+      } else if (e.key === 'Enter' && selectedIndex >= 0) {
+        e.preventDefault();
+        (items[selectedIndex] as HTMLAnchorElement)?.click();
+      }
+    }
+  });
+
+  // Click handlers
+  backdrop?.addEventListener('click', closeModal);
+
+  // Clear history button
+  clearHistoryBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearSearchHistory();
+  });
+
+  // Search input handler
+  input?.addEventListener('input', (e) => {
+    search((e.target as HTMLInputElement).value);
+  });
+
+  // Trending search clicks
+  document.querySelectorAll('.search-trending').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const text = (e.target as HTMLElement).textContent;
+      if (input) input.value = text;
+      search(text);
+    });
+  });
+
+  // Expose open function for other components
+  (window as any).openSearch = openModal;
+</script>

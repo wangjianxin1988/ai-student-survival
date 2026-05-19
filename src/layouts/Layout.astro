@@ -1,0 +1,226 @@
+---
+import '@/styles/global.css';
+import SearchModal from '@/components/common/SearchModal.astro';
+import Chatbot from '@/components/chatbot/Chatbot';
+import { AuthProvider } from '@/components/auth/AuthProvider';
+import ReactHeader from '@/components/ReactHeader';
+// import TinaCMSProvider from '@/components/tina/TinaCMSProvider.astro';
+import { type Locale, getLanguageSwitcherData, getAlternateUrl, t as translate, defaultLocale } from '@/i18n';
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string;
+  type?: 'website' | 'article';
+  canonicalUrl?: string;
+  jsonLd?: object;
+  locale?: Locale;
+}
+
+const {
+  title,
+  description,
+  image = '/og-image.png',
+  type = 'website',
+  canonicalUrl = Astro.url.href,
+  jsonLd,
+  locale = defaultLocale,
+} = Astro.props;
+
+const siteName = translate(locale, 'site.name');
+const fullTitle = title === siteName ? title : `${title} | ${siteName}`;
+
+// Language switcher data
+const languageSwitcher = getLanguageSwitcherData(locale);
+
+// Get alternate URL for language switching (uses path-based locale)
+function getAlternatePath(loc: Locale): string {
+  return getAlternateUrl(Astro.url, loc);
+}
+---
+
+<!doctype html>
+<html lang={locale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Primary Meta Tags -->
+    <title>{fullTitle}</title>
+    <meta name="title" content={fullTitle} />
+    <meta name="description" content={description} />
+    <meta name="keywords" content={translate(locale, 'meta.keywords')} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={image} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content={locale === 'zh' ? 'zh_CN' : 'en_US'} />
+
+    <!-- Alternate languages for SEO -->
+    <link rel="alternate" hreflang="zh" href={getAlternatePath('zh')} />
+    <link rel="alternate" hreflang="en" href={getAlternatePath('en')} />
+    <link rel="alternate" hreflang="x-default" href={getAlternatePath('zh')} />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalUrl} />
+    <meta property="twitter:title" content={fullTitle} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={image} />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+    <!-- Schema.org JSON-LD -->
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
+
+    <!-- WebSite Schema (global, for site-level search) -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": siteName,
+      "url": Astro.site?.toString() || 'https://ai-student-survival.pages.dev',
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${Astro.site?.toString() || 'https://ai-student-survival.pages.dev'}/tools?q={search_term_string}`
+        },
+        "query-input": "required name=search_term_string"
+      }
+    })} />
+
+    <!-- Organization Schema -->
+    <script type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": siteName,
+      "url": Astro.site?.toString() || 'https://ai-student-survival.pages.dev',
+      "logo": `${Astro.site?.toString() || 'https://ai-student-survival.pages.dev'}/favicon.svg`,
+      "description": locale === 'zh'
+        ? "为海外留学生打造的AI工具导航、大学AI政策数据库和支付解决方案平台"
+        : "AI tools navigator, university AI policy database, and payment solutions for international students",
+      "sameAs": [
+        "https://github.com/ai-student-survival"
+      ]
+    })} />
+
+    <style>
+      /* Language switcher floating button */
+      .lang-switcher {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(8px);
+        border-radius: 9999px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 0.25rem;
+      }
+      .lang-switcher a {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 9999px;
+        transition: all 0.2s;
+        text-decoration: none;
+      }
+      .lang-switcher a:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+      .lang-switcher a.active {
+        background: var(--color-primary-100, #dbeafe);
+        color: var(--color-primary-700, #1d4ed8);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
+    <!-- TinaCMS Provider disabled for testing -->
+    <!-- <TinaCMSProvider /> -->
+
+    <!-- Language Switcher (Floating) -->
+    <div class="lang-switcher">
+      {languageSwitcher.map(item => (
+        <a
+          href={getAlternatePath(item.locale)}
+          class:list={[
+            'px-3 py-1 text-sm font-medium transition-colors',
+            item.current ? 'active' : 'text-gray-600'
+          ]}
+          aria-label={`Switch to ${item.label}`}
+          aria-current={item.current ? 'true' : undefined}
+        >
+          {item.label}
+        </a>
+      ))}
+    </div>
+
+    <!-- AuthProvider wraps ALL components that need auth context -->
+    <AuthProvider client:load>
+      <ReactHeader locale={locale} currentPath={Astro.url.pathname} siteName={siteName} client:load />
+      <!-- Astro components and slot content -->
+      <slot />
+      <SearchModal locale={locale} />
+      <Chatbot client:load locale={locale} />
+    </AuthProvider>
+
+    <script>
+      // Connect search trigger button to search modal
+      document.querySelectorAll('[data-search-trigger]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          (window as any).openSearch?.();
+        });
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
+
+  /* Focus styles */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary-500 ring-offset-2;
+  }
+</style>

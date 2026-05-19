@@ -1,0 +1,349 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate } from '@/i18n';
+import { paymentSolutionsData, type PaymentSolutionData } from '@/data/paymentSolutions';
+import PaymentSolutionsFilter from '@/components/payment/PaymentSolutionsFilter';
+
+// Force English locale
+const locale: Locale = 'en';
+
+// Translation mapping for ALL solution content (id -> English translation)
+const solutionTranslations: Record<string, { title: string; excerpt: string; tags: string[] }> = {
+  'cursor-pro-subscription': {
+    title: 'Complete Guide to Cursor Pro Subscription Payment',
+    excerpt: 'Cursor Pro is an AI code editor supporting GPT-4 and more. This guide covers how to subscribe using virtual cards and student discounts.',
+    tags: ['Cursor', 'Pro', 'Subscription', 'Virtual Card', 'Student Discount', 'AI Programming']
+  },
+  'replit-ai-subscription': {
+    title: 'Replit AI Subscription and Ghostwriter Complete Tutorial',
+    excerpt: 'Replit is an online AI programming platform offering Ghostwriter AI code assistant. Learn how to subscribe to Replit Pro and payment methods.',
+    tags: ['Replit', 'Ghostwriter', 'Subscription', 'Online IDE', 'AI Programming']
+  },
+  'figma-professional-subscription': {
+    title: 'Figma Professional Subscription Complete Guide',
+    excerpt: 'Figma is the world\'s leading UI design tool with team collaboration and AI features. Learn how to subscribe to Figma Professional.',
+    tags: ['Figma', 'Professional', 'Subscription', 'Design Tool', 'UI Design']
+  },
+  'jasper-ai-marketing-subscription': {
+    title: 'Jasper AI Enterprise Writing Assistant Subscription Guide',
+    excerpt: 'Jasper is a well-known AI marketing copy tool with 100+ templates and multi-language writing. Details on subscription and payment solutions.',
+    tags: ['Jasper', 'AI Writing', 'Marketing Copy', 'Subscription', 'Enterprise']
+  },
+  'notion-ai-plus-subscription': {
+    title: 'Notion AI Plus Subscription Complete Guide',
+    excerpt: 'Notion AI is integrated into Notion notes, providing intelligent writing and organization features. Learn about Notion AI subscription and student discounts.',
+    tags: ['Notion', 'AI', 'Plus', 'Subscription', 'Notes', 'Student Discount']
+  },
+  'perplexity-pro-subscription': {
+    title: 'Perplexity Pro Subscription Complete Guide',
+    excerpt: 'Perplexity is the most powerful AI search engine, answering questions based on real web content. Learn about Pro subscription and payment methods.',
+    tags: ['Perplexity', 'Pro', 'Subscription', 'AI Search', 'Virtual Card']
+  },
+  'grammarly-premium-subscription': {
+    title: 'Grammarly Premium Subscription Complete Guide',
+    excerpt: 'Grammarly is a leading AI writing assistant providing grammar checking and style optimization. Learn about Premium subscription and payment methods.',
+    tags: ['Grammarly', 'Premium', 'Subscription', 'Grammar Check', 'Writing Assistant']
+  },
+  'quillbot-premium-subscription': {
+    title: 'QuillBot Premium Subscription Complete Guide',
+    excerpt: 'QuillBot is a well-known AI paraphrasing and polishing tool, especially for academic writing. Learn about Premium subscription, discount codes and payment.',
+    tags: ['QuillBot', 'Premium', 'Subscription', 'Paraphrasing', 'Polishing', 'Discount Code']
+  },
+  'copyai-pro-subscription': {
+    title: 'Copy.ai Pro Subscription Complete Guide',
+    excerpt: 'Copy.ai is an AI copy generation tool providing 100+ content templates. Learn about Pro subscription and payment methods.',
+    tags: ['Copy.ai', 'Pro', 'Subscription', 'Copy Generation', 'AI Writing', 'Templates']
+  },
+  'tabnine-pro-subscription': {
+    title: 'Tabnine Pro Subscription Complete Guide',
+    excerpt: 'Tabnine is an AI code completion plugin supporting all major programming languages. Learn about Pro subscription and free student application.',
+    tags: ['Tabnine', 'Pro', 'Subscription', 'Code Completion', 'Free for Students', 'IDE Plugin']
+  },
+  'dalle-3-api-payment': {
+    title: 'DALL-E 3 API Recharge and Usage Complete Guide',
+    excerpt: 'DALL-E 3 is OpenAI\'s AI image generation model, callable via API. Learn how to recharge API credits and use DALL-E 3.',
+    tags: ['DALL-E 3', 'API', 'OpenAI', 'Image Generation', 'API Recharge', 'Prepaid']
+  },
+  'kimi-api-moonshot-payment': {
+    title: 'Kimi API and Moonshot Recharge Complete Guide',
+    excerpt: 'Kimi is a domestic AI assistant developed by Moonshot AI with ultra-long context support. Learn about Kimi API recharge and domestic payment methods.',
+    tags: ['Kimi', 'Moonshot', 'API', 'Moonshot AI', 'Recharge', 'Domestic Payment']
+  },
+  'gemini-api-google-payment': {
+    title: 'Google Gemini API Complete Guide',
+    excerpt: 'Gemini is an AI model developed by Google with free API access. Learn about Gemini API application and recharge methods.',
+    tags: ['Gemini', 'Google', 'API', 'AI Model', 'Free Credits', 'Vertex AI']
+  },
+  'webpilot-premium-subscription': {
+    title: 'WebPilot Premium Subscription Guide',
+    excerpt: 'WebPilot is a free open-source AI web reading assistant supporting web summarization and translation. Learn about WebPilot features and usage.',
+    tags: ['WebPilot', 'Free', 'Open Source', 'Web Assistant', 'AI Summarization']
+  },
+  'elicit-research-subscription': {
+    title: 'Elicit Research Assistant Complete Guide',
+    excerpt: 'Elicit is an AI academic research assistant helping search and summarize academic literature. Learn about Elicit features and usage.',
+    tags: ['Elicit', 'Academic Research', 'Literature Search', 'Paper Summary', 'Free']
+  },
+  'stable-diffusion-api-payment': {
+    title: 'Stable Diffusion Complete Guide - Free Open Source AI Art',
+    excerpt: 'Stable Diffusion is an open-source free AI image generation model supporting local deployment and custom models. Learn about free usage and paid API.',
+    tags: ['Stable Diffusion', 'Open Source', 'Free', 'Local Deployment', 'API', 'AI Art']
+  },
+  'depay-complete-guide': {
+    title: 'Depay Virtual Card Application and Usage Complete Tutorial',
+    excerpt: 'Depay is the most popular virtual card service for international students, supporting USDT recharge without KYC. Perfect for subscribing to AI tools like ChatGPT and Midjourney.',
+    tags: ['Depay', 'Virtual Card', 'USDT', 'ChatGPT', 'Midjourney', 'Claude', 'International Students']
+  },
+  'noble-card-guide': {
+    title: 'Noble Virtual Card Application Tutorial - Designed for International Students',
+    excerpt: 'Noble Card is a virtual credit card service designed for international students with simple registration and multi-currency support, suitable for paying overseas AI subscriptions.',
+    tags: ['Noble', 'Virtual Card', 'International Students', 'Multi-currency', 'AI Tools']
+  },
+  'wildcard-virtual-card': {
+    title: 'WildCard Virtual Card Application Step-by-Step Tutorial',
+    excerpt: 'WildCard virtual card is a payment solution designed for domestic users supporting Alipay recharge with high stability and security. A popular choice for ChatGPT Plus subscriptions.',
+    tags: ['WildCard', 'Virtual Card', 'Alipay', 'ChatGPT Plus', 'Cursor', 'Figma', 'Jasper']
+  },
+  'openai-gift-card': {
+    title: 'OpenAI API Gift Card Purchase and Recharge Complete Guide',
+    excerpt: 'Purchase OpenAI gift cards to recharge API credits without a credit card. Perfect for developers using ChatGPT API in various scenarios.',
+    tags: ['OpenAI', 'Gift Card', 'API', 'ChatGPT', 'Recharge', 'Developer']
+  },
+  'anthropic-claude-gift-card': {
+    title: 'Anthropic Claude Gift Card Recharge Tutorial',
+    excerpt: 'Learn how to purchase Anthropic official gift cards to recharge your Claude account, supporting various subscription plans for users without credit cards.',
+    tags: ['Claude', 'Gift Card', 'Anthropic', 'Recharge', 'Subscription']
+  },
+  'midjourney-gift-card': {
+    title: 'Midjourney Gift Card Purchase and Subscription Tutorial',
+    excerpt: 'Midjourney is one of the most popular AI art tools. This tutorial covers how to subscribe via gift cards, avoiding credit card payment restrictions.',
+    tags: ['Midjourney', 'Gift Card', 'Subscription', 'AI Art', 'Image Generation']
+  },
+  'china-region-pricing': {
+    title: 'China Region AI Tools Special Pricing and Alternative Solutions',
+    excerpt: 'Detailed analysis of AI tool pricing issues faced by China region users. Learn about official channels and alternatives to find the most suitable subscription method.',
+    tags: ['China', 'Regional Pricing', 'AI Tools', 'Alternatives', 'Subscription']
+  },
+  'student-discount-programs': {
+    title: 'AI Tools Student Discount Programs Summary',
+    excerpt: 'Compile student discount plans for major AI tools including GitHub Copilot free application, OpenAI education discounts and more to help students save on subscriptions.',
+    tags: ['Student Discount', 'GitHub Copilot', 'Education', 'Free', 'Savings']
+  },
+  'education-email-benefits': {
+    title: 'What AI Tool Discounts Can Education Emails Get?',
+    excerpt: 'Detailed introduction to exclusive discounts and privileges education emails (.edu) can get for AI tools, and how to apply for and use these education benefits.',
+    tags: ['Education Email', '.edu', 'Discounts', 'Benefits', 'Student']
+  },
+  'payment-failure-solutions': {
+    title: 'Comprehensive Solutions for AI Tools Payment Failures',
+    excerpt: 'Summary of various reasons and detailed solutions for payment failures with ChatGPT, Claude, Midjourney and other AI tools, helping international students solve payment issues quickly.',
+    tags: ['Payment Failure', 'Troubleshooting', 'ChatGPT', 'Claude', 'Midjourney', 'Solutions']
+  },
+  'credit-card-rejection': {
+    title: 'Solutions and Suggestions for Credit Card Rejection',
+    excerpt: 'Detailed analysis of reasons why credit cards are rejected by international platforms. Provides practical solutions and alternative payment methods for smooth subscriptions.',
+    tags: ['Credit Card', 'Rejection', 'Solutions', 'Alternative Payment', 'International']
+  },
+  'refund-process': {
+    title: 'AI Tools Refund Process and Precautions',
+    excerpt: 'Detailed introduction to refund policies, application processes and precautions for mainstream AI tools like ChatGPT, Claude, Midjourney to help users get refunds when needed.',
+    tags: ['Refund', 'ChatGPT', 'Claude', 'Midjourney', 'Process', 'Policy']
+  },
+  'openclaw-complete-guide': {
+    title: 'OpenClaw AI Agent Framework Complete Guide - 300K Stars Open Source Project',
+    excerpt: 'OpenClaw is an Apache 2.0 open-source AI Agent framework with 300K+ Stars supporting 20+ messaging platforms. Learn about installation, configuration and payment solutions.',
+    tags: ['OpenClaw', 'AI Agent', 'Open Source', '300K Stars', 'Framework']
+  },
+  'hermes-agent-complete-guide': {
+    title: 'Hermes Agent Self-Evolving AI Framework Complete Guide',
+    excerpt: 'Hermes Agent is a 100K+ Stars self-evolving AI Agent framework supporting 200+ models. Learn about installation, configuration and usage tutorials.',
+    tags: ['Hermes Agent', 'Self-Evolving', 'AI Agent', 'Open Source', 'Framework']
+  },
+  'autogpt-complete-guide': {
+    title: 'AutoGPT Autonomous AI Agent Complete Guide',
+    excerpt: 'AutoGPT is a 160K+ Stars autonomous task execution framework achieving complex task automation through natural language instructions. Learn installation and usage.',
+    tags: ['AutoGPT', 'Autonomous', 'AI Agent', 'Open Source', 'Task Automation']
+  },
+  'crewai-complete-guide': {
+    title: 'CrewAI Multi-Agent Collaboration Framework Complete Guide',
+    excerpt: 'CrewAI is a 45K+ Stars multi-agent collaboration framework where multiple AI agents play different roles to complete complex tasks together.',
+    tags: ['CrewAI', 'Multi-Agent', 'Collaboration', 'Agent Framework', 'Open Source', 'Role Playing']
+  },
+  'langchain-complete-guide': {
+    title: 'LangChain Development Framework Complete Guide',
+    excerpt: 'LangChain is a comprehensive framework for developing applications powered by language models. Learn about installation, components and practical usage.',
+    tags: ['LangChain', 'LLM', 'Development Framework', 'Open Source', 'Tutorial']
+  },
+  'dify-complete-guide': {
+    title: 'Dify Low-Code AI Application Platform Complete Guide',
+    excerpt: 'Dify is an open-source low-code AI application platform with beautiful interface. Learn how to quickly build and deploy AI applications without extensive coding.',
+    tags: ['Dify', 'Low-Code', 'AI Application', 'Open Source', 'Platform']
+  },
+  'coze-platform-guide': {
+    title: 'Coze AI Bot Platform Complete Guide',
+    excerpt: 'Coze is ByteDance\'s AI bot platform enabling users to create various AI bots without coding. Learn about bot creation, deployment and monetization.',
+    tags: ['Coze', 'ByteDance', 'AI Bot', 'No-Code', 'Platform']
+  },
+  'ollama-complete-guide': {
+    title: 'Ollama Local Large Model Running Complete Guide',
+    excerpt: 'Ollama is a tool for running large language models locally. Learn how to quickly deploy and run Llama, Mistral and other open-source models on your computer.',
+    tags: ['Ollama', 'Local LLM', 'Open Source', 'Deployment', 'Tutorial']
+  },
+  'lm-studio-complete-guide': {
+    title: 'LM Studio Local LLM Complete Guide',
+    excerpt: 'LM Studio is a desktop application for running LLMs locally with an easy-to-use interface. Learn how to discover, download and run models locally.',
+    tags: ['LM Studio', 'Local LLM', 'Desktop App', 'Open Source Models', 'Tutorial']
+  },
+  'anything-llm-complete-guide': {
+    title: 'AnythingLLM Local RAG Knowledge Base Complete Guide',
+    excerpt: 'AnythingLLM is a full-stack document Q&A application supporting local RAG knowledge base. Learn how to build private AI knowledge systems with your own data.',
+    tags: ['AnythingLLM', 'RAG', 'Knowledge Base', 'Local', 'Private AI']
+  },
+  'deepseek-api-payment': {
+    title: 'DeepSeek API Recharge and Low-Cost Usage Complete Guide',
+    excerpt: 'DeepSeek is a domestic open-source model with extremely low API prices. Learn about DeepSeek API recharge and how to use it cost-effectively.',
+    tags: ['DeepSeek', 'API', 'Domestic', 'Low Cost', 'Open Source', 'LLM']
+  },
+  'qwen-open-source-guide': {
+    title: 'Qwen Tongyi Qianwen Open Source Model Complete Guide',
+    excerpt: 'Qwen is Alibaba\'s open-source large language model with powerful capabilities. Learn about Qwen model features, deployment and API usage.',
+    tags: ['Qwen', 'Tongyi', 'Alibaba', 'Open Source', 'LLM', 'API']
+  },
+  'chatglm-open-source-guide': {
+    title: 'ChatGLM Tsinghua Zhipu AI Complete Guide',
+    excerpt: 'ChatGLM is an open-source bilingual large language model developed by Tsinghua Zhipu AI. Learn about ChatGLM features, deployment and application scenarios.',
+    tags: ['ChatGLM', 'Zhipu AI', 'Tsinghua', 'Open Source', 'LLM', 'Bilingual']
+  }
+};
+
+// Translate solution content to English
+const translatedSolutions: PaymentSolutionData[] = paymentSolutionsData.map(solution => {
+  const translation = solutionTranslations[solution.id];
+  if (translation) {
+    return {
+      ...solution,
+      title: translation.title,
+      excerpt: translation.excerpt,
+      tags: translation.tags
+    };
+  }
+  return solution;
+});
+
+// Get category from URL params for filtering
+const selectedCategory = Astro.url.searchParams.get('category') || '';
+
+// Filter by category if selected
+const categoryFilteredSolutions = selectedCategory
+  ? translatedSolutions.filter(s => s.category === selectedCategory)
+  : translatedSolutions;
+
+// Category labels mapping
+const categoryLabels: Record<string, string> = {
+  virtual_card: 'Virtual Cards',
+  gift_card: 'Gift Cards',
+  regional_pricing: 'Regional Pricing',
+  troubleshooting: 'Troubleshooting'
+};
+
+// Category icons mapping
+const categoryIcons: Record<string, string> = {
+  virtual_card: '💳',
+  gift_card: '🎁',
+  regional_pricing: '🌍',
+  troubleshooting: '❓'
+};
+
+// Search functionality
+const searchQuery = Astro.url.searchParams.get('q') || '';
+const filteredSolutions = searchQuery
+  ? categoryFilteredSolutions.filter(s =>
+      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
+  : categoryFilteredSolutions;
+
+// Category counts (using translated solutions for English display)
+const categoryCounts = {
+  virtual_card: translatedSolutions.filter(s => s.category === 'virtual_card').length,
+  gift_card: translatedSolutions.filter(s => s.category === 'gift_card').length,
+  regional_pricing: translatedSolutions.filter(s => s.category === 'regional_pricing').length,
+  troubleshooting: translatedSolutions.filter(s => s.category === 'troubleshooting').length,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": ["CollectionPage", "FAQPage"],
+  "name": "AI Tools Payment Solutions for International Students",
+  "description": "One-stop solution for international students to pay for AI tools, including virtual cards, gift cards, regional pricing and more",
+  "url": "https://ai-student-survival.example.com/en/payment",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How can international students pay for ChatGPT Plus?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Common payment methods for international students include: 1) Virtual card services (e.g., Depay, WildCard) 2) Gift card purchase 3) Regional pricing subscriptions (e.g., Turkey region) 4) Third-party platform purchase."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are virtual cards? Can international students use them?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Virtual cards are prepaid cards without physical form that can be linked to various payment platforms. International students can use virtual cards to pay for most overseas AI tool services without needing a local bank card."
+      }
+    }
+  ]
+};
+---
+
+<Layout
+  title={translate(locale, 'payment.title')}
+  description={translate(locale, 'payment.description')}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Header -->
+  <div class="hero-gradient text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl font-bold mb-4">{translate(locale, 'payment.title')}</h1>
+        <p class="text-xl text-primary-100 mb-6">
+          {translate(locale, 'payment.description')}
+        </p>
+        <div class="flex items-center gap-4 text-primary-200">
+          <div class="flex items-center gap-2">
+            <span class="text-3xl font-bold text-white">4.8</span>
+            <span class="text-sm">{translate(locale, 'payment.painScore')}</span>
+          </div>
+          <span class="text-primary-300">|</span>
+          <span>50,000+ {translate(locale, 'payment.helpedStudents')}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Payment Solutions Filter Component (React) -->
+    <PaymentSolutionsFilter
+      client:load
+      solutions={translatedSolutions}
+      locale={locale}
+    />
+
+    <!-- CTA -->
+    <section class="mt-12 bg-primary-50 rounded-2xl p-8 text-center">
+      <h2 class="text-2xl font-bold mb-4">{translate(locale, 'payment.stillHaveQuestions')}</h2>
+      <p class="text-gray-600 mb-6">
+        {translate(locale, 'payment.askCommunity')}
+      </p>
+      <a href="/en/questions" class="btn-primary">
+        {translate(locale, 'payment.askCommunity')}
+      </a>
+    </section>
+  </div>
+</Layout>

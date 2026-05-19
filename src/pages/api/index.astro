@@ -1,0 +1,524 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "APIReference",
+  "name": "MI TO AI留学生存指南 API",
+  "description": "MI TO AI留学生存指南开放API文档，提供AI工具、支付解决方案、大学政策等数据接口",
+  "url": "https://ai-student-survival.example.com/api",
+  "provider": {
+    "@type": "Organization",
+    "name": "MI TO AI留学生存指南",
+    "url": "https://ai-student-survival.example.com"
+  }
+};
+
+const baseUrl = 'https://ai-student-survival.example.com';
+
+const endpoints = [
+  {
+    group: 'AI工具',
+    items: [
+      {
+        method: 'GET',
+        path: '/api/tools',
+        description: '获取AI工具列表，支持多维度筛选和搜索',
+        params: [
+          { name: 'category', type: 'string', required: false, description: '按分类筛选，可选值: writing, coding, design, research, communication' },
+          { name: 'pricing', type: 'string', required: false, description: '按定价筛选，可选值: free, freemium, paid' },
+          { name: 'q', type: 'string', required: false, description: '关键词搜索，匹配名称、描述和标签' },
+        ],
+        response: {
+          success: true,
+          data: [
+            {
+              id: '1',
+              name: 'ChatGPT',
+              slug: 'chatgpt',
+              description: 'OpenAI开发的AI对话助手',
+              category: 'communication',
+              pricing: 'freemium',
+              rating: 4.8,
+              tags: ['写作', '编程', '分析'],
+              priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+              features: ['多轮对话', '代码生成', '文本创作'],
+              alternatives: ['claude', 'gemini'],
+            }
+          ],
+          meta: { total: 20, timestamp: '2024-05-01T12:00:00.000Z' }
+        }
+      },
+      {
+        method: 'GET',
+        path: '/api/tools/[slug]',
+        description: '获取单个AI工具的详细信息',
+        params: [
+          { name: 'slug', type: 'string', required: true, description: '工具的唯一标识符(slug), 如: chatgpt, claude, midjourney' },
+        ],
+        response: {
+          success: true,
+          data: {
+            id: '1',
+            name: 'ChatGPT',
+            slug: 'chatgpt',
+            description: 'OpenAI开发的AI对话助手...',
+            category: 'communication',
+            subcategory: 'chatbot',
+            pricing: 'freemium',
+            priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+            url: 'https://chat.openai.com',
+            imageUrl: 'https://placehold.co/800x400/10b981/ffffff?text=ChatGPT',
+            rating: 4.8,
+            ratingCount: 12500,
+            dimensions: { easeOfUse: 4.5, features: 4.9, value: 4.7 },
+            tags: ['写作', '编程', '分析', '对话', 'OpenAI'],
+            features: ['多轮对话', '代码生成', '文本创作', '数据分析', '文件上传', '语音交互'],
+            alternatives: ['claude', 'gemini'],
+            isNew: false,
+            createdAt: '2024-01-01',
+            updatedAt: '2024-05-01',
+          },
+          meta: { timestamp: '2024-05-01T12:00:00.000Z' }
+        }
+      },
+    ]
+  },
+  {
+    group: '支付解决方案',
+    items: [
+      {
+        method: 'GET',
+        path: '/api/payment-solutions',
+        description: '获取支付解决方案列表',
+        params: [
+          { name: 'category', type: 'string', required: false, description: '按类别筛选，可选值: virtual_card, gift_card, regional_pricing, troubleshooting' },
+          { name: 'difficulty', type: 'string', required: false, description: '按难度筛选，可选值: easy, medium, hard' },
+          { name: 'toolId', type: 'string', required: false, description: '按适用工具筛选，工具的slug如: chatgpt, claude, midjourney' },
+        ],
+        response: {
+          success: true,
+          data: [
+            {
+              id: '1',
+              title: 'Depay虚拟卡申请和使用完整教程',
+              category: 'virtual_card',
+              difficulty: 'easy',
+              reliability: 'high',
+              excerpt: 'Depay是目前最流行的留学生虚拟卡服务...',
+              rating: 4.8,
+              views: 12500,
+              tags: ['虚拟卡', 'Depay', 'USDT'],
+              toolIds: ['chatgpt', 'claude'],
+            }
+          ],
+          meta: { total: 6, timestamp: '2024-05-01T12:00:00.000Z' }
+        }
+      },
+    ]
+  },
+  {
+    group: '大学政策',
+    items: [
+      {
+        method: 'GET',
+        path: '/api/policies',
+        description: '获取海外大学AI使用政策列表',
+        params: [
+          { name: 'country', type: 'string', required: false, description: '按国家筛选，如: 美国, 英国, 澳大利亚, 加拿大, 瑞士, 新加坡' },
+          { name: 'q', type: 'string', required: false, description: '关键词搜索，匹配大学名称、国家、地区' },
+          { name: 'tool', type: 'string', required: false, description: '按允许的工具筛选，如: ChatGPT, Claude, GitHub Copilot' },
+        ],
+        response: {
+          success: true,
+          data: [
+            {
+              id: 'mit',
+              universityName: 'MIT',
+              country: '美国',
+              region: 'Massachusetts',
+              summary: { allowed: ['ChatGPT', 'GitHub Copilot'], prohibited: [], restricted: ['Claude'] },
+              lastUpdated: '2024-03-15',
+              allowedTools: ['ChatGPT', 'GitHub Copilot'],
+              prohibitedTools: [],
+              penalty: '违反学术诚信政策可能面临警告、成绩降级或开除',
+              sourceUrl: 'https://integrity.mit.edu',
+            }
+          ],
+          meta: { total: 8, timestamp: '2024-05-01T12:00:00.000Z' }
+        }
+      },
+    ]
+  },
+];
+
+const statusCodes = [
+  { code: 200, description: '请求成功', example: '成功获取数据' },
+  { code: 400, description: '参数错误', example: '缺少必填参数或参数格式错误' },
+  { code: 404, description: '资源不存在', example: 'Tool with slug "xxx" not found' },
+  { code: 500, description: '服务器内部错误', example: '服务器处理失败' },
+];
+
+function formatJson(obj: any): string {
+  return JSON.stringify(obj, null, 2);
+}
+---
+
+<Layout
+  title={translate(locale, 'api.title')}
+  description={translate(locale, 'api.description')}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        <a href="/" class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <span class="font-semibold text-lg">MI TO AI留学生存指南</span>
+        </a>
+        <div class="hidden md:flex items-center gap-1">
+          <a href="/tools" class="nav-link">{translate(locale, 'nav.aiTools')}</a>
+          <a href="/payment" class="nav-link">{translate(locale, 'nav.payment')}</a>
+          <a href="/policies" class="nav-link">{translate(locale, 'nav.policies')}</a>
+          <a href="/prompts" class="nav-link">{translate(locale, 'nav.prompts')}</a>
+          <a href="/api" class="nav-link-active">{translate(locale, 'nav.api')}</a>
+        </div>
+        <a href="/tools" class="btn-primary text-sm">
+          {translate(locale, 'nav.explore')}
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-700 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="badge bg-white/20 text-white text-xs font-mono">RESTful API</span>
+          <span class="badge bg-green-500/20 text-green-200 text-xs">AI爬虫友好</span>
+        </div>
+        <h1 class="text-4xl font-bold mb-4">{translate(locale, 'api.title')}</h1>
+        <p class="text-lg text-primary-100 mb-6">
+          {translate(locale, 'api.description')}
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <a href={`${baseUrl}/api/tools`} class="btn bg-white text-primary-700 hover:bg-primary-50">
+            {translate(locale, 'api.tryEndpoint')}
+          </a>
+          <a href="/sitemap.xml" class="btn border-2 border-white/30 text-white hover:bg-white/10">
+            {translate(locale, 'api.viewSitemap')}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Base Info -->
+  <section class="py-12 bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold mb-8">{translate(locale, 'api.baseInfo.title')}</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="card p-6">
+          <div class="text-3xl font-bold text-primary-600 mb-2">JSON</div>
+          <div class="text-sm text-gray-600">{translate(locale, 'api.baseInfo.responseFormat')}</div>
+        </div>
+        <div class="card p-6">
+          <div class="text-3xl font-bold text-green-600 mb-2">CORS</div>
+          <div class="text-sm text-gray-600">{translate(locale, 'api.baseInfo.corsOpen')}</div>
+        </div>
+        <div class="card p-6">
+          <div class="text-3xl font-bold text-secondary-600 mb-2">index</div>
+          <div class="text-sm text-gray-600">{translate(locale, 'api.baseInfo.aiSpiderIndexable')}</div>
+        </div>
+        <div class="card p-6">
+          <div class="text-3xl font-bold text-orange-600 mb-2">REST</div>
+          <div class="text-sm text-gray-600">{translate(locale, 'api.baseInfo.standardRest')}</div>
+        </div>
+      </div>
+
+      <div class="mt-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
+        <div class="flex items-center gap-2 mb-3">
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span class="font-semibold text-gray-700">{translate(locale, 'api.requestExample')}</span>
+        </div>
+        <pre class="font-mono text-sm text-gray-700 overflow-x-auto"><code>curl -X GET "{baseUrl}/api/tools?category=writing&pricing=freemium" \
+  -H "Accept: application/json" \
+  -H "X-Robots-Tag: index, follow"</code></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Endpoints -->
+  <section class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold mb-8">{translate(locale, 'api.endpoints')}</h2>
+
+      <div class="space-y-12">
+        {endpoints.map((group) => (
+          <div>
+            <h3 class="text-xl font-semibold mb-6 flex items-center gap-3">
+              <span class="w-2 h-6 bg-primary-500 rounded-full"></span>
+              {group.group}
+            </h3>
+            <div class="space-y-6">
+              {group.items.map((endpoint) => (
+                <div class="card overflow-hidden">
+                  <!-- Endpoint Header -->
+                  <div class="card-header bg-gray-50/80 flex flex-wrap items-center gap-3">
+                    <span class={`font-mono font-bold text-sm px-3 py-1 rounded ${
+                      endpoint.method === 'GET' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                    }`}>
+                      {endpoint.method}
+                    </span>
+                    <code class="font-mono text-sm text-gray-800 flex-1">{baseUrl}{endpoint.path}</code>
+                    <span class="text-xs text-gray-500">{endpoint.description}</span>
+                  </div>
+
+                  <div class="card-body p-0">
+                    <div class="grid lg:grid-cols-2 divide-y lg:divide-y-0 lg:divide-x divide-gray-100">
+                      <!-- Parameters & Response -->
+                      <div class="p-6">
+                        <!-- Parameters -->
+                        {endpoint.params.length > 0 && (
+                          <div class="mb-6">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                              </svg>
+                              {translate(locale, 'api.requestParams')}
+                            </h4>
+                            <div class="overflow-x-auto">
+                              <table class="w-full text-sm">
+                                <thead>
+                                  <tr class="text-left border-b border-gray-100">
+                                    <th class="pb-2 font-medium text-gray-500">{translate(locale, 'api.paramName')}</th>
+                                    <th class="pb-2 font-medium text-gray-500">{translate(locale, 'api.paramType')}</th>
+                                    <th class="pb-2 font-medium text-gray-500">{translate(locale, 'api.required')}</th>
+                                    <th class="pb-2 font-medium text-gray-500">{translate(locale, 'api.description')}</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {endpoint.params.map((param) => (
+                                    <tr class="border-b border-gray-50 last:border-0">
+                                      <td class="py-2 font-mono text-xs text-primary-600">{param.name}</td>
+                                      <td class="py-2 text-gray-500">{param.type}</td>
+                                      <td class="py-2">
+                                        {param.required ? (
+                                          <span class="text-red-500 text-xs">{translate(locale, 'api.yes')}</span>
+                                        ) : (
+                                          <span class="text-gray-400 text-xs">{translate(locale, 'api.no')}</span>
+                                        )}
+                                      </td>
+                                      <td class="py-2 text-gray-600 text-xs">{param.description}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        )}
+
+                        <!-- Response Fields -->
+                        <div>
+                          <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            {translate(locale, 'api.responseFields')}
+                          </h4>
+                          <div class="bg-gray-50 rounded-lg p-4 font-mono text-xs text-gray-700 space-y-1">
+                            <div><span class="text-green-600">success</span>: boolean - 请求是否成功</div>
+                            <div><span class="text-green-600">data</span>: array/object - 返回数据</div>
+                            <div><span class="text-green-600">meta</span>: object - 元信息</div>
+                            <div class="pl-4 text-gray-400">total: number - 数据总数</div>
+                            <div class="pl-4 text-gray-400">timestamp: string - 请求时间(ISO 8601)</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- JSON Example -->
+                      <div class="p-6 bg-gray-50/50">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                          </svg>
+                          {translate(locale, 'api.responseExample')}
+                        </h4>
+                        <div class="bg-gray-900 rounded-lg p-4 overflow-x-auto">
+                          <pre class="font-mono text-xs text-green-400 leading-relaxed"><code>{formatJson(endpoint.response)}</code></pre>
+                        </div>
+                        <div class="mt-3 flex items-center gap-2">
+                          <span class="text-xs text-gray-500">{translate(locale, 'api.contentType')}</span>
+                          <code class="text-xs bg-gray-100 px-2 py-0.5 rounded">application/json</code>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Try It Button -->
+                  <div class="px-6 py-4 bg-gray-50/50 border-t border-gray-100">
+                    <a
+                      href={endpoint.path.replace('[slug]', 'chatgpt')}
+                      class="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium"
+                      target="_blank"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      {translate(locale, 'api.tryEndpointInNewTab')}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Status Codes -->
+  <section class="py-12 bg-white border-t border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold mb-8">{translate(locale, 'api.statusCodes')}</h2>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {statusCodes.map((status) => (
+          <div class="card p-4">
+            <div class={`text-2xl font-bold mb-1 ${
+              status.code === 200 ? 'text-green-600' :
+              status.code === 400 ? 'text-yellow-600' :
+              status.code === 404 ? 'text-orange-600' : 'text-red-600'
+            }`}>
+              {status.code}
+            </div>
+            <div class="text-sm font-medium text-gray-700 mb-1">{status.description}</div>
+            <div class="text-xs text-gray-500">{status.example}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Spider Optimization -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl font-bold mb-8">{translate(locale, 'api.spiderOptimization')}</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="card p-6">
+          <h3 class="font-semibold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            {translate(locale, 'api.enabled')}
+          </h3>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <li class="flex items-center gap-2">
+              <span class="text-green-500">✓</span>
+              {translate(locale, 'api.optimizations.contentType')}
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-green-500">✓</span>
+              {translate(locale, 'api.optimizations.cors')}
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-green-500">✓</span>
+              {translate(locale, 'api.optimizations.robotsTag')}
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-green-500">✓</span>
+              {translate(locale, 'api.optimizations.contentTypeOptions')}
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-green-500">✓</span>
+              {translate(locale, 'api.optimizations.robotsTxt')}
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="text-green-500">✓</span>
+              {translate(locale, 'api.optimizations.schemaOrg')}
+            </li>
+          </ul>
+        </div>
+        <div class="card p-6">
+          <h3 class="font-semibold mb-4 flex items-center gap-2">
+            <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {translate(locale, 'api.userAgents')}
+          </h3>
+          <div class="space-y-2 font-mono text-xs text-gray-700">
+            <div class="bg-gray-50 px-3 py-2 rounded">{translate(locale, 'api.userAgentsList.gptbot')}</div>
+            <div class="bg-gray-50 px-3 py-2 rounded">{translate(locale, 'api.userAgentsList.ccbot')}</div>
+            <div class="bg-gray-50 px-3 py-2 rounded">{translate(locale, 'api.userAgentsList.claude')}</div>
+            <div class="bg-gray-50 px-3 py-2 rounded">{translate(locale, 'api.userAgentsList.anthropicAi')}</div>
+            <div class="bg-gray-50 px-3 py-2 rounded">{translate(locale, 'api.userAgentsList.googleExtended')}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-4 gap-8">
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span class="font-semibold text-lg">MI TO AI留学生存指南</span>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">
+            为留学生服务的AI工具导航平台，解决AI使用过程中的所有难题。
+          </p>
+          <div class="flex items-center gap-4">
+            <a href="/tools" class="text-gray-400 hover:text-white transition-colors">AI工具库</a>
+            <a href="/payment" class="text-gray-400 hover:text-white transition-colors">支付指南</a>
+            <a href="/policies" class="text-gray-400 hover:text-white transition-colors">大学政策</a>
+          </div>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">资源</h4>
+          <ul class="space-y-2 text-sm text-gray-400">
+            <li><a href="/prompts" class="hover:text-white transition-colors">Prompt模板库</a></li>
+            <li><a href="/compare" class="hover:text-white transition-colors">工具对比</a></li>
+            <li><a href="/api" class="hover:text-white transition-colors">API文档</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="font-semibold mb-4">关于</h4>
+          <ul class="space-y-2 text-sm text-gray-400">
+            <li><a href="/about" class="hover:text-white transition-colors">关于我们</a></li>
+            <li><a href="/contact" class="hover:text-white transition-colors">联系我们</a></li>
+            <li><a href="/privacy" class="hover:text-white transition-colors">隐私政策</a></li>
+            <li><a href="/terms" class="hover:text-white transition-colors">使用条款</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+        <p>&copy; 2026 MI TO AI留学生存指南. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</Layout>
+
+<style>
+  pre code {
+    display: block;
+    white-space: pre;
+  }
+</style>

@@ -1,0 +1,629 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { policiesData, type UniversityPolicy } from '@/data/policies';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+const policies = policiesData;
+const countries = [...new Set(policies.map(p => p.country))].sort();
+
+function getPolicyColor(policyType: string | null) {
+  switch (policyType) {
+    case 'allowed': return 'bg-green-500';
+    case 'restricted': return 'bg-yellow-500';
+    case 'prohibited': return 'bg-red-500';
+    default: return 'bg-blue-500';
+  }
+}
+
+function getPolicyLabel(policyType: string | null) {
+  switch (policyType) {
+    case 'allowed': return locale === 'en' ? 'Allowed' : '允许';
+    case 'restricted': return locale === 'en' ? 'Restricted' : '限制';
+    case 'prohibited': return locale === 'en' ? 'Prohibited' : '禁止';
+    case 'case_by_case': return locale === 'en' ? 'Case by Case' : '因课程';
+    default: return locale === 'en' ? 'Unknown' : '未知';
+  }
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": locale === 'en' ? 'Compare University AI Policies' : '对比大学AI政策',
+  "description": locale === 'en'
+    ? 'Compare AI usage policies across multiple universities'
+    : '横向对比多所大学的AI使用政策'
+};
+---
+
+<Layout
+  title={locale === 'en' ? 'Compare Policies' : '政策对比'}
+  description={locale === 'en'
+    ? 'Compare AI usage policies across multiple universities'
+    : '横向对比多所大学的AI使用政策'}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Header -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 class="text-3xl font-bold mb-2">
+        {locale === 'en' ? 'Compare University AI Policies' : '对比大学AI政策'}
+      </h1>
+      <p class="text-gray-600">
+        {locale === 'en'
+          ? 'Select up to 5 universities to compare their AI usage policies side by side'
+          : '选择最多5所大学，横向对比它们的AI使用政策'}
+      </p>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- University Selection -->
+    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">
+          {locale === 'en' ? 'Select Universities' : '选择大学'}
+        </h2>
+        <button
+          id="clearAll"
+          class="text-sm text-gray-500 hover:text-gray-700 transition-colors hidden"
+        >
+          {locale === 'en' ? 'Clear All' : '清除全部'}
+        </button>
+      </div>
+
+      <!-- Selected Universities Display -->
+      <span id="placeholder" class="text-gray-500 text-sm flex items-center h-full mb-4">
+        {locale === 'en' ? 'Click universities below to add them to comparison' : '点击下方大学添加到对比'}
+      </span>
+      <div id="selectedUniversities" class="flex flex-wrap gap-3 mb-4 min-h-[44px]">
+      </div>
+
+      <!-- Country Filter -->
+      <div class="mb-4">
+        <select class="input w-full max-w-xs" id="countryFilter">
+          <option value="">
+            {locale === 'en' ? 'All Countries' : '全部国家'}
+          </option>
+          {countries.map(country => (
+            <option value={country}>{country}</option>
+          ))}
+        </select>
+      </div>
+
+      <!-- University Grid -->
+      <div id="universityGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-[400px] overflow-y-auto">
+        {policies.map((policy: UniversityPolicy) => (
+          <button
+            class="university-btn flex flex-col items-center p-3 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-all duration-200 text-left"
+            data-policy-id={policy.id}
+          >
+            <span class="text-2xl mb-1">{policy.flagEmoji}</span>
+            <span class="text-xs font-medium text-gray-900 text-center line-clamp-2">
+              {policy.universityName}
+            </span>
+            <span class="text-xs text-gray-500 mt-1">{policy.qsRank ? `QS #${policy.qsRank}` : ''}</span>
+            <span class={`mt-2 w-2 h-2 rounded-full ${getPolicyColor(policy.overallPolicy)}`}></span>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div id="comparisonSection" class="hidden">
+      <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[800px]">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="sticky left-0 bg-gray-50 px-4 py-4 text-left font-semibold text-gray-700 min-w-[180px] z-10 shadow-[2px_0_4px_rgba(0,0,0,0.05)]">
+                  {locale === 'en' ? 'Policy Aspect' : '政策维度'}
+                </th>
+                {[1, 2, 3, 4, 5].map(n => (
+                  <th class="px-4 py-4 text-center min-w-[180px] hidden" data-header-index={n - 1}>
+                    <div class="flex flex-col items-center">
+                      <span class="text-2xl university-flag">🏛️</span>
+                      <span class="font-semibold text-gray-900 university-name">University</span>
+                      <button
+                        class="remove-university-btn mt-2 text-xs text-red-500 hover:text-red-700 transition-colors hidden"
+                        data-remove-index={n - 1}
+                      >
+                        {locale === 'en' ? 'Remove' : '移除'}
+                      </button>
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody id="comparisonBody">
+              <!-- Dynamic content inserted by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="text-center py-16">
+      <svg class="w-20 h-20 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      </svg>
+      <h3 class="text-lg font-semibold text-gray-700 mb-2">
+        {locale === 'en' ? 'No Universities Selected' : '未选择大学'}
+      </h3>
+      <p class="text-gray-500">
+        {locale === 'en'
+          ? 'Select at least 2 universities above to start comparing'
+          : '请在上方选择至少2所大学开始对比'}
+      </p>
+    </div>
+
+    <!-- Tool Recommendations Based on Comparison -->
+    <div id="recommendationSection" class="hidden mt-8">
+      <div class="bg-gradient-to-br from-primary-50 to-teal-50 rounded-xl border border-primary-200 p-6">
+        <h3 class="text-lg font-semibold mb-4">
+          {locale === 'en' ? 'Tool Recommendations' : '工具推荐'}
+        </h3>
+        <p class="text-gray-600 mb-4">
+          {locale === 'en'
+            ? 'Based on the selected universities\' policies, here are the tools you can safely use:'
+            : '根据所选大学的政策，以下是您可以安全使用的工具：'}
+        </p>
+        <div id="recommendedToolsList" class="flex flex-wrap gap-3">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<script define:vars={{ policies, locale }}>
+  const MAX_COMPARE = 5;
+  const MIN_COMPARE = 2;
+  let selectedPolicyIds = [];
+
+  // DOM Elements
+  const universityGrid = document.getElementById('universityGrid');
+  const selectedUniversitiesContainer = document.getElementById('selectedUniversities');
+  const placeholder = document.getElementById('placeholder');
+  const clearAllBtn = document.getElementById('clearAll');
+  const comparisonSection = document.getElementById('comparisonSection');
+  const emptyState = document.getElementById('emptyState');
+  const recommendationSection = document.getElementById('recommendationSection');
+  const recommendedToolsList = document.getElementById('recommendedToolsList');
+  const countryFilter = document.getElementById('countryFilter');
+  const universityBtns = document.querySelectorAll('.university-btn');
+
+  function getPolicyById(id) {
+    return policies.find(p => p.id === id);
+  }
+
+  function getPolicyColor(policyType) {
+    switch (policyType) {
+      case 'allowed': return 'bg-green-500';
+      case 'restricted': return 'bg-yellow-500';
+      case 'prohibited': return 'bg-red-500';
+      default: return 'bg-blue-500';
+    }
+  }
+
+  function getPolicyLabel(policyType) {
+    switch (policyType) {
+      case 'allowed': return locale === 'en' ? 'Allowed' : '允许';
+      case 'restricted': return locale === 'en' ? 'Restricted' : '限制';
+      case 'prohibited': return locale === 'en' ? 'Prohibited' : '禁止';
+      case 'case_by_case': return locale === 'en' ? 'Case by Case' : '因课程';
+      default: return locale === 'en' ? 'Unknown' : '未知';
+    }
+  }
+
+  function renderSelectedUniversities() {
+    if (selectedPolicyIds.length === 0) {
+      placeholder.classList.remove('hidden');
+      clearAllBtn.classList.add('hidden');
+      return;
+    }
+
+    placeholder.classList.add('hidden');
+    clearAllBtn.classList.remove('hidden');
+
+    const html = selectedPolicyIds.map(id => {
+      const policy = getPolicyById(id);
+      return `
+        <div class="flex items-center gap-2 bg-primary-100 text-primary-700 px-3 py-1.5 rounded-full text-sm">
+          <span>${policy.flagEmoji}</span>
+          <span>${policy.universityName}</span>
+          <button class="remove-selected-btn hover:text-primary-900 transition-colors" data-remove-id="${id}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `;
+    }).join('');
+
+    selectedUniversitiesContainer.innerHTML = html;
+
+    // Add event listeners to remove buttons
+    selectedUniversitiesContainer.querySelectorAll('.remove-selected-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const removeId = btn.dataset.removeId;
+        removePolicyFromCompare(removeId);
+      });
+    });
+  }
+
+  function updateUniversityGridSelections() {
+    universityBtns.forEach(btn => {
+      const policyId = btn.dataset.policyId;
+      if (selectedPolicyIds.includes(policyId)) {
+        btn.classList.add('border-primary-500', 'bg-primary-50');
+        btn.classList.remove('hover:border-primary-300', 'hover:bg-primary-50');
+      } else {
+        btn.classList.remove('border-primary-500', 'bg-primary-50');
+        btn.classList.add('hover:border-primary-300', 'hover:bg-primary-50');
+      }
+
+      // Disable if max reached and this policy is not selected
+      if (selectedPolicyIds.length >= MAX_COMPARE && !selectedPolicyIds.includes(policyId)) {
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+      } else {
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+    });
+  }
+
+  function renderComparisonTable() {
+    if (selectedPolicyIds.length < MIN_COMPARE) {
+      comparisonSection.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      recommendationSection.classList.add('hidden');
+      return;
+    }
+
+    comparisonSection.classList.remove('hidden');
+    emptyState.classList.add('hidden');
+    recommendationSection.classList.remove('hidden');
+
+    const selectedPolicies = selectedPolicyIds.map(id => getPolicyById(id));
+
+    // Update table headers
+    const headerCells = comparisonSection.querySelectorAll('[data-header-index]');
+    headerCells.forEach((cell, index) => {
+      if (index < selectedPolicies.length) {
+        const policy = selectedPolicies[index];
+        cell.innerHTML = `
+          <div class="flex flex-col items-center">
+            <span class="text-2xl university-flag">${policy.flagEmoji}</span>
+            <span class="font-semibold text-gray-900 university-name">${policy.universityName}</span>
+            <button class="remove-university-btn mt-2 text-xs text-red-500 hover:text-red-700 transition-colors" data-remove-index="${index}">
+              ${locale === 'en' ? 'Remove' : '移除'}
+            </button>
+          </div>
+        `;
+        cell.classList.remove('hidden');
+      } else {
+        cell.classList.add('hidden');
+      }
+    });
+
+    // Build comparison rows
+    const comparisonBody = document.getElementById('comparisonBody');
+    const rows = [
+      // Overall Policy
+      {
+        category: locale === 'en' ? 'Overall Policy' : '总体政策',
+        fields: [
+          {
+            label: locale === 'en' ? 'Status' : '状态',
+            getValue: (p) => `<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${getPolicyColor(p.overallPolicy) === 'bg-green-500' ? 'bg-green-100 text-green-800' : getPolicyColor(p.overallPolicy) === 'bg-red-500' ? 'bg-red-100 text-red-800' : getPolicyColor(p.overallPolicy) === 'bg-yellow-500' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'}"><span class="w-1.5 h-1.5 rounded-full ${getPolicyColor(p.overallPolicy)}"></span>${getPolicyLabel(p.overallPolicy)}</span>`
+          }
+        ]
+      },
+      // AI Tools
+      {
+        category: locale === 'en' ? 'AI Tools' : 'AI工具',
+        fields: [
+          {
+            label: locale === 'en' ? 'Allowed Tools' : '允许使用',
+            getValue: (p) => p.allowedTools.length > 0 ? p.allowedTools.join(', ') : '-'
+          },
+          {
+            label: locale === 'en' ? 'Prohibited Tools' : '禁止使用',
+            getValue: (p) => p.prohibitedTools.length > 0 ? p.prohibitedTools.join(', ') : '-'
+          },
+          {
+            label: locale === 'en' ? 'Restricted Tools' : '限制使用',
+            getValue: (p) => p.restrictedTools.length > 0 ? p.restrictedTools.join(', ') : '-'
+          }
+        ]
+      },
+      // Scenario Policies
+      {
+        category: locale === 'en' ? 'Scenario Policies' : '场景政策',
+        fields: [
+          {
+            label: locale === 'en' ? 'Assignments' : '作业',
+            getValue: (p) => p.assignmentPolicy
+          },
+          {
+            label: locale === 'en' ? 'Exams' : '考试',
+            getValue: (p) => p.examPolicy
+          },
+          {
+            label: locale === 'en' ? 'Group Projects' : '小组项目',
+            getValue: (p) => p.groupProjectPolicy
+          },
+          {
+            label: locale === 'en' ? 'Thesis' : '论文',
+            getValue: (p) => p.thesisPolicy
+          },
+          {
+            label: locale === 'en' ? 'Research' : '研究',
+            getValue: (p) => p.researchPolicy
+          },
+          {
+            label: locale === 'en' ? 'Coding' : '编程',
+            getValue: (p) => p.codingPolicy
+          }
+        ]
+      },
+      // Requirements
+      {
+        category: locale === 'en' ? 'Requirements' : '规范要求',
+        fields: [
+          {
+            label: locale === 'en' ? 'Citation' : '引用要求',
+            getValue: (p) => p.citationRequirement
+          },
+          {
+            label: locale === 'en' ? 'Disclosure' : '披露要求',
+            getValue: (p) => p.disclosureRequirement
+          },
+          {
+            label: locale === 'en' ? 'Penalty' : '违规处罚',
+            getValue: (p) => p.penalty
+          },
+          {
+            label: locale === 'en' ? 'Data Privacy' : '数据隐私',
+            getValue: (p) => p.dataPrivacy
+          }
+        ]
+      },
+      // Meta Info
+      {
+        category: locale === 'en' ? 'Policy Info' : '政策信息',
+        fields: [
+          {
+            label: locale === 'en' ? 'Last Updated' : '最后更新',
+            getValue: (p) => p.lastUpdated
+          },
+          {
+            label: locale === 'en' ? 'Version' : '版本',
+            getValue: (p) => p.version
+          },
+          {
+            label: locale === 'en' ? 'Verified' : '已验证',
+            getValue: (p) => p.verified ? (locale === 'en' ? 'Yes' : '是') : (locale === 'en' ? 'No' : '否')
+          }
+        ]
+      }
+    ];
+
+    // Render table body
+    let tbodyHtml = '';
+
+    rows.forEach(section => {
+      tbodyHtml += `
+        <tr class="bg-gray-50">
+          <td colspan="${selectedPolicies.length + 1}" class="px-4 py-2 text-sm font-semibold text-gray-700">
+            ${section.category}
+          </td>
+        </tr>
+      `;
+
+      section.fields.forEach(field => {
+        tbodyHtml += `<tr class="border-b border-gray-100 hover:bg-gray-50/50 transition-colors">`;
+        tbodyHtml += `<td class="px-4 py-3 text-sm font-medium text-gray-600">${field.label}</td>`;
+
+        selectedPolicies.forEach(policy => {
+          tbodyHtml += `<td class="px-4 py-3 text-sm text-gray-700">${field.getValue(policy)}</td>`;
+        });
+
+        tbodyHtml += `</tr>`;
+      });
+    });
+
+    comparisonBody.innerHTML = tbodyHtml;
+
+    // Add remove button listeners
+    comparisonSection.querySelectorAll('.remove-university-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const cell = e.currentTarget.closest('th');
+        const index = parseInt(cell.dataset.headerIndex);
+        if (!isNaN(index) && selectedPolicyIds[index]) {
+          removePolicyFromCompare(selectedPolicyIds[index]);
+        }
+      });
+    });
+
+    // Update recommendations
+    updateRecommendations(selectedPolicies);
+  }
+
+  function updateRecommendations(selectedPolicies) {
+    // Find tools that are allowed by ALL selected policies
+    const allAllowedTools = selectedPolicies.flatMap(p => p.allowedTools);
+    const toolCounts = {};
+    allAllowedTools.forEach(tool => {
+      toolCounts[tool] = (toolCounts[tool] || 0) + 1;
+    });
+
+    const universalTools = Object.entries(toolCounts)
+      .filter(([_, count]) => count === selectedPolicies.length)
+      .map(([tool]) => tool);
+
+    const recommendedToolsHtml = universalTools.length > 0
+      ? universalTools.map(tool => `
+          <div class="bg-white px-4 py-2 rounded-full border border-green-200 text-sm">
+            <span class="text-green-600 mr-2">✓</span>
+            ${tool}
+          </div>
+        `).join('')
+      : `<p class="text-gray-600 text-sm">${locale === 'en'
+          ? 'No universal tools found across all selected universities.'
+          : '所选大学中没有通用的允许工具。'
+        }</p>`;
+
+    recommendedToolsList.innerHTML = recommendedToolsHtml;
+  }
+
+  function addPolicyToCompare(policyId) {
+    if (selectedPolicyIds.includes(policyId)) {
+      removePolicyFromCompare(policyId);
+      return;
+    }
+
+    if (selectedPolicyIds.length >= MAX_COMPARE) {
+      alert(locale === 'en'
+        ? `You can compare up to ${MAX_COMPARE} policies at a time`
+        : `最多同时对比${MAX_COMPARE}所大学`);
+      return;
+    }
+
+    selectedPolicyIds.push(policyId);
+    updateUI();
+  }
+
+  function removePolicyFromCompare(policyId) {
+    selectedPolicyIds = selectedPolicyIds.filter(id => id !== policyId);
+    updateUI();
+  }
+
+  function clearAll() {
+    selectedPolicyIds = [];
+    updateUI();
+  }
+
+  function updateUI() {
+    renderSelectedUniversities();
+    updateUniversityGridSelections();
+    renderComparisonTable();
+
+    // Save to localStorage
+    localStorage.setItem('comparePolicies', JSON.stringify(selectedPolicyIds));
+  }
+
+  function filterByCountry(country) {
+    universityBtns.forEach(btn => {
+      const policy = getPolicyById(btn.dataset.policyId);
+      if (!country || policy.country === country) {
+        btn.classList.remove('hidden');
+      } else {
+        btn.classList.add('hidden');
+      }
+    });
+  }
+
+  // Event Listeners
+  universityBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      addPolicyToCompare(btn.dataset.policyId);
+    });
+  });
+
+  if (countryFilter) {
+    countryFilter.addEventListener('change', (e) => {
+      filterByCountry(e.target.value);
+    });
+  }
+
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener('click', clearAll);
+  }
+
+  // Initialize from localStorage
+  const savedPolicyIds = localStorage.getItem('comparePolicies');
+  if (savedPolicyIds) {
+    try {
+      selectedPolicyIds = JSON.parse(savedPolicyIds);
+    } catch (e) {
+      selectedPolicyIds = [];
+    }
+  }
+
+  // Initial render
+  updateUI();
+</script>
+
+<style>
+  /* Custom scrollbar for university grid */
+  #universityGrid::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  #universityGrid::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  #universityGrid::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+  }
+
+  #universityGrid::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+  }
+
+  /* Line clamp for university names */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Table responsiveness */
+  @media (max-width: 768px) {
+    table {
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.5rem;
+    }
+  }
+
+  /* Sticky first column */
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: white;
+  }
+
+  thead th:first-child {
+    background: #f9fafb;
+  }
+
+  /* Animations */
+  .university-btn {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>

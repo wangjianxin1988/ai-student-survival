@@ -1,0 +1,106 @@
+# AI留学生存指南 - robots.txt
+# https://ai-student-survival.pages.dev
+
+# ============================================
+# AI搜索引擎爬虫 - 全部允许，最大化AI搜索可见性
+# ============================================
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+# ============================================
+# 传统搜索引擎爬虫
+# ============================================
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /images/
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+User-agent: bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: Sogou web spider
+Allow: /
+
+User-agent: Exabot
+Allow: /
+
+User-agent: FACEBOOK
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+# ============================================
+# 通用爬虫规则
+# ============================================
+
+User-agent: *
+Allow: /
+
+# ============================================
+# 禁止访问的路径
+# ============================================
+
+Disallow: /admin/
+Disallow: /api/admin/
+Disallow: /user/settings
+Disallow: /auth/callback
+Disallow: /auth/debug
+Disallow: /api/internal/
+
+# ============================================
+# Sitemap
+# ============================================
+
+Sitemap: https://ai-student-survival.pages.dev/sitemap.xml

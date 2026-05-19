@@ -1,0 +1,92 @@
+---
+import { type Locale, t as translate } from '@/i18n';
+
+interface Props {
+  currentPath?: string;
+  locale?: Locale;
+}
+
+const { currentPath = '/', locale = 'zh' as Locale } = Astro.props;
+
+const navLinks = [
+  { href: '/tools', key: 'nav.aiTools' },
+  { href: '/payment', key: 'nav.payment' },
+  { href: '/policies', key: 'nav.policies' },
+  { href: '/prompts', key: 'nav.prompts' },
+  { href: '/survival', key: 'nav.survival' },
+];
+---
+
+<nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-2 hover:opacity-90 transition-opacity">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <span class="font-semibold text-lg">{translate(locale, 'site.name')}</span>
+      </a>
+
+      <!-- Nav Links -->
+      <div class="hidden md:flex items-center gap-1">
+        <a href="/tools" class:list={[
+          'nav-link',
+          currentPath.startsWith('/tools') ? 'nav-link-active' : ''
+        ]}>
+          {translate(locale, 'nav.aiTools')}
+        </a>
+        <a href="/payment" class:list={[
+          'nav-link',
+          currentPath.startsWith('/payment') ? 'nav-link-active' : ''
+        ]}>
+          {translate(locale, 'nav.payment')}
+        </a>
+        <a href="/policies" class:list={[
+          'nav-link',
+          currentPath.startsWith('/policies') ? 'nav-link-active' : ''
+        ]}>
+          {translate(locale, 'nav.policies')}
+        </a>
+        <a href="/prompts" class:list={[
+          'nav-link',
+          currentPath.startsWith('/prompts') ? 'nav-link-active' : ''
+        ]}>
+          {translate(locale, 'nav.prompts')}
+        </a>
+        <a href="/survival" class:list={[
+          'nav-link',
+          currentPath.startsWith('/survival') ? 'nav-link-active' : ''
+        ]}>
+          {translate(locale, 'nav.survival')}
+        </a>
+        <a href="/api" class:list={[
+          'nav-link',
+          currentPath.startsWith('/api') ? 'nav-link-active' : ''
+        ]}>
+          {translate(locale, 'nav.api')}
+        </a>
+      </div>
+
+      <!-- Search & Actions -->
+      <div class="flex items-center gap-3">
+        <button
+          data-search-trigger
+          class="search-trigger flex items-center gap-2"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <span class="hidden sm:inline">{translate(locale, 'common.searchPlaceholder')}</span>
+          <kbd class="hidden sm:inline-flex ml-2 px-1.5 py-0.5 text-xs bg-gray-200 rounded">Ctrl+K</kbd>
+        </button>
+
+        <a href="/tools" class="btn-primary text-sm">
+          {translate(locale, 'common.explore')}
+        </a>
+      </div>
+    </div>
+  </div>
+</nav>

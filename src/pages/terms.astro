@@ -1,0 +1,240 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl, defaultLocale } from '@/i18n';
+
+// Get locale from URL
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+// Helper to generate locale-aware hrefs
+function getLocaleHref(path: string): string {
+  if (locale === defaultLocale) {
+    return path;
+  }
+  return `/${locale}${path}`;
+}
+---
+
+<Layout
+  title={translate(locale, 'nav.terms')}
+  description="MI TO AI留学生存指南的使用条款和服务条件。"
+  locale={locale}
+>
+  <!-- Hero Section -->
+  <section class="hero-gradient text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl lg:text-5xl font-bold mb-4">{translate(locale, 'terms.hero.title')}</h1>
+        <p class="text-xl text-primary-100">
+          {translate(locale, 'terms.hero.lastUpdate')}: 2026-01-01
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content -->
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="prose prose-lg max-w-none">
+        <!-- Acceptance -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.accept.title')}</h2>
+          <p class="text-gray-600">
+            {translate(locale, 'terms.accept.desc')}
+          </p>
+        </div>
+
+        <!-- Services -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.services.title')}</h2>
+          <p class="text-gray-600 mb-4">
+            {translate(locale, 'terms.services.desc')}
+          </p>
+          <div class="bg-gray-50 rounded-xl p-6">
+            <ul class="list-disc list-inside text-gray-600 space-y-2">
+              <li>{translate(locale, 'terms.services.items.tools')}</li>
+              <li>{translate(locale, 'terms.services.items.payment')}</li>
+              <li>{translate(locale, 'terms.services.items.policies')}</li>
+              <li>{translate(locale, 'terms.services.items.prompts')}</li>
+              <li>{translate(locale, 'terms.services.items.community')}</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- User Accounts -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.accounts.title')}</h2>
+
+          <div class="bg-gray-50 rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-3">{translate(locale, 'terms.accounts.register.title')}</h3>
+            <p class="text-gray-600">
+              {translate(locale, 'terms.accounts.register.desc')}
+            </p>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-3">{translate(locale, 'terms.accounts.security.title')}</h3>
+            <p class="text-gray-600 mb-4">
+              {translate(locale, 'terms.accounts.security.desc')}
+            </p>
+            <ul class="list-disc list-inside text-gray-600 space-y-2">
+              <li>{translate(locale, 'terms.accounts.security.items.strongPassword')}</li>
+              <li>{translate(locale, 'terms.accounts.security.items.keepSecret')}</li>
+              <li>{translate(locale, 'terms.accounts.security.items.notify')}</li>
+            </ul>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="text-lg font-semibold mb-3">{translate(locale, 'terms.accounts.terminate.title')}</h3>
+            <p class="text-gray-600">
+              {translate(locale, 'terms.accounts.terminate.desc')}
+            </p>
+          </div>
+        </div>
+
+        <!-- User Content -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.content.title')}</h2>
+
+          <div class="bg-gray-50 rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-3">{translate(locale, 'terms.content.ownership.title')}</h3>
+            <p class="text-gray-600">
+              {translate(locale, 'terms.content.ownership.desc')}
+            </p>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold mb-3">{translate(locale, 'terms.content.license.title')}</h3>
+            <p class="text-gray-600">
+              {translate(locale, 'terms.content.license.desc')}
+            </p>
+          </div>
+
+          <div class="bg-gray-50 rounded-xl p-6">
+            <h3 class="text-lg font-semibold mb-3">{translate(locale, 'terms.content.standards.title')}</h3>
+            <p class="text-gray-600 mb-4">{translate(locale, 'terms.content.standards.desc')}</p>
+            <ul class="list-disc list-inside text-gray-600 space-y-2">
+              <li>{translate(locale, 'terms.content.standards.items.legal')}</li>
+              <li>{translate(locale, 'terms.content.standards.items.respectful')}</li>
+              <li>{translate(locale, 'terms.content.standards.items.accurate')}</li>
+              <li>{translate(locale, 'terms.content.standards.items.noSpam')}</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Prohibited Uses -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.prohibited.title')}</h2>
+          <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+            <ul class="list-disc list-inside text-gray-700 space-y-3">
+              <li>{translate(locale, 'terms.prohibited.items.illegal')}</li>
+              <li>{translate(locale, 'terms.prohibited.items.fraud')}</li>
+              <li>{translate(locale, 'terms.prohibited.items.harm')}</li>
+              <li>{translate(locale, 'terms.prohibited.items.spam')}</li>
+              <li>{translate(locale, 'terms.prohibited.items.scraping')}</li>
+              <li>{translate(locale, 'terms.prohibited.items.interfere')}</li>
+              <li>{translate(locale, 'terms.prohibited.items.impersonate')}</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Intellectual Property -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.ip.title')}</h2>
+          <p class="text-gray-600 mb-4">
+            {translate(locale, 'terms.ip.desc')}
+          </p>
+          <div class="bg-gray-50 rounded-xl p-6">
+            <ul class="list-disc list-inside text-gray-600 space-y-2">
+              <li>{translate(locale, 'terms.ip.items.content')}</li>
+              <li>{translate(locale, 'terms.ip.items.software')}</li>
+              <li>{translate(locale, 'terms.ip.items.trademarks')}</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Third-Party Links -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.thirdParty.title')}</h2>
+          <p class="text-gray-600">
+            {translate(locale, 'terms.thirdParty.desc')}
+          </p>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.disclaimer.title')}</h2>
+          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6">
+            <p class="text-gray-700">
+              {translate(locale, 'terms.disclaimer.desc')}
+            </p>
+          </div>
+        </div>
+
+        <!-- Limitation of Liability -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.liability.title')}</h2>
+          <p class="text-gray-600">
+            {translate(locale, 'terms.liability.desc')}
+          </p>
+        </div>
+
+        <!-- Indemnification -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.indemnity.title')}</h2>
+          <p class="text-gray-600">
+            {translate(locale, 'terms.indemnity.desc')}
+          </p>
+        </div>
+
+        <!-- Changes to Terms -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.changes.title')}</h2>
+          <p class="text-gray-600">
+            {translate(locale, 'terms.changes.desc')}
+          </p>
+        </div>
+
+        <!-- Governing Law -->
+        <div class="mb-12">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.governing.title')}</h2>
+          <p class="text-gray-600">
+            {translate(locale, 'terms.governing.desc')}
+          </p>
+        </div>
+
+        <!-- Contact -->
+        <div class="bg-primary-50 rounded-xl p-8">
+          <h2 class="text-2xl font-bold mb-4">{translate(locale, 'terms.contact.title')}</h2>
+          <p class="text-gray-600 mb-4">
+            {translate(locale, 'terms.contact.desc')}
+          </p>
+          <p class="text-gray-600">
+            Email: legal@mitoai.example.com
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation -->
+  <section class="py-8 bg-gray-50 border-t">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center">
+        <a href={getLocaleHref('/privacy')} class="text-primary-600 hover:text-primary-700 flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          {translate(locale, 'nav.privacy')}
+        </a>
+        <a href={getLocaleHref('/about')} class="text-primary-600 hover:text-primary-700 flex items-center">
+          {translate(locale, 'nav.about')}
+          <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

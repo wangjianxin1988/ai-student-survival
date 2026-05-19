@@ -1,0 +1,218 @@
+---
+export const prerender = true;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate } from '@/i18n';
+import { promptTemplates, categoryInfo, type PromptTemplate } from '@/data/promptTemplates';
+
+// Force English locale
+const locale: Locale = 'en';
+
+const categories = [
+  { value: 'all', key: 'prompts.categories.all', label: 'All' },
+  { value: 'application', key: 'prompts.categories.application', label: 'Application' },
+  { value: 'thesis', key: 'prompts.categories.thesis', label: 'Thesis' },
+  { value: 'job', key: 'prompts.categories.job', label: 'Job' },
+  { value: 'daily', key: 'prompts.categories.daily', label: 'Daily' },
+  { value: 'research', key: 'prompts.categories.research', label: 'Research' },
+];
+
+const sortOptions = [
+  { value: 'rating', key: 'prompts.sortBy.rating', label: 'Highest Rated' },
+  { value: 'usageCount', key: 'prompts.sortBy.usageCount', label: 'Most Used' },
+  { value: 'newest', key: 'prompts.sortBy.newest', label: 'Newest' },
+];
+
+const toolNames: Record<string, string> = {
+  'chatgpt': 'ChatGPT',
+  'claude': 'Claude',
+  'gemini': 'Gemini',
+  'kimi': 'Kimi',
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": ["ItemList", "FAQPage"],
+  "name": "AI Prompt Template Library for International Students",
+  "description": "Curated AI prompt templates for international students covering applications, thesis, job search, daily communication and more",
+  "numberOfItems": promptTemplates.length,
+  "itemListElement": promptTemplates.map((template, index) => ({
+    "@type": "CreativeWork",
+    "position": index + 1,
+    "name": template.title,
+    "description": template.description,
+    "genre": template.category,
+  })),
+};
+---
+
+<Layout
+  title={translate(locale, 'prompts.title')}
+  description={translate(locale, 'prompts.description')}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Header -->
+  <div class="bg-gradient-to-r from-primary-600 to-primary-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <h1 class="text-3xl md:text-4xl font-bold mb-3">{translate(locale, 'prompts.title')}</h1>
+      <p class="text-primary-100 text-lg max-w-2xl">
+        {translate(locale, 'prompts.subtitle')}
+      </p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <span class="bg-white/20 px-3 py-1 rounded-full text-sm">{promptTemplates.length} templates</span>
+        <span class="bg-white/20 px-3 py-1 rounded-full text-sm">5 categories</span>
+        <span class="bg-white/20 px-3 py-1 rounded-full text-sm">Continuously updated</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Results Count -->
+    <div class="flex items-center justify-between mb-6">
+      <p class="text-gray-600">
+        Showing <span class="font-semibold text-gray-900">{promptTemplates.length}</span> templates
+      </p>
+    </div>
+
+    <!-- Template Grid -->
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {promptTemplates.map(template => (
+        <article class="card overflow-hidden group flex flex-col" data-template-id={template.id}>
+          <!-- Card Header -->
+          <div class="p-5 border-b border-gray-100">
+            <div class="flex items-start justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <span class={`badge ${
+                  template.category === 'application' ? 'bg-purple-100 text-purple-700' :
+                  template.category === 'thesis' ? 'bg-blue-100 text-blue-700' :
+                  template.category === 'job' ? 'bg-green-100 text-green-700' :
+                  template.category === 'daily' ? 'bg-orange-100 text-orange-700' :
+                  'bg-red-100 text-red-700'
+                }`}>
+                  {categoryInfo[template.category].name}
+                </span>
+                {template.toolId && (
+                  <span class="badge bg-gray-100 text-gray-600">{toolNames[template.toolId] || template.toolId}</span>
+                )}
+              </div>
+              <button
+                class="copy-btn text-gray-400 hover:text-primary-600 transition-colors p-1"
+                data-template-id={template.id}
+                title="Copy Prompt"
+                aria-label="Copy template"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </button>
+            </div>
+            <h3 class="text-lg font-semibold group-hover:text-primary-600 transition-colors line-clamp-2">
+              <a href={`/en/prompts/${template.id}`} class="hover:text-primary-600">{template.title}</a>
+            </h3>
+            <p class="text-gray-600 text-sm mt-2 line-clamp-2">{template.description}</p>
+          </div>
+
+          <!-- Preview Content -->
+          <div class="p-5 bg-gray-50 flex-1">
+            <div class="text-sm text-gray-700 font-mono whitespace-pre-wrap line-clamp-4 opacity-80">
+              {template.content.substring(0, 180)}...
+            </div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="p-5 bg-white border-t border-gray-100">
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1 mb-3">
+              {template.tags.slice(0, 3).map(tag => (
+                <span class="tag text-xs">{tag}</span>
+              ))}
+              {template.tags.length > 3 && (
+                <span class="tag text-xs">+{template.tags.length - 3}</span>
+              )}
+            </div>
+
+            <!-- Stats and Actions -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3 text-sm text-gray-500">
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  {template.rating.toFixed(1)}
+                </span>
+                <span class="flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                  {template.usageCount.toLocaleString()}
+                </span>
+              </div>
+              <a href={`/en/prompts/${template.id}`} class="text-sm font-medium text-primary-600 hover:text-primary-700 transition-colors flex items-center gap-1">
+                View Details
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+
+    <!-- Tips Section -->
+    <div class="mt-12 bg-gradient-to-r from-primary-50 to-blue-50 rounded-2xl p-6 md:p-8">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">Usage Tips</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-1">Copy and Customize</h3>
+            <p class="text-sm text-gray-600">Click the copy button, then modify placeholders according to your specific needs</p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-1">Combine with AI Tools</h3>
+            <p class="text-sm text-gray-600">Best results with recommended tools - ChatGPT for general tasks, Claude for long text</p>
+          </div>
+        </div>
+        <div class="flex gap-3">
+          <div class="flex-shrink-0 w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-semibold text-gray-900 mb-1">Iterate Continuously</h3>
+            <p class="text-sm text-gray-600">Good prompts need optimization - adjust based on AI output to find the best expression</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

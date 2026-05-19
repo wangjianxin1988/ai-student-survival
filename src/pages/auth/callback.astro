@@ -1,0 +1,35 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { supabase } from '@/lib/supabase';
+
+export const prerender = false;
+
+// Handle OAuth callback
+const locale = Astro.url.searchParams.get('locale') || 'zh';
+const code = Astro.url.searchParams.get('code');
+
+if (code) {
+  // The code will be exchanged by Supabase client-side
+  // Redirect to home page after a short delay
+  return Astro.redirect(`/?auth_callback=true`);
+}
+---
+
+<Layout title="Processing...">
+  <div class="min-h-[60vh] flex items-center justify-center">
+    <div class="text-center">
+      <div class="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p class="mt-4 text-gray-600">
+        {locale === 'zh' ? '正在处理登录...' : 'Processing sign in...'}
+      </p>
+    </div>
+  </div>
+
+  <script is:inline>
+    // Supabase handles the callback automatically
+    // Redirect to home after a delay
+    setTimeout(() => {
+      window.location.href = '/';
+    }, 2000);
+  </script>
+</Layout>

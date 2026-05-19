@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import RatingsList from '@/components/user/RatingsList';
+
+export const prerender = false;
+
+const locale = 'zh';
+---
+
+<Layout title={locale === 'zh' ? '我的评分' : 'My Ratings'}>
+  <RatingsList locale={locale} client:only="react" />
+</Layout>

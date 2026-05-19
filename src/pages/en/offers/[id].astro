@@ -1,0 +1,18 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import OfferDetailClient from '@/components/offers/OfferDetailClient';
+import { type Locale, t as translate } from '@/i18n';
+
+// Force English locale
+const locale: Locale = 'en';
+---
+
+<Layout
+  title={translate(locale, 'offers.detail.title')}
+  description={translate(locale, 'offers.detail.description')}
+  locale={locale}
+>
+  <OfferDetailClient offerId={Astro.params.id} locale={locale} client:only="react" />
+</Layout>

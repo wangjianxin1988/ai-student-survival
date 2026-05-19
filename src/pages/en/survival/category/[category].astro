@@ -1,0 +1,28 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import SurvivalClient from '@/components/survival/SurvivalClient';
+import { type Locale } from '@/i18n';
+import { SURVIVAL_CATEGORIES } from '@/data/survivalGuides';
+
+export const prerender = false;
+
+const locale: Locale = 'en';
+
+const { category } = Astro.params;
+
+// Validate category
+const validCategories = ['scam', 'culture', 'safety', 'legal', 'other'];
+if (!category || !validCategories.includes(category)) {
+  return Astro.redirect('/en/survival');
+}
+
+const categoryInfo = SURVIVAL_CATEGORIES[category as keyof typeof SURVIVAL_CATEGORIES];
+const categoryTitle = categoryInfo.labelEn;
+---
+
+<Layout
+  title={`${categoryTitle} - Survival Guides`}
+  description={categoryInfo.description}
+>
+  <SurvivalClient locale="en" client:only="react" initialCategory={category} />
+</Layout>

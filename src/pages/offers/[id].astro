@@ -1,0 +1,17 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import OfferDetailClient from '@/components/offers/OfferDetailClient';
+import { type Locale, getLocaleFromUrl } from '@/i18n';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const locale: Locale = getLocaleFromUrl(Astro.url);
+---
+
+<Layout
+  title={locale === 'zh' ? 'Offer详情' : 'Offer Details'}
+  description={locale === 'zh' ? '查看录取详情和申请经验' : 'View admission details and application experience'}
+>
+  <OfferDetailClient offerId={id} locale={locale} client:only="react" />
+</Layout>

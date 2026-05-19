@@ -1,0 +1,537 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { type Locale, t as translate, getLocaleFromUrl, translations } from '@/i18n';
+import { policiesData, getAllCountries, getAllRegions, type UniversityPolicy } from '@/data/policies';
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+// Use static data
+const policies = policiesData;
+const countries = getAllCountries();
+const regions = getAllRegions();
+const totalCount = policies.length;
+
+// Group policies by country for display
+const countriesWithCount = countries.map(country => ({
+  name: country,
+  count: policies.filter(p => p.country === country).length
+}));
+
+// Region stats
+const regionStats = regions.map(region => ({
+  name: region,
+  count: policies.filter(p => p.region === region).length,
+  countries: [...new Set(policies.filter(p => p.region === region).map(p => p.country))]
+}));
+
+interface DbPolicy {
+  university_name: string;
+  university_name_en: string | null;
+  university_slug: string;
+  country: string;
+  region: string | null;
+  city: string | null;
+  flag_emoji: string | null;
+  qs_rank: number | null;
+  overall_policy: string | null;
+  overall_summary: string | null;
+  allowed_tools: string[];
+  restricted_tools: string[];
+  prohibited_tools: string[];
+  last_updated: string | null;
+}
+
+let dbPolicies: DbPolicy[] = [];
+let dbCountries: string[] = [];
+
+// Only query Supabase if it's configured - with timeout protection
+if (isSupabaseConfigured) {
+  try {
+    // Create a promise that rejects after 3 seconds
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Supabase query timeout')), 3000);
+    });
+
+    const queryPromise = supabase
+      .from('university_policies')
+      .select('university_name, university_name_en, university_slug, country, region, city, flag_emoji, qs_rank, overall_policy, overall_summary, allowed_tools, restricted_tools, prohibited_tools, last_updated')
+      .order('qs_rank', { ascending: true })
+      .limit(150);
+
+    const { data, error } = await Promise.race([queryPromise, timeoutPromise]);
+
+    if (data && !error) {
+      dbPolicies = data as DbPolicy[];
+      dbCountries = [...new Set(dbPolicies.map(p => p.country))];
+    }
+  } catch (e) {
+    // fallback to static data - timeout or error
+    console.warn('Supabase query failed, using static data:', e instanceof Error ? e.message : 'Unknown error');
+  }
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": locale === 'en' ? 'University AI Policy Database' : '海外大学AI政策数据库',
+  "description": locale === 'en'
+    ? `Comprehensive database of AI usage policies from ${totalCount} universities worldwide`
+    : `全面收录${totalCount}所海外大学AI使用政策的数据库`,
+  "url": "https://ai-student-survival.example.com/policies"
+};
+
+function getPolicyColor(policy: string | null) {
+  switch (policy) {
+    case 'allowed': return 'bg-green-500';
+    case 'restricted': return 'bg-yellow-500';
+    case 'prohibited': return 'bg-red-500';
+    default: return 'bg-blue-500';
+  }
+}
+
+function getPolicyLabel(policy: string | null) {
+  switch (policy) {
+    case 'allowed': return locale === 'en' ? 'Allowed' : '允许使用';
+    case 'restricted': return locale === 'en' ? 'Restricted' : '限制使用';
+    case 'prohibited': return locale === 'en' ? 'Prohibited' : '禁止使用';
+    case 'case_by_case': return locale === 'en' ? 'Case by Case' : '各课程不同';
+    default: return locale === 'en' ? 'To Confirm' : '待确认';
+  }
+}
+
+function getPolicyBadgeBg(policy: string | null) {
+  switch (policy) {
+    case 'allowed': return 'bg-green-100 text-green-800 border-green-200';
+    case 'restricted': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'prohibited': return 'bg-red-100 text-red-800 border-red-200';
+    default: return 'bg-blue-100 text-blue-800 border-blue-200';
+  }
+}
+
+// FAQ for SEO
+const faqItems = [
+  {
+    "@type": "Question",
+    "name": locale === 'en' ? "Which US universities allow ChatGPT?" : "哪些美国大学允许使用ChatGPT？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": locale === 'en'
+        ? "MIT, Stanford, Harvard, Berkeley, Cornell and most other top US universities allow students to use ChatGPT under appropriate circumstances, but students must comply with course-specific policies and academic integrity principles."
+        : "MIT、Stanford、Harvard、Berkeley、Cornell等大多数美国顶尖大学都允许学生在适当情况下使用ChatGPT，但需要遵守各课程的具体规定和学术诚信原则。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": locale === 'en' ? "What is the UK university policy on AI tools?" : "英国大学对AI工具的政策是什么？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": locale === 'en'
+        ? "UK university policies vary. Cambridge and Imperial allow limited use of AI tools with emphasis on critical thinking; Oxford prohibits students from using generative AI for academic work. Please check specific university policy pages for details."
+        : "英国大学政策不一。Cambridge、Imperial允许有限度使用AI工具，强调批判性思维；Oxford则禁止学生使用生成式AI工具完成学术作业。请查看具体大学的政策页面了解详情。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": locale === 'en' ? "What should I pay attention to when using AI tools?" : "使用AI工具需要注意什么？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": locale === 'en'
+        ? "1. Understand and comply with your school's specific policies 2. Clearly disclose the use of AI-generated content 3. Maintain academic integrity and be able to explain AI-assisted work 4. Critically evaluate AI output results"
+        : "1. 了解并遵守学校的具体政策 2. 明确标注AI生成内容的使用 3. 保持学术诚信，理解并能解释AI辅助完成的工作 4. 批判性评估AI输出结果"
+    }
+  }
+];
+
+const pageJsonLd = {
+  "@context": "https://schema.org",
+  "@type": ["CollectionPage", "FAQPage"],
+  "name": locale === 'en' ? 'University AI Policy Database' : '海外大学AI政策数据库',
+  "description": locale === 'en'
+    ? `Comprehensive database of AI usage policies from ${totalCount} universities worldwide`
+    : `全面收录${totalCount}所海外大学AI使用政策`,
+  "url": "https://ai-student-survival.example.com/policies",
+  "mainEntity": faqItems
+};
+
+// Static tool data for recommendations
+const allTools = [
+  { id: 'chatgpt', name: 'ChatGPT', category: 'communication', slug: 'chatgpt' },
+  { id: 'claude', name: 'Claude', category: 'communication', slug: 'claude' },
+  { id: 'copilot', name: 'GitHub Copilot', category: 'coding', slug: 'github-copilot' },
+];
+---
+
+<Layout
+  title={locale === 'en' ? `University AI Policies (${totalCount})` : `大学AI政策 (${totalCount}所)`}
+  description={locale === 'en'
+    ? `Comprehensive database of AI usage policies from ${totalCount} universities worldwide`
+    : `全面收录${totalCount}所海外大学AI使用政策的数据库`}
+  jsonLd={pageJsonLd}
+>
+  <!-- Header -->
+  <div class="bg-gradient-to-br from-green-600 to-teal-600 text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl font-bold mb-4">
+          {locale === 'en' ? 'University AI Policy Database' : '海外大学AI政策数据库'}
+        </h1>
+        <p class="text-xl text-green-100 mb-6">
+          {locale === 'en'
+            ? 'Find out how top universities worldwide approach AI tool usage in academics'
+            : '了解全球顶尖大学如何处理学术场景中的AI工具使用问题'}
+        </p>
+        <div class="flex flex-wrap items-center gap-4 text-green-200 text-sm">
+          <span class="bg-white/20 px-3 py-1 rounded-full">{totalCount} {locale === 'en' ? 'Universities' : '所大学'}</span>
+          <span class="bg-white/20 px-3 py-1 rounded-full">{countries.length} {locale === 'en' ? 'Countries' : '个国家'}</span>
+          <span class="bg-white/20 px-3 py-1 rounded-full">{regions.length} {locale === 'en' ? 'Regions' : '个地区'}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Enhanced Search & Filter -->
+    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-8">
+      <div class="flex flex-col lg:flex-row gap-4">
+        <!-- Search -->
+        <div class="flex-1">
+          <div class="relative">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder={locale === 'en' ? 'Search universities...' : '搜索大学名称...'}
+              class="input pl-10 w-full"
+              id="searchInput"
+            />
+          </div>
+        </div>
+
+        <!-- Filters Row -->
+        <div class="flex flex-wrap gap-3">
+          <!-- Country Filter -->
+          <select class="input w-auto min-w-[140px]" id="countryFilter">
+            <option value="">
+              {locale === 'en' ? 'All Countries' : '全部国家'}
+            </option>
+            {countries.map(country => (
+              <option value={country}>{country}</option>
+            ))}
+          </select>
+
+          <!-- Region Filter -->
+          <select class="input w-auto min-w-[140px]" id="regionFilter">
+            <option value="">
+              {locale === 'en' ? 'All Regions' : '全部地区'}
+            </option>
+            {regions.map(region => (
+              <option value={region}>{region}</option>
+            ))}
+          </select>
+
+          <!-- Policy Type Filter -->
+          <select class="input w-auto min-w-[140px]" id="policyFilter">
+            <option value="">
+              {locale === 'en' ? 'All Policies' : '全部政策'}
+            </option>
+            <option value="allowed">{locale === 'en' ? 'Allowed' : '允许使用'}</option>
+            <option value="restricted">{locale === 'en' ? 'Restricted' : '限制使用'}</option>
+            <option value="prohibited">{locale === 'en' ? 'Prohibited' : '禁止使用'}</option>
+            <option value="case_by_case">{locale === 'en' ? 'Case by Case' : '因课程而异'}</option>
+          </select>
+
+          <!-- Ranking Filter -->
+          <select class="input w-auto min-w-[140px]" id="rankFilter">
+            <option value="">
+              {locale === 'en' ? 'All Rankings' : '全部排名'}
+            </option>
+            <option value="top10">QS Top 10</option>
+            <option value="top20">QS Top 20</option>
+            <option value="top50">QS Top 50</option>
+            <option value="top100">QS Top 100</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Quick Filter Chips -->
+      <div class="flex flex-wrap gap-2 mt-4 pt-4 border-t border-gray-100">
+        <span class="text-sm text-gray-500 mr-2">{locale === 'en' ? 'Quick filters:' : '快速筛选：'}</span>
+        <button class="quick-filter px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 hover:bg-primary-100 hover:text-primary-700 transition-colors" data-country="美国">
+          🇺🇸 {locale === 'en' ? 'US' : '美国'}
+        </button>
+        <button class="quick-filter px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 hover:bg-primary-100 hover:text-primary-700 transition-colors" data-country="英国">
+          🇬🇧 {locale === 'en' ? 'UK' : '英国'}
+        </button>
+        <button class="quick-filter px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 hover:bg-primary-100 hover:text-primary-700 transition-colors" data-country="加拿大">
+          🇨🇦 {locale === 'en' ? 'Canada' : '加拿大'}
+        </button>
+        <button class="quick-filter px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 hover:bg-primary-100 hover:text-primary-700 transition-colors" data-country="澳大利亚">
+          🇦🇺 {locale === 'en' ? 'Australia' : '澳大利亚'}
+        </button>
+        <button class="quick-filter px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 hover:bg-primary-100 hover:text-primary-700 transition-colors" data-country="中国">
+          🇨🇳 {locale === 'en' ? 'China' : '中国'}
+        </button>
+        <button class="quick-filter px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 hover:bg-green-200 transition-colors" data-policy="allowed">
+          {locale === 'en' ? 'Allowed' : '允许使用'}
+        </button>
+        <button class="quick-filter px-3 py-1 text-xs rounded-full bg-red-100 text-red-700 hover:bg-red-200 transition-colors" data-policy="prohibited">
+          {locale === 'en' ? 'Prohibited' : '禁止使用'}
+        </button>
+      </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="flex flex-wrap items-center gap-4 mb-6 text-sm">
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-green-500"></span>
+        <span>{locale === 'en' ? 'Allowed' : '允许使用'}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+        <span>{locale === 'en' ? 'Restricted' : '限制使用'}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-red-500"></span>
+        <span>{locale === 'en' ? 'Prohibited' : '禁止使用'}</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="w-3 h-3 rounded-full bg-blue-500"></span>
+        <span>{locale === 'en' ? 'Case by Case' : '因课程而异'}</span>
+      </div>
+      <div class="ml-auto text-sm text-gray-500">
+        <span id="visibleCount">{totalCount}</span> {locale === 'en' ? 'results' : '所大学'}
+      </div>
+    </div>
+
+    <!-- University List -->
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="policyList">
+      {policies.map((policy: UniversityPolicy) => (
+        <a
+          href={`/policies/${policy.id}`}
+          class="card p-4 hover:shadow-md transition-shadow cursor-pointer policy-card block no-underline"
+          data-id={policy.id}
+          data-country={policy.country}
+          data-region={policy.region}
+          data-name={policy.universityNameEn.toLowerCase()}
+          data-name-zh={policy.universityName}
+          data-policy={policy.overallPolicy}
+          data-qs-rank={policy.qsRank || ''}
+        >
+          <div class="flex items-start gap-3 mb-3">
+            <span class="text-2xl flex-shrink-0">{policy.flagEmoji}</span>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-semibold truncate" title={policy.universityName}>{policy.universityName}</h3>
+              <p class="text-xs text-gray-400">{policy.universityNameEn}</p>
+              <p class="text-sm text-gray-500">{policy.country} · {policy.city}</p>
+            </div>
+            {policy.qsRank && (
+              <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full flex-shrink-0">QS #{policy.qsRank}</span>
+            )}
+          </div>
+
+          <!-- Policy Badge -->
+          <div class="mb-3">
+            <span class={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${getPolicyBadgeBg(policy.overallPolicy)}`}>
+              <span class={`w-1.5 h-1.5 rounded-full ${getPolicyColor(policy.overallPolicy)}`}></span>
+              {getPolicyLabel(policy.overallPolicy)}
+            </span>
+          </div>
+
+          <!-- Tools Summary -->
+          <div class="flex flex-wrap gap-2 mb-3 min-h-[1.5rem]">
+            {policy.allowedTools && policy.allowedTools.length > 0 && (
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-green-400 flex-shrink-0"></span>
+                <span class="text-xs text-green-700">
+                  {locale === 'en' ? 'Allowed' : '允许'}:
+                  {policy.allowedTools.slice(0, 2).join(', ')}
+                  {policy.allowedTools.length > 2 && ` +${policy.allowedTools.length - 2}`}
+                </span>
+              </div>
+            )}
+            {policy.prohibitedTools && policy.prohibitedTools.length > 0 && (
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-red-400 flex-shrink-0"></span>
+                <span class="text-xs text-red-700">
+                  {locale === 'en' ? 'Prohibited' : '禁止'}:
+                  {policy.prohibitedTools.slice(0, 2).join(', ')}
+                </span>
+              </div>
+            )}
+            {policy.restrictedTools && policy.restrictedTools.length > 0 && (
+              <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-yellow-400 flex-shrink-0"></span>
+                <span class="text-xs text-yellow-700">
+                  {locale === 'en' ? 'Restricted' : '限制'}:
+                  {policy.restrictedTools.slice(0, 2).join(', ')}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div class="flex items-center justify-between text-xs text-gray-400">
+            <span>{locale === 'en' ? 'Updated' : '更新'}: {policy.lastUpdated}</span>
+            <span class="text-primary-600 font-medium">
+              {locale === 'en' ? 'View Details' : '查看详情'} →
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden text-center py-12">
+      <svg class="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">
+        {locale === 'en' ? 'No results found' : '未找到匹配结果'}
+      </h3>
+      <p class="text-gray-600">
+        {locale === 'en' ? 'Try adjusting your filters or search terms' : '请尝试调整筛选条件或搜索词'}
+      </p>
+    </div>
+
+    <!-- Stats Summary -->
+    {policies.length > 0 && (
+      <div class="mt-8 p-6 bg-gray-50 rounded-xl">
+        <h3 class="font-semibold mb-4">{locale === 'en' ? 'Policy Distribution' : '政策分布统计'}</h3>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="text-center">
+            <div class="text-2xl font-bold text-green-600">
+              {policies.filter((p: UniversityPolicy) => p.overallPolicy === 'allowed').length}
+            </div>
+            <div class="text-sm text-gray-600">{locale === 'en' ? 'Allowed' : '允许使用'}</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-yellow-600">
+              {policies.filter((p: UniversityPolicy) => p.overallPolicy === 'restricted').length}
+            </div>
+            <div class="text-sm text-gray-600">{locale === 'en' ? 'Restricted' : '限制使用'}</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-red-600">
+              {policies.filter((p: UniversityPolicy) => p.overallPolicy === 'prohibited').length}
+            </div>
+            <div class="text-sm text-gray-600">{locale === 'en' ? 'Prohibited' : '禁止使用'}</div>
+          </div>
+          <div class="text-center">
+            <div class="text-2xl font-bold text-blue-600">
+              {policies.filter((p: UniversityPolicy) => p.overallPolicy === 'case_by_case').length}
+            </div>
+            <div class="text-sm text-gray-600">{locale === 'en' ? 'Case by Case' : '因课程而异'}</div>
+          </div>
+        </div>
+
+        <!-- Region Distribution -->
+        <h4 class="font-medium mt-6 mb-3">{locale === 'en' ? 'By Region' : '按地区分布'}</h4>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {regionStats.map((stat: { name: string; count: number }) => (
+            <div class="bg-white rounded-lg p-3 text-center">
+              <div class="text-lg font-bold text-gray-700">{stat.count}</div>
+              <div class="text-xs text-gray-500">{stat.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+
+  <script is:inline>
+    const searchInput = document.getElementById('searchInput');
+    const countryFilter = document.getElementById('countryFilter');
+    const regionFilter = document.getElementById('regionFilter');
+    const policyFilter = document.getElementById('policyFilter');
+    const rankFilter = document.getElementById('rankFilter');
+    const cards = document.querySelectorAll('.policy-card');
+    const emptyState = document.getElementById('emptyState');
+    const visibleCountEl = document.getElementById('visibleCount');
+    const quickFilters = document.querySelectorAll('.quick-filter');
+
+    function filterPolicies() {
+      const searchTerm = searchInput?.value.toLowerCase().trim() || '';
+      const country = countryFilter?.value || '';
+      const region = regionFilter?.value || '';
+      const policyType = policyFilter?.value || '';
+      const rankRange = rankFilter?.value || '';
+      let visibleCount = 0;
+
+      cards.forEach(card => {
+        const el = card;
+        const nameEn = (el.dataset.name || '').toLowerCase();
+        const nameZh = (el.dataset.nameZh || '').toLowerCase();
+        const cardCountry = el.dataset.country || '';
+        const cardRegion = el.dataset.region || '';
+        const cardPolicy = el.dataset.policy || '';
+        const cardQsRank = parseInt(el.dataset.qsRank || '9999');
+
+        const matchesSearch = !searchTerm ||
+          nameEn.includes(searchTerm) ||
+          nameZh.includes(searchTerm) ||
+          cardCountry.includes(searchTerm);
+
+        const matchesCountry = !country || cardCountry === country;
+        const matchesRegion = !region || cardRegion === region;
+        const matchesPolicy = !policyType || cardPolicy === policyType;
+
+        let matchesRank = true;
+        if (rankRange) {
+          switch (rankRange) {
+            case 'top10': matchesRank = cardQsRank <= 10; break;
+            case 'top20': matchesRank = cardQsRank <= 20; break;
+            case 'top50': matchesRank = cardQsRank <= 50; break;
+            case 'top100': matchesRank = cardQsRank <= 100; break;
+          }
+        }
+
+        if (matchesSearch && matchesCountry && matchesRegion && matchesPolicy && matchesRank) {
+          el.style.display = '';
+          visibleCount++;
+        } else {
+          el.style.display = 'none';
+        }
+      });
+
+      if (visibleCountEl) visibleCountEl.textContent = visibleCount;
+      if (emptyState) emptyState.classList.toggle('hidden', visibleCount > 0);
+    }
+
+    // Event listeners
+    searchInput?.addEventListener('input', filterPolicies);
+    countryFilter?.addEventListener('change', filterPolicies);
+    regionFilter?.addEventListener('change', filterPolicies);
+    policyFilter?.addEventListener('change', filterPolicies);
+    rankFilter?.addEventListener('change', filterPolicies);
+
+    // Quick filter buttons
+    quickFilters.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const country = btn.dataset.country;
+        const policy = btn.dataset.policy;
+
+        if (country) {
+          countryFilter.value = country;
+        }
+        if (policy) {
+          policyFilter.value = policy;
+        }
+        filterPolicies();
+      });
+    });
+
+    // Clear all filters
+    function clearFilters() {
+      if (searchInput) searchInput.value = '';
+      if (countryFilter) countryFilter.value = '';
+      if (regionFilter) regionFilter.value = '';
+      if (policyFilter) policyFilter.value = '';
+      if (rankFilter) rankFilter.value = '';
+      filterPolicies();
+    }
+
+    // Make clearFilters available globally
+    window.clearPolicyFilters = clearFilters;
+  </script>
+</Layout>

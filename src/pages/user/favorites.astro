@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import FavoritesList from '@/components/user/FavoritesList';
+
+export const prerender = false;
+
+const locale = 'zh';
+---
+
+<Layout title={locale === 'zh' ? '我的收藏' : 'My Favorites'}>
+  <FavoritesList locale={locale} client:only="react" />
+</Layout>

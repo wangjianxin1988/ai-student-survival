@@ -1,0 +1,128 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+import { paymentSolutionsData, paymentCategories } from '@/data/paymentSolutions';
+import PaymentSolutionsFilter from '@/components/payment/PaymentSolutionsFilter';
+
+// Get locale from URL
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": ["CollectionPage", "FAQPage"],
+  "name": "留学生AI工具支付解决方案",
+  "description": "一站式解决留学生支付AI工具的难题，包括虚拟卡、礼品卡、地区定价等方案，已帮助50000+留学生解决支付问题",
+  "url": "https://ai-student-survival.example.com/payment",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "留学生如何支付ChatGPT Plus？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "留学生支付ChatGPT Plus的常用方式包括：1) 虚拟卡服务（如Depay、WildCard）2) 礼品卡购买 3) 地区定价订阅（如土耳其区）4) 通过第三方平台代购。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "什么是虚拟卡？留学生可以用吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "虚拟卡是一种预付费卡片，没有实体卡片但可以绑定到各种支付平台。留学生可以使用虚拟卡支付大部分海外AI工具服务，无需本地银行卡。常用的虚拟卡服务包括Depay和WildCard。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "使用虚拟卡安全吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "正规虚拟卡服务是安全的，它们使用加密技术保护用户信息。但建议选择知名服务商，避免使用来路不明的平台。另外，虚拟卡只能用于正规AI服务订阅，不要用于其他用途。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "如何开通Claude的付费订阅？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude支持礼品卡充值和信用卡支付。留学生可以通过购买Anthropic官方礼品卡或使用虚拟卡（如Depay、WildCard）来完成订阅。详细教程请查看我们的支付解决方案页面。"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "地区定价是什么意思？安全吗？",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "地区定价是利用不同国家的汇率和定价差异享受更低价格的方式。如土耳其区ChatGPT Plus约$8-10/月。但需要注意，部分平台可能对此有风险提示或限制，请谨慎使用。"
+      }
+    }
+  ]
+};
+---
+
+<Layout
+  title={translate(locale, 'payment.title')}
+  description={translate(locale, 'payment.description')}
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Header -->
+  <div class="hero-gradient text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div class="max-w-3xl">
+        <h1 class="text-4xl font-bold mb-4">{translate(locale, 'payment.title')}</h1>
+        <p class="text-xl text-primary-100 mb-6">
+          {translate(locale, 'payment.description')}
+        </p>
+        <div class="flex items-center gap-4 text-primary-200">
+          <div class="flex items-center gap-2">
+            <span class="text-3xl font-bold text-white">4.8</span>
+            <span class="text-sm">{translate(locale, 'payment.painScore')}</span>
+          </div>
+          <span class="text-primary-300">|</span>
+          <span>50,000+ {translate(locale, 'payment.helpedStudents')}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Payment Solutions Filter Component (React) -->
+    <PaymentSolutionsFilter
+      client:load
+      solutions={paymentSolutionsData}
+      locale={locale}
+    />
+
+    <!-- CTA -->
+    <section class="mt-12 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-2xl p-8 text-center">
+      <div class="flex flex-col items-center gap-4">
+        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+          <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.986.217-1.154.336a5.17 5.17 0 01-2.002.017C8.464 16.293 8 17.104 8 18c0 .896.464 1.707 1.006 2.246a5.17 5.17 0 002.002.017c.168-.119.612-.232 1.154-.336.542-.332 1.728-1.507 3.006-2.907a3.5 3.5 0 001.5-2.5c0-1.657-1.79-3-4-3-1.742 0-3.223.835-3.772 2z" />
+          </svg>
+        </div>
+        <div>
+          <h2 class="text-2xl font-bold text-white mb-2">{translate(locale, 'payment.stillHaveQuestions')}</h2>
+          <p class="text-white/90 mb-6 max-w-md mx-auto">
+            {locale === 'zh'
+              ? '没有找到合适的方案？我们的社区有50000+留学生帮你解答支付难题'
+              : 'Cant find the right solution? Our community of 50000+ international students can help with payment issues'}
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href={locale === 'zh' ? '/questions/ask' : '/en/questions/ask'} class="bg-white text-primary-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            {locale === 'zh' ? '发布问题' : 'Ask a Question'}
+          </a>
+          <a href={locale === 'zh' ? '/questions' : '/en/questions'} class="bg-white/20 text-white px-6 py-3 rounded-lg font-semibold hover:bg-white/30 transition-colors inline-flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            {locale === 'zh' ? '浏览问答' : 'Browse Q&A'}
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>

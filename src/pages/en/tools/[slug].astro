@@ -1,0 +1,1894 @@
+---
+export const prerender = false;
+
+// Required for dynamic route validation in hybrid mode
+export function getStaticPaths() {
+  return [];
+}
+
+import Layout from '@/layouts/Layout.astro';
+import type { Tool } from '@/lib/supabase';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
+import StarRating from '@/components/ratings/StarRating';
+import CompareButton from '@/components/compare/CompareButton';
+import ShareButton from '@/components/common/ShareButton';
+import CommentSection from '@/components/user/CommentSection';
+import ToolPricingRealtime from '@/components/tools/ToolPricingRealtime';
+import UpdateNotesClient from '@/components/tools/UpdateNotesClient';
+
+const { slug } = Astro.params;
+
+// English tools data
+const toolsData: Record<string, Tool> = {
+  'chatgpt': {
+    id: '1',
+    name: 'ChatGPT',
+    slug: 'chatgpt',
+    description: 'AI dialogue assistant developed by OpenAI, supporting writing, programming, analysis and more. ChatGPT is one of the most popular AI tools with powerful language understanding and generation capabilities.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://chat.openai.com',
+    imageUrl: 'https://placehold.co/800x400/10b981/ffffff?text=ChatGPT',
+    rating: 4.8,
+    ratingCount: 12500,
+    dimensions: { easeOfUse: 4.5, features: 4.9, value: 4.7 },
+    tags: ['writing', 'coding', 'analysis', 'dialogue', 'OpenAI'],
+    features: ['multi-turn dialogue', 'code generation', 'text creation', 'data analysis', 'file upload', 'voice interaction'],
+    alternatives: ['claude', 'gemini', 'kimi'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://help.openai.com/en/articles/6825453-chatgpt-release-notes',
+    updateSourceType: 'changelog',
+  },
+  'claude': {
+    id: '2',
+    name: 'Claude',
+    slug: 'claude',
+    description: 'AI assistant developed by Anthropic, excels at long text processing and complex analysis. Claude has a 100K context window, suitable for handling long documents and complex tasks.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://claude.ai',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=Claude',
+    rating: 4.7,
+    ratingCount: 8900,
+    dimensions: { easeOfUse: 4.6, features: 4.8, value: 4.5 },
+    tags: ['writing', 'long text', 'analysis', 'research', 'Anthropic'],
+    features: ['100K context', 'long text analysis', 'creative writing', 'code review', 'document processing', 'privacy protection'],
+    alternatives: ['chatgpt', 'gemini', 'kimi'],
+    isNew: false,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://docs.anthropic.com/en/release-notes/overview',
+    updateSourceType: 'changelog',
+  },
+  'midjourney': {
+    id: '3',
+    name: 'Midjourney',
+    slug: 'midjourney',
+    description: 'AI image generation tool that creates high-quality images from text descriptions. Midjourney is known for its artistic style and creative expression, making it the top choice for designers and artists.',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'paid',
+    priceDetail: { monthly: 10, yearly: 96, currency: 'USD' },
+    url: 'https://midjourney.com',
+    imageUrl: 'https://placehold.co/800x400/ec4899/ffffff?text=Midjourney',
+    rating: 4.6,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 3.8, features: 4.9, value: 4.4 },
+    tags: ['image generation', 'design', 'creative', 'art', 'Midjourney'],
+    features: ['text-to-image', 'diverse styles', 'high resolution', 'community sharing', 'Vary region editing', 'Zoom out expansion'],
+    alternatives: ['dalle-3', 'stable-diffusion', 'flux'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://docs.midjourney.com/',
+    updateSourceType: 'changelog',
+  },
+  'github-copilot': {
+    id: '4',
+    name: 'GitHub Copilot',
+    slug: 'github-copilot',
+    description: 'AI coding assistant providing code completion and generation for developers. Integrated into VS Code and other major IDEs, significantly improving programming efficiency.',
+    category: 'coding',
+    subcategory: 'code-assistant',
+    pricing: 'paid',
+    priceDetail: { monthly: 10, yearly: 100, currency: 'USD' },
+    url: 'https://github.com/features/copilot',
+    imageUrl: 'https://placehold.co/800x400/238636/ffffff?text=GitHub+Copilot',
+    rating: 4.5,
+    ratingCount: 9800,
+    dimensions: { easeOfUse: 4.3, features: 4.7, value: 4.2 },
+    tags: ['coding', 'code completion', 'IDE', 'developer', 'GitHub'],
+    features: ['code completion', 'function generation', 'bug fixing', 'code explanation', 'multi-language support', 'comments to code'],
+    alternatives: ['cursor', 'tabnine', 'replit'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://github.com/github/copilot-release-notes/releases',
+    updateSourceType: 'github',
+  },
+  'notion-ai': {
+    id: '5',
+    name: 'Notion AI',
+    slug: 'notion-ai',
+    description: 'AI assistant integrated into Notion, helping you write documents and organize notes. Notion AI provides smart suggestions, automatic summarization and translation while you write.',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 10, yearly: 96, currency: 'USD' },
+    url: 'https://notion.so',
+    imageUrl: 'https://placehold.co/800x400/1a1a1a/ffffff?text=Notion+AI',
+    rating: 4.4,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.7, features: 4.3, value: 4.2 },
+    tags: ['notes', 'documents', 'writing', 'organization', 'Notion'],
+    features: ['smart summary', 'auto continuation', 'translation', 'note organization', 'Q&A', 'template generation'],
+    alternatives: ['obsidian-ai', 'craft-ai', 'romin-ai'],
+    isNew: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.notion.so/updates',
+    updateSourceType: 'changelog',
+  },
+  'perplexity': {
+    id: '6',
+    name: 'Perplexity',
+    slug: 'perplexity',
+    description: 'AI search engine that answers questions based on real web content. Perplexity provides answers with cited sources, allowing you to verify information accuracy.',
+    category: 'research',
+    subcategory: 'search',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://perplexity.ai',
+    imageUrl: 'https://placehold.co/800x400/20c997/ffffff?text=Perplexity',
+    rating: 4.6,
+    ratingCount: 7800,
+    dimensions: { easeOfUse: 4.5, features: 4.6, value: 4.5 },
+    tags: ['search', 'research', 'Q&A', 'real-time information', 'Perplexity'],
+    features: ['real-time search', 'cited sources', 'multi-language', 'continuous dialogue', 'favorites sharing', 'academic search'],
+    alternatives: ['chatgpt', 'phind', 'kimi'],
+    isNew: false,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.perplexity.ai/changelog/',
+    updateSourceType: 'changelog',
+  },
+  'jasper': {
+    id: '7',
+    name: 'Jasper',
+    slug: 'jasper',
+    description: 'Enterprise-level AI writing assistant helping quickly generate marketing copy, blog posts and social content. Jasper has 50+ templates and supports brand voice customization.',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'paid',
+    priceDetail: { monthly: 49, yearly: 468, currency: 'USD' },
+    url: 'https://jasper.ai',
+    imageUrl: 'https://placehold.co/800x400/a855f7/ffffff?text=Jasper',
+    rating: 4.4,
+    ratingCount: 4200,
+    dimensions: { easeOfUse: 4.2, features: 4.7, value: 4.0 },
+    tags: ['writing', 'marketing', 'copy', 'blog', 'Jasper'],
+    features: ['multi-templates', 'brand voice', 'multi-language', 'SEO optimization', 'team collaboration', 'Chrome extension'],
+    alternatives: ['copyai', 'writesonic', 'chatgpt'],
+    isNew: false,
+    createdAt: '2024-01-20',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.jasper.ai/changelog',
+    updateSourceType: 'changelog',
+  },
+  'copyai': {
+    id: '8',
+    name: 'Copy.ai',
+    slug: 'copyai',
+    description: 'AI copywriting tool providing over 100 content templates, suitable for marketing and sales teams. Copy.ai helps you quickly generate ad copy, emails and social content.',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 49, yearly: 420, currency: 'USD' },
+    url: 'https://copy.ai',
+    imageUrl: 'https://placehold.co/800x400/9333ea/ffffff?text=Copy.ai',
+    rating: 4.3,
+    ratingCount: 3800,
+    dimensions: { easeOfUse: 4.4, features: 4.5, value: 4.1 },
+    tags: ['writing', 'copy', 'marketing', 'templates', 'Copy.ai'],
+    features: ['100+ templates', 'multi-language', 'team collaboration', 'brand toolkit', 'workflow automation'],
+    alternatives: ['jasper', 'writesonic', 'quillbot'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.copy.ai/changelog',
+    updateSourceType: 'changelog',
+  },
+  'grammarly': {
+    id: '9',
+    name: 'Grammarly',
+    slug: 'grammarly',
+    description: 'AI writing assistant providing grammar checking, spell correction and style optimization suggestions. Grammarly helps academic writers and business professionals improve English writing quality.',
+    category: 'writing',
+    subcategory: 'grammar-check',
+    pricing: 'freemium',
+    priceDetail: { monthly: 12, yearly: 144, currency: 'USD' },
+    url: 'https://grammarly.com',
+    imageUrl: 'https://placehold.co/800x400/7c3aed/ffffff?text=Grammarly',
+    rating: 4.7,
+    ratingCount: 15000,
+    dimensions: { easeOfUse: 4.8, features: 4.6, value: 4.5 },
+    tags: ['writing', 'grammar', 'proofreading', 'academic', 'Grammarly'],
+    features: ['grammar correction', 'style suggestions', 'plagiarism detection', 'multi-platform integration', 'dictionary lookup', 'tone adjustment'],
+    alternatives: ['quillbot', 'languagetool', 'prowritingaid'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.grammarly.com/updates',
+    updateSourceType: 'changelog',
+  },
+  'quillbot': {
+    id: '10',
+    name: 'QuillBot',
+    slug: 'quillbot',
+    description: 'AI rewriting and polishing tool helping students and writers optimize sentence structure and expression. QuillBot provides multiple rewriting modes suitable for academic and creative writing.',
+    category: 'writing',
+    subcategory: 'paraphrasing',
+    pricing: 'freemium',
+    priceDetail: { monthly: 9.95, yearly: 79.95, currency: 'USD' },
+    url: 'https://quillbot.com',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=QuillBot',
+    rating: 4.5,
+    ratingCount: 9200,
+    dimensions: { easeOfUse: 4.7, features: 4.4, value: 4.5 },
+    tags: ['writing', 'rewriting', 'polishing', 'academic', 'QuillBot'],
+    features: ['rewriting modes', 'synonym replacement', 'summary generation', 'citation generation', 'translation', 'grammar checking'],
+    alternatives: ['grammarly', 'paraphrase', 'spinbot'],
+    isNew: false,
+    createdAt: '2024-01-10',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://quillbot.com/changelog',
+    updateSourceType: 'changelog',
+  },
+  'tabnine': {
+    id: '11',
+    name: 'Tabnine',
+    slug: 'tabnine',
+    description: 'AI code completion plugin supporting all major programming languages, improving coding efficiency through deep learning. Tabnine supports local deployment and protects code privacy.',
+    category: 'coding',
+    subcategory: 'code-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://tabnine.com',
+    imageUrl: 'https://placehold.co/800x400/16a34a/ffffff?text=Tabnine',
+    rating: 4.3,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.4, features: 4.5, value: 4.6 },
+    tags: ['coding', 'code completion', 'IDE', 'multi-language', 'Tabnine'],
+    features: ['full language support', 'local运行', 'privacy protection', 'private model training', 'code explanation'],
+    alternatives: ['github-copilot', 'cursor', 'amazon-codewhisperer'],
+    isNew: false,
+    createdAt: '2024-02-10',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://github.com/codota/TabNine/releases',
+    updateSourceType: 'github',
+  },
+  'cursor': {
+    id: '12',
+    name: 'Cursor',
+    slug: 'cursor',
+    description: 'AI code editor built on GPT-4, supporting smart completion, code explanation and multi-file editing. Cursor is the top choice for programmers, providing the ultimate AI coding experience.',
+    category: 'coding',
+    subcategory: 'code-editor',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://cursor.sh',
+    imageUrl: 'https://placehold.co/800x400/15803d/ffffff?text=Cursor',
+    rating: 4.6,
+    ratingCount: 7100,
+    dimensions: { easeOfUse: 4.7, features: 4.7, value: 4.6 },
+    tags: ['coding', 'IDE', 'code generation', 'editor', 'Cursor'],
+    features: ['AI chat', 'code completion', 'multi-file editing', 'team collaboration', 'error fixing', 'code explanation'],
+    alternatives: ['github-copilot', 'replit', 'vscode'],
+    isNew: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://cursor.com/changelog',
+    updateSourceType: 'changelog',
+  },
+  'replit': {
+    id: '13',
+    name: 'Replit',
+    slug: 'replit',
+    description: 'Online AI programming platform where you can write, run and deploy code in your browser, with AI Ghostwriter support. Replit lets you code anywhere without environment setup.',
+    category: 'coding',
+    subcategory: 'code-platform',
+    pricing: 'freemium',
+    priceDetail: { monthly: 15, yearly: 144, currency: 'USD' },
+    url: 'https://replit.com',
+    imageUrl: 'https://placehold.co/800x400/22c55e/ffffff?text=Replit',
+    rating: 4.4,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 4.8, features: 4.5, value: 4.5 },
+    tags: ['coding', 'online IDE', 'deployment', 'collaboration', 'Replit'],
+    features: ['online running', 'AI coding assistant', 'one-click deployment', 'community sharing', 'version control', 'multiplayer collaboration'],
+    alternatives: ['cursor', 'vscode', 'github-codespaces'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://docs.replit.com/updates',
+    updateSourceType: 'changelog',
+  },
+  'figma': {
+    id: '14',
+    name: 'Figma',
+    slug: 'figma',
+    description: 'AI-enhanced design tool supporting prototype design and UI design, integrated with FigGPT for AI-assisted design. Figma is the industry standard for online collaborative design.',
+    category: 'design',
+    subcategory: 'ui-design',
+    pricing: 'freemium',
+    priceDetail: { monthly: 15, yearly: 144, currency: 'USD' },
+    url: 'https://figma.com',
+    imageUrl: 'https://placehold.co/800x400/f472b6/ffffff?text=Figma',
+    rating: 4.8,
+    ratingCount: 14000,
+    dimensions: { easeOfUse: 4.5, features: 4.8, value: 4.7 },
+    tags: ['design', 'UI', 'prototype', 'collaboration', 'Figma'],
+    features: ['vector design', 'prototype interaction', 'team collaboration', 'FigGPT integration', 'plugin ecosystem', 'design system'],
+    alternatives: ['sketch', 'adobe-xd', 'canva'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.figma.com/changelog/',
+    updateSourceType: 'changelog',
+  },
+  'dalle-3': {
+    id: '15',
+    name: 'DALL-E 3',
+    slug: 'dalle-3',
+    description: 'AI image generation model developed by OpenAI that creates high-quality images from natural language descriptions. DALL-E 3 has significant improvements in image quality and text rendering.',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'paid',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://openai.com/dall-e-3',
+    imageUrl: 'https://placehold.co/800x400/db2777/ffffff?text=DALL-E+3',
+    rating: 4.7,
+    ratingCount: 11000,
+    dimensions: { easeOfUse: 4.4, features: 4.8, value: 4.5 },
+    tags: ['image generation', 'design', 'creative', 'AI painting', 'DALL-E'],
+    features: ['high-precision images', 'text rendering', 'diverse styles', 'ChatGPT integration', 'variant generation', 'editing features'],
+    alternatives: ['midjourney', 'stable-diffusion', 'adobe-firefly'],
+    isNew: true,
+    createdAt: '2024-09-01',
+    updatedAt: '2024-11-01',
+    updateSourceUrl: 'https://help.openai.com/en/articles/6825453-chatgpt-release-notes',
+    updateSourceType: 'changelog',
+  },
+  'stable-diffusion': {
+    id: '16',
+    name: 'Stable Diffusion',
+    slug: 'stable-diffusion',
+    description: 'Open-source AI image generation model supporting local deployment and custom models, suitable for advanced users and researchers. Stable Diffusion is completely free and commercially usable.',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://stability.ai',
+    imageUrl: 'https://placehold.co/800x400/be185d/ffffff?text=Stable+Diffusion',
+    rating: 4.4,
+    ratingCount: 8900,
+    dimensions: { easeOfUse: 3.6, features: 4.8, value: 4.9 },
+    tags: ['image generation', 'open source', 'local deployment', 'custom models', 'Stable+Diffusion'],
+    features: ['open source free', 'local running', 'LoRA models', 'ControlNet', 'ComfyUI', 'community models'],
+    alternatives: ['midjourney', 'dalle-3', 'flux'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://stability.ai/news',
+    updateSourceType: 'changelog',
+  },
+  'kimi': {
+    id: '17',
+    name: 'Kimi',
+    slug: 'kimi',
+    description: 'AI assistant developed by Moonshot AI, supporting ultra-long context and document analysis, optimized for Chinese users. Kimi provides 200K ultra-long context and supports file analysis.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://kimi.moonshot.cn',
+    imageUrl: 'https://placehold.co/800x400/2563eb/ffffff?text=Kimi',
+    rating: 4.6,
+    ratingCount: 6500,
+    dimensions: { easeOfUse: 4.7, features: 4.5, value: 4.8 },
+    tags: ['dialogue', 'long text', 'document analysis', 'Chinese', 'Kimi'],
+    features: ['200K context', 'document analysis', 'web search', 'multi-file processing', 'PPT generation', 'webpage parsing'],
+    alternatives: ['chatgpt', 'claude', 'perplexity'],
+    isNew: true,
+    createdAt: '2024-03-15',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://kimi.moonshot.cn/docs/changelog',
+    updateSourceType: 'changelog',
+  },
+  'gemini': {
+    id: '18',
+    name: 'Gemini',
+    slug: 'gemini',
+    description: 'AI assistant developed by Google, integrated with Google ecosystem, supporting search, documents and code generation. Gemini is free to use and is a strong competitor to ChatGPT.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://gemini.google.com',
+    imageUrl: 'https://placehold.co/800x400/3b82f6/ffffff?text=Gemini',
+    rating: 4.5,
+    ratingCount: 9800,
+    dimensions: { easeOfUse: 4.6, features: 4.6, value: 4.4 },
+    tags: ['dialogue', 'search', 'code', 'Google ecosystem', 'Gemini'],
+    features: ['Google integration', 'multimodal', 'code generation', 'real-time information', 'Workspace collaboration', 'Advanced analysis'],
+    alternatives: ['chatgpt', 'claude', 'kimi'],
+    isNew: true,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://ai.google.dev/gemini-api/docs/changelog',
+    updateSourceType: 'changelog',
+  },
+  'webpilot': {
+    id: '19',
+    name: 'WebPilot',
+    slug: 'webpilot',
+    description: 'AI web reading assistant that helps quickly summarize web page content, extract key information and translate foreign articles. WebPilot is a powerful tool for research and information gathering.',
+    category: 'research',
+    subcategory: 'web-reading',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://webpilot.ai',
+    imageUrl: 'https://placehold.co/800x400/0d9488/ffffff?text=WebPilot',
+    rating: 4.3,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.6 },
+    tags: ['research', 'web reading', 'summary', 'translation', 'WebPilot'],
+    features: ['webpage summarization', 'content extraction', 'multi-language translation', 'information organization', 'comparison analysis', 'Q&A'],
+    alternatives: ['perplexity', 'chatgpt', 'kimi'],
+    isNew: true,
+    createdAt: '2024-04-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://github.com/webpilot-ai/Webpilot/releases',
+    updateSourceType: 'github',
+  },
+  'elicit': {
+    id: '20',
+    name: 'Elicit',
+    slug: 'elicit',
+    description: 'AI research assistant helping academic researchers quickly search literature, summarize paper key points and generate research ideas. Elicit has indexed over 200 million academic papers.',
+    category: 'research',
+    subcategory: 'academic-search',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://elicit.org',
+    imageUrl: 'https://placehold.co/800x400/0f766e/ffffff?text=Elicit',
+    rating: 4.5,
+    ratingCount: 2800,
+    dimensions: { easeOfUse: 4.2, features: 4.7, value: 4.8 },
+    tags: ['research', 'academic', 'literature', 'papers', 'Elicit'],
+    features: ['literature search', 'paper summarization', 'research ideas', 'citation generation', 'keyword analysis', 'topic discovery'],
+    alternatives: ['perplexity', 'consensus', 'semantic-scholar'],
+    isNew: false,
+    createdAt: '2024-02-15',
+    updatedAt: '2025-01-15',
+    updateSourceUrl: 'https://elicit.com/blog',
+    updateSourceType: 'blog',
+  },
+  // Chinese AI tools with English translations
+  'wenxin-yiyan': {
+    id: '21',
+    name: 'Wenxin Yiyan (ERNIE Bot)',
+    slug: 'wenxin-yiyan',
+    description: 'AI dialogue assistant built by Baidu based on the ERNIE large model, integrating Baidu\'s deep expertise in search and Chinese language processing. Wenxin Yiyan supports knowledge Q&A, text creation, logical reasoning, code generation and more, particularly excelling at Chinese understanding and generation.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://yiyan.baidu.com',
+    imageUrl: 'https://placehold.co/800x400/de3d32/ffffff?text=Wenxin-Yiyan',
+    rating: 4.4,
+    ratingCount: 8200,
+    dimensions: { easeOfUse: 4.5, features: 4.3, value: 4.6 },
+    tags: ['dialogue', 'Chinese', 'Baidu', 'writing', 'search'],
+    features: ['enhanced Chinese understanding', 'knowledge Q&A', 'text creation', 'code generation', 'logical reasoning', 'literary creation', 'data analysis', 'web search', 'PPT generation', 'image generation'],
+    alternatives: ['tongyi-qianwen', 'zhixing-qingyan', 'kimi'],
+    isNew: false,
+    createdAt: '2024-03-01',
+    updatedAt: '2025-03-01',
+    updateSourceUrl: 'https://yiyan.baidu.com/notice',
+    updateSourceType: 'changelog',
+  },
+  'tongyi-qianwen': {
+    id: '22',
+    name: 'Tongyi Qianwen',
+    slug: 'tongyi-qianwen',
+    description: 'Large language model released by Alibaba Cloud, with powerful Chinese understanding and multimodal capabilities. Tongyi Qianwen supports long text analysis, code writing, math problem solving, creative writing and more, with open APIs for enterprise integration.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://tongyi.aliyun.com',
+    imageUrl: 'https://placehold.co/800x400/ff6a00/ffffff?text=Tongyi-Qianwen',
+    rating: 4.5,
+    ratingCount: 7500,
+    dimensions: { easeOfUse: 4.6, features: 4.5, value: 4.7 },
+    tags: ['dialogue', 'Alibaba', 'open source', 'code', 'writing'],
+    features: ['long text analysis', 'code generation', 'multi-language support', 'creative writing', 'math problem solving', 'web search', 'document processing', 'multimodal', 'PPT generation', 'API access'],
+    alternatives: ['wenxin-yiyan', 'zhixing-qingyan', 'kimi'],
+    isNew: false,
+    createdAt: '2024-04-01',
+    updatedAt: '2025-01-15',
+    updateSourceUrl: 'https://help.aliyun.com/zh/qwen',
+    updateSourceType: 'changelog',
+  },
+  'xunfei-xinghuo': {
+    id: '23',
+    name: 'iFlytek Xinghuo',
+    slug: 'xunfei-xinghuo',
+    description: 'AI dialogue platform based on iFlytek\'s Spark large model, with globally leading advantages in speech recognition and synthesis. Xinghuo supports voice input/output, real-time translation, and multi-language interaction.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://xinghuo.xfyun.cn',
+    imageUrl: 'https://placehold.co/800x400/00d2ff/ffffff?text=Xunfei-Xinghuo',
+    rating: 4.4,
+    ratingCount: 6100,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.5 },
+    tags: ['dialogue', 'iFlytek', 'voice', 'translation', 'Chinese'],
+    features: ['voice input/output', 'real-time translation', 'multi-language support', 'long text analysis', 'code generation', 'PPT generation', 'creative writing', 'math problem solving', 'web search', 'API access'],
+    alternatives: ['wenxin-yiyan', 'tongyi-qianwen', 'kimi'],
+    isNew: false,
+    createdAt: '2024-05-01',
+    updatedAt: '2025-02-01',
+    updateSourceUrl: 'https://www.xfyun.cn/doc/spark/Web.html',
+    updateSourceType: 'changelog',
+  },
+  'zhixing-qingyan': {
+    id: '24',
+    name: 'Zhipu Qingyan (GLM)',
+    slug: 'zhixing-qingyan',
+    description: 'Large language model dialogue assistant independently developed by Zhipu AI, built on the ChatGLM series models. Zhipu Qingyan performs stably in Chinese/English dialogue, academic writing, code generation, and knowledge reasoning.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.zhipuai.cn',
+    imageUrl: 'https://placehold.co/800x400/6c5ce7/ffffff?text=Zhipu-Qingyan',
+    rating: 4.3,
+    ratingCount: 5400,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.4 },
+    tags: ['dialogue', 'Zhipu AI', 'academic', 'code', 'Chinese'],
+    features: ['Chinese/English dialogue', 'academic writing', 'code generation', 'knowledge reasoning', 'long text analysis', 'web search', 'multimodal', 'PPT generation', 'API access', 'private deployment'],
+    alternatives: ['wenxin-yiyan', 'tongyi-qianwen', 'claude'],
+    isNew: false,
+    createdAt: '2024-04-15',
+    updatedAt: '2025-01-20',
+  },
+  'doubao': {
+    id: '25',
+    name: 'Doubao',
+    slug: 'doubao',
+    description: 'AI dialogue assistant launched by ByteDance, integrated into Douyin, Feishu and other ByteDance products. Doubao supports voice and text dual-mode interaction, providing chat, writing assistant, English learning, coding assistance and more.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.doubao.com',
+    imageUrl: 'https://placehold.co/800x400/fe453b/ffffff?text=Doubao',
+    rating: 4.5,
+    ratingCount: 9200,
+    dimensions: { easeOfUse: 4.8, features: 4.3, value: 4.7 },
+    tags: ['dialogue', 'ByteDance', 'voice', 'daily', 'writing'],
+    features: ['voice dialogue', 'chat assistant', 'writing assistant', 'English learning', 'coding assistance', 'translation', 'creative inspiration', 'web search', 'multimodal', 'Douyin integration'],
+    alternatives: ['kimi', 'wenxin-yiyan', 'tongyi-qianwen'],
+    isNew: true,
+    createdAt: '2024-08-01',
+    updatedAt: '2025-03-15',
+    updateSourceUrl: 'https://www.volcengine.com/docs/82379/1195622',
+    updateSourceType: 'changelog',
+  },
+  'hunyuan': {
+    id: '26',
+    name: 'Hunyuan',
+    slug: 'hunyuan',
+    description: 'Tencent Hunyuan large model is an AI dialogue assistant built by Tencent based on years of AI technology accumulation, deeply integrated into Tencent Docs, Tencent Meeting, WeChat Search and other core products.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://hunyuan.tencent.com',
+    imageUrl: 'https://placehold.co/800x400/24c869/ffffff?text=Hunyuan',
+    rating: 4.3,
+    ratingCount: 4800,
+    dimensions: { easeOfUse: 4.6, features: 4.3, value: 4.4 },
+    tags: ['dialogue', 'Tencent', 'Chinese', 'ecosystem', 'documents'],
+    features: ['intelligent writing', 'code generation', 'meeting notes', 'Tencent Docs integration', 'multimodal', 'web search', 'creative content', 'translation', 'long text analysis', 'WeChat Search integration'],
+    alternatives: ['wenxin-yiyan', 'tongyi-qianwen', 'kimi'],
+    isNew: false,
+    createdAt: '2024-09-01',
+    updatedAt: '2025-01-10',
+    updateSourceUrl: 'https://cloud.tencent.com/document/product/1729',
+    updateSourceType: 'changelog',
+  },
+  'shangliang': {
+    id: '27',
+    name: 'Shangliang (SenseChat)',
+    slug: 'shangliang',
+    description: 'SenseChat is an AI dialogue assistant developed by SenseTime based on its "Riri Xin" large model, focusing on enterprise-level AI application scenarios. Shangliang performs stably in logical reasoning, math problem solving, code generation and long text processing.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://tech.sensetime.com',
+    imageUrl: 'https://placehold.co/800x400/4a90e2/ffffff?text=Shangliang',
+    rating: 4.2,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.4, features: 4.4, value: 4.3 },
+    tags: ['dialogue', 'SenseTime', 'enterprise', 'code', 'reasoning'],
+    features: ['logical reasoning', 'math problem solving', 'code generation', 'long text analysis', 'multimodal', 'web search', 'file analysis', 'industry applications', 'API access', 'multi-turn dialogue'],
+    alternatives: ['tongyi-qianwen', 'wenxin-yiyan', 'claude'],
+    isNew: false,
+    createdAt: '2024-07-01',
+    updatedAt: '2025-01-05',
+    updateSourceUrl: 'https://www.sensetime.com/news',
+    updateSourceType: 'changelog',
+  },
+  'tiangong': {
+    id: '28',
+    name: 'Tiangong',
+    slug: 'tiangong',
+    description: 'Kunlun Wanv\'s Tiangong large model is one of the earliest dual-trillion-parameter large language models in China, with deep accumulation in search and knowledge Q&A. Tiangong AI supports ultra-long context dialogue, web search, knowledge reasoning and multimodal content generation.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.tiangong.cn',
+    imageUrl: 'https://placehold.co/800x400/2d8cff/ffffff?text=Tiangong',
+    rating: 4.3,
+    ratingCount: 4100,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.4 },
+    tags: ['dialogue', 'Kunlun Wanv', 'search', 'knowledge', 'Chinese'],
+    features: ['web search', 'knowledge Q&A', 'long text analysis', 'code generation', 'creative writing', 'multi-language', 'multimodal', 'semantic reasoning', 'document processing', 'real-time web information'],
+    alternatives: ['tongyi-qianwen', 'wenxin-yiyan', 'perplexity'],
+    isNew: false,
+    createdAt: '2024-06-01',
+    updatedAt: '2025-01-25',
+    updateSourceUrl: 'https://www.tiangong.cn/',
+    updateSourceType: 'changelog',
+  },
+  'pangu': {
+    id: '29',
+    name: 'Pangu',
+    slug: 'pangu',
+    description: 'Huawei Cloud Pangu large model is an ultra-large-scale pre-training model independently developed by Huawei, focusing on industry intelligent upgrading. Pangu covers NLP, CV, scientific computing and other sub-fields.',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.huaweicloud.com/product/pangu.html',
+    imageUrl: 'https://placehold.co/800x400/dd2625/ffffff?text=Pangu',
+    rating: 4.1,
+    ratingCount: 2800,
+    dimensions: { easeOfUse: 4.2, features: 4.5, value: 4.2 },
+    tags: ['dialogue', 'Huawei Cloud', 'enterprise', 'industry', 'API'],
+    features: ['Chinese understanding', 'text generation', 'knowledge services', 'industry applications', 'multimodal', 'API access', 'long text analysis', 'code generation', 'Huawei Cloud integration', 'private deployment'],
+    alternatives: ['tongyi-qianwen', 'wenxin-yiyan', 'zhixing-qingyan'],
+    isNew: false,
+    createdAt: '2024-08-15',
+    updatedAt: '2025-02-01',
+    updateSourceUrl: 'https://www.huaweicloud.com/product/pangu.html',
+    updateSourceType: 'changelog',
+  },
+  // Chinese AI image tools
+  'tongyi-wanxiang': {
+    id: '30',
+    name: 'Tongyi Wanxiang',
+    slug: 'tongyi-wanxiang',
+    description: 'Alibaba Cloud\'s AI image generation and editing tool, supporting text-to-image, image-to-image, style transfer and more. Tongyi Wanxiang uses Alibaba\'s self-developed Composer model architecture, achieving industry-leading image quality and generation speed.',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://wanxiang.aliyun.com',
+    imageUrl: 'https://placehold.co/800x400/ff6a00/ffffff?text=Tongyi-Wanxiang',
+    rating: 4.4,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.6, features: 4.4, value: 4.6 },
+    tags: ['image generation', 'Alibaba', 'text-to-image', 'art', 'free'],
+    features: ['text-to-image', 'image-to-image', 'style transfer', 'multiple art styles', 'image editing', 'local inpainting', 'element removal', 'daily free quota', 'high-resolution output', 'creative inspiration'],
+    alternatives: ['stable-diffusion', 'midjourney', 'miaohua'],
+    isNew: true,
+    createdAt: '2024-10-01',
+    updatedAt: '2025-02-15',
+    updateSourceUrl: 'https://help.aliyun.com/zh/tongyi/document-2506281',
+    updateSourceType: 'changelog',
+  },
+  'miaohua': {
+    id: '31',
+    name: 'Miaohua',
+    slug: 'miaohua',
+    description: 'AI image generation platform developed by SenseTime based on its self-developed Artist large model, supporting precise prompt understanding in both Chinese and English. Miaohua provides rich style models covering anime, realism, illustration, Chinese style and more.',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://miaohua.sensetime.com',
+    imageUrl: 'https://placehold.co/800x400/6c5ce7/ffffff?text=Miaohua',
+    rating: 4.3,
+    ratingCount: 3800,
+    dimensions: { easeOfUse: 4.3, features: 4.5, value: 4.4 },
+    tags: ['image generation', 'SenseTime', 'art', 'Chinese/English bilingual', 'ControlNet'],
+    features: ['Chinese/English bilingual prompt', 'multiple style models', 'ControlNet control', 'sketch control', 'pose control', 'high-resolution generation', 'style fusion', 'daily free quota', 'LoRA model customization', 'batch generation'],
+    alternatives: ['tongyi-wanxiang', 'stable-diffusion', 'midjourney'],
+    isNew: true,
+    createdAt: '2024-09-15',
+    updatedAt: '2025-01-30',
+    updateSourceUrl: '',
+    updateSourceType: 'none',
+  },
+  'liblib': {
+    id: '32',
+    name: 'liblib',
+    slug: 'liblib',
+    description: 'liblib.ai is the largest AI image creation community platform in China, built on the Stable Diffusion ecosystem, providing massive pre-trained models and LoRA model downloads. liblib also offers online image generation services.',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.liblib.ai',
+    imageUrl: 'https://placehold.co/800x400/f59e0b/ffffff?text=liblib',
+    rating: 4.5,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 4.4, features: 4.7, value: 4.6 },
+    tags: ['image generation', 'SD model', 'community', 'LoRA', 'open source'],
+    features: ['massive model library', 'online generation', 'LoRA model training', 'community sharing', 'model browsing', 'Prompt sharing', 'no local deployment needed', 'daily free quota', 'model customization', 'creative inspiration'],
+    alternatives: ['stable-diffusion', 'tongyi-wanxiang', 'midjourney'],
+    isNew: true,
+    createdAt: '2024-08-01',
+    updatedAt: '2025-03-01',
+    updateSourceUrl: 'https://www.liblib.ai/',
+    updateSourceType: 'changelog',
+  },
+  // Chinese AI writing tools
+  'xunfei-xiezuo': {
+    id: '33',
+    name: 'iFlytek Write',
+    slug: 'xunfei-xiezuo',
+    description: 'AI writing assistant launched by iFlytek, leveraging its technology accumulation in speech and language processing to provide intelligent writing, content polishing and multi-language translation. Supports various document templates.',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://tongyi.aliyun.com/qianwen/overview',
+    imageUrl: 'https://placehold.co/800x400/00d2ff/ffffff?text=Xunfei-Write',
+    rating: 4.3,
+    ratingCount: 4100,
+    dimensions: { easeOfUse: 4.6, features: 4.3, value: 4.5 },
+    tags: ['writing', 'iFlytek', 'translation', 'templates', 'voice'],
+    features: ['multi-style templates', 'smart continuation', 'multi-language translation', 'voice input', 'content polishing', 'grammar checking', 'structure optimization', 'citation recommendations', 'one-click generation', 'multi-language writing'],
+    alternatives: ['mita-writecat', 'caiyun-xiaomeng', 'tongyi-qianwen'],
+    isNew: false,
+    createdAt: '2024-06-15',
+    updatedAt: '2025-01-15',
+    updateSourceUrl: 'https://www.xfyun.cn/doc/spark/Web.html',
+    updateSourceType: 'changelog',
+  },
+  'mita-writecat': {
+    id: '34',
+    name: 'Mita Writecat',
+    slug: 'mita-writecat',
+    description: 'AI writing assistant developed by Shanghai Mita Technology, focusing on Chinese and English writing grammar checking, typo correction and style optimization. Provides web, browser extension and Word plugin versions.',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://xiezuocat.zhiya.tech',
+    imageUrl: 'https://placehold.co/800x400/f97316/ffffff?text=Mita-Writecat',
+    rating: 4.5,
+    ratingCount: 7800,
+    dimensions: { easeOfUse: 4.7, features: 4.4, value: 4.6 },
+    tags: ['writing', 'proofreading', 'rewriting', 'translation', 'academic'],
+    features: ['grammar checking', 'typo correction', 'full text rewriting', 'summary generation', 'multi-language translation', 'writing templates', 'browser extension', 'Word plugin', 'English academic polishing', 'style optimization'],
+    alternatives: ['grammarly', 'xunfei-xiezuo', 'quillbot'],
+    isNew: false,
+    createdAt: '2024-03-01',
+    updatedAt: '2025-02-20',
+    updateSourceUrl: '',
+    updateSourceType: 'none',
+  },
+  'caiyun-xiaomeng': {
+    id: '35',
+    name: 'Caiyun Xiaomeng',
+    slug: 'caiyun-xiaomeng',
+    description: 'AI story creation assistant launched by Caiyun Technology, focusing on novel, screenplay and creative story continuation and generation. Users only need to provide an opening or story outline for automatic continuation.',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.caiyunai.com',
+    imageUrl: 'https://placehold.co/800x400/e879f9/ffffff?text=Caiyun-Xiaomeng',
+    rating: 4.4,
+    ratingCount: 5200,
+    dimensions: { easeOfUse: 4.6, features: 4.4, value: 4.5 },
+    tags: ['writing', 'story creation', 'novel', 'creative', 'continuation'],
+    features: ['story continuation', 'AI screenplay generation', 'multi-style settings', 'worldview customization', 'character settings', 'fan fiction creation', 'writing inspiration', 'daily free creation', 'social sharing', 'export function'],
+    alternatives: ['chatgpt', 'wenxin-yiyan', 'mita-writecat'],
+    isNew: true,
+    createdAt: '2024-05-01',
+    updatedAt: '2025-02-01',
+    updateSourceUrl: '',
+    updateSourceType: 'none',
+  },
+  // ========== High-Star Agent Frameworks ==========
+  'openclaw': {
+    id: '21',
+    name: 'OpenClaw',
+    slug: 'openclaw',
+    description: 'Apache 2.0 open-source AI Agent framework, 300K+ Stars, supports 20+ messaging platforms, Windows/Mac/Linux/Docker multi-platform deployment.',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/openclaw/openclaw',
+    imageUrl: 'https://placehold.co/800x400/f97316/ffffff?text=OpenClaw',
+    rating: 4.8,
+    ratingCount: 5200,
+    dimensions: { easeOfUse: 4.2, features: 4.9, value: 4.9 },
+    tags: ['Agent', 'open-source', 'multi-platform', 'messaging platform', 'Docker'],
+    features: ['Multi-platform integration', 'Plugin system', 'Memory management', 'Tool calling', '20+ platform support'],
+    alternatives: ['hermes-agent', 'autogpt'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Install OpenClaw', description: 'Method 1: Docker (recommended) - docker run -d -p 3000:3000 openclaw/openclaw\nMethod 2: Direct install - npm install -g openclaw-cli\nMethod 3: Source install - git clone then run ./setup.sh\nAfter installation, access http://localhost:3000 to enter the console' },
+        { step: 2, title: 'Configure Your First Agent', description: 'Click "Create Agent" in the console, enter Agent name and description. Select messaging platform (Discord/Slack/Telegram/etc), configure Bot Token. Enable required capabilities in "Capabilities": memory management, tool calling, code execution. Set system prompt to define Agent role and behavior.' },
+        { step: 3, title: 'Add Plugins and Capabilities', description: 'Visit plugin marketplace to add functionality extensions. Recommended plugins: web-search, image-generation, code-interpreter. Configure API keys (OpenAI, Google) to enable corresponding features. Use memory system to configure vector database (Chroma/Pinecone) for long-term memory.' }
+      ],
+      useCases: [
+        { title: 'Cross-Platform Customer Service Agent', description: 'Build unified customer service Agent with OpenClaw, deployed simultaneously to Discord, Slack, Telegram, WeChat and other platforms. Agent shares same knowledge base and memory, providing consistent service experience. Handles FAQs, order queries, technical support while complex issues auto-escalate to humans.' },
+        { title: 'Community Operations Automation', description: 'Use OpenClaw to automate community management. Bot automatically welcomes new members, publishes scheduled content, answers common questions, manages violations. Plugins enable auto-lotteries, data collection, voting activities reducing manual workload.' },
+        { title: 'Personal AI Assistant', description: 'Deploy OpenClaw as personal AI assistant integrated into daily IM tools. Assistant helps process emails, schedule appointments, query information, debug code. Memory system allows learning user preferences for personalized assistance.' },
+        { title: 'Enterprise Knowledge Base Q&A', description: 'Build internal knowledge base Q&A system with OpenClaw. Configure RAG pipeline connecting Confluence, Notion and other docs. Employees ask questions in Slack/Teams, Agent automatically retrieves relevant docs and generates answers.' }
+      ],
+      tips: [
+        'Docker deployment is simplest - production environment should use docker-compose for multi-container architecture including OpenClaw main service, Redis cache, Chroma vector database.',
+        'Plugin development uses OpenClaw plugin SDK, defining capabilities and actions interfaces. Reference official plugin repository for examples like weather queries, currency conversion.',
+        'Memory system configuration is crucial - choose Chroma (local, lightweight) or Pinecone (cloud, scalable). Regularly clean expired memories to avoid interference with current tasks.',
+        'Each platform needs independent Bot Token for multi-platform configuration. Use environment variables for sensitive configs, inject via -e parameters when running.'
+      ],
+      updateNotes: '2026 May: OpenClaw 2.0 released with multi-Agent collaboration and hierarchical task decomposition; new visual workflow editor; improved memory system supporting multimodal content; 50+ new official plugins in marketplace; 3x performance improvement.'
+    },
+    updateSourceUrl: 'https://github.com/openclaw/openclaw/releases',
+    updateSourceType: 'github',
+  },
+  'hermes-agent': {
+    id: '22',
+    name: 'Hermes Agent',
+    slug: 'hermes-agent',
+    description: '100K+ Stars self-evolving AI Agent framework, MIT open-source, supports 200+ models, capable of self-evolution and continuous learning.',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/NousResearch/hermes-agent',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=Hermes+Agent',
+    rating: 4.7,
+    ratingCount: 3800,
+    dimensions: { easeOfUse: 4.0, features: 4.8, value: 4.9 },
+    tags: ['Agent', 'self-evolving', 'multi-model', 'open-source', 'MIT'],
+    features: ['200+ model support', 'Self-evolution capability', 'Multi-Agent collaboration', 'Long-term memory', 'Tool extension'],
+    alternatives: ['openclaw', 'autogpt'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Install Hermes Agent', description: 'Method 1: pip install - pip install hermes-agent\nMethod 2: Docker quick deploy - docker run -d -p 8000:8000 nousresearch/hermes-agent\nMethod 3: Source install - git clone then pip install -e .\nRun hermes-agent init to initialize configuration after installation' },
+        { step: 2, title: 'Configure Models and Tools', description: 'Edit config.yaml to configure LLM backend, supporting OpenAI, Anthropic, local Ollama and 200+ other models. Configure tools: web-search, calculator, file-ops, code-executor. Set self-evolution parameters including learning rate, reflection interval, memory integration strategy.' },
+        { step: 3, title: 'Create Self-Evolving Agent', description: 'Define Agent role and goals using natural language to describe task objectives rather than fixed processes. Agent autonomously plans steps, calls tools, self-reflects and improves. Feedback loop enables learning from successes and failures, continuously optimizing decision strategies.' }
+      ],
+      useCases: [
+        { title: 'Complex Task Autonomous Execution', description: 'Hermes Agent is suitable for complex multi-step planning tasks like market research, competitor analysis, trip planning. Agent autonomously decomposes tasks, calls tools, integrates results, outputs complete reports. Self-reflection enables discovering and adjusting strategies during execution.' },
+        { title: 'Multi-Agent Collaboration System', description: 'Deploy multiple Hermes Agents forming a collaboration network, each Agent focusing on document retrieval, data analysis, report writing etc. Agent communication coordinates to jointly accomplish complex tasks beyond single Agent capability.' },
+        { title: 'Continuously Learning Research Assistant', description: 'Use Hermes Agent as research assistant - it continuously learns research domain knowledge through cycles of reading papers, analyzing data, writing summaries. Memory system preserves learning outcomes for relevant tasks later.' },
+        { title: 'Automated Code Development', description: 'Developers use Hermes Agent for automatic code development tasks. After describing requirements, Agent autonomously writes, tests, debugs code. Self-evolution enables learning from debugging failures, progressively improving code quality and development efficiency.' }
+      ],
+      tips: [
+        'Self-evolution is disabled by default - recommended to first test in controlled environment for new users. Enable by setting evolution: enabled: true in config.yaml, configure evolution learning rate and reflection threshold.',
+        'Long-term memory consumes storage space - regularly run hermes-agent memory --prune to clean low-value memories. Important memories can be pinned with hermes-agent memory --pin.',
+        'Among 200+ supported models, local Ollama deployed models respond fastest, OpenAI GPT-4 most capable but has API costs. Selecting appropriate model by task type balances effect and cost.',
+        'Multi-Agent collaboration - configure different professional roles and tool sets for each Agent, communicate via message queue. Set reasonable task allocation strategies to avoid duplication.'
+      ],
+      updateNotes: '2026 Apr: Hermes 3.0 released with new self-evolution algorithm improving Agent learning efficiency 5x; new multimodal understanding support; improved long-term memory system supporting structured knowledge storage; new sandbox environment for safe execution of dangerous operations.'
+    },
+    updateSourceUrl: 'https://github.com/NousResearch/hermes-agent/releases',
+    updateSourceType: 'github',
+  },
+  'autogpt': {
+    id: '23',
+    name: 'AutoGPT',
+    slug: 'autogpt',
+    description: '160K+ Stars autonomous task execution Agent framework, achieves complex task automation through natural language instructions.',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/Significant-Gravitas/AutoGPT',
+    imageUrl: 'https://placehold.co/800x400/10b981/ffffff?text=AutoGPT',
+    rating: 4.5,
+    ratingCount: 4500,
+    dimensions: { easeOfUse: 3.8, features: 4.7, value: 4.8 },
+    tags: ['Agent', 'autonomous execution', 'automation', 'open-source'],
+    features: ['Autonomous task planning', 'Step execution', 'Self-reflection', 'Vision support', 'Voice interaction'],
+    alternatives: ['openclaw', 'langchain'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Install AutoGPT', description: 'Method 1: Git clone - git clone https://github.com/Significant-Gravitas/AutoGPT.git && cd AutoGPT && pip install -r requirements.txt\nMethod 2: Docker - docker build -t autogpt . && docker run -it --env-file .env autogpt\nMethod 3: Forge version (more user-friendly) - download AutoGPT Forge installer and run. Configure API Key to start.' },
+        { step: 2, title: 'Define AI Role and Goals', description: 'Set AI_Name (Agent name), AI_Role (role description), Goals (goal list, comma-separated). Example role: personal research assistant, specializes in collecting and analyzing information for me. Goal 1: search latest AI news, 2: summarize key points, 3: save to notes. Agent autonomously plans implementation path.' },
+        { step: 3, title: 'Monitor and Intervene Execution', description: 'AutoGPT outputs progress in command line during autonomous execution. Press Ctrl+C to pause for manual intervention. In continuous mode, Agent executes continuously without confirmation, but beginners should avoid initially. Agent self-reflects (five whys analysis) during execution to improve solutions.' }
+      ],
+      useCases: [
+        { title: 'Automated Research', description: 'Give AutoGPT a research topic, it automatically searches web pages, reads articles, extracts key information, integrates into reports. 10x faster than manual research, suitable for competitor analysis, technical research, market research.' },
+        { title: 'Code Auto Development', description: 'Describe desired functionality, AutoGPT autonomously plans architecture, writes code, creates tests, fixes bugs. Suitable for simple scripts and small projects. For large projects, recommend using AutoGPT Agent SDK for modular development.' },
+        { title: 'Content Creation Automation', description: 'Input content creation requirements, AutoGPT automatically completes data collection, outline design, draft writing, revision and polishing. Suitable for blog articles, social media content, marketing copy.' },
+        { title: 'Data Analysis and Visualization', description: 'AutoGPT can read data files, analyze trends, generate charts, write analysis reports. Supports CSV, Excel, JSON formats, automatically selects appropriate analysis methods and visualization styles.' }
+      ],
+      tips: [
+        'AI_Role definition more specific = Agent behavior more aligned with expectations. Use "You are XXX expert, proficient at YYY, especially focused on ZZZ" rather than simple descriptions.',
+        'Goals list order matters - AutoGPT processes front-aligned goals first. Put most important goals at front to ensure core tasks complete.',
+        'Continuous mode is efficient but may produce unexpected results - recommend first testing workflow in normal mode, then enabling continuous mode after confirming correctness.',
+        'AutoGPT consumes API quota for each operation - set GLOBAL_DEBUG flag to monitor API usage and avoid unexpected overspending.'
+      ],
+      updateNotes: '2026 May: AutoGPT 4.0 launched with more stable goal decomposition algorithm; new Agent Graph visualization interface for tracking task execution; performance optimization reducing 50% Token consumption; support for more model backends including Claude and Gemini.'
+    },
+    updateSourceUrl: 'https://github.com/Significant-Gravitas/AutoGPT/releases',
+    updateSourceType: 'github',
+  },
+  'crewai': {
+    id: '24',
+    name: 'CrewAI',
+    slug: 'crewai',
+    description: '45K+ Stars multi-Agent collaboration framework, enables multiple AI Agents to play different roles and collaborate on complex tasks.',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/crewAIInc/crewAI',
+    imageUrl: 'https://placehold.co/800x400/3b82f6/ffffff?text=CrewAI',
+    rating: 4.6,
+    ratingCount: 2900,
+    dimensions: { easeOfUse: 4.3, features: 4.6, value: 4.7 },
+    tags: ['Agent', 'multi-Agent', 'collaboration', 'role-playing', 'workflow'],
+    features: ['Multi-role Agents', 'Task collaboration', 'Process control', 'Output integration', 'Easy definition'],
+    alternatives: ['langchain', 'autogpt'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Install CrewAI', description: 'pip install crewai crewai-tools\nRequires Python 3.10+, virtual environment recommended. Core dependencies include langchain-core for LLM calls, redis for Agent communication (if needed). Optional: crewai[all] for complete tool support.' },
+        { step: 2, title: 'Define Agent Roles', description: 'Create Agent using Agent class, define role, goal, backstory. Example: researcher = Agent(role="Senior Research Analyst", goal="Provide most relevant information", backstory="15 years of market research experience"). Each Agent can be configured with specialized tool sets.' },
+        { step: 3, title: 'Create Crew and Tasks', description: 'Create Task with description, expected_output, agent assignment. Use Crew class to combine Agents, set verbose=True to view execution logs. Configure crew.kickoff() to start collaboration process, agents execute tasks sequentially or in parallel and share results.' }
+      ],
+      useCases: [
+        { title: 'Automated Marketing Campaigns', description: 'Create three-Agent team: strategist, copywriter, designer. Strategist analyzes market and audience, copywriter generates draft copy, designer produces visual materials. Three collaborate to complete entire marketing campaign from strategy to execution.' },
+        { title: 'Software Code Review', description: 'Set up code review team: architect Agent reviews design rationality, developer Agent checks code quality, security Agent scans for vulnerabilities, compliance Agent verifies adherence. Multiple perspectives for comprehensive code review.' },
+        { title: 'Research Analysis Reports', description: 'Research team includes data collection Agent for information gathering, analysis Agent for data processing and insight discovery, writing Agent for structured report integration. Hierarchical task setup ensures orderly information flow.' },
+        { title: 'Customer Support Automation', description: 'Classification Agent first understands and categorizes customer issues, diagnostic Agent analyzes problem causes, resolution Agent provides specific solutions, escalation Agent determines if human intervention needed. Diverted processing improves customer service efficiency.' }
+      ],
+      tips: [
+        'Agent backstory greatly impacts output quality - detailed background description enables Agent to more accurately understand its role and responsibilities, producing more professional output.',
+        'Use hierarchical=True for hierarchical process, main Agent responsible for coordination and integration, other Agents execute in their professional domains. More suitable for complex tasks than sequential execution.',
+        'Tasks share data via output_pydantic or output_json. Use Process.sequential to ensure dependent tasks execute in order, Process.consensus for scenarios requiring multi-Agent consensus.',
+        'crewai-tools package provides practical tools for browser operations, SQL execution, file processing. Use tool extensions wisely to avoid Agent over-reliance on tools.'
+      ],
+      updateNotes: '2026 Apr: CrewAI 2.0 supports visual workflow designer; new Process.consensus multi-Agent consensus mechanism; improved memory system supporting cross-Crew sharing; more official tool integrations including GitHub, Jira, Slack.'
+    },
+    updateSourceUrl: 'https://github.com/crewAIInc/crewAI/releases',
+    updateSourceType: 'github',
+  },
+  'langchain': {
+    id: '25',
+    name: 'LangChain',
+    slug: 'langchain',
+    description: '118K+ Stars AI application development framework, provides modular components for building complex LLM applications, supports Python and JavaScript.',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/langchain-ai/langchain',
+    imageUrl: 'https://placehold.co/800x400/22c55e/ffffff?text=LangChain',
+    rating: 4.4,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 3.8, features: 4.8, value: 4.6 },
+    tags: ['Agent', 'development framework', 'LLM application', 'RAG', 'vector database'],
+    features: ['Chain building', 'Agent abstraction', 'RAG support', 'Tool calling', 'Vector storage'],
+    alternatives: ['dify', 'crewai'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Install LangChain', description: 'pip install langchain langchain-openai langchain-community\nOptional components: langchain[all] for all integrations, langchain-experimental for experimental features. JavaScript version: npm install langchain @langchain/core' },
+        { step: 2, title: 'Build Your First Chain', description: 'Use LCEL (LangChain Expression Language) for chain calls:\nfrom langchain_openai import ChatOpenAI\nfrom langchain_core.prompts import ChatPromptTemplate\nllm = ChatOpenAI()\nprompt = ChatPromptTemplate.from_template("Write a {topic} in {language}")\nchain = prompt | llm\nresult = chain.invoke({"language": "Python", "topic": "quick sort"})' },
+        { step: 3, title: 'Use RAG and Tools', description: 'RAG implementation: use VectorStoreRetriever for document retrieval, FAISS/Chroma as vector database.\nAgent tools: from langchain.agents import load_tools\ntools = load_tools(["serpapi", "llm-math"], llm=llm)\nagent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION)' }
+      ],
+      useCases: [
+        { title: 'RAG Knowledge Base Q&A', description: 'Build enterprise knowledge base Q&A system with LangChain. Documents split and vectorized for storage, retrieve relevant chunks then generate answers combined with questions. Supports PDF, Markdown, Notion and multi-format documents - core solution for building intelligent customer service.' },
+        { title: 'Multi-Step Complex Reasoning', description: 'Use LangChain Chain structure for complex reasoning: user query → query database for user profile → determine intent → call appropriate tools → integrate results → generate response. LCEL makes chain composition intuitive.' },
+        { title: 'Tool-Calling Agents', description: 'Build Agents that call external tools: web-search for latest info, calculator for computation, API queries for real-time data. Agent autonomously decides call sequence and parameters, LangChain uniformly manages tool execution and result processing.' },
+        { title: 'Chatbot Development', description: 'Use LangChain to build chatbots with memory. ConversationBufferMemory saves dialogue history, ConversationChain manages context. Call RAG during conversation to enhance response accuracy.' }
+      ],
+      tips: [
+        'LCEL is core syntax in LangChain v0.2+, recommended to learn first. Using | operator to compose components is more intuitive than traditional Chain, also better performance.',
+        'RAG optimization: use RecursiveCharacterTextSplitter for proper document splitting, set correct chunk_size and chunk_overlap, use MaxMarginalRelevance during retrieval to improve diversity.',
+        'Production environment use LangSmith for debugging and monitoring. pip install langsmith then set environment variables LANGCHAIN_TRACING_V2=true LANGCHAIN_API_KEY=xxx',
+        'Large document retrieval use ParentDocumentRetriever to avoid context destruction from splitting. For highly structured documents, consider using ElementType to distinguish different levels.'
+      ],
+      updateNotes: '2026 May: LangChain 0.3 released, LCEL syntax fully stabilized; LangGraph for building stateful multi-Agent applications; new long-text understanding optimization and structured output enhancement; LangSmith supports multi-tenant and private deployment options.'
+    },
+    updateSourceUrl: 'https://github.com/langchain-ai/langchain/releases',
+    updateSourceType: 'github',
+  },
+  'dify': {
+    id: '26',
+    name: 'Dify',
+    slug: 'dify',
+    description: '120K+ Stars open-source LLM application development platform, build AI applications quickly with low-code approach, supports RAG and Agent.',
+    category: 'agent',
+    subcategory: 'no-code-ai',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/langgenius/dify',
+    imageUrl: 'https://placehold.co/800x400/ec4899/ffffff?text=Dify',
+    rating: 4.7,
+    ratingCount: 4100,
+    dimensions: { easeOfUse: 4.6, features: 4.7, value: 4.8 },
+    tags: ['LLM application', 'low-code', 'RAG', 'open-source', 'visual orchestration'],
+    features: ['Visual orchestration', 'RAG pipeline', 'Agent', 'API deployment', 'Multi-model support'],
+    alternatives: ['langchain', 'coze'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Deploy Dify', description: 'Method 1: Docker one-click deploy (recommended) - docker run -d -p 80:80 -v ~/dify-data:/data dify/dify-community\nMethod 2: Docker Compose - git clone then cd dify/docker && docker-compose up -d\nMethod 3: Dify Cloud - register at dify.ai to use cloud version without deployment. Access http://localhost:80 to start' },
+        { step: 2, title: 'Create AI Application', description: 'Click "Create App", select app type: Agent/Chat Assistant/Text Generator/Agent. Set AI model provider and model name. Configure system prompt to define app role. In "Context" set RAG, enable knowledge base to upload documents.' },
+        { step: 3, title: 'Use Workflow Orchestration', description: 'Drag nodes in workflow page to build complex flows: LLM node (call model), condition node (branch judgment), code node (data processing), template node (format output). Connect nodes to set execution order. Test and publish when ready, integrate via API or embed into other applications.' }
+      ],
+      useCases: [
+        { title: 'Enterprise Knowledge Base Q&A', description: 'Upload PDF, Word, PPT and other enterprise documents to Dify knowledge base, configure RAG retrieval augmented generation. Employees ask questions about products, technology, policies via chat interface, AI accurately answers based on enterprise documents, greatly reducing manual customer service pressure.' },
+        { title: 'Intelligent Customer Service Bot', description: 'Use Dify Agent to build multi-turn dialogue customer service, can autonomously decide to call tools (check orders, inventory, return processes). Supports WeChat, DingTalk, web multi-channel access. Integration with CRM system for personalized service.' },
+        { title: 'Content Creation Workflow', description: 'Build automated content production flow: input topic → search web for materials → AI writes draft → human review → publish to WeChat/Xiaohongshu with one click. Template nodes ensure consistent output format, variable nodes enable content personalization.' },
+        { title: 'Data Analysis Assistant', description: 'After connecting to database, describe analysis needs in natural language, Dify Agent automatically generates SQL queries, displays results as charts and interprets them. Suitable for non-technical staff to self-service data retrieval and analysis.' }
+      ],
+      tips: [
+        'Pre-process documents before uploading: convert PDF to Markdown, remove irrelevant content, structure. This greatly improves retrieval quality and generation results.',
+        'Naming variables in workflows should be clear and consistent. Using snake_case like product_name, user_query makes it easier for subsequent nodes to reference.',
+        'In Agent mode, system automatically uses ReAct reasoning. For more precise tool calling control, consider using workflow mode to manually orchestrate tool calling logic.',
+        'Production deployment recommend using reverse proxy Nginx to configure SSL certificates, enable access restrictions. Regularly backup database to prevent data loss.'
+      ],
+      updateNotes: '2026 Apr: Dify 1.0 released, stable version RAG pipeline and next-gen workflow designer; new multi-tenant support; Agent supports function calling and code interpreter; API performance improved 3x; Dify Cloud enterprise edition now available for managed service.'
+    },
+    updateSourceUrl: 'https://github.com/langgenius/dify/releases',
+    updateSourceType: 'github',
+  },
+  'coze': {
+    id: '27',
+    name: 'Coze',
+    slug: 'coze',
+    description: 'ByteDance AI Bot development platform, provides 60+ official plugins, supports fast building and deploying chatbots.',
+    category: 'agent',
+    subcategory: 'bot-platform',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://coze.com',
+    imageUrl: 'https://placehold.co/800x400/ef4444/ffffff?text=Coze',
+    rating: 4.5,
+    ratingCount: 3500,
+    dimensions: { easeOfUse: 4.7, features: 4.5, value: 4.4 },
+    tags: ['Bot', 'chatbot', 'plugins', 'workflow', 'ByteDance'],
+    features: ['60+ plugins', 'Workflow orchestration', 'Multi-channel publishing', 'Bot store', 'API support'],
+    alternatives: ['dify', 'langchain'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Register and Create Bot', description: 'Visit coze.com or coze.cn (domestic version), login with Douyin or phone number. Click "Create Bot", set Bot name, description and icon. Select LLM (Skylark/GPT-4/Claude etc.) in left panel, configure Bot capabilities and persona on right.' },
+        { step: 2, title: 'Configure Plugins and Workflow', description: 'In Bot edit page, click "+ Plugin" to add 60+ official plugins (Feishu, WeChat, GitHub etc.). Use workflow to orchestrate complex logic: drag nodes from left (LLM, code, database, card messages), connect to set execution flow.' },
+        { step: 3, title: 'Publish to Multiple Channels', description: 'Click "Publish" when development complete. Supports publishing to: Coze Bot store, Feishu, WeChat (enterprise certification required), DingTalk, Telegram, Discord etc. Can also integrate to own applications via API. Domestic version (coze.cn) more convenient for publishing to ByteDance products.' }
+      ],
+      useCases: [
+        { title: 'Enterprise Office Assistant', description: 'Build Feishu bot for employee services like IT support, HR policy Q&A, meeting room booking. Integrate enterprise database and API, Bot automatically queries and processes requests, reducing administrative workload.' },
+        { title: 'Content Operations Bot', description: 'Create social media operations Bot, automatically publishes content, replies to comments, analyzes data. Support connecting to content library, schedule posts generation and publishing. Card messages and button interactions provide rich content display.' },
+        { title: 'Customer Service Bot Reception', description: 'Configure Bot to automatically receive visitors, use workflow to divert: AI immediately answers simple questions, complex issues escalate to humans. Combined with knowledge base for accurate Q&A, supports multi-turn dialogue maintaining context.' },
+        { title: 'Personal Efficiency Assistant', description: 'Create personal Bot integrating various services: subscribe to newsletters summary, weather alerts, schedule management, code snippet storage. Natural interaction via chat becomes efficient assistant for daily work.' }
+      ],
+      tips: [
+        'Make good use of variables and condition branches in workflows. Bot flexibility over fixed scripts lies in dynamically adjusting flow based on user input, reasonable condition settings improve conversation experience.',
+        'Plugin calls have rate limits - consider caching common results for high-frequency scenarios. Set plugin timeout to avoid single calls blocking entire conversation.',
+        'Card messages greatly improve user experience. Use cards to display structured information (tables, lists, buttons) clearer than plain text.',
+        'Domestic version coze.cn and overseas version coze.com have different features and plugins. Enterprise users should confirm required features availability in respective versions first.'
+      ],
+      updateNotes: '2026 May: Coze 2.0 launched with new Agent engine supporting more complex autonomous decisions; new multimodal understanding capability; workflow editor fully upgraded with loop and subflow support; plugin marketplace adds 30+ official plugins; deeper integration with more ByteDance products.'
+    },
+    updateSourceUrl: 'https://www.coze.com/open/docs/guides/release_note',
+    updateSourceType: 'changelog',
+  },
+  'ollama': {
+    id: '28',
+    name: 'Ollama',
+    slug: 'ollama',
+    description: 'Local large model running tool, one-click deployment of Llama 2/Qwen/DeepSeek and other open-source models, GPU acceleration support.',
+    category: 'coding',
+    subcategory: 'local-llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://ollama.com',
+    imageUrl: 'https://placehold.co/800x400/06b6d4/ffffff?text=Ollama',
+    rating: 4.8,
+    ratingCount: 7800,
+    dimensions: { easeOfUse: 4.8, features: 4.6, value: 4.9 },
+    tags: ['local deployment', 'open-source model', 'GPU acceleration', 'command line', 'privacy protection'],
+    features: ['One-click deployment', 'GPU support', 'Model management', 'REST API', 'Cross-platform'],
+    alternatives: ['lm-studio', 'anything-llm'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Install Ollama Client', description: 'macOS users download dmg installer, Windows users use installer or WSL2 environment, Linux users run: curl -fsSL https://ollama.com/install.sh | sh. After installation, run ollama --version in terminal to verify' },
+        { step: 2, title: 'Pull and Run Models', description: 'Use ollama pull to download models, e.g., ollama pull llama3.2 or ollama pull mistral. First run automatically downloads to ~/.ollama/models. Common models: llama3.2(8B), mistral(7B), codellama(code), nomic-embed-text(vector)' },
+        { step: 3, title: 'Chat via API or CLI', description: 'CLI: directly run ollama run llama3.2 to start chat. OpenAI-compatible API: start service with ollama serve then access http://localhost:11434/v1/chat/completions. Can configure as backend for LangChain, LlamaIndex and other frameworks' }
+      ],
+      useCases: [
+        { title: 'Privacy-Sensitive Local AI Applications', description: 'Healthcare, finance, legal industries needing data to stay local use Ollama to deploy Llama3/Mistral models. All conversation data stays on local machine, build internal knowledge Q&A system with LangChain' },
+        { title: 'Developer Local LLM App Debugging', description: 'Use Ollama OpenAI-compatible API for rapid prototyping, switching models only requires changing model name. Supports streaming output for debugging ChatGPT plugins or Claude API apps' },
+        { title: 'Run Large Models on Low-Spec Computers', description: '7B parameter models like Llama3.2, Qwen2.5 runnable on 8GB GPU or 16GB RAM machines, even lower with 4bit quantization. Ideal for users without high-end GPUs wanting local LLM experience' },
+        { title: 'Enterprise Intranet AI Infrastructure', description: 'Deploy Ollama as unified inference service on intranet servers, supporting multi-user concurrent access. Modelfile customization for model prompts, Docker containerization for easy scaling' }
+      ],
+      tips: [
+        'GPU acceleration: Ensure NVIDIA driver + CUDA installed, Ollama auto-detects GPU. Mac M-series chips auto-use Metal acceleration, no extra config needed',
+        'Model quantization: Production recommended using 4bit quantized models (e.g. *-q4_0), file size reduced 60% with minimal quality loss, VRAM requirement drops from 16GB to 8GB',
+        'Modelfile customization: Create ./Modelfile with FROM base model + PARAMETER + SYSTEM + TEMPLATE to create exclusive chatbot templates',
+        'Multi-model management: ollama list shows downloaded models, ollama rm <model> deletes unwanted models to free space, models stored in ~/.ollama/models/ by default'
+      ],
+      updateNotes: '2026 update: v0.5.x series supports multimodal models (vision), Function Calling, new Qwen2.5/Qwen2.5-Coder official support, Mac performance optimization, WSL2 native support'
+    },
+    updateSourceUrl: 'https://github.com/ollama/ollama/releases',
+    updateSourceType: 'github',
+  },
+  'lm-studio': {
+    id: '29',
+    name: 'LM Studio',
+    slug: 'lm-studio',
+    description: 'Local LLM running platform, provides ChatGPT-like interface, supports GGUF format models, GPU acceleration out of the box.',
+    category: 'coding',
+    subcategory: 'local-llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://lmstudio.ai',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=LM+Studio',
+    rating: 4.7,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.9, features: 4.5, value: 4.8 },
+    tags: ['local deployment', 'LLM', 'desktop app', 'GPU acceleration', 'privacy'],
+    features: ['ChatGPT-like interface', 'Model downloads', 'GPU acceleration', 'Local API', 'Multi-model'],
+    alternatives: ['ollama', 'anything-llm'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Download and Install LM Studio', description: 'Download from lmstudio.ai for your OS (macOS/Windows/Linux). macOS needs Apple Silicon or Intel chip, Windows needs Vulkan-capable GPU. First launch takes 5-10 minutes for initialization' },
+        { step: 2, title: 'Browse and Download Models', description: 'Built-in model browser searches Llama3.2, Mistral, Qwen2.5, DeepSeek series. Click Download to save locally, LM Studio auto-manages model file storage location. Supports GGUF format model import' },
+        { step: 3, title: 'Start Local Chat or API Server', description: 'Select model and click Chat for ChatGPT-like GUI chat. Click Server tab to start local API server, auto-provides OpenAI-compatible interface http://localhost:1234/v1/' }
+      ],
+      useCases: [
+        { title: 'Local ChatGPT Alternative', description: 'For users wanting offline or paid API subscription-free, load Llama3.2/Qwen2.5 models in LM Studio for chat experience rivaling online services, supports multi-turn dialogue, chat history saving' },
+        { title: 'Developer Quick Local LLM Integration', description: 'After starting built-in OpenAI-compatible API server, existing LangChain/LlamaIndex apps connect to local models without code changes. Supports both completion and chat interfaces' },
+        { title: 'Offline Code Assistant', description: 'Load CodeLlama or DeepSeek-Coder models for code completion, refactoring, explanation. Suitable for development work in offline environments like flights or intranets' },
+        { title: 'Model Performance Benchmarking', description: 'LM Studio provides inference speed (Tokens/s), VRAM usage and other performance metrics. Easy model switching in same interface for benchmarking, helps select best model for hardware and tasks' }
+      ],
+      tips: [
+        'Hardware: Mac M-series recommends 16GB+ unified memory, NVIDIA GPU recommends 8GB+ VRAM. First large model load caches to GPU, subsequent starts faster',
+        'Context length: Qwen2.5, Llama3.2 support 128K context but will significantly slow on low-spec machines, recommend choosing based on hardware capability',
+        'Quantization version: Q5_K_M balances quality and speed, Q8_0 highest quality but slower, Q4_K_S fastest but slightly lower quality. Generally recommend Q5_K_M',
+        'GPU offloading: Settings adjusts GPU offloading layers (0-100), more layers to GPU accelerates inference but uses more VRAM, suggest starting from 50 and tuning'
+      ],
+      updateNotes: '2026 update: v0.8.x supports multimodal model chat, image understanding, built-in Embedding models, model merger tool, performance analysis panel, Mac Metal acceleration optimization'
+    },
+    updateSourceUrl: 'https://lmstudio.ai/changelog',
+    updateSourceType: 'changelog',
+  },
+  'anything-llm': {
+    id: '30',
+    name: 'AnythingLLM',
+    slug: 'anything-llm',
+    description: 'Local RAG knowledge base application, build private AI knowledge assistant, support document dialogue and knowledge base management.',
+    category: 'agent',
+    subcategory: 'knowledge-base',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/Mintplex-Labs/anything-llm',
+    imageUrl: 'https://placehold.co/800x400/14b8a6/ffffff?text=AnythingLLM',
+    rating: 4.6,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.5, features: 4.7, value: 4.8 },
+    tags: ['knowledge base', 'RAG', 'local deployment', 'document Q&A', 'privatization'],
+    features: ['Multi-document support', 'Vector database', 'Workspace isolation', 'Private deployment', 'API integration'],
+    alternatives: ['ollama', 'dify'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Install AnythingLLM', description: 'Desktop download installers (Haggmark/Windows/Linux) or use Docker: docker run -p 3001:3001 mintplexlabs/anything-llm. First launch configures workspace name and default LLM provider' },
+        { step: 2, title: 'Add Document Knowledge Base', description: 'Supports PDF, TXT, Markdown, DOCX, CSV, XLSX and other formats. Click Workspace -> Upload to upload files or drag and drop. System auto performs document chunking and vectorized storage' },
+        { step: 3, title: 'Configure Embedding Model and LLM', description: 'Settings use Ollama local models (recommended nomic-embed-text for Embedding) or other APIs (OpenAI/DeepSeek). Save and chat in chat box based on uploaded documents' }
+      ],
+      useCases: [
+        { title: 'Enterprise Knowledge Base Q&A', description: 'Upload company internal documents, contracts, regulations, product manuals to build conversable knowledge base. Employees use natural language to quickly retrieve answers without manual FAQ organization' },
+        { title: 'Legal/Medical Document Analysis', description: 'Lawyers upload case files, doctors upload medical literature for retrieval and analysis via natural language. Supports multi-turn follow-up questions for deep detail mining, all data stays local for compliance' },
+        { title: 'Personal Research Material Management', description: 'Researchers upload papers, notes, web bookmarks for RAG-based quick retrieval and organization. Supports citing original text to avoid hallucination issues' },
+        { title: 'Customer Service Bot Knowledge Source', description: 'Import product docs, FAQs, technical specs into AnythingLLM for accurate document-based Q&A service, avoiding hallucination answers from general LLMs' }
+      ],
+      tips: [
+        'Vector database: Default LanceDB (built-in), production recommended switching to Pinecone (cloud) or Qdrant (self-hosted) for better performance',
+        'Document chunking strategy: Adjust chunkSize (default 500 tokens) and chunkOverlap in Settings. Technical docs use smaller chunks + larger overlap for more precise retrieval',
+        'Multi-workspace isolation: Create different Workspaces to isolate documents and conversations for different projects/departments like Company-Docs, Product-Manuals, Legal-Contracts',
+        'LLM provider: Embedding use local Ollama (nomic-embed-text) to save API costs, use DeepSeek API (cheap) or local Llama3 for generation'
+      ],
+      updateNotes: '2026 update: v1.6.x supports multimodal document understanding, Max tokens increased to 32K, Workspace collaboration, Pinecone/Weaviate cloud vector library integration, custom Embedding models'
+    },
+    updateSourceUrl: 'https://github.com/Mintplex-Labs/anything-llm/releases',
+    updateSourceType: 'github',
+  },
+  'deepseek': {
+    id: '31',
+    name: 'DeepSeek',
+    slug: 'deepseek',
+    description: '70K+ Stars Chinese open-source large model, extremely low API price, leading math and code capabilities, supports open-source model local deployment.',
+    category: 'communication',
+    subcategory: 'llm',
+    pricing: 'paid',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://deepseek.com',
+    imageUrl: 'https://placehold.co/800x400/1a1a2e/ffffff?text=DeepSeek',
+    rating: 4.7,
+    ratingCount: 6800,
+    dimensions: { easeOfUse: 4.5, features: 4.8, value: 4.9 },
+    tags: ['large model', 'Chinese', 'cheap API', 'code', 'math'],
+    features: ['Low-cost API', 'Open-source model', 'Code generation', 'Math reasoning', 'Long context'],
+    alternatives: ['qwen', 'kimi'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Get API Key', description: 'Register at deepseek.com/platform, create API key on API Keys page. Personal version enjoys low prices, enterprise version can apply for higher quota. Supports WeChat/Alipay recharge' },
+        { step: 2, title: 'Call API Interface', description: 'Official SDK: pip install openai, or use curl directly. Base endpoint https://api.deepseek.com/chat/completions, model selection deepseek-chat (latest) or deepseek-coder' },
+        { step: 3, title: 'Integrate into Applications', description: 'Replace OpenAI base_url with DeepSeek endpoint, API key with DeepSeek, almost no code changes needed. Supports function calling, json mode, streaming' }
+      ],
+      useCases: [
+        { title: 'Low-Cost AI Application Development', description: 'DeepSeek price is about 1/50 of GPT-4, suitable for startups and individual developers for MVP. $1 can handle about 100,000 conversations, reducing AI application trial costs' },
+        { title: 'Code Generation and Debugging', description: 'DeepSeek-Coder performs excellently on code generation tasks, supports Python, Java, Go, JavaScript and other mainstream languages, usable for IDE plugins, code review, automated test generation' },
+        { title: 'Chinese NLP Applications', description: 'DeepSeek-Chat optimized for Chinese context, high cost-performance on Chinese Q&A, text generation, summarization tasks. Suitable for content creation, customer service, translation scenarios' },
+        { title: 'Private Knowledge Base Q&A', description: 'Combine with LangChain/LlamaIndex for RAG applications, use domestic MiniLM or BGE models for Embedding, DeepSeek API for generation, overall solution cost-controllable' }
+      ],
+      tips: [
+        'Model selection: deepseek-chat for general conversation, deepseek-coder for coding tasks. Coder 128K context suitable for processing large files',
+        'Prompt optimization: DeepSeek sensitive to system prompts, using Few-shot examples can significantly improve output quality',
+        'Cost control: Enable stream mode for real-time return reducing wait time; set max_tokens reasonably to avoid waste; batch requests merge calls',
+        'Token calculation: Use official tool or tiktoken library to accurately calculate tokens, avoid exceeding limits. Chinese token count about 1.5-2x Chinese character count'
+      ],
+      updateNotes: '2026 update: DeepSeek-V3 latest version released, MoE architecture 240 billion parameters, code capability significantly improved. DeepSeek-R2 in internal testing, supports multimodal. New Function Calling stable version, API adds EU regional nodes'
+    },
+    updateSourceUrl: 'https://api-docs.deepseek.com/updates',
+    updateSourceType: 'changelog',
+  },
+  'qwen': {
+    id: '32',
+    name: 'Qwen',
+    slug: 'qwen',
+    description: 'Alibaba Tongyi Qianwen large model, open-source version Qwen2/1.8B-72B, supports Chinese and English, performance comparable to GPT-4.',
+    category: 'communication',
+    subcategory: 'llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://qwenlm.github.io',
+    imageUrl: 'https://placehold.co/800x400/f59e0b/ffffff?text=Qwen',
+    rating: 4.6,
+    ratingCount: 5200,
+    dimensions: { easeOfUse: 4.4, features: 4.7, value: 4.8 },
+    tags: ['large model', 'Alibaba', 'open-source', 'Tongyi Qianwen', 'Chinese-English bilingual'],
+    features: ['Open-source model', 'Multiple size versions', 'Long context', 'Code generation', 'Chinese optimization'],
+    alternatives: ['deepseek', 'chatglm'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Choose Deployment Method', description: 'Local deployment: Download Qwen2.5 series GGUF models to run with Ollama/LM Studio. E.g. ollama pull qwen2.5:14b. API call: Tongyi Qianwen API or DashScope platform' },
+        { step: 2, title: 'Local Model Configuration (Ollama)', description: 'ollama run qwen2.5:14b for direct running. Qwen2.5-72B needs dual GPUs or quantization. Recommended Q4_K_M quantization, 14B model about 8GB VRAM usable' },
+        { step: 3, title: 'API Call (Qwen API)', description: 'Apply for API Key at Alibaba Cloud DashScope platform, SDK supports OpenAI-compatible format. Example: base_url=https://dashscope.aliyuncs.com/compatible-mode/v1' }
+      ],
+      useCases: [
+        { title: 'Chinese Smart Customer Service', description: 'Qwen2.5 excellent Chinese capability, deploy local customer service bot for user consulting. Supports multi-turn dialogue, 14B version handles product recommendations, after-sales Q&A smoothly' },
+        { title: 'Content Creation Assistant', description: 'Suitable for copywriting, story creation, email generation. 72B version strongest creative ability, 7B version fast response suitable for simple copywriting' },
+        { title: 'Code Development Assistance', description: 'Qwen2.5-Coder focuses on code, supports code completion, bug fixes, code explanation. Qwen architecture compatible with Llama, mature toolchain' },
+        { title: 'Alibaba Cloud Ecosystem Integration', description: 'Deep integration with DingTalk, Alibaba Cloud Function Compute, PAI and other Alibaba products. Enterprise users can directly deploy Qwen applications in Alibaba Cloud environment' }
+      ],
+      tips: [
+        'Model size: 7B suitable for simple Q&A and copywriting, 14B for complex reasoning and multi-turn dialogue, 72B/110B for high-quality creative tasks',
+        'Chinese optimization: Qwen2.5 pre-training data high Chinese ratio, daily Chinese scenarios better than同等规模Llama models',
+        'Tool calling: Qwen2.5 supports ReAct mode Tool Use, can connect to external tools like search, database to build Agents',
+        'Long context: Qwen2.5-Instruct supports 32K context, more stable than Llama on long documents but increases VRAM usage'
+      ],
+      updateNotes: '2026 update: Qwen3 series released (128K context), Qwen2.5-72B latest open source version. Qwen-Waabi side-end model released (1.5B/0.5B can run on phones). Alibaba Cloud DashScope adds Qwen-VL multimodal API'
+    },
+    updateSourceUrl: 'https://github.com/QwenLM/Qwen3/releases',
+    updateSourceType: 'github',
+  },
+  'chatglm': {
+    id: '33',
+    name: 'ChatGLM',
+    slug: 'chatglm',
+    description: 'Tsinghua Zhipu AI developed hundred-billion parameter large model, open-source ChatGLM2-6B/GLM-4 series, strong Chinese understanding capability.',
+    category: 'communication',
+    subcategory: 'llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://chatglm.cn',
+    imageUrl: 'https://placehold.co/800x400/10b981/ffffff?text=ChatGLM',
+    rating: 4.5,
+    ratingCount: 4800,
+    dimensions: { easeOfUse: 4.3, features: 4.6, value: 4.7 },
+    tags: ['large model', 'Tsinghua', 'open-source', 'Chinese', 'hundred-billion parameters'],
+    features: ['Hundred-billion parameters', 'Chinese optimization', 'Open-source version', 'Fine-tuning support', 'Local deployment'],
+    alternatives: ['qwen', 'deepseek'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: 'Choose Deployment Method', description: 'Local deployment: Download ChatGLM3 series GGUF models to run with Ollama/LM Studio. API call: Zhipu AI open platform (glmnlp.com) apply for API Key' },
+        { step: 2, title: 'Local Model Running', description: 'ollama pull chatglm3 or ollama pull chatglm4. ChatGLM4-9B recommended config 12GB+ VRAM, 6B version runs on 8GB. Supports INT4 quantization' },
+        { step: 3, title: 'API Integration', description: 'pip install zhipuai SDK. Call example: client = ZhipuAI(api_key=\'your_key\'); response = client.chat.completions.create(model=\'glm-4\', messages=[...])' }
+      ],
+      useCases: [
+        { title: 'Chinese Dialogue and Q&A', description: 'ChatGLM4 excellent Chinese semantic understanding, suitable for intelligent customer service, knowledge Q&A, text generation. GLM-4-AllTools version supports web search, code execution' },
+        { title: 'Long Document Processing', description: 'ChatGLM4 supports 128K ultra-long context, usable for long document summarization, cross-document retrieval, paper intensive reading needing processing large amounts of text' },
+        { title: 'Finance/Legal Professional Scenarios', description: 'Zhipu provides industry fine-tuned versions (GLG-Finance etc.), optimized for finance analysis, legal consultation scenarios. API version has stable SLA guarantee' },
+        { title: 'Multimodal Applications', description: 'GLM-4Vision supports image understanding and dialogue, usable for image Q&A, visual reasoning, poster design needing image understanding' }
+      ],
+      tips: [
+        'API vs local: API version (glm-4) strongest capability but has cost, local 6B/9B models suitable for simple scenarios or high privacy requirements',
+        'Fine-tuned versions: Zhipu provides industry custom fine-tuning services, suitable for enterprises with specific domain needs but lacking fine-tuning capabilities',
+        'Token optimization: Chinese dialogue recommends enabling cache.md feature, repeated context not repeatedly billed, effectively reducing costs',
+        'Function Calling: GLM-4 supports tool calling, suitable for building Agent applications, can connect to external APIs, databases, search and other tools'
+      ],
+      updateNotes: '2026 update: GLM-5 series in internal testing (next-gen base), ChatGLM4 performance continuously optimized. Zhipu AI new enterprise API support for private deployment. GLM-4-AllTools officially released, integrates code interpreter, web search, DALL-E drawing'
+    },
+    updateSourceUrl: 'https://github.com/THUDM/ChatGLM3/releases',
+    updateSourceType: 'github',
+  },
+};
+
+const tool = toolsData[slug as string];
+
+if (!tool) {
+  return Astro.redirect('/en/tools');
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": ["Product", "SoftwareApplication"],
+  "name": tool.name,
+  "description": tool.description,
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "url": tool.url,
+  "image": tool.imageUrl,
+  "brand": {
+    "@type": "Brand",
+    "name": tool.name
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": tool.priceDetail.monthly?.toString() || "0",
+    "priceCurrency": tool.priceDetail.currency,
+    "availability": "https://schema.org/InStock",
+    "priceType": "starting from"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": tool.rating.toString(),
+    "reviewCount": tool.ratingCount.toString(),
+    "ratingExplanation": `${tool.rating} out of 5 stars based on ${tool.ratingCount} reviews`
+  },
+  "featureList": tool.features.join(', '),
+  "keywords": tool.tags.join(', '),
+  "category": tool.category,
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "name": "easeOfUse",
+      "value": tool.dimensions.easeOfUse.toString()
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "features",
+      "value": tool.dimensions.features.toString()
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "value",
+      "value": tool.dimensions.value.toString()
+    }
+  ]
+};
+---
+
+<Layout
+  title={tool.name}
+  description={tool.description}
+  image={tool.imageUrl}
+  type="article"
+  jsonLd={jsonLd}
+>
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <nav class="flex items-center gap-2 text-sm">
+        <a href="/en" class="text-gray-500 hover:text-gray-900">Home</a>
+        <span class="text-gray-400">/</span>
+        <a href="/en/tools" class="text-gray-500 hover:text-gray-900">AI Tools</a>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-900 font-medium">{tool.name}</span>
+      </nav>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2">
+        <!-- Hero Image -->
+        <div class="rounded-xl overflow-hidden mb-8">
+          <img src={tool.imageUrl} alt={tool.name} class="w-full h-auto" />
+        </div>
+
+        <!-- Title Section -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <h1 class="text-3xl font-bold">{tool.name}</h1>
+              {tool.isNew && <span class="badge bg-red-100 text-red-700">New</span>}
+            </div>
+            <FavoriteButton client:load targetType="tool" targetId={tool.id} locale="en" />
+            <ShareButton client:load title={tool.name} description={tool.description} />
+            <button
+              id="copy-link-btn"
+              aria-label="Copy link"
+              onclick="navigator.clipboard.writeText(window.location.href).then(() => { const btn = document.getElementById('copy-link-btn'); if(btn) { btn.textContent = 'Copied!'; setTimeout(() => { if(btn) btn.textContent = 'Copy Link'; }, 2000); } })"
+              class="p-2 rounded-lg text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
+              title="Copy Link"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            </button>
+          </div>
+          <p class="text-lg text-gray-600">{tool.description}</p>
+        </div>
+
+        <!-- Features -->
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">Key Features</h2>
+          <div class="grid sm:grid-cols-2 gap-3">
+            {tool.features.map(feature => (
+              <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Rating Details -->
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">Rating Details</h2>
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="text-5xl font-bold text-primary-600">{tool.rating}</div>
+              <div>
+                <div class="rating mb-2">
+                  <StarRating client:load targetType="tool" targetId={tool.id} size="lg" />
+                </div>
+                <p class="text-sm text-gray-500">{tool.ratingCount} reviews</p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">Ease of Use</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-primary-500 rounded-full" style={`width: ${tool.dimensions.easeOfUse * 20}%`}></div>
+                  </div>
+                  <span class="text-sm font-medium w-8">{tool.dimensions.easeOfUse}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">Features</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-secondary-500 rounded-full" style={`width: ${tool.dimensions.features * 20}%`}></div>
+                  </div>
+                  <span class="text-sm font-medium w-8">{tool.dimensions.features}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">Value</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-green-500 rounded-full" style={`width: ${tool.dimensions.value * 20}%`}></div>
+                  </div>
+                  <span class="text-sm font-medium w-8">{tool.dimensions.value}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Alternatives -->
+        {(() => {
+          // Build a slug -> name lookup from all defined tools
+          const altNames = {};
+          Object.values(toolsData).forEach((t) => { altNames[t.slug] = t.name; });
+          // Only show alternatives that exist in our data
+          const validAlts = tool.alternatives.filter(a => altNames[a]);
+          if (validAlts.length === 0) return null;
+          return (
+            <section>
+              <h2 class="text-xl font-semibold mb-4">Alternative Tools</h2>
+              <div class="flex flex-wrap gap-2">
+                {validAlts.map(alt => (
+                  <a href={`/en/tools/${alt}`} class="btn-outline text-sm">
+                    {altNames[alt]}
+                  </a>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* Comments Section */}
+        <section class="mt-12">
+          <CommentSection client:load targetType="tool" targetId={tool.id} locale="en" showRating={true} />
+        </section>
+
+        <!-- Capability Expansion -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">Capability Expansion</h2>
+          <div class="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-100 p-6">
+            <div class="grid sm:grid-cols-2 gap-4">
+              {tool.features.slice(0, 4).map((feature, idx) => (
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900">{feature}</h4>
+                    <p class="text-sm text-gray-600 mt-1">
+                      {idx === 0 ? 'Click to learn detailed application scenarios for this capability' :
+                       idx === 1 ? 'See how this capability performs in real usage' :
+                       idx === 2 ? 'Explore how this capability improves work efficiency' :
+                       'Learn about the latest updates and optimizations for this capability'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div class="mt-4 pt-4 border-t border-primary-100">
+              <p class="text-sm text-gray-600">
+                <span class="font-medium text-primary-700">Tip:</span>
+                Most AI tools support API access, allowing you to integrate them into third-party applications or automated workflows.
+                {tool.pricing === 'free' || tool.pricing === 'freemium' ? 'This tool offers a free version, try it out before deciding whether to upgrade.' : 'Paid versions usually offer higher usage limits and more advanced features.'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Update Notes -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">Update Notes</h2>
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">Latest Update</p>
+                <p class="text-sm text-gray-500">Last updated: {new Date(tool.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                <p class="text-sm text-gray-700">Tool ratings and review data are regularly updated based on user feedback</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                <p class="text-sm text-gray-700">Feature lists and pricing information may change due to official updates; refer to the official website for accuracy</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <div class="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div>
+                <p class="text-sm text-gray-700">If you find any inaccurate information, feel free to provide feedback through the comment section</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- How to Get Started -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">How to Get Started with {tool.name}</h2>
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="space-y-4">
+              <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold flex-shrink-0">1</div>
+                <div>
+                  <h4 class="font-medium text-gray-900 mb-1">Create an Account</h4>
+                  <p class="text-sm text-gray-600">Visit the {tool.name} official website and click the register button to create an account. Use email or Google/Apple account for quick registration.</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold flex-shrink-0">2</div>
+                <div>
+                  <h4 class="font-medium text-gray-900 mb-1">Choose a Suitable Plan</h4>
+                  <p class="text-sm text-gray-600">Based on your usage needs, choose the free or paid version. {tool.pricing === 'free' ? 'This tool is completely free to use.' : tool.pricing === 'freemium' ? 'The free version already has basic features; paid versions unlock more advanced features.' : 'The paid version provides complete features.'}</p>
+                </div>
+              </div>
+              <div class="flex gap-4">
+                <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold flex-shrink-0">3</div>
+                <div>
+                  <h4 class="font-medium text-gray-900 mb-1">Start Using</h4>
+                  <p class="text-sm text-gray-600">Log in to start using {tool.name}. {tool.features[0] ? `Recommended to start with the ${tool.features[0]} feature.` : 'Explore various features to find the usage style that suits you best.'}</p>
+                </div>
+              </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <a href={tool.url} target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex items-center gap-2">
+                <span>Get Started Now</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Use Cases -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">Use Cases</h2>
+          <div class="grid sm:grid-cols-2 gap-4">
+            {tool.features.slice(0, 4).map((feature, idx) => (
+              <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200 hover:border-primary-300 transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center mb-3">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h4 class="font-medium text-gray-900 mb-2">{feature}</h4>
+                <p class="text-sm text-gray-600">
+                  {idx === 0 ? 'Suitable for daily tasks and beginner usage scenarios' :
+                   idx === 1 ? 'Supports professional-level applications and complex tasks' :
+                   idx === 2 ? 'A powerful tool to improve work and study efficiency' :
+                   'Explore more possibilities with AI'}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Tips & Best Practices -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">Tips & Best Practices</h2>
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100 p-6">
+            <ul class="space-y-3">
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <p class="text-sm text-gray-700">Using specific and clear prompts可以获得更准确的回答</p>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <p class="text-sm text-gray-700">Make full use of context dialogue capability - continue asking questions in the same session</p>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <p class="text-sm text-gray-700">{tool.category === 'coding' ? 'Providing code context and specific error messages makes it easier to get effective help' : 'Try different expressions to find the interaction style that works best for you'}</p>
+              </li>
+              <li class="flex items-start gap-3">
+                <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+                <p class="text-sm text-gray-700">{tool.pricing !== 'free' ? 'Make full use of the free quota before deciding whether to upgrade' : 'Although this is a free tool, there are still usage limits - keep an eye on your usage'}</p>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Related Tools (More Comprehensive) -->
+        {(() => {
+          // Get tools in same category
+          const sameCategoryTools = Object.values(toolsData).filter(t => t.category === tool.category && t.slug !== tool.slug).slice(0, 4);
+          const hasRelated = sameCategoryTools.length > 0;
+          if (!hasRelated) return null;
+          return (
+            <section class="mt-8">
+              <h2 class="text-xl font-semibold mb-4">Related Tools</h2>
+              <div class="grid sm:grid-cols-2 gap-4">
+                {sameCategoryTools.map(t => (
+                  <a href={`/en/tools/${t.slug}`} class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-primary-300 hover:shadow-md transition-all group">
+                    <div class="flex items-center gap-3">
+                      <img src={t.imageUrl} alt={t.name} class="w-12 h-12 rounded-lg object-cover" loading="lazy" />
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-gray-900 group-hover:text-primary-600 transition-colors truncate">{t.name}</h4>
+                        <p class="text-sm text-gray-500 truncate">{t.description.slice(0, 40)}...</p>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span class="text-sm font-medium">{t.rating}</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="lg:col-span-1">
+        <div class="sticky top-24 space-y-6">
+          <!-- CTA Card -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="text-center mb-6">
+              <span class={`badge text-lg px-4 py-1 ${
+                tool.pricing === 'free' ? 'badge-free' :
+                tool.pricing === 'paid' ? 'badge-paid' : 'badge-freemium'
+              }`}>
+                {tool.pricing === 'free' ? 'Free' :
+                 tool.pricing === 'paid' ? `$${tool.priceDetail.monthly}/mo` : 'Free + Paid'}
+              </span>
+            </div>
+            <a
+              href={tool.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary w-full text-center"
+            >
+              Visit Website
+            </a>
+            <p class="text-xs text-gray-500 text-center mt-3">
+              This link leads to the official website
+            </p>
+          </div>
+
+          <!-- Real-time Pricing -->
+          <ToolPricingRealtime
+            client:load
+            toolSlug={tool.slug}
+            toolName={tool.name}
+            officialUrl={tool.url}
+            locale="en"
+          />
+
+          <!-- Compare Button -->
+          <CompareButton
+            client:load
+            toolSlug={tool.slug}
+            toolName={tool.name}
+            toolImage={tool.imageUrl}
+            locale="en"
+          />
+
+          <!-- Compare Link -->
+          <div class="bg-primary-50 rounded-xl border border-primary-200 p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-semibold text-primary-900 mb-1">Compare Tools</h3>
+                <p class="text-xs text-primary-700">Multi-dimensional comparison with other tools</p>
+              </div>
+              <a href="/en/compare" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                Compare →
+              </a>
+            </div>
+          </div>
+
+          <!-- Quick Info -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 class="font-semibold mb-4">Basic Information</h3>
+            <dl class="space-y-3 text-sm">
+              <div class="flex justify-between">
+                <dt class="text-gray-500">Category</dt>
+                <dd class="font-medium">
+                  {tool.category === 'agent' ? 'Agent' :
+                   tool.category === 'writing' ? 'Writing' :
+                   tool.category === 'coding' ? 'Coding' :
+                   tool.category === 'design' ? 'Design' :
+                   tool.category === 'research' ? 'Research' : 'Communication'}
+                </dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">Tags</dt>
+                <dd class="font-medium text-right max-w-[150px]">
+                  {tool.tags.slice(0, 3).join(', ')}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Payment Solutions -->
+          <div class="bg-secondary-50 rounded-xl border border-secondary-200 p-6">
+            <h3 class="font-semibold mb-3 text-secondary-900">Payment Issues?</h3>
+            <p class="text-sm text-secondary-700 mb-4">
+              Check out our payment solutions guide
+            </p>
+            <a href="/en/payment" class="btn-secondary w-full text-center text-sm">
+              Payment Guide
+            </a>
+          </div>
+
+          <!-- University Policy -->
+          <div class="bg-green-50 rounded-xl border border-green-200 p-6">
+            <h3 class="font-semibold mb-3 text-green-900">Allowed at Your University?</h3>
+            <p class="text-sm text-green-700 mb-4">
+              Check your school's AI policy to avoid violations
+            </p>
+            <a href="/en/policies" class="bg-green-600 text-white btn w-full text-center text-sm hover:bg-green-700">
+              Check Policy
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>

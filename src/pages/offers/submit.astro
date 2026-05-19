@@ -1,0 +1,28 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import SubmitOfferForm from '@/components/offers/SubmitOfferForm';
+
+export const prerender = false;
+
+const locale = 'zh';
+---
+
+<Layout
+  title={locale === 'zh' ? '提交Offer' : 'Submit Offer'}
+  description={locale === 'zh' ? '分享你的录取结果和申请经验' : 'Share your admission results and application experience'}
+>
+  <div class="min-h-[calc(100vh-200px)] py-12 px-4">
+    <div class="max-w-3xl mx-auto">
+      <a
+        href="/offers"
+        class="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        {locale === 'zh' ? '返回列表' : 'Back to List'}
+      </a>
+      <SubmitOfferForm locale={locale} client:only="react" />
+    </div>
+  </div>
+</Layout>

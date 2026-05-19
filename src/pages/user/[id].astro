@@ -1,0 +1,16 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import UserPublicProfile from '@/components/user/UserPublicProfile';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const locale = 'zh';
+---
+
+<Layout
+  title={locale === 'zh' ? '用户主页' : 'User Profile'}
+  description={locale === 'zh' ? '查看用户主页和公开内容' : 'View user profile and public content'}
+>
+  <UserPublicProfile userId={id} locale={locale} client:only="react" />
+</Layout>

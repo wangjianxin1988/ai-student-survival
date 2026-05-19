@@ -1,0 +1,61 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Header from '@/components/Header.astro';
+import MapPage from '@/components/map/MapPage';
+import { mapMarkers, universities } from '@/data/map-markers';
+import { CATEGORY_ICONS, CATEGORY_NAMES } from '@/lib/types';
+
+const currentPath = '/map';
+
+// Get unique categories
+const categories = [...new Set(mapMarkers.map(m => m.category))];
+---
+
+<Layout title="Campus Map - MI TO AI留学生存指南">
+  <Header currentPath={currentPath} locale="zh" slot="header" />
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">校园地图</h1>
+        <p class="text-gray-600">探索校园设施，找到你需要的地方</p>
+      </div>
+      <a
+        href="/map/add"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        添加标记
+      </a>
+    </div>
+
+    <!-- Map Page with Filters -->
+    <MapPage
+      client:only="react"
+      markers={mapMarkers}
+      universities={universities}
+      height="600px"
+    />
+
+    <!-- Legend -->
+    <div class="mt-8 p-4 bg-gray-50 rounded-lg">
+      <h3 class="font-semibold text-gray-900 mb-3">图例</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        {categories.map(cat => (
+          <div class="flex items-center gap-2">
+            <span class="text-xl">{CATEGORY_ICONS[cat]}</span>
+            <span class="text-sm text-gray-700">{CATEGORY_NAMES[cat]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mt-4 text-center text-sm text-gray-500">
+      共 {universities.length} 所大学 · {mapMarkers.length} 个地点标记
+    </div>
+  </main>
+</ Layout>

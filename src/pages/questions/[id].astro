@@ -1,0 +1,17 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import QuestionDetailClient from '@/components/questions/QuestionDetailClient';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const locale = 'zh';
+
+if (!id) {
+  return Astro.redirect('/questions');
+}
+---
+
+<Layout title={locale === 'zh' ? '问题详情' : 'Question Details'}>
+  <QuestionDetailClient questionId={id} locale={locale} client:only="react" />
+</Layout>

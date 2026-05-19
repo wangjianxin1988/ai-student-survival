@@ -1,0 +1,22 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import SurvivalDetailClient from '@/components/survival/SurvivalDetailClient';
+import { type Locale, getLocaleFromUrl } from '@/i18n';
+
+export const prerender = false;
+
+// Required for dynamic route validation in hybrid mode
+export function getStaticPaths() {
+  return [];
+}
+
+const { id } = Astro.params;
+const locale: Locale = getLocaleFromUrl(Astro.url);
+---
+
+<Layout
+  title={locale === 'zh' ? '指南详情' : 'Guide Details'}
+  description={locale === 'zh' ? '查看防坑防骗指南详情' : 'View survival guide details'}
+>
+  <SurvivalDetailClient guideId={id} locale={locale} client:only="react" />
+</Layout>

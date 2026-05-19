@@ -1,0 +1,1089 @@
+{
+  "site": {
+    "name": "MI TO AI留学生存指南",
+    "description": "中国留学生AI工具大全 - 工具推荐·支付指南·大学政策·Prompt模板"
+  },
+  "nav": {
+    "aiTools": "AI工具库",
+    "payment": "支付解决方案",
+    "policies": "大学政策",
+    "prompts": "Prompt库",
+    "survival": "防坑指南",
+    "api": "API文档",
+    "compare": "工具对比",
+    "about": "关于我们",
+    "contact": "联系我们",
+    "privacy": "隐私政策",
+    "terms": "使用条款",
+    "login": "登录",
+    "register": "注册",
+    "offers": "Offer展示",
+    "map": "校园地图",
+    "questions": "问答社区",
+    "faq": "常见问题",
+    "useGuide": "使用指南"
+  },
+  "footer": {
+    "tagline": "中国留学生AI工具第一站 - 从工具选择到成功支付，一站式解决留学路上的所有AI难题",
+    "toolsCategory": "工具分类",
+    "resources": "资源",
+    "writing": "写作工具",
+    "coding": "编程工具",
+    "design": "设计工具",
+    "research": "研究工具"
+  },
+  "common": {
+    "search": "搜索",
+    "searchPlaceholder": "搜索工具...",
+    "browse": "浏览",
+    "explore": "开始探索",
+    "viewDetails": "查看详情",
+    "back": "返回",
+    "results": "个结果",
+    "tutorials": "篇教程",
+    "universities": "所大学",
+    "countries": "个国家",
+    "filters": "筛选",
+    "clearFilters": "清除筛选",
+    "noResults": "没有找到匹配的结果",
+    "loading": "加载中...",
+    "copyLink": "复制链接",
+    "share": "分享",
+    "copied": "已复制"
+  },
+  "search": {
+    "history": "搜索历史",
+    "clear": "清空",
+    "trending": "热门搜索",
+    "searching": "搜索中...",
+    "noResults": "没有找到相关结果",
+    "navigate": "导航",
+    "navigateLabel": "上/下",
+    "select": "选择",
+    "close": "关闭",
+    "trendingChatGPT": "ChatGPT",
+    "trendingClaude": "Claude",
+    "trendingMidjourney": "Midjourney",
+    "trendingPayment": "支付",
+    "trendingMIT": "MIT",
+    "trendingStanford": "斯坦福",
+    "trendingCopilot": "GitHub Copilot",
+    "trendingPrompts": "Prompt模板"
+  },
+  "notifications": {
+    "title": "通知",
+    "markAllRead": "全部标为已读",
+    "noNotifications": "暂无通知",
+    "clearAll": "清空所有",
+    "follow": "关注了你",
+    "comment": "评论了你的内容",
+    "favorite": "收藏了你的内容",
+    "rating": "评价了你的内容",
+    "like": "点赞了你的内容",
+    "system": "系统通知"
+  },
+  "user": {
+    "profile": "个人主页",
+    "favorites": "收藏",
+    "ratings": "评分",
+    "reviews": "评论",
+    "offers": "Offer",
+    "followers": "粉丝",
+    "following": "关注",
+    "points": "积分",
+    "level": "等级",
+    "joined": "加入于",
+    "noPublicContent": "暂无公开内容",
+    "notFound": "用户不存在",
+    "goBack": "返回"
+  },
+  "settings": {
+    "title": "账户设置",
+    "profileInfo": "个人信息",
+    "email": "邮箱",
+    "nickname": "昵称",
+    "nicknamePlaceholder": "输入昵称",
+    "bio": "个人简介",
+    "bioPlaceholder": "介绍一下你自己...",
+    "avatar": "头像",
+    "uploadAvatar": "上传头像",
+    "avatarHint": "点击上传或拖拽图片到此处，支持 JPG、PNG，最大 2MB",
+    "saveChanges": "保存更改",
+    "privacy": "隐私设置",
+    "privacyPublic": "公开",
+    "privacyPublicDesc": "其他用户可以查看你的个人主页、收藏和评分",
+    "privacyPrivate": "私密",
+    "privacyPrivateDesc": "其他用户只能看到你的用户名，无法查看详细信息",
+    "notifications": "通知设置",
+    "notifEmail": "邮件通知",
+    "notifNewFollower": "新粉丝通知",
+    "notifNewComment": "评论提醒",
+    "notifNewFavorite": "收藏提醒",
+    "notifNewRating": "评分提醒",
+    "notifWeeklyDigest": "每周摘要",
+    "dangerZone": "危险区域",
+    "signOut": "退出登录",
+    "deleteAccount": "删除账户",
+    "deleteConfirm": "确定要删除账户吗？此操作不可撤销。",
+    "saved": "保存成功！",
+    "language": "语言设置",
+    "languageZh": "中文",
+    "languageEn": "English"
+  },
+  "onboarding": {
+    "title": "欢迎来到AI留学生存指南",
+    "subtitle": "让我们快速带你了解核心功能",
+    "skip": "跳过",
+    "next": "下一步",
+    "done": "开始探索"
+  },
+  "qa": {
+    "title": "问答",
+    "askQuestion": "提问",
+    "yourQuestion": "你的问题",
+    "questionPlaceholder": "描述你的问题...",
+    "submitQuestion": "提交问题",
+    "noQuestions": "暂无问题",
+    "beFirst": "成为第一个提问的人",
+    "answers": "个回答",
+    "answer": "回答",
+    "writeAnswer": "撰写回答",
+    "answerPlaceholder": "写下你的回答...",
+    "submitAnswer": "提交回答",
+    "accepted": "已采纳",
+    "helpful": "有帮助",
+    "views": "浏览",
+    "similarQuestions": "相似问题",
+    "loginToAsk": "登录后提问",
+    "login": "登录"
+  },
+  "home": {
+    "hero": {
+      "title": "留学AI工具，一个就够",
+      "subtitle": "工具地图 · 支付方案 · 大学政策 · Prompt模板 · Offer展示",
+      "description": "一站式解决：工具选择、支付难题、大学政策、申请经验。学长学姐真实分享，让你的留学生活开挂",
+      "browseTools": "开始探索",
+      "paymentSolutions": "支付有难题？",
+      "exploreMap": "浏览工具地图",
+      "exploreTools": "探索AI工具库",
+      "viewOffers": "查看学长Offer",
+      "statTools": "AI工具收录",
+      "statPayment": "支付解决方案",
+      "statPolicies": "大学AI政策",
+      "statPrompts": "Prompt模板"
+    },
+    "modules": {
+      "title": "留学生必备AI工具箱",
+      "subtitle": "有了这些，再也不怕AI工具选择困难症",
+      "aiTools": {
+        "title": "AI工具库",
+        "description": "500+主流AI工具，多维对比评分，附真实用户评价，找到最适合你的那一款"
+      },
+      "payment": {
+        "title": "支付解决方案",
+        "description": "没有信用卡？虚拟卡、礼品卡、地区定价...20+方案帮你搞定支付难题"
+      },
+      "policies": {
+        "title": "大学AI政策",
+        "description": "首家全面收录200+海外大学AI政策，实时更新，再也不怕违规使用"
+      },
+      "prompts": {
+        "title": "Prompt模板",
+        "description": "1000+精选模板，覆盖申请文书、论文写作、求职面试，直接用"
+      }
+    },
+    "painPoints": {
+      "title": "留学生使用AI工具的四大痛点",
+      "points": {
+        "1": {
+          "title": "工具选择困难症",
+          "description": "AI工具琳琅满目，不知道哪个最适合自己？效果最好？"
+        },
+        "2": {
+          "title": "支付完全不会",
+          "description": "没有信用卡？国内银行卡被拒？虚拟卡申请复杂怕踩坑？"
+        },
+        "3": {
+          "title": "政策一头雾水",
+          "description": "学校到底让不让用AI？用了会不会被处分？一头雾水"
+        },
+        "4": {
+          "title": "Prompt写不好",
+          "description": "明明有AI工具，却写不出有效的Prompt，效果大打折扣"
+        }
+      },
+      "stats": {
+        "tools": "精选AI工具",
+        "paymentSolutions": "支付方案",
+        "universityPolicies": "大学政策",
+        "promptTemplates": "Prompt模板"
+      }
+    }
+  },
+  "tools": {
+    "title": "AI工具库",
+    "description": "精选留学生常用的AI工具，包括写作、编程、设计、研究等分类，支持多维度筛选和对比",
+    "categories": {
+      "all": "全部分类",
+      "writing": "写作",
+      "coding": "编程",
+      "design": "设计",
+      "research": "研究",
+      "communication": "对话",
+      "agent": "Agent"
+    },
+    "pricing": {
+      "all": "全部价格",
+      "free": "免费",
+      "freemium": "免费+付费",
+      "paid": "付费"
+    },
+    "dbConnected": "[数据库已连接]",
+    "showResults": "显示 {count} 个结果",
+    "compareTools": "对比工具",
+    "new": "新",
+    "free": "免费",
+    "paidPerMonth": "${price}/月",
+    "freePlus": "免费+付费"
+  },
+  "payment": {
+    "title": "支付解决方案",
+    "description": "一站式解决留学生支付AI工具的难题，虚拟卡、礼品卡、地区定价全攻略",
+    "painScore": "留学生支付痛点评分",
+    "helpedStudents": "已帮助留学生解决支付问题",
+    "categories": {
+      "virtualCard": {
+        "label": "虚拟卡",
+        "description": "虚拟信用卡服务，可绑定各种支付方式"
+      },
+      "giftCard": {
+        "label": "礼品卡",
+        "description": "各大平台的礼品卡购买和使用教程"
+      },
+      "regionalPricing": {
+        "label": "地区定价",
+        "description": "利用不同地区价格差异节省费用"
+      },
+      "troubleshooting": {
+        "label": "问题解答",
+        "description": "常见支付问题解决方案"
+      }
+    },
+    "difficulty": {
+      "easy": "简单",
+      "medium": "中等",
+      "hard": "复杂"
+    },
+    "reliability": {
+      "label": "可靠性",
+      "high": "高",
+      "medium": "中",
+      "low": "低"
+    },
+    "views": "浏览",
+    "popularTutorials": "热门教程",
+    "tutorialInfo": "教程信息",
+    "relatedTutorials": "相关教程",
+    "contactSupport": "联系客服",
+    "stillHaveQuestions": "还有问题？",
+    "askCommunity": "如果你没有找到解决方案，可以在社区提问，我们会尽快回答"
+  },
+  "policies": {
+    "title": "大学AI政策数据库",
+    "description": "首家全面收录海外大学AI使用政策的数据库，帮助留学生了解各大学的AI使用规定",
+    "stats": {
+      "universities": "已收录大学",
+      "countries": "覆盖国家",
+      "updating": "持续更新中"
+    },
+    "searchPlaceholder": "搜索大学名称...",
+    "allCountries": "全部国家",
+    "legend": {
+      "allowed": "允许使用",
+      "prohibited": "禁止使用",
+      "restricted": "限制使用",
+      "caseByCase": "各课程不同"
+    },
+    "dataStats": {
+      "title": "数据统计",
+      "allowed": "允许使用",
+      "restricted": "限制使用",
+      "prohibited": "禁止使用",
+      "caseByCase": "各课程不同"
+    },
+    "updatedAt": "更新于",
+    "viewDetails": "查看详情",
+    "noResults": "没有找到匹配的大学",
+    "tryAdjustFilters": "尝试调整搜索条件或浏览其他大学"
+  },
+  "prompts": {
+    "title": "Prompt模板库",
+    "subtitle": "精选40+高质量Prompt模板，覆盖申请文书、学术论文、求职面试、日常沟通等多个场景，一键复制使用",
+    "description": "精选留学生常用的AI提示词模板，包括学术论文润色、邮件撰写、代码审查、研究助手等，帮助你快速上手AI工具",
+    "categories": {
+      "all": "全部",
+      "application": "申请",
+      "thesis": "论文",
+      "job": "工作",
+      "daily": "日常",
+      "research": "研究"
+    },
+    "sortBy": {
+      "rating": "评分最高",
+      "usageCount": "使用最多",
+      "newest": "最新"
+    },
+    "copyPrompt": "复制Prompt",
+    "expandContent": "展开查看完整内容",
+    "applicableTo": "适用于",
+    "copyContent": "复制内容",
+    "exploreMoreTools": "探索更多AI工具"
+  },
+  "compare": {
+    "title": "AI工具对比",
+    "description": "对比留学生的20款主流AI工具，从易用性、功能、价格等多维度进行全面比较，帮助找到最适合自己的AI工具",
+    "selectTools": "选择工具进行对比",
+    "clearAll": "清空对比列表",
+    "selectPlaceholder": "请从下方选择工具（至少选择2个）",
+    "startCompare": "开始对比",
+    "allCategories": "全部",
+    "noSelection": "还没有选择工具",
+    "selectToCompare": "从上方列表选择2-5个工具开始对比",
+    "compareDimensions": "对比维度",
+    "dimensions": {
+      "basicInfo": "基本信息",
+      "category": "类别",
+      "pricingModel": "定价模式",
+      "price": "价格",
+      "ratings": "评分",
+      "overallRating": "综合评分",
+      "ratingCount": "评分人数",
+      "dimensionScores": "维度评分",
+      "easeOfUse": "易用性",
+      "features": "功能丰富度",
+      "value": "性价比",
+      "coreFeatures": "核心功能"
+    },
+    "outOf": "/ 5.0",
+    "best": "最优",
+    "operation": "操作",
+    "viewDetails": "查看详情",
+    "remove": "移除",
+    "maxCompareAlert": "最多只能对比{count}个工具"
+  },
+  "api": {
+    "title": "开放API文档",
+    "description": "AI留学生存指南开放API文档，提供AI工具、支付解决方案、大学政策等数据接口，支持AI爬虫抓取",
+    "aiSpiderFriendly": "AI爬虫友好",
+    "tryEndpoint": "试用工具接口",
+    "viewSitemap": "查看站点地图",
+    "baseInfo": {
+      "title": "基本信息",
+      "responseFormat": "响应格式",
+      "corsOpen": "跨域开放 (*)",
+      "aiSpiderIndexable": "AI爬虫可索引",
+      "standardRest": "标准RESTful"
+    },
+    "requestExample": "请求示例",
+    "endpoints": "接口列表",
+    "requestParams": "请求参数",
+    "responseFields": "响应字段",
+    "responseExample": "响应示例",
+    "tryEndpointInNewTab": "在新标签页测试此接口",
+    "statusCodes": "HTTP状态码",
+    "spiderOptimization": "AI爬虫优化",
+    "enabled": "已启用的优化",
+    "userAgents": "AI爬虫User-Agent",
+    "paramName": "参数名",
+    "paramType": "类型",
+    "required": "必填",
+    "description": "说明",
+    "yes": "是",
+    "no": "否",
+    "contentType": "Content-Type:",
+    "schemaStandard": "符合Schema.org标准的响应结构",
+    "robotsAccess": "robots.txt 开放 /api/ 访问",
+    "optimizations": {
+      "contentType": "Content-Type: application/json",
+      "cors": "Access-Control-Allow-Origin: *",
+      "robotsTag": "X-Robots-Tag: index, follow",
+      "contentTypeOptions": "X-Content-Type-Options: nosniff",
+      "schemaOrg": "符合Schema.org标准的响应结构",
+      "robotsTxt": "robots.txt 开放 /api/ 访问"
+    },
+    "userAgentsList": {
+      "gptbot": "GPTBot (OpenAI)",
+      "ccbot": "CCBot (Common Crawl)",
+      "claude": "Claude (Anthropic)",
+      "anthropicAi": "anthropic-ai",
+      "googleExtended": "Google-Extended"
+    }
+  },
+  "footer": {
+    "tagline": "中国留学生AI工具第一站 - 从工具选择到成功支付，一站式解决留学路上的所有AI难题",
+    "toolsCategory": "工具分类",
+    "resources": "资源",
+    "writing": "写作工具",
+    "coding": "编程工具",
+    "design": "设计工具",
+    "research": "研究工具"
+  },
+  "chatbot": {
+    "title": "AI助手",
+    "placeholder": "问我任何关于AI工具的问题...",
+    "welcome": "你好！我是AI助手，可以帮你找到合适的AI工具、了解支付方案、查询大学政策等。有什么可以帮你的？",
+    "suggestions": ["推荐一个写作AI工具", "哪个学校允许用ChatGPT？", "没有信用卡怎么订阅ChatGPT？"],
+    "send": "发送",
+    "thinking": "思考中...",
+    "suggestTry": "试试这样问："
+  },
+  "auth": {
+    "signIn": "登录",
+    "signUp": "注册",
+    "signOut": "退出登录",
+    "email": "邮箱",
+    "password": "密码",
+    "confirmPassword": "确认密码",
+    "forgotPassword": "忘记密码？",
+    "noAccount": "还没有账号？",
+    "hasAccount": "已有账号？",
+    "orContinueWith": "或继续使用",
+    "googleSignIn": "Google账号登录",
+    "googleSignUp": "Google账号注册"
+  },
+  "favorites": {
+    "myFavorites": "我的收藏",
+    "addFavorite": "添加收藏",
+    "removeFavorite": "取消收藏",
+    "noFavorites": "暂无收藏"
+  },
+  "offers": {
+    "title": "Offer展示",
+    "shareYourOffer": "分享你的Offer",
+    "universityName": "大学名称",
+    "program": "申请项目",
+    "admissionResult": "录取结果",
+    "accepted": "录取",
+    "rejected": "拒信",
+    "waitlisted": "候补",
+    "background": "背景分析",
+    "toolsUsed": "使用工具",
+    "submit": "提交",
+    "noOffers": "暂无Offer记录",
+    "subTitle": "分享你的录取结果，帮助其他留学生做出更好的选择",
+    "filters": "筛选",
+    "clearFilters": "清除筛选",
+    "sortBy": "排序",
+    "newest": "最新",
+    "hottest": "最热",
+    "scholarship": "奖学金金额",
+    "allCountries": "全部国家",
+    "allDegrees": "全部学位",
+    "allResults": "全部结果",
+    "searchPlaceholder": "搜索学校或专业...",
+    "submitOffer": "提交Offer",
+    "showResults": "显示 {count} 个结果",
+    "noResults": "没有找到匹配的Offer",
+    "degree": "学位类型",
+    "master": "硕士",
+    "phd": "博士",
+    "postdoc": "博后",
+    "country": "国家/地区",
+    "scholarshipType": "奖学金类型",
+    "full": "全奖",
+    "partial": "半奖",
+    "none": "无奖",
+    "scholarshipAmount": "奖学金金额",
+    "gpa": "GPA",
+    "gre": "GRE",
+    "toefl": "托福",
+    "ielts": "雅思",
+    "publications": "发表论文数",
+    "researchExperience": "科研经历（年）",
+    "internships": "实习数量",
+    "aiToolsPlaceholder": "例如：ChatGPT, Claude, Perplexity（用逗号分隔）",
+    "timeline": "申请时间线",
+    "timelinePlaceholder": "例如：2025 Fall - Submitted Dec 2024, Result Feb 2025",
+    "advice": "给学弟学妹的建议",
+    "advicePlaceholder": "分享你的申请经验和建议...",
+    "anonymous": "匿名提交",
+    "submitting": "提交中...",
+    "success": "提交成功！感谢分享",
+    "loginRequired": "请先登录才能分享Offer",
+    "login": "登录",
+    "cancel": "取消",
+    "fieldRequired": "此项为必填",
+    "detail": {
+      "comments": "评论",
+      "noComments": "暂无评论",
+      "writeComment": "发表评论",
+      "commentPlaceholder": "写下你的评论...",
+      "submitComment": "提交",
+      "submittingComment": "提交中...",
+      "commentSuccess": "评论提交成功",
+      "notFound": "未找到该Offer",
+      "relatedOffers": "相关Offer",
+      "likes": "点赞"
+    }
+  },
+  "about": {
+    "hero": {
+      "title": "关于我们",
+      "subtitle": "专门为留学生服务的AI工具导航平台"
+    },
+    "mission": {
+      "title": "我们的使命",
+      "desc1": "MI TO AI留学生存指南致力于帮助中国留学生解决使用AI工具过程中遇到的各种难题。",
+      "desc2": "从工具选择到支付方案，从大学政策到Prompt模板，我们提供一站式解决方案。",
+      "desc3": "我们相信，每一位留学生都应该能够平等地享受AI带来的便利。"
+    },
+    "features": {
+      "title": "核心功能",
+      "tools": {
+        "title": "AI工具库",
+        "desc": "收录500+精选AI工具，多维度对比评分"
+      },
+      "payment": {
+        "title": "支付解决方案",
+        "desc": "虚拟卡、礼品卡、地区定价全攻略"
+      },
+      "policies": {
+        "title": "大学AI政策",
+        "desc": "首家全面收录200+所大学AI使用政策"
+      },
+      "prompts": {
+        "title": "Prompt模板",
+        "desc": "1000+高质量模板，覆盖申请、论文、求职"
+      }
+    },
+    "team": {
+      "title": "团队介绍",
+      "desc": "我们是一支由留学生、技术专家、内容创作者和社区志愿者组成的团队。",
+      "developer": {
+        "title": "技术团队",
+        "desc": "负责平台开发和技术维护"
+      },
+      "content": {
+        "title": "内容团队",
+        "desc": "负责工具评测和内容创作"
+      },
+      "community": {
+        "title": "社区志愿者",
+        "desc": "收集反馈，组织活动"
+      }
+    },
+    "guide": {
+      "title": "使用指南",
+      "started": {
+        "title": "快速开始",
+        "desc": "首次使用？按照以下步骤开始你的AI工具之旅。",
+        "step1": "浏览工具地图，了解各类AI工具",
+        "step2": "根据需求选择合适的工具",
+        "step3": "查看支付方案和大学政策"
+      },
+      "tools": {
+        "title": "使用AI工具",
+        "desc": "学会如何高效使用AI工具。",
+        "step1": "搜索或浏览工具分类",
+        "step2": "查看工具详情和评价",
+        "step3": "使用Prompt模板提升效果"
+      },
+      "payment": {
+        "title": "解决支付问题",
+        "desc": "没有信用卡？我们提供多种解决方案。",
+        "step1": "虚拟信用卡（Depay、Wise等）",
+        "step2": "礼品卡购买和兑换",
+        "step3": "利用地区定价差异省钱"
+      },
+      "community": {
+        "title": "参与社区",
+        "desc": "加入问答社区，分享你的经验。",
+        "step1": "提问和回答问题",
+        "step2": "分享你的Offer经验",
+        "step3": "阅读留学防坑指南"
+      },
+      "cta": "开始探索"
+    },
+    "cta": {
+      "title": "有更多问题？",
+      "desc": "联系我们获取帮助或提出建议"
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "联系我们",
+      "subtitle": "我们很乐意听取您的意见、建议和反馈"
+    },
+    "info": {
+      "email": {
+        "title": "邮箱",
+        "desc": "support@mitoai.example.com"
+      },
+      "social": {
+        "title": "社交媒体",
+        "desc": "微信: mitoai_helper"
+      },
+      "hours": {
+        "title": "响应时间",
+        "desc": "工作日 9:00-18:00"
+      }
+    },
+    "form": {
+      "title": "发送消息",
+      "name": "姓名",
+      "namePlaceholder": "输入你的姓名",
+      "email": "邮箱",
+      "emailPlaceholder": "输入你的邮箱",
+      "subject": "主题",
+      "selectSubject": "选择主题",
+      "subjectGeneral": "一般咨询",
+      "subjectFeedback": "反馈建议",
+      "subjectBug": "报告问题",
+      "subjectFeature": "功能请求",
+      "subjectCollab": "合作洽谈",
+      "message": "留言内容",
+      "messagePlaceholder": "写下你想说的...",
+      "submit": "发送",
+      "responseTime": "我们通常在24小时内回复"
+    },
+    "faq": {
+      "title": "查看常见问题",
+      "desc": "也许你的问题已经有答案了"
+    }
+  },
+  "privacy": {
+    "hero": {
+      "title": "隐私政策",
+      "lastUpdate": "最后更新"
+    },
+    "intro": {
+      "title": "介绍",
+      "desc": "MI TO AI留学生存指南非常重视用户的隐私保护。本隐私政策说明了我们如何收集、使用、存储和保护您的个人信息。"
+    },
+    "collect": {
+      "title": "信息收集",
+      "personal": {
+        "title": "个人信息",
+        "items": {
+          "email": "邮箱地址",
+          "name": "昵称",
+          "avatar": "头像",
+          "preferences": "偏好设置"
+        }
+      },
+      "usage": {
+        "title": "使用信息",
+        "items": {
+          "usage": "功能使用情况",
+          "device": "设备信息",
+          "logs": "访问日志"
+        }
+      },
+      "thirdParty": {
+        "title": "第三方服务",
+        "desc": "我们使用以下第三方服务：",
+        "items": {
+          "analytics": "网站分析（如Google Analytics）",
+          "auth": "身份认证（如Google登录）",
+          "cdn": "内容分发（如Cloudflare）"
+        }
+      }
+    },
+    "usage": {
+      "title": "信息使用",
+      "items": {
+        "service": "提供和改进服务",
+        "personalize": "个性化用户体验",
+        "improve": "分析使用趋势",
+        "communication": "发送重要通知",
+        "security": "安全保障"
+      }
+    },
+    "protection": {
+      "title": "数据保护",
+      "items": {
+        "encryption": "数据传输加密",
+        "access": "严格访问控制",
+        "retention": "定期数据备份",
+        "employees": "员工隐私培训"
+      }
+    },
+    "cookies": {
+      "title": "Cookies",
+      "desc": "我们使用Cookies来改善用户体验。",
+      "types": {
+        "title": "Cookie类型",
+        "essential": {
+          "title": "必要Cookies",
+          "desc": "网站正常运行必需"
+        },
+        "analytics": {
+          "title": "分析Cookies",
+          "desc": "帮助我们了解用户行为"
+        },
+        "preferences": {
+          "title": "偏好Cookies",
+          "desc": "记住用户设置"
+        }
+      }
+    },
+    "rights": {
+      "title": "用户权利",
+      "desc": "您对个人数据拥有以下权利：",
+      "access": {
+        "title": "访问权",
+        "desc": "查看我们持有的您的数据"
+      },
+      "correction": {
+        "title": "更正权",
+        "desc": "更正不准确的数据"
+      },
+      "deletion": {
+        "title": "删除权",
+        "desc": "要求删除您的数据"
+      },
+      "portability": {
+        "title": "数据可携带权",
+        "desc": "获取您的数据副本"
+      }
+    },
+    "retention": {
+      "title": "数据保留",
+      "desc": "我们仅在实现收集目的所需的时间内保留您的数据。"
+    },
+    "children": {
+      "title": "儿童隐私",
+      "desc": "我们的服务不面向13岁以下的儿童。"
+    },
+    "changes": {
+      "title": "政策变更",
+      "desc": "我们可能会不时更新本隐私政策。任何变更都会在本页面发布。"
+    },
+    "contact": {
+      "title": "联系我们",
+      "desc": "如果您对本隐私政策有任何问题，请联系我们："
+    }
+  },
+  "terms": {
+    "hero": {
+      "title": "使用条款",
+      "lastUpdate": "最后更新"
+    },
+    "accept": {
+      "title": "接受条款",
+      "desc": "使用MI TO AI留学生存指南即表示您同意遵守本使用条款。"
+    },
+    "services": {
+      "title": "服务描述",
+      "desc": "我们提供以下服务：",
+      "items": {
+        "tools": "AI工具推荐和评测",
+        "payment": "支付解决方案指南",
+        "policies": "大学AI使用政策查询",
+        "prompts": "Prompt模板库",
+        "community": "用户社区互动"
+      }
+    },
+    "accounts": {
+      "title": "用户账户",
+      "register": {
+        "title": "账户注册",
+        "desc": "注册时需提供真实、准确的信息。"
+      },
+      "security": {
+        "title": "账户安全",
+        "desc": "您有责任保护账户安全：",
+        "items": {
+          "strongPassword": "使用强密码",
+          "keepSecret": "妥善保管登录凭证",
+          "notify": "发现异常立即通知我们"
+        }
+      },
+      "terminate": {
+        "title": "账户终止",
+        "desc": "我们保留终止违反条款账户的权利。"
+      }
+    },
+    "content": {
+      "title": "用户内容",
+      "ownership": {
+        "title": "内容所有权",
+        "desc": "您对您发布的内容保留所有权。"
+      },
+      "license": {
+        "title": "内容许可",
+        "desc": "您授予我们使用、复制您发布内容的许可。"
+      },
+      "standards": {
+        "title": "内容标准",
+        "desc": "您的内容必须符合以下标准：",
+        "items": {
+          "legal": "合法合规",
+          "respectful": "尊重他人",
+          "accurate": "真实准确",
+          "noSpam": "无垃圾信息"
+        }
+      }
+    },
+    "prohibited": {
+      "title": "禁止行为",
+      "items": {
+        "illegal": "进行非法活动",
+        "fraud": "欺诈行为",
+        "harm": "伤害他人",
+        "spam": "发送垃圾信息",
+        "scraping": "抓取网站数据",
+        "interfere": "干扰服务运行",
+        "impersonate": "冒充他人"
+      }
+    },
+    "ip": {
+      "title": "知识产权",
+      "desc": "我们的服务受知识产权法保护。",
+      "items": {
+        "content": "网站内容和设计",
+        "software": "软件和代码",
+        "trademarks": "商标和标识"
+      }
+    },
+    "thirdParty": {
+      "title": "第三方链接",
+      "desc": "我们的服务可能包含指向第三方网站的链接。我们不对第三方内容负责。"
+    },
+    "disclaimer": {
+      "title": "免责声明",
+      "desc": "服务按\"现状\"提供，不提供任何明示或暗示的保证。"
+    },
+    "liability": {
+      "title": "责任限制",
+      "desc": "在任何情况下，我们不对间接、附带或后果性损失负责。"
+    },
+    "indemnity": {
+      "title": "赔偿",
+      "desc": "您同意赔偿因您违反条款导致的任何损失。"
+    },
+    "changes": {
+      "title": "条款变更",
+      "desc": "我们保留随时修改条款的权利，修改会在本页发布。"
+    },
+    "governing": {
+      "title": "适用法律",
+      "desc": "本条款受中华人民共和国法律管辖。"
+    },
+    "contact": {
+      "title": "联系我们",
+      "desc": "如有问题，请联系我们："
+    }
+  },
+  "guide": {
+    "hero": {
+      "title": "使用指南",
+      "subtitle": "学习如何使用AI留学生存指南的各项功能"
+    },
+    "nav": {
+      "tools": "浏览工具",
+      "payment": "支付方案",
+      "policies": "大学政策",
+      "prompts": "Prompt模板",
+      "community": "社区"
+    },
+    "tools": {
+      "title": "浏览AI工具",
+      "search": {
+        "title": "搜索工具",
+        "desc": "使用搜索框快速找到你需要的工具。",
+        "step1": "在首页顶部搜索框输入关键词",
+        "step2": "浏览搜索结果",
+        "step3": "点击查看详情"
+      },
+      "filter": {
+        "title": "筛选工具",
+        "desc": "使用分类筛选找到特定类型的工具。"
+      },
+      "compare": {
+        "title": "对比工具",
+        "desc": "选择多个工具进行横向对比。"
+      }
+    },
+    "payment": {
+      "title": "支付解决方案",
+      "virtualCards": {
+        "title": "虚拟信用卡",
+        "desc": "无需海外银行卡，在线申请虚拟卡。",
+        "step1": "选择虚拟卡服务商（Depay、Wise等）",
+        "step2": "下载APP并完成身份认证",
+        "step3": "充值并绑定到AI工具账户"
+      },
+      "giftCards": {
+        "title": "礼品卡",
+        "desc": "购买平台礼品卡进行支付。",
+        "step1": "在天猫、京东等平台购买礼品卡",
+        "step2": "获取卡密",
+        "step3": "在AI平台兑换"
+      },
+      "regional": {
+        "title": "地区定价",
+        "desc": "利用不同地区的价格差异节省费用。"
+      }
+    },
+    "policies": {
+      "title": "大学AI政策",
+      "desc": "了解你学校的AI使用规定，避免违规。",
+      "step1": {
+        "title": "搜索学校",
+        "desc": "在政策数据库中搜索你的大学"
+      },
+      "step2": {
+        "title": "查看政策详情",
+        "desc": "了解允许和禁止的AI工具使用场景"
+      },
+      "step3": {
+        "title": "遵守规定",
+        "desc": "按照学校政策合理使用AI工具"
+      }
+    },
+    "prompts": {
+      "title": "Prompt模板",
+      "howToUse": {
+        "title": "如何使用模板",
+        "step1": "浏览或搜索你需要的模板类型",
+        "step2": "点击查看模板详情",
+        "step3": "复制Prompt内容",
+        "step4": "粘贴到AI工具中使用"
+      },
+      "example": {
+        "title": "Prompt示例",
+        "context": "学术论文润色",
+        "prompt": "Please help me polish this academic paper to improve its clarity, coherence, and academic tone while maintaining the original meaning..."
+      }
+    },
+    "community": {
+      "title": "社区互动",
+      "questions": {
+        "desc": "在问答社区提问，获得其他用户的帮助"
+      },
+      "offers": {
+        "desc": "分享你的申请经验，帮助其他留学生"
+      },
+      "survival": {
+        "desc": "阅读留学防坑指南，避免常见陷阱"
+      },
+      "map": {
+        "desc": "查看校园地图，发现更多资源"
+      }
+    },
+    "cta": {
+      "title": "准备好开始了吗？",
+      "desc": "浏览工具地图，探索更多AI工具"
+    }
+  },
+  "meta": {
+    "keywords": "AI工具, 留学生, ChatGPT, AI写作, 支付解决方案, 大学AI政策, Prompt模板"
+  },
+  "community": {
+    "promotion": {
+      "autoPromoted": "已自动推送到 {category}",
+      "directPromoted": "直达 {category} 热门",
+      "heatProgress": "热度进度",
+      "heatScore": "热度评分",
+      "heatFormula": "点赞×1 + 评论×2 + 收藏×3 = 热度评分，≥10分自动推送",
+      "directPublish": "直接发布",
+      "directPublishCost": "消耗 {points} 积分直接发布到目标板块",
+      "hotBoost": "热门加速",
+      "hotBoostCost": "消耗 {points} 积分获得24小时热门曝光",
+      "pointsRequired": "需要 {points} 积分",
+      "pointsInsufficient": "积分不足",
+      "promotionSuccess": "发布成功",
+      "viewOriginal": "查看原文",
+      "promotionHint": "{category}帖子推送说明"
+    }
+  },
+  "faq": {
+    "title": "常见问题",
+    "subtitle": "关于AI留学生存指南的常见问题解答",
+    "description": "找到关于AI工具推荐、支付解决方案、大学政策等常见问题的答案",
+    "searchPlaceholder": "搜索问题...",
+    "categories": {
+      "general": "基础问题",
+      "tools": "AI工具",
+      "payment": "支付相关",
+      "policy": "政策相关"
+    },
+    "general": {
+      "whatIs": {
+        "title": "AI留学生存指南是什么？",
+        "answer": "AI留学生存指南是一个专门为留学生服务的AI工具导航平台。我们收录了500+精选AI工具、提供20+支付解决方案、整理了200+所大学的AI使用政策，并提供1000+高质量Prompt模板，帮助留学生解决使用AI工具过程中遇到的各种问题。"
+      },
+      "whoFor": {
+        "title": "这个平台适合哪些人？",
+        "answer": "平台主要面向准备留学和已经在海外就读的中国留学生。无论你是正在申请学校、刚入学的新生，还是已经就读高年级的学生，都能在这里找到适合自己的AI工具使用方案。"
+      },
+      "freeUse": {
+        "title": "平台上的内容都是免费的吗？",
+        "answer": "是的，平台的绝大部分内容都是免费使用的。我们提供AI工具推荐、支付方案、大学政策查询、Prompt模板等免费服务。部分高级功能如深度对比、专业咨询等可能需要付费订阅。"
+      },
+      "howStart": {
+        "title": "如何开始使用？",
+        "answer": "你可以直接从首页浏览推荐内容，或使用搜索功能找到特定的AI工具。推荐你先阅读「留学防坑指南」了解常见问题，然后根据自身需求选择合适的AI工具和支付方案。"
+      }
+    },
+    "tools": {
+      "howMany": {
+        "title": "平台收录了多少AI工具？",
+        "answer": "我们目前收录了超过500款AI工具，涵盖写作、编程、设计、研究、对话等多个分类。所有工具都经过我们筛选和测试，确保质量和实用性。"
+      },
+      "whichBest": {
+        "title": "哪款AI工具最适合我？",
+        "answer": "这取决于你的具体需求。如果你需要写作辅助，推荐ChatGPT或Claude；如果需要编程辅助，推荐GitHub Copilot或Cursor；如果需要图像生成，推荐Midjourney或DALL-E 3。你可以使用我们的「工具对比」功能横向比较不同工具。"
+      },
+      "pricing": {
+        "title": "这些AI工具如何收费？",
+        "answer": "AI工具的收费模式各不相同。常见模式包括：完全免费（如Copilot）、免费+付费结合（如ChatGPT有免费版和Plus版）、按量付费（如部分API服务）。我们的工具详情页提供了详细的价格信息。"
+      },
+      "chinaAccess": {
+        "title": "在中国能使用这些工具吗？",
+        "answer": "部分AI工具在中国大陆可以直接访问，但很多主流工具（如ChatGPT、Claude等）需要特殊的网络环境才能使用。我们提供了专门的「支付解决方案」帮助留学生解决访问和支付问题。"
+      }
+    },
+    "payment": {
+      "methods": {
+        "title": "如何支付海外AI工具的费用？",
+        "answer": "我们推荐几种主要的支付方式：1) 虚拟信用卡（如Depay、Wise卡）；2) 礼品卡（部分平台支持）；3) 地区定价（利用不同地区的价格差异）；4) 教育优惠（学生认证）。详细教程请查看「支付解决方案」页面。"
+      },
+      "virtualCard": {
+        "title": "什么是虚拟信用卡？如何申请？",
+        "answer": "虚拟信用卡是一种在线生成的虚拟卡号，可以用于网上消费。常见选择包括Depay、Revolut、TransferWise等。通常需要下载APP、进行身份认证后即可申请。具体步骤请参考我们的支付教程。"
+      },
+      "giftCard": {
+        "title": "什么是礼品卡支付？",
+        "answer": "部分AI服务（如Apple、Google、OpenAI）支持礼品卡充值。你可以在天猫、京东等平台购买相应国家的礼品卡，然后兑换到你的账户。这种方式不需要信用卡，适合没有海外支付渠道的用户。"
+      },
+      "safety": {
+        "title": "这些支付方式安全吗？",
+        "answer": "只要选择正规渠道，支付方式都是安全的。建议：1) 通过官方渠道申请虚拟卡；2) 不要在非官方网站输入卡号；3) 设置合理的消费限额；4) 定期检查账单。我们的支付方案都是经过验证的安全方案。"
+      }
+    },
+    "policy": {
+      "why": {
+        "title": "为什么需要了解大学AI政策？",
+        "answer": "不同大学对AI工具的使用有不同规定。部分大学允许学生在作业中使用AI辅助，但要求注明；部分大学完全禁止使用；还有些大学正在制定相关政策。了解你学校的政策可以避免不必要的麻烦。"
+      },
+      "checkMethod": {
+        "title": "如何查询自己学校的AI使用政策？",
+        "answer": "你可以在我们的「大学政策」页面搜索你的学校。我们收录了200+所大学的AI使用政策，包括官方声明、可使用工具清单、违规处理方式等。如果没有找到你的学校，建议直接联系学校相关部门确认。"
+      },
+      "violation": {
+        "title": "违反学校AI使用规定会有什么后果？",
+        "answer": "后果因学校而异，常见包括：作业得零分、课程不及格、学术警告，严重者可能被开除。建议仔细阅读你学校的学术诚信条例，使用AI工具时遵守相关规定。"
+      },
+      "allowAI": {
+        "title": "哪些AI工具是大多数学校允许使用的？",
+        "answer": "一般而言，用于语法检查、词典查询等基础辅助的工具通常被允许使用（如Grammarly）。但用于代写、检查作业答案等可能被认为是不当行为。具体请以你学校的官方政策为准。"
+      }
+    },
+    "stillHaveQuestions": "还有其他问题？",
+    "contactDescription": "如果你没有找到想要的答案，可以通过以下方式联系我们，我们会尽快回复。",
+    "emailUs": "邮件联系我们",
+    "askCommunity": "社区提问"
+  }
+}

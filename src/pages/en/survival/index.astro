@@ -1,0 +1,17 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import SurvivalClient from '@/components/survival/SurvivalClient';
+import { type Locale, t as translate } from '@/i18n';
+
+export const prerender = false;
+
+const locale: Locale = 'en';
+---
+
+<Layout
+  title={translate(locale, 'survival.title')}
+  description={translate(locale, 'survival.description')}
+  locale={locale}
+>
+  <SurvivalClient locale="en" client:only="react" />
+</Layout>

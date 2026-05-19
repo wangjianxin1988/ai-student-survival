@@ -1,0 +1,53 @@
+{
+  "name": "ai-student-survival",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "AI留学生存指南 - AI Native website for Chinese international students",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint src --ext .ts,.tsx,.astro",
+    "format": "prettier --write \"src/**/*.{ts,tsx,astro,css}\"",
+    "test": "vitest",
+    "tina": "tinacms dev",
+    "tina:build": "tinacms build",
+    "tina:schema": "tinacms schema"
+  },
+  "dependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@astrojs/cloudflare": "^11.2.0",
+    "@astrojs/node": "^8.3.4",
+    "@astrojs/react": "^3.6.0",
+    "@astrojs/tailwind": "^5.1.0",
+    "@supabase/supabase-js": "^2.45.0",
+    "@tinacms/cli": "^2.3.1",
+    "@tinacms/toolkit": "^1.7.13",
+    "@types/leaflet": "^1.9.21",
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "emoji-picker-react": "^4.19.1",
+    "leaflet": "^1.9.4",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-leaflet": "^4.2.1",
+    "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "astro": "^4.16.19",
+    "eslint": "^8.57.0",
+    "eslint-plugin-astro": "^1.0.0",
+    "playwright": "^1.60.0",
+    "prettier": "^3.3.0",
+    "prettier-plugin-astro": "^0.14.0",
+    "typescript": "^5.9.3",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.14.1"
+  }
+}

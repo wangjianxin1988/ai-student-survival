@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import OffersList from '@/components/user/OffersList';
+
+export const prerender = false;
+
+const locale = 'zh';
+---
+
+<Layout title={locale === 'zh' ? '我的Offer' : 'My Offers'}>
+  <OffersList locale={locale} client:only="react" />
+</Layout>

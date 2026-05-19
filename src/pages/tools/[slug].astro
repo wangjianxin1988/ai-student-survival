@@ -1,0 +1,2247 @@
+---
+export const prerender = false;
+
+// Required for dynamic route validation in hybrid mode
+export function getStaticPaths() {
+  return [];
+}
+
+import Layout from '@/layouts/Layout.astro';
+import type { Tool } from '@/lib/supabase';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
+import StarRating from '@/components/ratings/StarRating';
+import CompareButton from '@/components/compare/CompareButton';
+import ShareButton from '@/components/common/ShareButton';
+import CommentSection from '@/components/user/CommentSection';
+import ToolPricingRealtime from '@/components/tools/ToolPricingRealtime';
+import UpdateNotesClient from '@/components/tools/UpdateNotesClient';
+
+const { slug } = Astro.params;
+
+// In real implementation, fetch from Supabase
+// For MVP, we use static data
+const toolsData: Record<string, Tool> = {
+  'chatgpt': {
+    id: '1',
+    name: 'ChatGPT',
+    slug: 'chatgpt',
+    description: 'OpenAI开发的AI对话助手，支持写作、编程、分析等多种任务。ChatGPT是目前最流行的AI工具之一，拥有强大的语言理解和生成能力。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://chat.openai.com',
+    imageUrl: 'https://placehold.co/800x400/10b981/ffffff?text=ChatGPT',
+    rating: 4.8,
+    ratingCount: 12500,
+    dimensions: { easeOfUse: 4.5, features: 4.9, value: 4.7 },
+    tags: ['写作', '编程', '分析', '对话', 'OpenAI'],
+    features: ['多轮对话', '代码生成', '文本创作', '数据分析', '文件上传', '语音交互'],
+    alternatives: ['claude', 'gemini', 'kimi'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册并登录账户', description: '访问 chat.openai.com，使用邮箱、Google账户或Microsoft账户注册。免费用户可使用GPT-3.5，付费Plus用户($20/月)可使用GPT-4o、GPT-4 Turbo及DALL-E图像生成' },
+        { step: 2, title: '选择合适的模式', description: '在输入框顶部选择模式：GPT-4o(快速响应)、GPT-4(深度思考)、DALL-E(绘图)、浏览模式(获取实时信息)。使用快捷指令如/data analysis、/image生成特定任务' },
+        { step: 3, title: '创建自定义指令', description: '点击左上角用户名进入设置，启用Custom Instructions设置默认行为和偏好。通过@提及在对话中召唤特定GPT(如GPT-4o、DALL-E)处理特定任务' }
+      ],
+      useCases: [
+        { title: '实时信息检索与研究', description: '使用浏览模式搜索最新新闻、股票行情、天气预报等实时信息，支持追问和深度挖掘。Plus用户可使用Advanced Data Analysis处理上传的CSV/Excel文件进行数据分析' },
+        { title: '创意写作与内容创作', description: '撰写文章、营销文案、社交媒体内容，生成故事、诗歌、剧本。配合DALL-E生成配图，支持多语言翻译和语气调整' },
+        { title: '代码开发与调试', description: '编写Python、JavaScript、SQL等代码，Debug调试，性能优化。支持50+编程语言，可直接在对话中执行代码块和创建文件' },
+        { title: '文档处理与文件分析', description: '上传PDF、Word文档、图片进行分析和总结。支持Advanced Data Analysis，可上传CSV数据文件进行可视化分析和趋势预测' }
+      ],
+      tips: [
+        '使用斜杠指令(/)快速调用特定功能，如/image生成图像，/data analysis进入数据分析模式，/think让模型进行深度推理',
+        '利用Custom Instructions设置固定角色(如技术文档写手、法律顾问)，避免每次重复设定上下文',
+        'GPT-4o相比GPT-4 Turbo响应更快且免费额度更多，日常使用优先选择GPT-4o以节省GPT-4额度',
+        '多模态交互：直接粘贴截图或照片让GPT分析，可识别UI设计、代码截图、表格内容甚至手绘草图'
+      ],
+      updateNotes: '2026年4月：GPT-4o全面推出，支持实时语音对话、屏幕共享、情绪识别；ChatGPT Mac版支持屏幕共享；SearchGPT测试中集成实时网络搜索'
+    },
+    updateSourceUrl: 'https://help.openai.com/en/articles/6825453-chatgpt-release-notes',
+    updateSourceType: 'changelog',
+  },
+  'claude': {
+    id: '2',
+    name: 'Claude',
+    slug: 'claude',
+    description: 'Anthropic开发的AI助手，擅长长文本处理和复杂分析。Claude拥有100K上下文窗口，适合处理长文档和复杂任务。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://claude.ai',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=Claude',
+    rating: 4.7,
+    ratingCount: 8900,
+    dimensions: { easeOfUse: 4.6, features: 4.8, value: 4.5 },
+    tags: ['写作', '长文本', '分析', '研究', 'Anthropic'],
+    features: ['100K上下文', '长文本分析', '创意写作', '代码审查', '文档处理', '隐私保护'],
+    alternatives: ['chatgpt', 'gemini', 'kimi'],
+    isNew: false,
+    createdAt: '2024-01-15',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册并选择订阅计划', description: '访问 claude.ai 使用邮箱、Google或Apple账户注册。免费用户有使用限制，Pro用户($20/月)可使用Claude 3.5 Sonnet和Opus，无限制访问' },
+        { step: 2, title: '掌握对话基本操作', description: '在输入框输入问题，支持多轮追问。点击附件图标上传文件(支持PDF、CSV、TXT、图片等)，查看右侧的Artifacts面板获取代码和文档预览' },
+        { step: 3, title: '使用扩展和能力', description: '在输入框下方选择扩展：Web Search(搜索最新信息)、Prediction(预测分析)、引用验证。使用/开关命令快速切换模式，如/auto-search启用自动网络搜索' }
+      ],
+      useCases: [
+        { title: '深度写作与编辑', description: '利用Claude 3.5 Opus的超长上下文(200K tokens)，可一次性处理整本书籍、长篇报告。支持多轮迭代改稿，通过引用功能精确定位和修改特定段落' },
+        { title: '复杂代码开发', description: 'Artifacts功能可实时预览HTML/CSS/JS代码、React组件、Python脚本。Sonnet模型擅长快速代码补全和重构，Opus适合复杂算法和架构设计' },
+        { title: '长文档分析总结', description: '上传长PDF合同、白皮书、财务报告，Claude可理解整体结构和细节。200K上下文窗口相当于一次处理15万字，可进行深度对比分析和批判性评估' },
+        { title: '创意头脑风暴', description: '使用Opus模型的深度思考能力进行复杂问题分析。适合产品策略、商业模式、SWOT分析等多维度创意工作，支持思维链显式展示推理过程' }
+      ],
+      tips: [
+        '使用Claude的引用功能(citations)追踪事实来源，适合需要高准确度的研究写作，点击引用编号可直接跳转到原文位置',
+        '长文档处理时优先使用Opus模型，虽然速度慢但理解深度和细节还原度远超Sonnet，适合法律合同、学术论文等关键场景',
+        '通过Artifacts分享代码片段，生成的React组件、HTML页面可直接嵌入网站，点击打开完整预览',
+        'Web Search扩展可获取实时信息，但在深度分析任务中慎用，会消耗额外配额'
+      ],
+      updateNotes: '2026年5月：Claude 3.5 Sonnet升级支持更长的上下文窗口；新增 Projects 功能可上传文件集构建知识库；引用功能全面支持PDF内联引用；Team Plan推出支持5人团队协作'
+    },
+    updateSourceUrl: 'https://docs.anthropic.com/en/release-notes/overview',
+    updateSourceType: 'changelog',
+  },
+  'midjourney': {
+    id: '3',
+    name: 'Midjourney',
+    slug: 'midjourney',
+    description: 'AI图像生成工具，通过文本描述创建高质量图像。Midjourney以其艺术风格和创意表现力著称，是设计师和艺术家的首选工具。',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'paid',
+    priceDetail: { monthly: 10, yearly: 96, currency: 'USD' },
+    url: 'https://midjourney.com',
+    imageUrl: 'https://placehold.co/800x400/ec4899/ffffff?text=Midjourney',
+    rating: 4.6,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 3.8, features: 4.9, value: 4.4 },
+    tags: ['图像生成', '设计', '创意', '艺术', 'Midjourney'],
+    features: ['文生图', '风格多样', '高分辨率', '社区分享', 'Vary区域编辑', 'Zoom out扩展'],
+    alternatives: ['dalle-3', 'stable-diffusion', 'flux'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册Discord账户并加入Midjourney服务器', description: '访问 midjourney.com，点击Join Beta使用Discord账户登录。进入官方Discord服务器后，在左侧sidebar找到#general 或 #newbie 频道。每个频道下方会有Imaginine、Imagine、Stylize等子频道供新手使用。' },
+        { step: 2, title: '订阅Midjourney套餐', description: '在Discord中使用/subscribe命令或访问Midjourney官网订阅。Basic Plan ($10/月)每月可生成约200张图像，Standard Plan ($30/月)提供无限生成+fast GPU时间。建议新手从Basic Plan开始体验。' },
+        { step: 3, title: '使用/imagine命令生成图像', description: '在任意频道输入/imagine提示词，例如imagine: a futuristic city skyline at sunset, hyperrealistic, 8k。使用--ar 16:9调整横纵比，--stylize 100-1000调整艺术风格，--v 5.2选择版本。生成后点击U1-U4放大图像，V1-V4变体重生成。' }
+      ],
+      useCases: [
+        { title: '品牌视觉设计与营销素材', description: '品牌方使用Midjourney快速生成logo变体、社交媒体配图、广告banner、品牌IP形象。输入风格描述+品牌色值，系统可批量产出符合品牌调性的视觉素材，大幅缩短创意探索周期。' },
+        { title: '游戏与影视概念美术', description: '游戏工作室和影视制作团队利用Midjourney快速迭代概念艺术。输入场景描述、角色设定、氛围关键词，可一次性生成多套风格方案供导演/美术总监选择，加速前期创意验证。' },
+        { title: '产品设计与工业可视化', description: '工业设计师上传产品草图或输入文字描述，快速生成产品效果图。支持输入材质描述（brushed metal、leather texture）、光照条件、背景场景，用于产品原型验证和客户提案展示。' },
+        { title: '室内装修与建筑设计可视化', description: '设计师输入空间描述（minimalist living room with large windows）、风格关键词，光线要求，系统生成逼真的室内效果图。支持控制视角（interior view、bird\'s eye view）、渲染风格（archviz、realistic）。' }
+      ],
+      tips: [
+        '使用精确的艺术家和风格参考词可大幅提升效果 - 例如by Greg Rutkowski, artstation, trending等可引导生成特定艺术风格。避免过于笼统的描述，越具体的场景、材质，光照描述效果越好。',
+        '合理使用--no参数排除不想要元素，例如castle --no people, cars。善用--iw (image weight) 0.5-2控制参考图影响程度，--s (stylize) 100-1000调整艺术化程度，数值越高越具有艺术感但可能偏离描述。',
+        '使用/blend命令可混合2-5张参考图，适合产品设计中的形态融合或情绪板创建。使用/variation (subtle/creative) 可在生成结果基础上微调或大幅变奏。Upscale后可用/describe反推提示词学习优秀案例。',
+        '注意版权风险 - Midjourney生成图像的版权归属取决于订阅级别。Paid用户拥有商业使用权但应避免直接模仿在世艺术家风格。建议将Midjourney作为灵感草稿工具，最终商业作品需进行足够的原创转化。'
+      ],
+      updateNotes: '2025年最新版本V6支持更精确的文本理解、连贯的手部和面部细节、更长的提示词支持（V6对中英文提示词理解均有提升）。新增--sref和--cref参数支持风格参考和角色一致性功能。Niji 6模型专门优化了动漫和插画风格生成。'
+    },
+    updateSourceUrl: 'https://docs.midjourney.com/',
+    updateSourceType: 'changelog',
+  },
+  'github-copilot': {
+    id: '4',
+    name: 'GitHub Copilot',
+    slug: 'github-copilot',
+    description: 'AI编程助手，为开发者提供代码补全和生成功能。集成在VS Code等主流IDE中，大幅提升编程效率。',
+    category: 'coding',
+    subcategory: 'code-assistant',
+    pricing: 'paid',
+    priceDetail: { monthly: 10, yearly: 100, currency: 'USD' },
+    url: 'https://github.com/features/copilot',
+    imageUrl: 'https://placehold.co/800x400/238636/ffffff?text=GitHub+Copilot',
+    rating: 4.5,
+    ratingCount: 9800,
+    dimensions: { easeOfUse: 4.3, features: 4.7, value: 4.2 },
+    tags: ['编程', '代码补全', 'IDE', '开发者', 'GitHub'],
+    features: ['代码补全', '函数生成', 'Bug修复', '代码解释', '多语言支持', '注释转代码'],
+    alternatives: ['cursor', 'tabnine', 'replit'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装GitHub Copilot扩展', description: '在VS Code、VS JetBrains或Neovim中安装GitHub Copilot扩展。使用拥有有效Copilot订阅的GitHub账户登录(学生免费验证或$10/月个人订阅)。' },
+        { step: 2, title: '使用注释描述需求', description: '用自然语言编写注释描述想要实现的功能，例如// 创建一个降序排列数组的函数。Copilot会根据注释和现有代码上下文生成代码建议。' },
+        { step: 3, title: '接受或优化建议', description: '按Tab键接受内联建议，或继续输入查看其他替代方案。使用Cmd/Ctrl+Enter一次查看最多10个建议，使用方向键循环浏览。' }
+      ],
+      useCases: [
+        { title: '加速样板代码编写', description: '生成重复的样板代码如React组件、API路由、数据库schema和测试模板。只需在注释中描述结构，Copilot就会填充实现。' },
+        { title: '学习新框架', description: '在探索不熟悉的库或框架时，Copilot提供上下文感知的建议，展示正确的API使用模式，帮助开发者在编码时理解框架约定。' },
+        { title: '通过CLI自主执行任务', description: '在终端中使用gh copilot explain和gh copilot suggest命令理解现有代码、调试错误，或获取任意shell任务的AI指导，无需离开工作流。' },
+        { title: '代码审查和重构', description: '粘贴代码段并让Copilot识别潜在bug、建议性能改进或帮助重构以提高可读性。在转换类似模式(如将类组件转换为hooks)时特别有效。' }
+      ],
+      tips: [
+        '在VS Code中使用/命令调用Copilot Chat进行专门对话 - 键入/explain获取代码解释，/fix排查错误，/test为选定代码生成单元测试。',
+        '编写描述性的函数名和注释你的意图。Copilot的建议在清晰上下文下显著改善 - 模糊的注释产生通用代码，而具体的描述产生定制解决方案。',
+        '结合GitHub Actions实现自动化代码审查工作流 - Copilot可以分析PR差异并作为CI/CD管道的一部分提出改进建议。',
+        '对于安全敏感的代码，始终审查AI生成的SQL查询、认证逻辑和文件I/O操作。Copilot有时会建议存在漏洞的代码 - 使用Copilot提速但手动应用安全最佳实践。'
+      ],
+      updateNotes: '2026年更新包括扩展模型支持，GPT-4o和Claude 3.5 Sonnet作为后端模型，增强的多文件上下文理解(最高512KB上下文窗口)，GitHub Copilot Workspace支持基于浏览器的开发，移动端Copilot Chat体验改进(iOS/Android)，以及与GitHub仓库更深入的集成以实现语义代码搜索。'
+    },
+    updateSourceUrl: 'https://github.com/github/copilot-release-notes/releases',
+    updateSourceType: 'github',
+  },
+  'notion-ai': {
+    id: '5',
+    name: 'Notion AI',
+    slug: 'notion-ai',
+    description: '集成在Notion中的AI助手，帮你写文档、整理笔记。Notion AI可以在你写作时提供智能建议、自动总结和翻译功能。',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 10, yearly: 96, currency: 'USD' },
+    url: 'https://notion.so',
+    imageUrl: 'https://placehold.co/800x400/1a1a1a/ffffff?text=Notion+AI',
+    rating: 4.4,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.7, features: 4.3, value: 4.2 },
+    tags: ['笔记', '文档', '写作', '整理', 'Notion'],
+    features: ['智能摘要', '自动续写', '翻译', '整理笔记', '问答功能', '模板生成'],
+    alternatives: ['obsidian-ai', 'craft-ai', 'romin-ai'],
+    isNew: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.notion.so/updates',
+    updateSourceType: 'changelog',
+  },
+  'perplexity': {
+    id: '6',
+    name: 'Perplexity',
+    slug: 'perplexity',
+    description: 'AI搜索引擎，基于真实网络内容回答问题。Perplexity提供带有引用来源的答案，让你验证信息的准确性。',
+    category: 'research',
+    subcategory: 'search',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://perplexity.ai',
+    imageUrl: 'https://placehold.co/800x400/20c997/ffffff?text=Perplexity',
+    rating: 4.6,
+    ratingCount: 7800,
+    dimensions: { easeOfUse: 4.5, features: 4.6, value: 4.5 },
+    tags: ['搜索', '研究', '问答', '实时信息', 'Perplexity'],
+    features: ['实时搜索', '引用来源', '多语言', '连续对话', '收藏分享', '学术搜索'],
+    alternatives: ['chatgpt', 'phind', 'kimi'],
+    isNew: false,
+    createdAt: '2024-02-15',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册并选择套餐', description: '访问 perplexity.ai 使用邮箱、Google或Apple账户注册。免费用户有Pro搜索次数限制，Pro用户($20/月)可使用GPT-4o、Claude 3.5 Sonnet、Sonar等高级模型' },
+        { step: 2, title: '执行搜索查询', description: '在搜索框输入问题，支持自然语言。Copilot模式(Pro)提供引导式搜索，通过追问精确定位需求。免费用户直接获得带引用的答案' },
+        { step: 3, title: '使用专注和发现功能', description: '创建专注线程(Threads)管理不同主题的研究。支持Spaces功能创建个人知识空间，可上传文件构建私有知识库进行问答' }
+      ],
+      useCases: [
+        { title: '实时信息验证', description: '每个答案都附带引用来源链接，可直接点击验证。支持深入追问和来源追溯，适合新闻核查、事实查证、市场数据收集' },
+        { title: '专业领域深度研究', description: 'Pro版本的Copilot功能引导式深入研究，通过多轮对话挖掘深层信息。适合学术调研、投资分析、技术选型等需要多源交叉验证的场景' },
+        { title: '代码开发和调试', description: 'Sonar模型专精代码搜索和解释，支持直接粘贴报错信息获取解决方案。支持代码片段搜索和解释，帮助理解开源项目' },
+        { title: '个人知识管理', description: 'Spaces功能可上传PDF、文章链接构建个人知识库。基于上传内容进行问答，适合法律研究、商业情报分析、产品竞品研究' }
+      ],
+      tips: [
+        '使用Copilot模式时描述要具体，如查找2024年Q3新能源汽车销量数据，重点对比比亚迪和特斯拉比单纯问新能源车销量获得更精准结果',
+        'Spaces是Perplexity的独特优势，上传公司财报、竞品分析报告后提问，可获得基于私有文档的精准答案，适合投资研究和商业分析',
+        '每个答案右下角有Library按钮，点击保存到个人知识库，支持标签分类，便于后续追踪和整理研究资料',
+        '免费用户推荐使用Sonar Large 70B模型，性价比最高；需要深度推理时切换到Claude或GPT-4o模型'
+      ],
+      updateNotes: '2026年5月：Perplexity Enterprise Pro发布，支持团队协作和共享Spaces；新增图片理解功能；Sonar模型升级支持更长的上下文；API支持自定义知识库集成'
+    },
+    updateSourceUrl: 'https://www.perplexity.ai/changelog/',
+    updateSourceType: 'changelog',
+  },
+  'jasper': {
+    id: '7',
+    name: 'Jasper',
+    slug: 'jasper',
+    description: '企业级AI写作助手，帮助快速生成营销文案、博客文章和社交内容。Jasper拥有50+模板，支持品牌声音定制。',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'paid',
+    priceDetail: { monthly: 49, yearly: 468, currency: 'USD' },
+    url: 'https://jasper.ai',
+    imageUrl: 'https://placehold.co/800x400/a855f7/ffffff?text=Jasper',
+    rating: 4.4,
+    ratingCount: 4200,
+    dimensions: { easeOfUse: 4.2, features: 4.7, value: 4.0 },
+    tags: ['写作', '营销', '文案', '博客', 'Jasper'],
+    features: ['多模板', '品牌语音', '多语言', 'SEO优化', '团队协作', 'Chrome扩展'],
+    alternatives: ['copyai', 'writesonic', 'chatgpt'],
+    isNew: false,
+    createdAt: '2024-01-20',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.jasper.ai/changelog',
+    updateSourceType: 'changelog',
+  },
+  'copyai': {
+    id: '8',
+    name: 'Copy.ai',
+    slug: 'copyai',
+    description: 'AI文案生成工具，提供超过100种内容模板，适合营销和销售团队。Copy.ai可以帮助你快速生成广告文案、邮件和社交内容。',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 49, yearly: 420, currency: 'USD' },
+    url: 'https://copy.ai',
+    imageUrl: 'https://placehold.co/800x400/9333ea/ffffff?text=Copy.ai',
+    rating: 4.3,
+    ratingCount: 3800,
+    dimensions: { easeOfUse: 4.4, features: 4.5, value: 4.1 },
+    tags: ['写作', '文案', '营销', '模板', 'Copy.ai'],
+    features: ['100+模板', '多语言', '团队协作', '品牌工具包', '工作流自动化'],
+    alternatives: ['jasper', 'writesonic', 'quillbot'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.copy.ai/changelog',
+    updateSourceType: 'changelog',
+  },
+  'grammarly': {
+    id: '9',
+    name: 'Grammarly',
+    slug: 'grammarly',
+    description: 'AI写作辅助工具，提供语法检查、拼写纠错和风格优化建议。Grammarly帮助学术写作者和商务人士提升英文写作质量。',
+    category: 'writing',
+    subcategory: 'grammar-check',
+    pricing: 'freemium',
+    priceDetail: { monthly: 12, yearly: 144, currency: 'USD' },
+    url: 'https://grammarly.com',
+    imageUrl: 'https://placehold.co/800x400/7c3aed/ffffff?text=Grammarly',
+    rating: 4.7,
+    ratingCount: 15000,
+    dimensions: { easeOfUse: 4.8, features: 4.6, value: 4.5 },
+    tags: ['写作', '语法', '校对', '学术', 'Grammarly'],
+    features: ['语法纠错', '风格建议', '剽窃检测', '多平台集成', '词典查阅', '语气调整'],
+    alternatives: ['quillbot', 'languagetool', 'prowritingaid'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://www.grammarly.com/updates',
+    updateSourceType: 'changelog',
+  },
+  'quillbot': {
+    id: '10',
+    name: 'QuillBot',
+    slug: 'quillbot',
+    description: 'AI改写和润色工具，帮助学生和写作者优化句子结构和表达方式。QuillBot提供多种改写模式，适合学术写作和创意写作。',
+    category: 'writing',
+    subcategory: 'paraphrasing',
+    pricing: 'freemium',
+    priceDetail: { monthly: 9.95, yearly: 79.95, currency: 'USD' },
+    url: 'https://quillbot.com',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=QuillBot',
+    rating: 4.5,
+    ratingCount: 9200,
+    dimensions: { easeOfUse: 4.7, features: 4.4, value: 4.5 },
+    tags: ['写作', '改写', '润色', '学术', 'QuillBot'],
+    features: ['改写模式', '同义词替换', '摘要生成', '引用生成', '翻译功能', '语法检查'],
+    alternatives: ['grammarly', 'paraphrase', 'spinbot'],
+    isNew: false,
+    createdAt: '2024-01-10',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://quillbot.com/changelog',
+    updateSourceType: 'changelog',
+  },
+  'tabnine': {
+    id: '11',
+    name: 'Tabnine',
+    slug: 'tabnine',
+    description: 'AI代码补全插件，支持所有主流编程语言，通过深度学习提升编码效率。Tabnine支持本地部署，保护代码隐私。',
+    category: 'coding',
+    subcategory: 'code-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://tabnine.com',
+    imageUrl: 'https://placehold.co/800x400/16a34a/ffffff?text=Tabnine',
+    rating: 4.3,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.4, features: 4.5, value: 4.6 },
+    tags: ['编程', '代码补全', 'IDE', '多语言', 'Tabnine'],
+    features: ['全语言支持', '本地运行', '隐私保护', '私有模型训练', '代码解释'],
+    alternatives: ['github-copilot', 'cursor', 'amazon-codewhisperer'],
+    isNew: false,
+    createdAt: '2024-02-10',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '在IDE中安装Tabnine', description: '为VS Code、JetBrains IDEs(IntelliJ、PyCharm、WebStorm)或其他支持的编辑器安装Tabnine扩展。创建免费账户或使用Google/GitHub登录以激活插件。' },
+        { step: 2, title: '选择部署模式', description: '在云端(默认，使用Tabnine服务器)、本地(离线模式仅使用本地模型)或企业本地部署之间选择。根据需求配置隐私设置。' },
+        { step: 3, title: '连接你的代码仓库', description: '使用Tabnivate连接私有仓库。AI从你的代码库模式中学习，在确保代码永不离开你选择的隐私边界的同时，提供符合上下文的建议。' }
+      ],
+      useCases: [
+        { title: '隐私敏感的企业开发', description: '对于受监管行业(医疗、金融、政府)，使用Tabnine On-Premise将所有代码保留在基础设施内。完全符合HIPAA和SOC 2合规，代码不会离开你的服务器。' },
+        { title: '离线开发', description: '启用本地模式可在隔离环境、飞机上或网络受限地区进行开发。Tabnine的本地模型无需互联网访问即可提供代码补全。' },
+        { title: '团队特定代码建议', description: '通过Tabnivate训练AI了解组织的代码模式、库和约定。随着时间推移，建议对你的特定技术栈和编码风格变得更加准确。' },
+        { title: '快速原型加速', description: '使用Tabnine的长上下文理解从docstring描述生成整个函数。在Python、Java和TypeScript等样板密集型语言中表现尤其出色。' }
+      ],
+      tips: [
+        '使用Tabnine的Smart Paste功能——当你需要从文档或Stack Overflow插入代码时，Tabnine会自动重新格式化以匹配项目的样式和约定。',
+        '在设置中配置Learning from Usage——Tabnine根据你接受或拒绝的补全来改进建议，在使用2-3周后使模型个性化适配你的编码模式。',
+        '对于大型代码库战略性地使用索引功能。优先索引你最常编辑的目录而非整个仓库，以获得更快的初始设置和更相关的建议。',
+        '结合Tabnine与明确的类型提示——函数签名和变量类型越具体，Tabnine的补全建议就越准确，尤其是在TypeScript和Python中。'
+      ],
+      updateNotes: '2026年更新包括Tabnine 4.0，新一代自定义语言模型比前代快4倍，增强的企业功能包括SAML SSO和审计日志，改进了与GitHub和GitLab的代码审查集成，扩展了对Rust、Go和Kotlin的语言支持。'
+    },
+    updateSourceUrl: 'https://github.com/codota/TabNine/releases',
+    updateSourceType: 'github',
+  },
+  'cursor': {
+    id: '12',
+    name: 'Cursor',
+    slug: 'cursor',
+    description: 'AI代码编辑器，基于GPT-4构建，支持智能补全、代码解释和多文件编辑。Cursor是程序员的首选IDE，提供极致的AI编码体验。',
+    category: 'coding',
+    subcategory: 'code-editor',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://cursor.sh',
+    imageUrl: 'https://placehold.co/800x400/15803d/ffffff?text=Cursor',
+    rating: 4.6,
+    ratingCount: 7100,
+    dimensions: { easeOfUse: 4.7, features: 4.7, value: 4.6 },
+    tags: ['编程', 'IDE', '代码生成', '编辑器', 'Cursor'],
+    features: ['AI对话', '代码补全', '多文件编辑', '团队协作', '错误修复', '代码解释'],
+    alternatives: ['github-copilot', 'replit', 'vscode'],
+    isNew: true,
+    createdAt: '2024-03-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '下载并安装Cursor', description: '从 cursor.sh 下载(支持macOS、Windows、Linux)。注册或使用邮箱、Google、GitHub账户登录。免费版每月包含200次 premium 请求。' },
+        { step: 2, title: '连接代码库并建立索引', description: '打开项目文件夹，使用Cmd/L + I让Cursor建立代码库索引。这启用Codebase模式，AI能理解整个项目结构、依赖和编码约定，提供准确建议。' },
+        { step: 3, title: '使用Composer进行多文件开发', description: '打开Composer(Cmd+L然后点击Composer)可同时处理多个文件。描述你想要构建的内容，Cursor会在一次对话中创建、编辑和连接所有必要的文件。' }
+      ],
+      useCases: [
+        { title: '全栈功能开发', description: '使用Composer构建端到端完整功能 - 描述一个带认证和数据库模型的REST API，Cursor会跨多个文件生成后端路由、前端组件和集成代码。' },
+        { title: '即时调试与错误模式', description: '发生错误时，复制错误信息粘贴到Cursor。AI分析代码上下文，识别根本原因，提供具体修复而非通用解释。' },
+        { title: '遗留代码现代化', description: '选择遗留代码段并让Cursor将它们重构为现代模式 - 将jQuery转换为React，将类组件更新为hooks，或将回调式async迁移到async/await。' },
+        { title: 'AI驱动的代码库搜索', description: '使用Code Search功能，用自然语言查询跨整个代码库查找函数、模式或逻辑，如find the authentication middleware或where is the payment validation logic。' }
+      ],
+      tips: [
+        '在设置中启用Predictive editing以加快完成速度 - Cursor在你输入之前显示整个代码块，允许一键接受多行建议。',
+        '使用Doc按钮为函数和类生成文档。选择任意函数，点击Doc，Cursor生成带有参数描述和使用示例的JSDoc/TSDoc注释。',
+        '使用.cursorrules文件自定义AI行为 - 在项目根目录定义编码标准、首选库和团队约定，Cursor在生成建议时遵循这些规范。',
+        '在Composer中，使用Apply in Territory模式当你希望AI仅在指定文件/文件夹中修改代码而非全项目更改时 - 防止对不相关代码的意外修改。'
+      ],
+      updateNotes: '2026年更新包括Cursor 0.5支持Claude 3.5 Sonnet和GPT-4o模型选项，增强的Composer支持拖放文件管理，改进的代码库索引3倍加速与语义搜索，新的PR分析Review模式，以及包括SSO和SOC 2合规的企业功能。'
+    },
+    updateSourceUrl: 'https://cursor.com/changelog',
+    updateSourceType: 'changelog',
+  },
+  'replit': {
+    id: '13',
+    name: 'Replit',
+    slug: 'replit',
+    description: '在线AI编程平台，浏览器内即可编写、运行和部署代码，支持AI Ghostwriter。Replit让你随时随地编程，无需配置环境。',
+    category: 'coding',
+    subcategory: 'code-platform',
+    pricing: 'freemium',
+    priceDetail: { monthly: 15, yearly: 144, currency: 'USD' },
+    url: 'https://replit.com',
+    imageUrl: 'https://placehold.co/800x400/22c55e/ffffff?text=Replit',
+    rating: 4.4,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 4.8, features: 4.5, value: 4.5 },
+    tags: ['编程', '在线IDE', '部署', '协作', 'Replit'],
+    features: ['在线运行', 'AI代码助手', '一键部署', '社区分享', '版本控制', '多人协作'],
+    alternatives: ['cursor', 'vscode', 'github-codespaces'],
+    isNew: false,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '创建账户并启动项目', description: '在 replit.com 使用邮箱、Google或GitHub注册。点击Create Repl开始新项目。从50+语言或模板中选择，包括Python、Node.js、React等——无需本地配置。' },
+        { step: 2, title: '使用Agent构建功能', description: '点击侧边栏的Agent按钮。用自然语言描述你想要构建的内容，如Build a REST API for a todo app with authentication。Replit Agent自动规划、编写、测试和部署代码。' },
+        { step: 3, title: '一键部署', description: '当项目准备好后，点击Deploy按钮。Replit托管你的应用，提供自动HTTPS、自定义域名和后台作业支持。立即获得可分享的URL。' }
+      ],
+      useCases: [
+        { title: '快速原型和MVP', description: '在几分钟内构建和部署可用的原型，无需本地环境设置。非常适合测试商业想法、黑客马拉松项目或概念验证演示。' },
+        { title: '协作编码会话', description: '邀请团队成员到你的Repl进行实时协作编辑，multiplayer模式下多人可同时编码，具有完整的编辑器同步。' },
+        { title: '编程学习和教学', description: '利用Replit内置的IDE功能进行教育——创建教室、跟踪学生进度、在代码上留下评论、一键运行代码。支持自动评分和内置测试。' },
+        { title: '后端即服务开发', description: '使用Replit原生数据库、认证和键值存储构建全栈应用。连接外部API，部署服务端代码而无需管理基础设施。' }
+      ],
+      tips: [
+        '使用Ghostwriter(Replit的AI)，配合/explain、/fix、/test和/review命令——在任何问题前加斜杠命令获取当前文件的上下文AI帮助。',
+        '配置Secrets用于API密钥和环境变量——在代码中作为process.env访问，保持敏感凭证在公开Repls之外的同时方便部署。',
+        '有效利用多文件支持——使用文件树组织更大项目，导入现有zip文件或GitHub仓库，利用内置shell进行git操作。',
+        '对于团队项目，使用Replit Teams功能和共享计算——在团队成员间分配编码任务，通过Git集成合并更改，并具有实时存在指示器进行协作。'
+      ],
+      updateNotes: '2026年更新包括Replit Agent 2.0，复杂功能开发的多步骤推理改进，新的iOS和Android移动应用具有完整IDE功能，增强的部署支持serverless功能和自动扩展，以及扩展的模板库包括Next.js、FastAPI和Django模板。'
+    },
+    updateSourceUrl: 'https://docs.replit.com/updates',
+    updateSourceType: 'changelog',
+  },
+  'figma': {
+    id: '14',
+    name: 'Figma',
+    slug: 'figma',
+    description: 'AI增强的设计工具，支持原型设计、UI设计，集成FigGPT进行AI辅助设计。Figma是在线协作设计的行业标准。',
+    category: 'design',
+    subcategory: 'ui-design',
+    pricing: 'freemium',
+    priceDetail: { monthly: 15, yearly: 144, currency: 'USD' },
+    url: 'https://figma.com',
+    imageUrl: 'https://placehold.co/800x400/f472b6/ffffff?text=Figma',
+    rating: 4.8,
+    ratingCount: 14000,
+    dimensions: { easeOfUse: 4.5, features: 4.8, value: 4.7 },
+    tags: ['设计', 'UI', '原型', '协作', 'Figma'],
+    features: ['矢量设计', '原型交互', '团队协作', 'FigGPT集成', '插件生态', '设计系统'],
+    alternatives: ['sketch', 'adobe-xd', 'canva'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册Figma账户并创建项目', description: '访问 figma.com 使用邮箱或Google账户注册。免费版可供最多3个Figma文件和无限Figjam文件使用。创建新文件后，界面分为Canvas画布、左侧Layers图层面板、右侧Properties属性面板。中央工具栏提供移动、框架、钢笔、文本等基础工具。' },
+        { step: 2, title: '使用Figma AI功能加速设计', description: '点击右侧面板AI图标或使用快捷键Cmd/Ctrl+Shift+K唤起Figma AI。输入设计描述如landing page hero section with hero image and CTA button，AI自动生成可编辑的UI框架。支持一键生成Wireframe、完整页面设计、Icons、文本内容等。' },
+        { step: 3, title: '利用AI辅助功能提升效率', description: '使用Rename Layers AI批量重命名图层，Apply styles AI匹配设计系统样式，Generate icons AI生成Icons，Match layout AI复制参考设计布局。团队协作时使用Coidia AI等第三方插件进行设计稿AI评审和设计转代码。' }
+      ],
+      useCases: [
+        { title: '快速原型设计与用户流程验证', description: 'UX设计师使用Figma快速搭建交互原型。拖拽生成AI设计后，使用Figma的 prototyping 功能连接页面流程，添加交互事件(click、hover、drag)。内置的Animate功能支持微交互动效设计，Preview模式可模拟真实用户操作体验。' },
+        { title: '设计系统构建与管理', description: '团队使用Figma构建企业级设计系统(Design System)。创建Atomic原子组件库，定义Color Style、Typography、Effect样式变量。组件支持Variants变体和Properties属性面板，便于设计师快速切换状态和组合。Design Tokens可同步到代码端。' },
+        { title: '团队协作与设计评审', description: '分布式团队通过Figma实时协作同一设计文件。评论功能(Comment)支持@提及和Task指派，Developer handoff模式提供CSS/iOS/Android代码导出。内置的Loom录制功能可记录设计讲解视频，减少异步沟通成本。' },
+        { title: '营销页与品牌视觉设计', description: '平面设计师使用Figma设计营销Banner、社交媒体素材、品牌视觉物料。使用Frame工具设置标准画布尺寸(Instagram 1080x1080、小红书 1242x2208等)，运用Auto Layout自适应布局功能确保多尺寸适配。组件化设计便于品牌资产统一管理。' }
+      ],
+      tips: [
+        '熟练使用Auto Layout是提升效率的关键——选中图层Cmd/Ctrl+Alt+A开启，可设置padding、gap、方向。响应式设计时结合Constraints约束功能控制元素相对边缘的位置。组件(Components)应使用清晰命名如Button/Primary/Default方便检索。',
+        '利用Figma的Variants功能管理组件多状态。将相同元素的不同状态(默认、悬停、按下、禁用)整合到一个Component Set中，通过右侧Properties面板切换，减少图层数量。合理使用Boolean Operations合并或裁切复杂形状。',
+        'Design Handoff时，开发人员最关注的是Spacing、Color色值、Typography字重字号、Fills/Strokes填充描边属性。确保注释标注清晰，使用官方提供的PixelPerfect插件检查设计还原度。Style使用Design System变量而非硬编码值。',
+        '第三方AI插件如Magician、Framer AI、Uizard可进一步扩展Figma的AI能力。使用这些工具时注意文件权限设置，避免敏感设计内容泄露。建议企业用户使用Figma Organization的企业版安全功能(SSO、SAML、数据residency)。'
+      ],
+      updateNotes: 'Figma AI功能持续更新，新增AI生成Wireframe模式、文本生成Icons、图片生成Icons功能。2025年引入更智能的Design Token同步和变量管理。Dev Mode全新改版，支持代码片段收藏和组件状态预览。FigJam集成AI脑暴功能。'
+    },
+    updateSourceUrl: 'https://www.figma.com/changelog/',
+    updateSourceType: 'changelog',
+  },
+  'dalle-3': {
+    id: '15',
+    name: 'DALL-E 3',
+    slug: 'dalle-3',
+    description: 'OpenAI开发的AI图像生成模型，通过自然语言描述创建高质量图像。DALL-E 3在图像质量和文本渲染方面有显著提升。',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'paid',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://openai.com/dall-e-3',
+    imageUrl: 'https://placehold.co/800x400/db2777/ffffff?text=DALL-E+3',
+    rating: 4.7,
+    ratingCount: 11000,
+    dimensions: { easeOfUse: 4.4, features: 4.8, value: 4.5 },
+    tags: ['图像生成', '设计', '创意', 'AI绘画', 'DALL-E'],
+    features: ['高精度图像', '文字渲染', '风格多样', 'ChatGPT集成', '变体生成', '编辑功能'],
+    alternatives: ['midjourney', 'stable-diffusion', 'adobe-firefly'],
+    isNew: true,
+    createdAt: '2024-09-01',
+    updatedAt: '2024-11-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '通过ChatGPT访问DALL-E 3', description: '登录 chat.openai.com，使用ChatGPT Plus ($20/月) 或 ChatGPT Pro ($200/月) 订阅。在模型选择器中选择DALL-E 3或直接在对话中请求图像生成。API用户可通过OpenAI API平台使用，标准定价约$0.04/张(1024x1024)。' },
+        { step: 2, title: '输入精确的图像描述', description: 'DALL-E 3对自然语言理解力极强，建议直接用详细句子描述场景。例如A cozy cafe corner with vintage wooden furniture, warm afternoon sunlight streaming through lace curtains, a steaming latte on the table, watercolor style。避免使用逗号分隔的关键词列表，完整句子描述效果更佳。' },
+        { step: 3, title: '生成后编辑和调整', description: '生成完成后，点击图像可进入编辑模式。选择Select工具框选区域，输入修改指令例如replace coffee cup with teapot。支持扩展图像画布(Extend)、局部重绘(Inpainting)。所有生成图像自带C2PA元数据标识AI生成。' }
+      ],
+      useCases: [
+        { title: '内容创作与博客配图', description: '博主和内容创作者使用DALL-E 3为文章快速生成定制化配图。输入文章核心内容描述，系统生成风格统一的封面图和内文配图。支持生成带透明背景的PNG、生成信息图表、将数据可视化描述转化为插画风格图像。' },
+        { title: '电商产品展示与广告图', description: '电商卖家使用DALL-E 3生成产品场景图、广告banner、社交媒体素材。输入产品描述+使用场景+风格要求，可批量生成符合品牌调性的营销素材。支持生成不同尺寸版本(1792x1024横版、1024x1792竖版、1024x1024方形)。' },
+        { title: '儿童绘本与教育内容创作', description: '童书作者和教育内容创作者利用DALL-E 3生成故事插画。输入角色描述、场景设定、故事氛围，系统生成风格可爱的绘本级插画。支持输入现有角色描述保持一致性，特别适合生成教育故事的配套插图。' },
+        { title: '品牌故事与企业营销', description: '营销团队使用DALL-E 3生成品牌故事视频分镜、广告创意素材、企业文化宣传图。支持生成包含品牌色的定制图像，通过详细场景描述确保生成的视觉素材符合企业VI规范和营销调性。' }
+      ],
+      tips: [
+        'DALL-E 3擅长理解和遵循复杂提示词，应使用完整的自然语言描述而非关键词列表。描述越详细具体，生成结果越符合预期。包含场景细节、情绪氛围，光线条件、视角位置等元素。',
+        '如需特定构图或布局，应在描述中明确指出元素位置关系。例如left side shows a coffee cup, right side displays a laptop with code on screen, connected by a line of steam。对于文字内容生成，需明确标注文字位置和内容。',
+        '生成人脸时DALL-E 3默认会自动优化为更吸引人的外观(Sanitization)。如需真实面孔可尝试输入photorealistic portrait of a person等提示。生成的文字常有拼写错误，需后期修图处理。',
+        '通过ChatGPT对话上下文可实现图像迭代优化——先生成初稿，基于反馈提出修改意见如Make it more vibrant或Change the background to blue sky。善用GPT-4V分析现有图像并生成改进提示词。'
+      ],
+      updateNotes: '2024年底DALL-E 3支持更长的提示词长度和更精确的构图控制。新增Style选项(normal/natural/vivid/super vivid)控制渲染风格。API端新增editing功能支持更灵活的局部重绘。最新版本对中文提示词理解有显著提升。'
+    },
+    updateSourceUrl: 'https://help.openai.com/en/articles/6825453-chatgpt-release-notes',
+    updateSourceType: 'changelog',
+  },
+  'stable-diffusion': {
+    id: '16',
+    name: 'Stable Diffusion',
+    slug: 'stable-diffusion',
+    description: '开源AI图像生成模型，支持本地部署和自定义模型，适合高级用户和研究者。Stable Diffusion完全免费，可商用。',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://stability.ai',
+    imageUrl: 'https://placehold.co/800x400/be185d/ffffff?text=Stable+Diffusion',
+    rating: 4.4,
+    ratingCount: 8900,
+    dimensions: { easeOfUse: 3.6, features: 4.8, value: 4.9 },
+    tags: ['图像生成', '开源', '本地部署', '自定义模型', 'Stable+Diffusion'],
+    features: ['开源免费', '本地运行', 'LoRA模型', 'ControlNet', 'ComfyUI', '社区模型'],
+    alternatives: ['midjourney', 'dalle-3', 'flux'],
+    isNew: false,
+    createdAt: '2024-01-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '选择合适的Stable Diffusion部署方式', description: '方式1: 访问Clipdrop、Replicate、Stability AI官方平台(免费试用)在线使用。方式2: 使用Stable Diffusion WebUI(如AUTOMATIC1111、ComfyUI)本地部署。需要NVIDIA显卡(建议8GB+ VRAM)，或使用Google Colab云端GPU。按需求选择SD 3、SDXL、SD 1.5模型。SD 3在文字渲染和复杂构图上有大幅提升。' },
+        { step: 2, title: '编写有效的提示词(Prompt)', description: '正向提示词描述期望内容，格式主体 subject, 细节 details, 风格 style, 渲染参数。推荐使用ComfyUI的Midjourney-like节点流程图。质量标签词best quality, masterpiece, 8k放前面。反向提示词(Reverse Prompt)输入不想要元素如lowres, bad anatomy, blurry。SD 3对自然语言理解更好，可输入连贯句子。' },
+        { step: 3, title: '调整采样器和参数进行优化', description: 'Sampler(采样器)选择: DPM++ 2M Karras适合写实风格(速度/质量平衡)，Euler a适合快速草图，DDIM适合精细控制。Key参数: Steps(20-50，越高质量越慢), CFG Scale(7-12.5控制提示词遵循度), Seed(固定种子复现结果)。使用ControlNet控制构图线条、深度图、骨骼姿态。' }
+      ],
+      useCases: [
+        { title: 'AI艺术创作与数字艺术品生成', description: '数字艺术家使用Stable Diffusion创作高分辨率艺术作品。通过LoRA模型注入特定艺术风格(如吉卜力、赛博朋克、水墨)，使用IP-Adapter保持角色一致性。SD 3的Multi-prompting支持对同一画面不同区域使用独立提示词，实现复杂构图创作。' },
+        { title: '游戏素材与虚拟世界构建', description: '游戏开发者批量生成游戏场景、道具、角色概念图。使用ControlNet提取参考图的深度图、法线图作为生约束，保持多视角一致性。Lora模型可训练游戏IP角色风格，通过img2img将草图转化为精细线稿，再转3D建模参考。适合Indie游戏快速原型验证。' },
+        { title: '电商与平面设计素材生产', description: '电商设计师使用Stable Diffusion批量生成产品场景图、模特图、广告Banner。通过LoRA注入品牌风格和真实模特特征。使用Inpainting局部重绘更换模特服装、调整背景。Img2img模式可将手绘草图转化为精细渲染图，大幅提升设计效率。' },
+        { title: '建筑与室内设计可视化', description: '设计师使用ControlNet控制建筑线稿构图，结合SDXL生成逼真的建筑效果图。通过LoRA注入特定建筑风格(现代主义、苏州园林、Art Deco)。Depth Map ControlNet保持建筑结构线稿与生成效果一致，生成多角度方案供客户选择。' }
+      ],
+      tips: [
+        '提示词编写是SD出图质量的关键。使用tag语法(tags separated by commas)通常比自然语言效果更稳定。质量增强词masterpiece, best quality, absurdres放在最前面。人物描述建议固定顺序1girl, solo, long hair, white dress, standing方便模型学习。',
+        'SDXL相对于SD 1.5在真实人像和复杂光影上有显著提升，但需要更多VRAM(推荐12GB+)。新手建议从SD 1.5开始，资源充足后升级SDXL。Checkpoint模型决定基础风格，LoRA微调风格，Textual Inversion注入概念。建议建立自己的正反向提示词模板库。',
+        'ControlNet是SD最重要的控制工具之一。Canny边缘检测保留构图，Depth深度图控制空间结构，OpenPose控制人物姿态。Tile VAE可无损放大图像4倍。放大算法推荐4x-UltraSharp或RealESRGAN。批量生成时固定Seed值方便对比不同提示词效果。',
+        '本地部署推荐AUTOMATIC1111 WebUI(功能全面)或ComfyUI(节点式工作流，适合复杂Pipeline)。ComfyUI的workflow可保存复用，适合团队协作。使用VAE美化(通常用vae-ft-mse)可提升画面质感。注意模型版权和商业使用限制。'
+      ],
+      updateNotes: 'Stable Diffusion 3 (SD3) 于2024年发布，采用MMDiT架构，在文字渲染(终于能正确生成文字)、复杂构图、多主体理解上有质的飞跃。Stability AI推出Stable Assistant聊天机器人。ComfyUI原生支持SD3工作流。SDXL Turbo实时生成分辨率512x512仅需1步。'
+    },
+    updateSourceUrl: 'https://stability.ai/news',
+    updateSourceType: 'changelog',
+  },
+  'kimi': {
+    id: '17',
+    name: 'Kimi',
+    slug: 'kimi',
+    description: '月之暗面开发的AI助手，支持超长上下文和文档分析，专为中文用户优化。Kimi提供20万字超长上下文，支持文件分析。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://kimi.moonshot.cn',
+    imageUrl: 'https://placehold.co/800x400/2563eb/ffffff?text=Kimi',
+    rating: 4.6,
+    ratingCount: 6500,
+    dimensions: { easeOfUse: 4.7, features: 4.5, value: 4.8 },
+    tags: ['对话', '长文本', '文档分析', '中文', 'Kimi'],
+    features: ['20万字上下文', '文档分析', '联网搜索', '多文件处理', 'PPT生成', '网页解析'],
+    alternatives: ['chatgpt', 'claude', 'perplexity'],
+    isNew: true,
+    createdAt: '2024-03-15',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册并开始使用', description: '访问 kimi.moonshot.cn 使用手机号或微信注册。支持网页版和微信小程序，Kimi Chat免费使用，付费Kimi+($15/月起)解锁更多高级功能' },
+        { step: 2, title: '处理文件和链接', description: '支持上传PDF、Word、Excel、PPT、TXT、图片等文件，单文件最大100MB。支持输入链接抓取网页内容，特别擅长处理中文长文档' },
+        { step: 3, title: '使用高级功能', description: 'Kimi+智能体市场提供定制化助手：PPT助手、翻译助手、论文润色等。支持200K上下文窗口，可一次处理几十万字的中文文档' }
+      ],
+      useCases: [
+        { title: '超长中文文档处理', description: '支持20万字超长上下文，可一次性阅读整本长篇小说、完整法律合同。长文档摘要和问答功能适合处理招股书、年报、学术论文等长篇资料' },
+        { title: 'PPT和文档制作', description: '通过PPT助手输入主题和大纲，自动生成专业PPT初稿。支持多种风格模板，可导出为PPTX格式。Kimi+提供简历优化、报告撰写等专业模板' },
+        { title: '学术论文辅助', description: '论文润色、查重改写、参考文献格式化、摘要生成。支持中英互译和专业术语统一，适合研究生和学术写作者' },
+        { title: '网页内容抓取分析', description: '输入URL自动抓取并总结网页内容，适合新闻聚合、行业报告、竞品监控。支持多链接对比分析，一次性处理多个信息源' }
+      ],
+      tips: [
+        '处理超长文档时选择Kimi+的长文本专用入口，比普通对话模式更稳定，中文语义理解更准确',
+        '利用对比分析功能可同时上传多个版本文档(如合同V1、V2)，Kimi会自动列出差异点并标注潜在风险条款',
+        '微信小程序支持语音输入和OCR拍照识别，纸质文件拍照即可上传分析，适合移动办公场景',
+        'Kimi+的翻译助手支持学术/商务/日常三种模式，翻译学术论文时保留专业术语和引用格式'
+      ],
+      updateNotes: '2026年4月：Kimi 1.0超长上下文版支持100万字；Kimi+智能体市场新增20+专业助手；新增视频理解功能可分析短视频内容；微信端支持语音对话'
+    },
+    updateSourceUrl: 'https://kimi.moonshot.cn/docs/changelog',
+    updateSourceType: 'changelog',
+  },
+  'gemini': {
+    id: '18',
+    name: 'Gemini',
+    slug: 'gemini',
+    description: 'Google开发的AI助手，集成在Google生态中，支持搜索、文档和代码生成。Gemini提供免费使用，是ChatGPT的有力竞争者。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://gemini.google.com',
+    imageUrl: 'https://placehold.co/800x400/3b82f6/ffffff?text=Gemini',
+    rating: 4.5,
+    ratingCount: 9800,
+    dimensions: { easeOfUse: 4.6, features: 4.6, value: 4.4 },
+    tags: ['对话', '搜索', '代码', 'Google生态', 'Gemini'],
+    features: ['Google集成', '多模态', '代码生成', '实时信息', 'Workspace协作', 'Advanced分析'],
+    alternatives: ['chatgpt', 'claude', 'kimi'],
+    isNew: true,
+    createdAt: '2024-02-01',
+    updatedAt: '2024-05-01',
+    details: {
+      howToUse: [
+        { step: 1, title: '访问Gemini平台', description: '访问 gemini.google.com 或下载Gemini App。使用Google账户登录，Google One AI Premium订阅用户($19.99/月)可解锁Ultra 1.0模型和Gemini高级功能' },
+        { step: 2, title: '选择模型版本', description: '在界面顶部切换：Gemini(基础，快速)、Gemini Advanced(Ultra 1.0，深度推理)。Advanced用户可使用Deep Research功能进行深度网络搜索分析' },
+        { step: 3, title: '创建Gems和设置', description: '在Gemini Advanced中创建定制化Gems(类似自定义GPT)，设定角色、指令和知识库。通过设置自定义默认回复风格和偏好' }
+      ],
+      useCases: [
+        { title: '深度学术研究', description: 'Deep Research功能可自动进行多轮网络搜索，生成结构化研究报告。适合文献综述、市场调研、竞品分析，输出包含引用链接的研究报告' },
+        { title: '多模态内容理解', description: '原生支持图片、视频、音频理解。可分析图表、识别物体、描述视频内容、转录音频，适合UI设计评审、学术图表解读' },
+        { title: 'Google生态深度集成', description: '与Google Docs、Sheets、Gmail、Drive无缝连接。可直接从Gmail总结邮件、从Docs分析文档、从Sheets生成图表，数据分析能力突出' },
+        { title: '代码开发辅助', description: '支持Python、JavaScript等主流语言，可直接在对话中编写、执行、调试代码。适合数据科学、机器学习项目，支持导入和分析数据文件' }
+      ],
+      tips: [
+        'Deep Research适合开放式研究任务(如研究量子计算最新进展)，但会消耗大量配额，日常工作使用Gemini基础版即可',
+        'Gemini Ultra的上下文窗口达1M tokens，处理长文档时可开启Large context mode提升理解深度',
+        '利用Gems创建专属AI助手，如Python导师、健身教练、翻译助手，预设指令和知识库后每次对话自动加载',
+        'Google Workspace用户可将Gemini集成到Gmail和Docs，对长邮件点击Summarize快速获取要点，在Docs中直接询问内容相关问题'
+      ],
+      updateNotes: '2026年4月：Gemini 2.0 Flash推出，响应速度提升2倍；Deep Research支持中文和更多语言；Gems商店上线提供预设助手；Gemini Nano可在Android设备离线运行'
+    },
+    updateSourceUrl: 'https://ai.google.dev/gemini-api/docs/changelog',
+    updateSourceType: 'changelog',
+  },
+  'webpilot': {
+    id: '19',
+    name: 'WebPilot',
+    slug: 'webpilot',
+    description: 'AI网页阅读助手，帮助快速总结网页内容、提取关键信息和翻译外文文章。WebPilot是研究和信息收集的强大工具。',
+    category: 'research',
+    subcategory: 'web-reading',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://webpilot.ai',
+    imageUrl: 'https://placehold.co/800x400/0d9488/ffffff?text=WebPilot',
+    rating: 4.3,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.6 },
+    tags: ['研究', '网页阅读', '摘要', '翻译', 'WebPilot'],
+    features: ['网页总结', '内容提取', '多语言翻译', '信息整理', '对比分析', '问答功能'],
+    alternatives: ['perplexity', 'chatgpt', 'kimi'],
+    isNew: true,
+    createdAt: '2024-04-01',
+    updatedAt: '2024-05-01',
+    updateSourceUrl: 'https://github.com/webpilot-ai/Webpilot/releases',
+    updateSourceType: 'github',
+  },
+  'elicit': {
+    id: '20',
+    name: 'Elicit',
+    slug: 'elicit',
+    description: 'AI研究助手，帮助学术研究者快速搜索文献、总结论文要点和生成研究思路。Elicit已收录超过2亿篇学术论文。',
+    category: 'research',
+    subcategory: 'academic-search',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://elicit.org',
+    imageUrl: 'https://placehold.co/800x400/0f766e/ffffff?text=Elicit',
+    rating: 4.5,
+    ratingCount: 2800,
+    dimensions: { easeOfUse: 4.2, features: 4.7, value: 4.8 },
+    tags: ['研究', '学术', '文献', '论文', 'Elicit'],
+    features: ['文献搜索', '论文摘要', '研究思路', '引用生成', '关键词分析', '主题发现'],
+    alternatives: ['perplexity', 'consensus', 'semantic-scholar'],
+    isNew: false,
+    createdAt: '2024-02-15',
+    updatedAt: '2025-01-15',
+    updateSourceUrl: 'https://elicit.com/blog',
+    updateSourceType: 'blog',
+  },
+  // ========== 国内AI对话/大模型 ==========
+  'wenxin-yiyan': {
+    id: '21',
+    name: '文心一言',
+    slug: 'wenxin-yiyan',
+    description: '百度基于文心大模型打造的AI对话助手，集成百度在搜索和中文语言处理领域的深厚积累。文心一言支持知识问答、文本创作、逻辑推理、代码生成等多种任务，尤其擅长中文理解和生成。该工具已更新至4.0版本，在中文语义理解、文学创作和法律咨询等专业领域表现出色，是中国用户日常学习工作的得力AI助手。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://yiyan.baidu.com',
+    imageUrl: 'https://placehold.co/800x400/de3d32/ffffff?text=Wenxin-Yiyan',
+    rating: 4.4,
+    ratingCount: 8200,
+    dimensions: { easeOfUse: 4.5, features: 4.3, value: 4.6 },
+    tags: ['对话', '中文', '百度', '写作', '搜索'],
+    features: ['中文理解增强', '知识问答', '文本创作', '代码生成', '逻辑推理', '文学创作', '数据分析', '联网搜索', 'PPT生成', '图片生成'],
+    alternatives: ['tongyi-qianwen', 'zhixing-qingyan', 'kimi'],
+    isNew: false,
+    createdAt: '2024-03-01',
+    updatedAt: '2025-03-01',
+    updateSourceUrl: 'https://yiyan.baidu.com/notice',
+    updateSourceType: 'changelog',
+  },
+  'tongyi-qianwen': {
+    id: '22',
+    name: '通义千问',
+    slug: 'tongyi-qianwen',
+    description: '阿里云发布的大语言模型，拥有强大的中文理解和多模态能力。通义千问支持长文本分析、代码编写、数学解题、创意写作等任务，并通过阿里云开放API供企业接入使用。其开源版本Qwen系列在GitHub上广受欢迎，支持多种尺寸的模型部署。通义千问的免费版本已能够满足大多数日常学习和工作需求，是中国留学生的优质AI助手选择。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://tongyi.aliyun.com',
+    imageUrl: 'https://placehold.co/800x400/ff6a00/ffffff?text=Tongyi-Qianwen',
+    rating: 4.5,
+    ratingCount: 7500,
+    dimensions: { easeOfUse: 4.6, features: 4.5, value: 4.7 },
+    tags: ['对话', '阿里', '开源', '代码', '写作'],
+    features: ['长文本分析', '代码生成', '多语言支持', '创意写作', '数学解题', '联网搜索', '文档处理', '多模态', 'PPT生成', 'API接入'],
+    alternatives: ['wenxin-yiyan', 'zhixing-qingyan', 'kimi'],
+    isNew: false,
+    createdAt: '2024-04-01',
+    updatedAt: '2025-01-15',
+    updateSourceUrl: 'https://help.aliyun.com/zh/qwen',
+    updateSourceType: 'changelog',
+  },
+  'xunfei-xinghuo': {
+    id: '23',
+    name: '讯飞星火',
+    slug: 'xunfei-xinghuo',
+    description: '科大讯飞基于星火大模型打造的AI对话平台，在语音识别和语音合成领域具有全球领先优势。讯飞星火支持语音输入输出、实时翻译、多语言交互等功能，特别适合需要语音交互场景的用户。其认知大模型已升级至V3.5版本，在语言理解、数学能力、代码生成等方面表现优异。讯飞星火提供网页端、手机App和API多种接入方式，免费版即可使用大部分核心功能。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://xinghuo.xfyun.cn',
+    imageUrl: 'https://placehold.co/800x400/00d2ff/ffffff?text=Xunfei-Xinghuo',
+    rating: 4.4,
+    ratingCount: 6100,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.5 },
+    tags: ['对话', '科大讯飞', '语音', '翻译', '中文'],
+    features: ['语音输入输出', '实时翻译', '多语言支持', '长文本分析', '代码生成', 'PPT生成', '创意写作', '数学解题', '联网搜索', 'API接入'],
+    alternatives: ['wenxin-yiyan', 'tongyi-qianwen', 'kimi'],
+    isNew: false,
+    createdAt: '2024-05-01',
+    updatedAt: '2025-02-01',
+    updateSourceUrl: 'https://www.xfyun.cn/doc/spark/Web.html',
+    updateSourceType: 'changelog',
+  },
+  'zhixing-qingyan': {
+    id: '24',
+    name: '智谱清言',
+    slug: 'zhixing-qingyan',
+    description: '智谱AI自主研发的大语言模型对话助手，基于ChatGLM系列模型构建。智谱清言在中英文对话、学术写作、代码生成、知识推理等方面表现稳定，已被广泛应用于学术研究和商业场景。智谱AI是国内最早推出千亿参数大模型的公司之一，其GLM-4模型在多项评测中位居国内前列。平台提供免费版本，同时开放API供开发者使用，是国内AI应用中生态较为成熟的产品之一。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.zhipuai.cn',
+    imageUrl: 'https://placehold.co/800x400/6c5ce7/ffffff?text=Zhipu-Qingyan',
+    rating: 4.3,
+    ratingCount: 5400,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.4 },
+    tags: ['对话', '智谱AI', '学术', '代码', '中文'],
+    features: ['中英文对话', '学术写作', '代码生成', '知识推理', '长文本分析', '联网搜索', '多模态', 'PPT生成', 'API接入', '私有化部署'],
+    alternatives: ['wenxin-yiyan', 'tongyi-qianwen', 'claude'],
+    isNew: false,
+    createdAt: '2024-04-15',
+    updatedAt: '2025-01-20',
+    updateSourceUrl: 'https://www.zhipuai.cn/news',
+    updateSourceType: 'changelog',
+  },
+  'doubao': {
+    id: '25',
+    name: '豆包',
+    slug: 'doubao',
+    description: '字节跳动推出的AI对话助手，集成在抖音、飞书等多个字节系产品中。豆包支持语音和文字双模态交互，提供聊天、写作助手、英语学习、编程辅助等多种功能。其特点是交互界面简洁流畅，适合日常轻量使用。作为字节跳动AI战略的核心产品，豆包利用字节在内容推荐和大规模数据处理方面的积累，在对话体验上做了深度优化。目前豆包完全免费使用，是寻求简单易用AI工具的用户的不错选择。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.doubao.com',
+    imageUrl: 'https://placehold.co/800x400/fe453b/ffffff?text=Doubao',
+    rating: 4.5,
+    ratingCount: 9200,
+    dimensions: { easeOfUse: 4.8, features: 4.3, value: 4.7 },
+    tags: ['对话', '字节跳动', '语音', '日常', '写作'],
+    features: ['语音对话', '聊天助手', '写作助手', '英语学习', '编程辅助', '翻译', '创意灵感', '联网搜索', '多模态', '抖音集成'],
+    alternatives: ['kimi', 'wenxin-yiyan', 'tongyi-qianwen'],
+    isNew: true,
+    createdAt: '2024-08-01',
+    updatedAt: '2025-03-15',
+    updateSourceUrl: 'https://www.volcengine.com/docs/82379/1195622',
+    updateSourceType: 'changelog',
+  },
+  'hunyuan': {
+    id: '26',
+    name: '混元',
+    slug: 'hunyuan',
+    description: '腾讯混元大模型是腾讯基于多年AI技术积累打造的AI对话助手，已深度集成在腾讯文档、腾讯会议、微信搜索等多个核心产品中。混元大模型依托腾讯在社交、游戏、云服务等领域积累的海量数据，在中文语境理解、创意内容生成和多模态处理方面具有独特优势。特别是在结合腾讯生态使用时，混元可以提供文档处理、会议纪要、社交内容创作等场景化AI能力。目前混元对普通用户免费开放API使用。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://hunyuan.tencent.com',
+    imageUrl: 'https://placehold.co/800x400/24c869/ffffff?text=Hunyuan',
+    rating: 4.3,
+    ratingCount: 4800,
+    dimensions: { easeOfUse: 4.6, features: 4.3, value: 4.4 },
+    tags: ['对话', '腾讯', '中文', '生态', '文档'],
+    features: ['智能写作', '代码生成', '会议纪要', '腾讯文档集成', '多模态', '联网搜索', '创意内容', '翻译', '长文本分析', '微信搜索集成'],
+    alternatives: ['wenxin-yiyan', 'tongyi-qianwen', 'kimi'],
+    isNew: false,
+    createdAt: '2024-09-01',
+    updatedAt: '2025-01-10',
+    updateSourceUrl: 'https://cloud.tencent.com/document/product/1729',
+    updateSourceType: 'changelog',
+  },
+  'shangliang': {
+    id: '27',
+    name: '商量',
+    slug: 'shangliang',
+    description: '商汤科技SenseChat是基于日日新大模型开发的AI对话助手，专注于企业级AI应用场景。商量在逻辑推理、数学解题、代码生成和长文本处理方面表现稳定，已被广泛应用于金融、医疗、教育等行业的智能化转型。商量支持多轮对话和文件上传分析，提供网页端和API接口。商汤作为计算机视觉领域的头部企业，其大模型在多模态理解方面有着独特定位，能够处理图文混合内容。商量目前向用户免费开放核心功能。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://tech.sensetime.com',
+    imageUrl: 'https://placehold.co/800x400/4a90e2/ffffff?text=Shangliang',
+    rating: 4.2,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.4, features: 4.4, value: 4.3 },
+    tags: ['对话', '商汤', '企业', '代码', '推理'],
+    features: ['逻辑推理', '数学解题', '代码生成', '长文本分析', '多模态', '联网搜索', '文件分析', '行业应用', 'API接入', '多轮对话'],
+    alternatives: ['tongyi-qianwen', 'wenxin-yiyan', 'claude'],
+    isNew: false,
+    createdAt: '2024-07-01',
+    updatedAt: '2025-01-05',
+    updateSourceUrl: 'https://www.sensetime.com/news',
+    updateSourceType: 'changelog',
+  },
+  'tiangong': {
+    id: '28',
+    name: '天工',
+    slug: 'tiangong',
+    description: '昆仑万维天工大模型是国内最早实现双千亿参数的大语言模型之一，在搜索和知识问答领域具有深厚积累。天工AI支持超长上下文对话、联网搜索、知识推理和多模态内容生成。作为昆仑万维在AI领域的旗舰产品，天工在大规模预训练和推理优化方面投入巨大，对复杂问题的理解和回答质量稳定。天工AI提供网页端和App双端使用，目前基础功能免费，是有深度知识检索需求用户的可靠选择。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.tiangong.cn',
+    imageUrl: 'https://placehold.co/800x400/2d8cff/ffffff?text=Tiangong',
+    rating: 4.3,
+    ratingCount: 4100,
+    dimensions: { easeOfUse: 4.5, features: 4.4, value: 4.4 },
+    tags: ['对话', '昆仑万维', '搜索', '知识', '中文'],
+    features: ['联网搜索', '知识问答', '长文本分析', '代码生成', '创意写作', '多语言', '多模态', '语义推理', '文档处理', '联网实时信息'],
+    alternatives: ['tongyi-qianwen', 'wenxin-yiyan', 'perplexity'],
+    isNew: false,
+    createdAt: '2024-06-01',
+    updatedAt: '2025-01-25',
+    updateSourceUrl: 'https://www.tiangong.cn/',
+    updateSourceType: 'changelog',
+  },
+  'pangu': {
+    id: '29',
+    name: '盘古',
+    slug: 'pangu',
+    description: '华为云盘古大模型是华为自主研发的超大规模预训练模型，聚焦于行业智能化升级。盘古大模型涵盖NLP、CV、科学计算等多个子领域，其中盘古NLP大模型在中文理解、文本生成和知识服务方面表现突出。盘古主要通过华为云API对外服务，适合企业用户在云端集成AI能力。个人用户可通过华为云体验中心免费试用部分功能。对于需要结合华为云生态进行AI开发或研究的用户，盘古是不可替代的选择。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.huaweicloud.com/product/pangu.html',
+    imageUrl: 'https://placehold.co/800x400/dd2625/ffffff?text=Pangu',
+    rating: 4.1,
+    ratingCount: 2800,
+    dimensions: { easeOfUse: 4.2, features: 4.5, value: 4.2 },
+    tags: ['对话', '华为云', '企业', '行业', 'API'],
+    features: ['中文理解', '文本生成', '知识服务', '行业应用', '多模态', 'API接入', '长文本分析', '代码生成', '华为云集成', '私有化部署'],
+    alternatives: ['tongyi-qianwen', 'wenxin-yiyan', 'zhixing-qingyan'],
+    isNew: false,
+    createdAt: '2024-08-15',
+    updatedAt: '2025-02-01',
+    updateSourceUrl: 'https://www.huaweicloud.com/product/pangu.html',
+    updateSourceType: 'changelog',
+  },
+  // ========== 国内AI图像工具 ==========
+  'tongyi-wanxiang': {
+    id: '30',
+    name: '通义万相',
+    slug: 'tongyi-wanxiang',
+    description: '阿里云通义万相是阿里推出的AI图像生成和编辑工具，支持文生图、图生图、风格迁移等多种创作模式。通义万相基于阿里自研的Composer模型架构，在图像质量和生成速度上均达到行业领先水平。该工具提供多种艺术风格预设，包括油画、水彩、动漫、摄影等，适合不同创作需求。用户每日可免费生成一定数量的图片，对于有图像创作需求但不想付费的留学生而言是实用的免费选项。通义万相还支持图像局部重绘和元素移除等编辑功能。',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://wanxiang.aliyun.com',
+    imageUrl: 'https://placehold.co/800x400/ff6a00/ffffff?text=Tongyi-Wanxiang',
+    rating: 4.4,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.6, features: 4.4, value: 4.6 },
+    tags: ['图像生成', '阿里', '文生图', '艺术', '免费'],
+    features: ['文生图', '图生图', '风格迁移', '多种艺术风格', '图像编辑', '局部重绘', '元素移除', '每日免费额度', '高分辨率输出', '创意灵感'],
+    alternatives: ['stable-diffusion', 'midjourney', 'miaohua'],
+    isNew: true,
+    createdAt: '2024-10-01',
+    updatedAt: '2025-02-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '访问通义万相并登录阿里云账户', description: '访问 wanxiang.aliyun.com，使用阿里云账户(淘宝/支付宝账户可直接登录)或钉钉账户登录。新用户有免费试用额度(绘画API有100次免费调用)，付费版按生成次数计费。界面支持中文，有文本生成图像和图像生成图像两大核心模式。' },
+        { step: 2, title: '输入中文提示词并调整参数', description: '在文本生成图像模式下，输入详细的中文场景描述，例如一只橘色的小猫在阳光下打盹，背景是落地窗和绿植，印象派油画风格，暖色调。右侧面板可调整画面比例(1:1/16:9/9:16)、画质(高清/标准)、风格预设(默认/油画/水彩/动漫)。支持选择生成数量1-4张。' },
+        { step: 3, title: '使用图像风格融合与编辑功能', description: '图像生成图像模式支持上传参考图，将照片转为插画/油画风格。风格融合功能可选择2-3种艺术风格混合。局部重绘功能(Inpainting)支持涂抹不满意的区域并用提示词重新生成。满意的作品可点击下载获取高清版本。' }
+      ],
+      useCases: [
+        { title: '中文内容创作与营销配图', description: '自媒体创作者和营销人员使用通义万相为中文内容快速生成配图。输入中文提示词，国潮风格的新年海报，飞龙图案，中国红背景，金色字体装饰，系统生成符合中文审美和节日氛围的素材。特别适合微信公众号、小红书、微博等平台配图需求。' },
+        { title: '电商中文详情页与主图设计', description: '电商卖家使用通义万相生成中文场景化产品主图。例如现代简约风格的卧室，实木床上摆放着淡蓝色床品，晨光透过纱帘作为产品使用场景图。支持生成白底产品图(添加纯白背景提示词)，批量产出差异化主图素材。' },
+        { title: '中文绘本文学与教育内容创作', description: '童书作者和教育内容创作者利用通义万相生成中文绘本插画。输入一只小兔子在森林里采蘑菇，童话绘本风格，色彩柔和，系统生成可爱风格插画。支持保持角色一致性的连续生成，适合故事绘本、教育动画分镜的快速制作。' },
+        { title: '品牌本土化与国风设计', description: '设计师使用通义万相进行国潮品牌设计和传统元素现代化创作。输入青花瓷纹样的运动鞋，蓝色渐变，潮流款式或敦煌飞天壁画风格的数字海报，系统融合传统美学与现代设计。适合需要中国文化元素的设计项目快速出稿。' }
+      ],
+      tips: [
+        '通义万相对中文语义理解有优化，中文提示词直接输入即可获得良好效果，无需翻译成英文。提示词越具体场景描述越详细效果越好。推荐格式主体描述 + 场景环境 + 光线氛围 + 风格定位。质量修饰词高清、细节丰富、8K可提升分辨率。',
+        '风格预设提供多种艺术风格选择，包括默认真实感、油画、水彩、动漫、素描等。国风风格适合传统元素，油画风格适合艺术创作。图像生成图像模式可将手机照片转为艺术风格，适合设计师快速测试不同风格方向。',
+        '合理利用局部重绘(Inpainting)功能修复画面问题。选择画笔涂抹问题区域，用提示词描述期望内容如换成红色的花。批量生成时使用生成4张选项可快速获得多种方案选择，节省创意探索时间。',
+        '结合阿里云其他服务使用效果更佳。通义万相生成的图像可通过OSS存储服务管理，通过钉钉机器人分享，通过PAI平台进行模型微调训练。企业用户建议使用API调用方式接入现有设计工作流，实现自动化批量生产。'
+      ],
+      updateNotes: '通义万相持续迭代更新，2024年上线FLUX模型支持的更高质量图像生成。新增智能抠图、图像扩展、多图融合等进阶功能。API接口支持更高并发和更丰富的参数控制。中文理解和东方美学风格生成持续优化。'
+    },
+    updateSourceUrl: 'https://help.aliyun.com/zh/tongyi/document-2506281',
+    updateSourceType: 'changelog',
+  },
+  'miaohua': {
+    id: '31',
+    name: '秒画',
+    slug: 'miaohua',
+    description: '商汤科技秒画是基于自研Artist大模型开发的AI图像生成平台，支持中英文双语的精准prompt理解。秒画提供丰富的风格模型库，涵盖动漫、写实、插画、国风等多个方向，生成的图像在细节和色彩表现上较为出色。平台还支持ControlNet条件控制，用户可以通过线稿、姿态等方式精确控制生成结果。对于需要精细控制图像创作的用户，秒画提供了比大多数竞品更灵活的控制选项。免费版每日有额度限制，付费版提供更高速和更多生图次数。',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://miaohua.sensetime.com',
+    imageUrl: 'https://placehold.co/800x400/6c5ce7/ffffff?text=Miaohua',
+    rating: 4.3,
+    ratingCount: 3800,
+    dimensions: { easeOfUse: 4.3, features: 4.5, value: 4.4 },
+    tags: ['图像生成', '商汤', '艺术', '中英双语', 'ControlNet'],
+    features: ['中英双语prompt', '多种风格模型', 'ControlNet控制', '线稿控制', '姿态控制', '高分辨率生成', '风格融合', '每日免费额度', 'LoRA模型定制', '批量生成'],
+    alternatives: ['tongyi-wanxiang', 'stable-diffusion', 'midjourney'],
+    isNew: true,
+    createdAt: '2024-09-15',
+    updatedAt: '2025-01-30',
+    updateSourceUrl: '',
+    updateSourceType: 'none',
+  },
+  'liblib': {
+    id: '32',
+    name: 'liblib',
+    slug: 'liblib',
+    description: 'liblib.ai是国内最大的AI图像创作社区平台，基于Stable Diffusion生态构建，提供海量预训练模型和LoRA模型下载。liblib同时提供在线生图服务，用户无需本地部署即可使用各种社区模型，适合不想折腾本地配置的普通用户。平台汇聚了数万个由社区创作者训练的个性化模型，覆盖人像、风景、动漫、游戏等各种主题。用户可以浏览社区作品获取灵感，也可以训练自己的专属模型。是国内AI绘画爱好者最活跃的交流平台之一。',
+    category: 'design',
+    subcategory: 'image-generation',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.liblib.ai',
+    imageUrl: 'https://placehold.co/800x400/f59e0b/ffffff?text=liblib',
+    rating: 4.5,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 4.4, features: 4.7, value: 4.6 },
+    tags: ['图像生成', 'SD模型', '社区', 'LoRA', '开源'],
+    features: ['海量模型库', '在线生图', 'LoRA模型训练', '社区分享', '模型浏览', 'Prompt分享', '免本地部署', '每日免费额度', '模型定制', '创意灵感'],
+    alternatives: ['stable-diffusion', 'tongyi-wanxiang', 'midjourney'],
+    isNew: true,
+    createdAt: '2024-08-01',
+    updatedAt: '2025-03-01',
+    updateSourceUrl: 'https://www.liblib.ai/',
+    updateSourceType: 'changelog',
+  },
+  // ========== 国内AI写作工具 ==========
+  'xunfei-xiezuo': {
+    id: '33',
+    name: '讯飞写作',
+    slug: 'xunfei-xiezuo',
+    description: '讯飞写作是科大讯飞推出的AI写作辅助工具，依托讯飞在语音和语言处理领域的技术积累，提供智能写作、内容润色和多语言翻译等功能。讯飞写作支持多种文体模板，包括工作报告、公文、演讲稿、邮件等，用户只需输入关键词或大纲即可生成完整文章。平台支持中、英、法、德等多语言互译，适合撰写多语言材料的留学生使用。讯飞写作还集成语音输入功能，可以边说边写，大幅提升写作效率。',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://tongyi.aliyun.com/qianwen/overview',
+    imageUrl: 'https://placehold.co/800x400/00d2ff/ffffff?text=Xunfei-Write',
+    rating: 4.3,
+    ratingCount: 4100,
+    dimensions: { easeOfUse: 4.6, features: 4.3, value: 4.5 },
+    tags: ['写作', '科大讯飞', '翻译', '模板', '语音'],
+    features: ['多文体模板', '智能续写', '多语言翻译', '语音输入', '内容润色', '语法检查', '结构优化', '引用推荐', '一键生成', '多语言写作'],
+    alternatives: ['mita-writecat', 'caiyun-xiaomeng', 'tongyi-qianwen'],
+    isNew: false,
+    createdAt: '2024-06-15',
+    updatedAt: '2025-01-15',
+    updateSourceUrl: 'https://www.xfyun.cn/doc/spark/Web.html',
+    updateSourceType: 'changelog',
+  },
+  'mita-writecat': {
+    id: '34',
+    name: '秘塔写作猫',
+    slug: 'mita-writecat',
+    description: '秘塔写作猫是上海秘塔网络科技推出的AI写作辅助工具，专注于中英文写作的语法检查、错别字纠正和风格优化。秘塔写作猫提供网页端、浏览器插件和Word插件多端使用，覆盖日常写作的各类场景。其核心功能包括全文改写、摘要生成、翻译和校对，尤其适合需要撰写英文论文或报告的留学生使用。平台的校对功能完全免费，付费版本提供更强大的改写和润色能力。秘塔写作猫还提供多种写作模板，帮助用户快速生成周报、邮件等常用文档。',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://xiezuocat.zhiya.tech',
+    imageUrl: 'https://placehold.co/800x400/f97316/ffffff?text=Mita-Writecat',
+    rating: 4.5,
+    ratingCount: 7800,
+    dimensions: { easeOfUse: 4.7, features: 4.4, value: 4.6 },
+    tags: ['写作', '校对', '改写', '翻译', '学术'],
+    features: ['语法检查', '错别字纠正', '全文改写', '摘要生成', '多语言翻译', '写作模板', '浏览器插件', 'Word插件', '英文学术润色', '风格优化'],
+    alternatives: ['grammarly', 'xunfei-xiezuo', 'quillbot'],
+    isNew: false,
+    createdAt: '2024-03-01',
+    updatedAt: '2025-02-20',
+    updateSourceUrl: '',
+    updateSourceType: 'none',
+  },
+  'caiyun-xiaomeng': {
+    id: '35',
+    name: '彩云小梦',
+    slug: 'caiyun-xiaomeng',
+    description: '彩云小梦是彩云科技推出的AI故事创作助手，专注于小说、剧本和创意故事的续写和生成。用户只需提供一个开头或故事梗概，彩云小梦即可自动续写生成丰富的内容，支持多种故事风格和世界观设定。该工具特别适合需要创作小说章节、写同人故事或进行创意写作练习的用户。彩云小梦提供基础免费版和高级创作版，高级版支持自定义世界观和角色设定。对于喜欢故事创作或需要进行创意写作的文科类留学生，是独特而实用的工具。',
+    category: 'writing',
+    subcategory: 'writing-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://www.caiyunai.com',
+    imageUrl: 'https://placehold.co/800x400/e879f9/ffffff?text=Caiyun-Xiaomeng',
+    rating: 4.4,
+    ratingCount: 5200,
+    dimensions: { easeOfUse: 4.6, features: 4.4, value: 4.5 },
+    tags: ['写作', '故事创作', '小说', '创意', '续写'],
+    features: ['故事续写', 'AI剧本生成', '多风格设定', '世界观定制', '角色设定', '同人创作', '写作灵感', '每日免费创作', '社交分享', '导出功能'],
+    alternatives: ['chatgpt', 'wenxin-yiyan', 'mita-writecat'],
+    isNew: true,
+    createdAt: '2024-05-01',
+    updatedAt: '2025-02-01',
+    updateSourceUrl: '',
+    updateSourceType: 'none',
+  },
+  // ========== 高星 Agent 框架 ==========
+  'openclaw': {
+    id: '36',
+    name: 'OpenClaw',
+    slug: 'openclaw',
+    description: 'Apache 2.0开源的AI Agent框架，300K+ Stars，支持20+消息平台，Windows/Mac/Linux/Docker多平台部署。OpenClaw是构建AI Agent的强大基础架构，支持多种消息平台集成。',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/openclaw/openclaw',
+    imageUrl: 'https://placehold.co/800x400/f97316/ffffff?text=OpenClaw',
+    rating: 4.8,
+    ratingCount: 5200,
+    dimensions: { easeOfUse: 4.2, features: 4.9, value: 4.9 },
+    tags: ['Agent', '开源', '多平台', '消息平台', 'Docker'],
+    features: ['多消息平台集成', '插件系统', '记忆管理', '工具调用', '20+平台支持', '可视化调试'],
+    alternatives: ['hermes-agent', 'autogpt'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装OpenClaw', description: '方式1: Docker安装(推荐) - docker run -d -p 3000:3000 openclaw/openclaw\n方式2: 直接安装 - npm install -g openclaw-cli\n方式3: 源码安装 - git clone后运行./setup.sh\n安装完成后访问 http://localhost:3000 进入控制台' },
+        { step: 2, title: '配置第一个Agent', description: '在控制台点击"Create Agent"，输入Agent名称和描述。选择消息平台(Discord/Slack/Telegram等)，配置Bot Token。在"Capabilities"中启用所需能力：记忆管理、工具调用、代码执行等。设置系统提示词定义Agent角色和行为。' },
+        { step: 3, title: '添加插件和能力', description: '访问插件市场添加功能扩展。推荐插件：web-search(联网搜索)、image-generation(图像生成)、code-interpreter(代码执行)。配置API密钥(如OpenAI、Google)以启用相应功能。使用记忆系统配置向量数据库(Chroma/Pinecone)以实现长期记忆。' }
+      ],
+      useCases: [
+        { title: '跨平台客服Agent', description: '企业使用OpenClaw构建统一客服Agent，同时部署到Discord、Slack、Telegram、微信等多个平台。Agent共享同一知识库和记忆，提供一致的服务体验。处理FAQ、订单查询、技术支持等常规问题，复杂问题自动转人工。' },
+        { title: '社群运营自动化', description: '社群管理员使用OpenClaw自动化社群运营。Bot自动欢迎新成员、发布定时内容、回答常见问题、管理违规内容。通过插件集成，实现自动抽奖、数据收集、投票活动等互动功能，大幅减少人工运营负担。' },
+        { title: '个人AI助手', description: '开发者将OpenClaw部署为个人AI助手，集成到日常使用的IM工具中。助手可以帮助处理邮件、安排日程、查询信息、代码调试等任务。记忆系统让助手能够学习用户偏好，提供个性化的协助。' },
+        { title: '企业知识库问答', description: '使用OpenClaw构建企业内部知识库问答系统。配置RAG管道连接Confluence、Notion等文档库。员工在Slack/Teams提问，Agent自动检索相关文档并生成回答，减少信息检索时间。' }
+      ],
+      tips: [
+        '使用Docker部署是最简单的方式，生产环境建议使用docker-compose配置多容器架构，包括OpenClaw主服务、Redis缓存、Chroma向量数据库。',
+        '插件开发使用OpenClaw的插件SDK，定义capabilities和actions接口。参考官方插件仓库中的示例插件，如天气查询、货币转换等。',
+        '记忆系统配置很关键 - 选择Chroma(本地，轻量)或Pinecone(云端，可扩展)。定期清理过期记忆避免干扰当前任务。',
+        '多平台配置时，每个平台需要独立的Bot Token。建议使用环境变量管理敏感配置，运行启动命令时通过-e参数注入。'
+      ],
+      updateNotes: '2026年5月：OpenClaw 2.0发布，支持多Agent协作和层级任务分解；新增可视化工作流编辑器；改进的记忆系统支持多模态内容；插件市场新增50+官方插件；性能优化提升3倍响应速度。'
+    },
+    updateSourceUrl: 'https://github.com/openclaw/openclaw/releases',
+    updateSourceType: 'github',
+  },
+  'hermes-agent': {
+    id: '37',
+    name: 'Hermes Agent',
+    slug: 'hermes-agent',
+    description: '100K+ Stars的自进化AI Agent框架，MIT开源，支持200+模型，可自我进化和持续学习。Hermes Agent是自主AI Agent的标杆项目。',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/NousResearch/hermes-agent',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=Hermes+Agent',
+    rating: 4.7,
+    ratingCount: 3800,
+    dimensions: { easeOfUse: 4.0, features: 4.8, value: 4.9 },
+    tags: ['Agent', '自进化', '多模型', '开源', 'MIT'],
+    features: ['200+模型支持', '自进化能力', '多Agent协作', '长期记忆', '工具扩展', '自主决策'],
+    alternatives: ['openclaw', 'autogpt'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装Hermes Agent', description: '方式1: pip安装 - pip install hermes-agent\n方式2: Docker快速部署 - docker run -d -p 8000:8000 nousresearch/hermes-agent\n方式3: 源码安装 - git clone后pip install -e .\n安装后运行hermes-agent init初始化配置' },
+        { step: 2, title: '配置模型和工具', description: '编辑config.yaml配置LLM后端，支持OpenAI、Anthropic、本地Ollama等200+模型。配置工具集：web-search(联网)、calculator(计算)、file-ops(文件操作)、code-executor(代码执行)。设置自我进化参数，包括学习率、反思间隔、记忆整合策略。' },
+        { step: 3, title: '创建自进化Agent', description: '定义Agent角色和目标，使用自然语言描述任务目标而非固定流程。Agent会自主规划步骤、调用工具、自我反思改进。使用反馈循环机制，Agent从成功和失败中学习，持续优化决策策略。' }
+      ],
+      useCases: [
+        { title: '复杂任务自主执行', description: 'Hermes Agent适合需要多步骤规划的复杂任务，如市场调研、竞品分析、旅行规划。Agent自主分解任务、调用工具、整合结果，最终输出完整报告。自我反思机制让它能在执行中发现问题并调整策略。' },
+        { title: '多Agent协作系统', description: '部署多个Hermes Agent组成协作网络，每个Agent专注文档检索、数据分析、报告撰写等特定能力。通过Agent间通信协调，共同完成超出单一Agent能力范围的复杂任务。' },
+        { title: '持续学习的研究助手', description: '将Hermes Agent作为研究助手，它能从阅读论文、分析数据、撰写摘要的循环中不断学习研究领域的知识。记忆系统保存学习成果，下次处理相关任务时调用积累的知识。' },
+        { title: '自动化代码开发', description: '开发者使用Hermes Agent自动完成代码开发任务。描述需求后，Agent自主编写、测试、调试代码。自我进化让它能从调试失败中学习，逐步提升代码质量和开发效率。' }
+      ],
+      tips: [
+        '自我进化功能默认关闭，初次使用时建议先在受控环境测试。在config.yaml中设置evolution: enabled: true启用，并配置进化学习率和反思阈值。',
+        '长期记忆会消耗存储空间，定期运行hermes-agent memory --prune清理低价值记忆。重要记忆可以使用hermes-agent memory --pin固定保留。',
+        '200+模型支持中，本地Ollama部署的模型响应最快，OpenAI GPT-4能力最强但有API成本。按任务类型选择合适模型能平衡效果和成本。',
+        '多Agent协作时，每个Agent配置不同的专业角色和工具集，通过消息队列进行通信。设置合理的任务分配策略避免重复劳动。'
+      ],
+      updateNotes: '2026年4月：Hermes 3.0发布，全新的自进化算法使Agent学习效率提升5倍；新增多模态理解支持；改进的长期记忆系统支持结构化知识存储；新增沙箱环境执行危险操作保障安全。'
+    },
+    updateSourceUrl: 'https://github.com/NousResearch/hermes-agent/releases',
+    updateSourceType: 'github',
+  },
+  'autogpt': {
+    id: '38',
+    name: 'AutoGPT',
+    slug: 'autogpt',
+    description: '160K+ Stars的自主任务执行Agent框架，通过自然语言指令实现复杂任务的自动化完成。AutoGPT是最流行的自主AI Agent之一。',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/Significant-Gravitas/AutoGPT',
+    imageUrl: 'https://placehold.co/800x400/10b981/ffffff?text=AutoGPT',
+    rating: 4.5,
+    ratingCount: 4500,
+    dimensions: { easeOfUse: 3.8, features: 4.7, value: 4.8 },
+    tags: ['Agent', '自主执行', '自动化', '开源'],
+    features: ['自主任务规划', '步骤执行', '自我反思', '视觉支持', '语音交互', '长程记忆'],
+    alternatives: ['openclaw', 'langchain'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装AutoGPT', description: '方式1: Git克隆 - git clone https://github.com/Significant-Gravitas/AutoGPT.git && cd AutoGPT && pip install -r requirements.txt\n方式2: Docker - docker build -t autogpt . && docker run -it --env-file .env autogpt\n方式3: Forge版本(更易用) - 下载AutoGPT Forge安装包运行。配置API Key后即可启动。' },
+        { step: 2, title: '定义AI角色和目标', description: '设置AI_Name(Agent名称)、AI_Role(角色描述)、Goals(目标列表，用逗号分隔)。例如角色：个人研究助手，专门帮我收集和分析信息。目标1：搜索最新AI进展，2：总结要点，3：保存到笔记。Agent会自主规划实现路径。' },
+        { step: 3, title: '监控和干预执行', description: 'AutoGPT自主执行任务时会在命令行输出进度。按Ctrl+C暂停人工干预。使用continuous模式Agent会连续执行不需确认，但建议新手先不使用。执行过程中Agent会自我反思(five whys分析)改进方案。' }
+      ],
+      useCases: [
+        { title: '自动化研究调研', description: '给AutoGPT一个研究主题，它会自动搜索网页、阅读文章、提取关键信息、整合成报告。比传统人工调研快10倍，适合竞品分析、技术调研、市场研究等任务。' },
+        { title: '代码自动开发', description: '描述你想要的功能，AutoGPT会自动规划架构、编写代码、创建测试、修复Bug。适用于简单脚本和小型项目，大型项目建议使用AutoGPT Agent SDK分模块开发。' },
+        { title: '内容创作自动化', description: '输入内容创作需求，AutoGPT自动完成资料收集、大纲设计、初稿撰写、修改润色。适合博客文章、社交媒体内容、营销文案等重复性内容生产。' },
+        { title: '数据分析和可视化', description: 'AutoGPT可以读取数据文件、分析趋势、生成图表、撰写分析报告。支持CSV、Excel、JSON等格式，自动选择合适的分析方法和可视化方式。' }
+      ],
+      tips: [
+        'AI_Role定义越具体，Agent行为越符合预期。使用"你是XXX专家，擅长YYY，尤其注重ZZZ"比简单描述效果更好。',
+        'Goals列表顺序很重要，AutoGPT会优先处理靠前的目标。将最重要的目标放前面，确保核心任务完成。',
+        'continuous模式虽然高效但可能产生意外结果，建议先用正常模式测试流程，确认无误后再启用连续模式。',
+        'AutoGPT每次操作都会消耗API配额，设置GLOBAL_DEUBG标志监控API使用情况，避免意外超支。'
+      ],
+      updateNotes: '2026年5月：AutoGPT 4.0推出，改用更稳定的目标分解算法；新增Agent Graph可视化界面追踪任务执行；性能优化减少50% Token消耗；支持更多模型后端包括Claude和Gemini。'
+    },
+    updateSourceUrl: 'https://github.com/Significant-Gravitas/AutoGPT/releases',
+    updateSourceType: 'github',
+  },
+  'crewai': {
+    id: '39',
+    name: 'CrewAI',
+    slug: 'crewai',
+    description: '45K+ Stars的多Agent协作框架，让多个AI Agent扮演不同角色协同完成复杂任务。CrewAI让多Agent协作变得简单高效。',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/crewAIInc/crewAI',
+    imageUrl: 'https://placehold.co/800x400/3b82f6/ffffff?text=CrewAI',
+    rating: 4.6,
+    ratingCount: 2900,
+    dimensions: { easeOfUse: 4.3, features: 4.6, value: 4.7 },
+    tags: ['Agent', '多Agent', '协作', '角色扮演', '工作流'],
+    features: ['多角色Agent', '任务协作', '流程控制', '输出整合', '简易定义', '层级任务'],
+    alternatives: ['langchain', 'autogpt'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装CrewAI', description: 'pip install crewai crewai-tools\n需要Python 3.10+，建议使用虚拟环境。核心依赖包括langchain-core用于LLM调用，redis用于Agent间通信(如需)。可选安装crewai[all]获取全部工具支持。' },
+        { step: 2, title: '定义Agent角色', description: '使用Agent类创建Agent，定义role(角色名)、goal(目标)、backstory(背景故事)。例如：researcher = Agent(role="高级研究分析师", goal="提供最相关的信息", backstory="15年市场研究经验")。每个Agent可配置专属工具集。' },
+        { step: 3, title: '创建Crew和Task', description: '创建Task定义具体任务，包括description、expected_output、agent分配。使用Crew类组合Agent，设置verbose=True查看执行日志。配置crew.kickoff()启动协作流程，agents按顺序或并行执行任务并共享结果。' }
+      ],
+      useCases: [
+        { title: '自动化营销活动', description: '创建由策略师、写手、设计师组成的三Agent团队：策略师分析市场和受众，写手生成文案初稿，设计师产出视觉素材。三者协同完成从策略到执行的完整营销活动。' },
+        { title: '软件代码审查', description: '设置代码审查团队：架构师Agent审查设计合理性，开发Agent检查代码质量，安全Agent扫描潜在漏洞，安全Agent验证合规性。多个视角全面审查代码。' },
+        { title: '研究分析报告', description: '研究团队包括数据收集Agent负责信息采集，分析Agent处理数据并发现洞察，写作Agent整合成结构化报告。层级任务设置确保信息流有序传递。' },
+        { title: '客户支持自动化', description: '分类Agent首先理解并分类客户问题，诊断Agent分析问题原因，解决Agent提供具体方案，升级Agent判断是否需要人工介入。分流处理提升客服效率。' }
+      ],
+      tips: [
+        'Agent的backstory对输出质量影响很大，详细的背景描述能让Agent更准确地理解自己的角色和职责，产生更专业的输出。',
+        '使用hierarchical=True设置层级流程，主Agent负责协调和整合，其他Agent在各自专业领域执行。这比顺序执行更适合复杂任务。',
+        'Task之间通过output_pydantic或output_json共享数据。使用Process.sequential确保依赖任务按顺序执行，Process.consensus用于需要多Agent共识的场景。',
+        'crewai-tools包提供浏览器操作、SQL执行、文件处理等实用工具。合理使用工具扩展Agent能力，但避免让Agent过度依赖工具。'
+      ],
+      updateNotes: '2026年4月：CrewAI 2.0支持可视化工作流设计器；新增Process.consensus多Agent共识机制；改进的记忆系统支持跨Crew共享；提供更多官方工具集成包括GitHub、Jira、Slack。'
+    },
+    updateSourceUrl: 'https://github.com/crewAIInc/crewAI/releases',
+    updateSourceType: 'github',
+  },
+  'langchain': {
+    id: '40',
+    name: 'LangChain',
+    slug: 'langchain',
+    description: '118K+ Stars的AI应用开发框架，提供模块化组件构建复杂LLM应用，支持Python和JavaScript。LangChain是LLM应用开发的标准框架。',
+    category: 'agent',
+    subcategory: 'agent-framework',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/langchain-ai/langchain',
+    imageUrl: 'https://placehold.co/800x400/22c55e/ffffff?text=LangChain',
+    rating: 4.4,
+    ratingCount: 6200,
+    dimensions: { easeOfUse: 3.8, features: 4.8, value: 4.6 },
+    tags: ['Agent', '开发框架', 'LLM应用', 'RAG', '向量数据库'],
+    features: ['Chain构建', 'Agent抽象', 'RAG支持', '工具调用', '向量存储', '提示词模板'],
+    alternatives: ['dify', 'crewai'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装LangChain', description: 'pip install langchain langchain-openai langchain-community\n可选组件：langchain[all]安装全部集成，langchain-experimental实验性功能。JavaScript版本：npm install langchain @langchain/core' },
+        { step: 2, title: '构建第一个Chain', description: '使用LCEL(LangChain Expression Language)链式调用：\nfrom langchain_openai import ChatOpenAI\nfrom langchain_core.prompts import ChatPromptTemplate\nllm = ChatOpenAI()\nprompt = ChatPromptTemplate.from_template("用{language}写一个{topic}")\nchain = prompt | llm\nresult = chain.invoke({"language": "Python", "topic": "快速排序"})' },
+        { step: 3, title: '使用RAG和工具', description: 'RAG实现：使用VectorStoreRetriever检索文档，FAISS/Chroma作为向量数据库。\nAgent工具：from langchain.agents import load_tools\ntools = load_tools(["serpapi", "llm-math"], llm=llm)\nagent = initialize_agent(tools, llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION)' }
+      ],
+      useCases: [
+        { title: 'RAG知识库问答', description: '使用LangChain构建企业知识库问答系统。文档分割后向量化存储，检索相关片段后结合问题生成答案。支持PDF、Markdown、Notion等多格式文档，是构建智能客服的核心方案。' },
+        { title: '多步骤复杂推理', description: '利用LangChain的Chain结构实现复杂推理流程。示例：用户查询 → 查询数据库获取用户画像 → 判断意图 → 调用相应工具 → 整合结果 → 生成回复。LCEL让链式组合简单直观。' },
+        { title: '工具调用型Agent', description: '构建能调用外部工具的Agent：web-search获取最新信息、calculator进行计算、API查询获取实时数据。Agent自主决定调用顺序和参数，LangChain统一管理工具执行和结果处理。' },
+        { title: '聊天机器人开发', description: '使用LangChain构建带记忆的聊天机器人。ConversationBufferMemory保存对话历史，ConversationChain管理上下文。在对话过程中调用RAG增强回复准确性。' }
+      ],
+      tips: [
+        'LCEL是LangChain v0.2+的核心语法，推荐优先学习。使用|操作符组合组件比传统Chain更直观，性能也更好。',
+        'RAG效果优化：使用RecursiveCharacterTextSplitter合理分割文档，设置正确的chunk_size和chunk_overlap，检索时使用MaxMarginalRelevance提升多样性。',
+        '生产环境使用LangSmith进行调试和监控。pip install langsmith后设置环境变量，LANGCHAIN_TRACING_V2=true LANGCHAIN_API_KEY=xxx',
+        '大量文档检索时使用ParentDocumentRetriever避免切割破坏上下文完整性。对于高度结构化的文档，考虑使用ElementType区分不同层级。'
+      ],
+      updateNotes: '2026年5月：LangChain 0.3推出，LCEL语法全面稳定；LangGraph用于构建有状态的多Agent应用；新增长文本理解优化和结构化输出增强；LangSmith支持多租户和私有部署选项。'
+    },
+    updateSourceUrl: 'https://github.com/langchain-ai/langchain/releases',
+    updateSourceType: 'github',
+  },
+  'dify': {
+    id: '41',
+    name: 'Dify',
+    slug: 'dify',
+    description: '120K+ Stars的开源LLM应用开发平台，低代码方式快速构建AI应用，支持RAG和Agent。Dify让AI应用开发变得前所未有的简单。',
+    category: 'agent',
+    subcategory: 'no-code-ai',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/langgenius/dify',
+    imageUrl: 'https://placehold.co/800x400/ec4899/ffffff?text=Dify',
+    rating: 4.7,
+    ratingCount: 4100,
+    dimensions: { easeOfUse: 4.6, features: 4.7, value: 4.8 },
+    tags: ['LLM应用', '低代码', 'RAG', '开源', '可视化编排'],
+    features: ['可视化编排', 'RAG管道', 'Agent', 'API部署', '多模型支持', 'SaaS版本'],
+    alternatives: ['langchain', 'coze'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '部署Dify', description: '方式1: Docker一键部署(推荐) - docker run -d -p 80:80 -v ~/dify-data:/data dify/dify-community\n方式2: Docker Compose - git clone后cd dify/docker && docker-compose up -d\n方式3: Dify Cloud - 注册dify.ai使用云端版本无需部署。访问 http://localhost:80 开始使用' },
+        { step: 2, title: '创建AI应用', description: '点击"创建应用"，选择应用类型：Agent/聊天助手/文本生成器/Agent。设置AI模型供应商和模型名称。配置系统提示词定义应用角色。在"上下文"设置RAG，开启知识库功能上传文档。' },
+        { step: 3, title: '使用工作流编排', description: '在工作流页面拖拽节点构建复杂流程：LLM节点(调用模型)、条件节点(分支判断)、代码节点(数据处理)、模板节点(格式化输出)。连接节点设置执行顺序。测试无误后发布，通过API或嵌入方式集成到其他应用。' }
+      ],
+      useCases: [
+        { title: '企业知识库问答', description: '上传PDF、Word、PPT等企业文档到Dify知识库，配置RAG检索增强生成。员工通过聊天界面询问产品、技术、制度等问题，AI基于企业文档准确回答，大幅减少人工客服压力。' },
+        { title: '智能客服机器人', description: '使用Dify Agent构建多轮对话客服，可自主决策调用工具(查订单、查库存、退换货流程)。支持微信、钉钉、网页多渠道接入。与CRM系统集成实现个性化服务。' },
+        { title: '内容创作工作流', description: '搭建自动化内容生产流程：输入选题 → 联网搜索素材 → AI撰写初稿 → 人工审核 → 一键发布到公众号/小红书。模板节点确保输出格式统一，变量节点实现内容个性化。' },
+        { title: '数据分析助手', description: '接入数据库后，用自然语言描述分析需求，Dify Agent自动生成SQL查询数据，以图表形式展示结果并解读。适合非技术人员自助取数和分析。' }
+      ],
+      tips: [
+        '知识库文档上传前先进行预处理：PDF转Markdown、去除无关内容、结构调整。这样检索质量和生成效果都会大幅提升。',
+        '工作流中的变量命名要规范清晰，方便后续节点引用。建议使用snake_case命名法如product_name、user_query。',
+        'Agent模式下，系统会自动使用ReAct推理。如需更精确的工具调用控制，可使用工作流模式手动编排工具调用逻辑。',
+        '生产环境部署建议使用反向代理Nginx配置SSL证书，开启访问限制。数据库定期备份防止数据丢失。'
+      ],
+      updateNotes: '2026年4月：Dify 1.0发布，正式版RAG管道和新一代工作流设计器；新增多租户支持；Agent支持function calling和code interpreter；API性能优化提升3倍；新增Dify Cloud企业版提供托管服务。'
+    },
+    updateSourceUrl: 'https://github.com/langgenius/dify/releases',
+    updateSourceType: 'github',
+  },
+  'coze': {
+    id: '42',
+    name: 'Coze',
+    slug: 'coze',
+    description: '字节跳动推出的AI Bot开发平台，提供60+官方插件，支持快速构建和部署聊天机器人。Coze让Bot开发变得轻松简单。',
+    category: 'agent',
+    subcategory: 'bot-platform',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://coze.com',
+    imageUrl: 'https://placehold.co/800x400/ef4444/ffffff?text=Coze',
+    rating: 4.5,
+    ratingCount: 3500,
+    dimensions: { easeOfUse: 4.7, features: 4.5, value: 4.4 },
+    tags: ['Bot', '聊天机器人', '插件', '工作流', '字节跳动'],
+    features: ['60+插件', '工作流编排', '多渠道发布', 'Bot商店', 'API支持', '卡片交互'],
+    alternatives: ['dify', 'langchain'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册并创建Bot', description: '访问 coze.com 或国内的 coze.cn (扣子)，使用抖音或手机号登录。点击"创建Bot"，设置Bot名称、描述和图标。左侧面板选择大模型(云雀、GPT-4、Claude等)，右侧配置Bot能力和人设。' },
+        { step: 2, title: '配置插件和工作流', description: '在Bot编辑页，点击"+插件"添加60+官方插件(飞书、微信、GitHub等)。使用工作流编排复杂逻辑：从左侧拖拽节点(大模型、代码、数据库、卡片消息)，连接设定执行流程。' },
+        { step: 3, title: '发布到多渠道', description: '开发完成后点击"发布"。支持发布到：Coze Bot商店、飞书、微信(需企业认证)、钉钉、Telegram、Discord等。也可以通过API集成到自有应用。Coze国内版(扣子)发布到字节系产品更便捷。' }
+      ],
+      useCases: [
+        { title: '企业办公助手', description: '搭建飞书机器人为员工提供IT支持、HR政策问答、会议室预约等服务。集成企业数据库和API，Bot自动查询和处理请求，减少行政人员工作量。' },
+        { title: '内容运营Bot', description: '创建社交媒体运营Bot，自动发布内容、回复评论、分析数据。支持连接内容库，定时生成并发布帖子。配合卡片消息和按钮交互，提供丰富的内容展示形式。' },
+        { title: '客服机器人的接待', description: '配置Bot自动接待访客，通过工作流分流：简单问题AI即时回答，复杂问题转人工处理。结合知识库实现精准问答，支持多轮对话保持上下文。' },
+        { title: '个人效率助手', description: '创建个人Bot集成各种服务：订阅 newsletters 摘要、天气提醒、日程管理、代码片段存储。通过聊天自然交互，成为日常工作的高效助手。' }
+      ],
+      tips: [
+        '工作流中善用变量和条件分支。Bot比固定脚本灵活的关键在于能根据用户输入动态调整流程，设置合理的条件判断能提升对话体验。',
+        '插件调用有频率限制，高频场景考虑缓存常用结果。设置插件超时时间，避免单个调用阻塞整个对话。',
+        '卡片消息能大幅提升用户体验。使用卡片展示结构化信息(表格、列表、按钮)，比纯文本更清晰。',
+        '国内版扣子(coze.cn)与海外版(coze.com)功能和插件有差异，企业用户建议先确认需要的功能在哪版本可用。'
+      ],
+      updateNotes: '2026年5月：Coze 2.0推出全新Agent引擎，支持更复杂的自主决策；新增多模态理解能力；工作流编辑器全面升级支持循环和子流程；插件市场新增30+官方插件；与字节更多产品深度集成。'
+    },
+    updateSourceUrl: 'https://www.coze.com/open/docs/guides/release_note',
+    updateSourceType: 'changelog',
+  },
+  'ollama': {
+    id: '43',
+    name: 'Ollama',
+    slug: 'ollama',
+    description: '本地大模型运行工具，一键部署Llama 2/Qwen/DeepSeek等开源模型，支持GPU加速。Ollama是本地运行大语言模型的最佳选择。',
+    category: 'coding',
+    subcategory: 'local-llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://ollama.com',
+    imageUrl: 'https://placehold.co/800x400/06b6d4/ffffff?text=Ollama',
+    rating: 4.8,
+    ratingCount: 7800,
+    dimensions: { easeOfUse: 4.8, features: 4.6, value: 4.9 },
+    tags: ['本地部署', '开源模型', 'GPU加速', '命令行', '隐私保护'],
+    features: ['一键部署', 'GPU支持', '模型管理', 'REST API', '跨平台', '热加载模型'],
+    alternatives: ['lm-studio', 'anything-llm'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装Ollama客户端', description: 'macOS用户下载 dmg 安装包直接安装，Windows用户使用安装包或WSL2环境，Linux用户运行官方安装命令: curl -fsSL https://ollama.com/install.sh | sh。安装完成后在终端运行 ollama --version 验证' },
+        { step: 2, title: '拉取并运行模型', description: '使用 ollama pull 命令下载模型，如 ollama pull llama3.2 或 ollama pull mistral。首次运行自动下载模型文件到 ~/.ollama/models。常用模型: llama3.2(8B)、mistral(7B)、codellama(代码)、nomic-embed-text(向量)' },
+        { step: 3, title: '通过API或CLI对话', description: 'CLI方式直接运行 ollama run llama3.2 开始对话。支持OpenAI兼容API: 启动服务 ollama serve 后访问 http://localhost:11434/v1/chat/completions。也可配置Ollama作为LangChain、LlamaIndex等框架的后端' }
+      ],
+      useCases: [
+        { title: '隐私敏感的本地AI应用', description: '医疗、金融、法律等行业需要数据不出本地时，使用Ollama部署Llama3/Mistral模型，所有对话数据保存在本地机器，配合LangChain构建内部知识问答系统' },
+        { title: '开发者本地调试LLM应用', description: '使用Ollama的OpenAI兼容API快速原型开发，切换模型只需修改模型名无需改代码。支持流式输出，便于调试ChatGPT插件或Claude API应用' },
+        { title: '低配电脑体验大模型', description: '7B参数模型如Llama3.2、Qwen2.5可在8GB显存GPU或16GB内存CPU机器运行，4bit量化后更低。适合没有高端显卡但想本地体验大模型的用户' },
+        { title: '企业内网AI基础设施', description: '在内网服务器部署Ollama作为统一推理服务，支持多用户并发访问。可通过Modelfile自定义模型提示词模板，Docker容器化部署实现快速扩缩容' }
+      ],
+      tips: [
+        'GPU加速：确保安装了NVIDIA驱动+CUDA，Ollama自动识别GPU。Mac M系列芯片自动使用Metal加速，无需额外配置',
+        '模型量化：生产环境推荐使用4bit量化模型(如*-q4_0)，文件体积减少60%且质量损失最小，显存需求从16GB降至8GB',
+        'Modelfile自定义：创建 ./Modelfile 编写FROM基础模型+PARAMETER+SYSTEM+TEMPLATE，可打造专属聊天机器人模板',
+        '多模型管理：ollama list 查看已下载模型，ollama rm <model> 删除不需要的模型释放空间，模型默认存储在 ~/.ollama/models/'
+      ],
+      updateNotes: '2026年更新: v0.5.x系列支持多模态模型(视觉)、Function Calling、新增Qwen2.5/Qwen2.5-Coder系列官方支持、Mac端性能优化、WSL2原生支持'
+    },
+    updateSourceUrl: 'https://github.com/ollama/ollama/releases',
+    updateSourceType: 'github',
+  },
+  'lm-studio': {
+    id: '44',
+    name: 'LM Studio',
+    slug: 'lm-studio',
+    description: '本地LLM运行平台，提供类ChatGPT界面，支持GGUF格式模型，GPU加速开箱即用。LM Studio让本地大模型运行变得前所未有的简单。',
+    category: 'coding',
+    subcategory: 'local-llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://lmstudio.ai',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=LM+Studio',
+    rating: 4.7,
+    ratingCount: 5600,
+    dimensions: { easeOfUse: 4.9, features: 4.5, value: 4.8 },
+    tags: ['本地部署', 'LLM', '桌面应用', 'GPU加速', '隐私'],
+    features: ['类ChatGPT界面', '模型下载', 'GPU加速', '本地API', '多模型', '聊天历史'],
+    alternatives: ['ollama', 'anything-llm'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '下载安装LM Studio', description: '访问 lmstudio.ai 下载对应系统版本(macOS/Windows/Linux)。macOS版需Apple Silicon或Intel芯片，Windows版需要支持Vulkan的显卡。安装后首次启动约5-10分钟初始化' },
+        { step: 2, title: '浏览和下载模型', description: '内置模型浏览器直接搜索如Llama3.2、Mistral、Qwen2.5、DeepSeek系列。点击Download下载到本地，LM Studio自动管理模型文件存储位置。支持GGUF格式模型导入' },
+        { step: 3, title: '启动本地聊天或API服务', description: '选择模型后点击Chat开始类似ChatGPT的图形界面聊天。点击Server标签可一键启动本地API服务器，自动提供OpenAI兼容接口 http://localhost:1234/v1/' }
+      ],
+      useCases: [
+        { title: '替代ChatGPT的本地对话界面', description: '不想联网或订阅付费API的用户，可用LM Studio加载Llama3.2/Qwen2.5等模型，获得媲美在线服务的聊天体验，支持多轮对话、对话历史保存' },
+        { title: '开发者快速对接本地LLM', description: '启动内置的OpenAI兼容服务器后，无需修改代码即可让现有LangChain/LlamaIndex应用连接本地模型。支持completion和chat两种接口' },
+        { title: '离线代码助手', description: '加载CodeLlama或DeepSeek-Coder模型，用于代码补全、重构、解释。适合飞机上、内网等无网络环境的开发工作' },
+        { title: '模型性能对比评测', description: 'LM Studio提供推理速度(Token/s)、显存占用等性能指标，可方便地在同一界面切换不同模型进行对比评测，选择最适合硬件配置和任务的模型' }
+      ],
+      tips: [
+        '硬件配置：Mac M系列建议16GB+统一内存，NVIDIA显卡建议8GB+显存。首次加载大模型会缓存到GPU，后续启动更快',
+        '上下文长度：Qwen2.5、Llama3.2支持128K上下文，但在低配置机器上长上下文会显著变慢，建议按硬件能力选择',
+        '量化版本选择：Q5_K_M平衡质量和速度，Q8_0质量最高但慢，Q4_K_S最快但质量稍差。一般推荐Q5_K_M',
+        'GPU卸载：Settings中可调整GPU卸载层数(0-100)，更多层到GPU加速推理但占更多显存，建议从50开始调试'
+      ],
+      updateNotes: '2026年更新: v0.8.x支持多模态模型聊天、图片理解、内置Embedding模型、模型合并工具、性能分析面板、Mac端Metal加速优化'
+    },
+    updateSourceUrl: 'https://lmstudio.ai/changelog',
+    updateSourceType: 'changelog',
+  },
+  'anything-llm': {
+    id: '45',
+    name: 'AnythingLLM',
+    slug: 'anything-llm',
+    description: '本地RAG知识库应用，构建私有AI知识助手，支持文档对话和知识库管理。AnythingLLM是构建私有知识库的理想选择。',
+    category: 'agent',
+    subcategory: 'knowledge-base',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/Mintplex-Labs/anything-llm',
+    imageUrl: 'https://placehold.co/800x400/14b8a6/ffffff?text=AnythingLLM',
+    rating: 4.6,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.5, features: 4.7, value: 4.8 },
+    tags: ['知识库', 'RAG', '本地部署', '文档问答', '私有化'],
+    features: ['多文档支持', '向量数据库', '工作区隔离', '私有部署', 'API集成', '多LLM支持'],
+    alternatives: ['ollama', 'dify'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装AnythingLLM', description: '桌面端下载安装包(Haggmark/Windows/Linux)，或使用Docker部署: docker run -p 3001:3001 mintplexlabs/anything-llm。首次启动配置工作区名称和默认LLM提供商' },
+        { step: 2, title: '添加文档知识库', description: '支持PDF、TXT、Markdown、DOCX、CSV、XLSX等格式。点击 Workspace -> Upload 上传文件，或直接拖拽。系统自动进行文档分块(Chunking)和向量化存储' },
+        { step: 3, title: '配置Embedding模型和LLM', description: '设置中使用Ollama本地模型(推荐nomic-embed-text做Embedding)或其他API(OpenAI/DeepSeek)。保存后即可在聊天框基于上传的文档进行问答' }
+      ],
+      useCases: [
+        { title: '企业知识库问答', description: '上传公司内部文档、合同、规章、产品手册，建立可对话的知识库。员工用自然语言提问即可快速检索答案，无需人工整理FAQ' },
+        { title: '法律/医疗文档分析', description: '律师上传案例卷宗、医生上传医学文献，用自然语言进行检索和分析。支持多轮追问深挖细节，所有数据保留在本地满足合规要求' },
+        { title: '个人研究资料管理', description: '研究者上传论文、笔记、网页书签，用RAG方式快速检索和组织研究材料。支持引用原文标注，避免幻觉问题' },
+        { title: '客服机器人知识源', description: '将产品文档、常见问题、技术规范导入AnythingLLM，对外提供基于准确文档的问答服务，避免通用LLM的幻觉回答' }
+      ],
+      tips: [
+        '向量数据库选择：默认使用LanceDB(内置)，生产环境推荐切换到Pinecone(云端)或Qdrant(自托管)获得更好性能',
+        '文档分块策略：Settings中调整chunkSize(默认500 tokens)和chunkOverlap。技术文档用小chunk+大小重叠获得更精确检索',
+        '多工作区隔离：创建不同Workspace隔离不同项目/部门的文档和对话，如Company-Docs、Product-Manuals、Legal-Contracts',
+        'LLM提供商：Embedding用本地Ollama(nomic-embed-text)省API费用，生成用DeepSeek API(便宜)或本地Llama3'
+      ],
+      updateNotes: '2026年更新: v1.6.x支持多模态文档理解、Max tokens提升到32K、 Workspace协作功能、Pinecone/Weaviate云向量库集成、自定义Embedding模型'
+    },
+    updateSourceUrl: 'https://github.com/Mintplex-Labs/anything-llm/releases',
+    updateSourceType: 'github',
+  },
+  'deepseek': {
+    id: '46',
+    name: 'DeepSeek',
+    slug: 'deepseek',
+    description: '70K+ Stars的国产开源大模型，API价格极低，数学和代码能力领先，支持开源模型本地部署。DeepSeek是性价比最高的大模型API之一。',
+    category: 'communication',
+    subcategory: 'llm',
+    pricing: 'paid',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://deepseek.com',
+    imageUrl: 'https://placehold.co/800x400/1a1a2e/ffffff?text=DeepSeek',
+    rating: 4.7,
+    ratingCount: 6800,
+    dimensions: { easeOfUse: 4.5, features: 4.8, value: 4.9 },
+    tags: ['大模型', '国产', '便宜API', '代码', '数学'],
+    features: ['低成本API', '开源模型', '代码生成', '数学推理', '长上下文', 'MoE架构'],
+    alternatives: ['qwen', 'kimi'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '获取API密钥', description: '访问 deepseek.com/platform 注册账号，在API Keys页面创建密钥。个人版即享低价，企业版可申请更高配额。支持微信/支付宝充值' },
+        { step: 2, title: '调用API接口', description: '官方SDK: pip install openai，或直接用curl调用。基础端点 https://api.deepseek.com/chat/completions，模型选择 deepseek-chat (最新) 或 deepseek-coder' },
+        { step: 3, title: '集成到应用', description: '将OpenAI的base_url替换为DeepSeek端点，API Key换成DeepSeek的，代码几乎不用改。支持function calling、json mode、streaming' }
+      ],
+      useCases: [
+        { title: '低成本AI应用开发', description: 'DeepSeek价格约为GPT-4的1/50，适合初创公司和个人开发者做MVP。1美元可处理约10万次对话，降低AI应用试错成本' },
+        { title: '代码生成和调试', description: 'DeepSeek-Coder在代码生成任务上表现优异，支持Python、Java、Go、JavaScript等主流语言，可用于IDE插件、代码审查、自动化测试生成' },
+        { title: '中文NLP应用', description: 'DeepSeek-Chat针对中文语境优化，在中文问答、文本生成、摘要等任务上性价比高，适合内容创作、客服、翻译等场景' },
+        { title: '私有知识库问答', description: '配合LangChain/LlamaIndex做RAG应用，Embedding用国产 MiniLM或BGE模型，生成用DeepSeek API，整体方案成本可控' }
+      ],
+      tips: [
+        '模型选择：通用对话用 deepseek-chat，做代码任务用 deepseek-coder。coder上下文窗口128K适合处理大文件',
+        '提示词优化：DeepSeek对系统提示词较敏感，善用 Few-shot examples 可显著提升输出质量',
+        '成本控制：开启 stream 模式实时返回减少等待时间；合理设置 max_tokens 避免浪费；批量请求合并调用',
+        'Token计算：用官方工具或 tiktoken 库准确计算token数，避免超出限额。中文token数约为汉字数的1.5-2倍'
+      ],
+      updateNotes: '2026年更新: DeepSeek-V3最新版本发布，MoE架构2400亿参数，代码能力大幅提升。DeepSeek-R2正在内测，支持多模态。新增Function Calling稳定版，API新增EU区域节点'
+    },
+    updateSourceUrl: 'https://api-docs.deepseek.com/updates',
+    updateSourceType: 'changelog',
+  },
+  'qwen': {
+    id: '47',
+    name: 'Qwen',
+    slug: 'qwen',
+    description: '阿里通义千问大模型，开源版本Qwen2/1.8B-72B，支持中英文，性能对标GPT-4。Qwen是中国开源大模型的代表。',
+    category: 'communication',
+    subcategory: 'llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://qwenlm.github.io',
+    imageUrl: 'https://placehold.co/800x400/f59e0b/ffffff?text=Qwen',
+    rating: 4.6,
+    ratingCount: 5200,
+    dimensions: { easeOfUse: 4.4, features: 4.7, value: 4.8 },
+    tags: ['大模型', '阿里', '开源', '通义千问', '中英双语'],
+    features: ['开源模型', '多尺寸版本', '长上下文', '代码生成', '中文优化', '多模态'],
+    alternatives: ['deepseek', 'chatglm'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '选择部署方式', description: '本地部署: 下载Qwen2.5系列GGUF模型用Ollama/LM Studio运行。如 ollama pull qwen2.5:14b。API调用: 通义千问API或DashScope平台' },
+        { step: 2, title: '本地模型配置(Ollama)', description: 'ollama run qwen2.5:14b 可直接运行。Qwen2.5-72B需双卡或量化后运行。推荐用 Q4_K_M 量化，14B模型约8GB显存可用' },
+        { step: 3, title: 'API调用(Qwen API)', description: '阿里云DashScope平台申请API Key，SDK支持OpenAI兼容格式。示例: base_url=https://dashscope.aliyuncs.com/compatible-mode/v1' }
+      ],
+      useCases: [
+        { title: '中文智能客服', description: 'Qwen2.5中文能力优秀，部署本地客服机器人处理用户咨询。支持多轮对话，14B版本可流畅处理商品推荐、售后问答等场景' },
+        { title: '内容创作助手', description: '适合文案写作、故事创作、邮件生成等中文内容生产。72B版本创意能力最强，7B版本响应快适合简单文案' },
+        { title: '代码开发辅助', description: 'Qwen2.5-Coder专注代码，支持代码补全、bug修复、代码解释。Qwen架构与Llama兼容，工具链成熟' },
+        { title: '阿里云生态集成', description: '与钉钉、阿里云函数计算、PAI等阿里产品深度集成，企业用户可直接在阿里云环境部署Qwen应用' }
+      ],
+      tips: [
+        '模型规模选择：7B适合简单问答和文案，14B可做复杂推理和多轮对话，72B/110B适合对质量要求高的创意任务',
+        '中文优化：Qwen2.5预训练数据中中文占比高，日常中文场景比同等规模Llama模型效果更好',
+        '工具调用：Qwen2.5支持ReAct模式的Tool Use，可接入搜索、数据库等外部工具构建Agent',
+        '长上下文：Qwen2.5-Instruct支持32K上下文，处理长文档时比Llama更稳定，但长上下文会增加显存占用'
+      ],
+      updateNotes: '2026年更新: Qwen3系列发布(128K上下文)，Qwen2.5-72B开源最新版本。Qwen-Waabi端侧模型发布(1.5B/0.5B可在手机运行)。阿里云DashScope新增Qwen-VL多模态API'
+    },
+    updateSourceUrl: 'https://github.com/QwenLM/Qwen3/releases',
+    updateSourceType: 'github',
+  },
+  'chatglm': {
+    id: '48',
+    name: 'ChatGLM',
+    slug: 'chatglm',
+    description: '清华智谱AI开发的千亿参数大模型，开源ChatGLM2-6B/GLM-4系列，中文理解能力强。ChatGLM是中国大模型发展的重要里程碑。',
+    category: 'communication',
+    subcategory: 'llm',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://chatglm.cn',
+    imageUrl: 'https://placehold.co/800x400/10b981/ffffff?text=ChatGLM',
+    rating: 4.5,
+    ratingCount: 4800,
+    dimensions: { easeOfUse: 4.3, features: 4.6, value: 4.7 },
+    tags: ['大模型', '清华', '开源', '中文', '千亿参数'],
+    features: ['千亿参数', '中文优化', '开源版本', '微调支持', '本地部署', '多模态'],
+    alternatives: ['qwen', 'deepseek'],
+    isNew: true,
+    createdAt: '2024-06-01',
+    updatedAt: '2024-05-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '选择部署方式', description: '本地部署: 下载ChatGLM3系列GGUF模型用Ollama/LM Studio。API调用: 智谱AI开放平台(glmnlp.com)申请API Key' },
+        { step: 2, title: '本地模型运行', description: 'ollama pull chatglm3 或 ollama pull chatglm4。ChatGLM4-9B推荐配置12GB+显存，6B版本8GB可跑。支持INT4量化' },
+        { step: 3, title: 'API集成', description: 'pip install zhipuai SDK。调用示例: client = ZhipuAI(api_key=\'your_key\'); response = client.chat.completions.create(model=\'glm-4\', messages=[...])' }
+      ],
+      useCases: [
+        { title: '中文对话与问答', description: 'ChatGLM4在中文语义理解上有优势，适合智能客服、知识问答、文本生成等场景。GLM-4-AllTools版本支持网页搜索、代码执行' },
+        { title: '长文档处理', description: 'ChatGLM4支持128K超长上下文，可用于长篇文档摘要、跨文档检索、论文精读等需要处理大量文本的任务' },
+        { title: '金融/法律专业场景', description: '智谱提供行业微调版本(GLG-Finance等)，针对金融分析、法律咨询场景优化，API版本稳定性和SLA有保障' },
+        { title: '多模态应用', description: 'GLM-4Vision支持图片理解和对话，可用于图文问答、视觉推理、海报设计等需要图片理解的应用' }
+      ],
+      tips: [
+        'API vs 本地：API版本(glm-4)能力最强但有成本，本地6B/9B模型适合简单场景或隐私要求高的用例',
+        '微调版本：智谱提供行业定制微调服务，适合企业有特定领域需求但缺乏微调能力的场景',
+        'Token优化：中文对话建议开启cache.md功能，重复上下文不重复计费，有效降低成本',
+        'Function Calling：GLM-4支持工具调用，适合构建Agent应用，可对接外部API、数据库、搜索等工具'
+      ],
+      updateNotes: '2026年更新: GLM-5系列内测中(新一代基座)，ChatGLM4性能持续优化。智谱AI新增企业版API支持私有化部署。GLM-4-AllTools正式版发布，集成代码解释器、网页搜索、DALL-E绘图'
+    },
+    updateSourceUrl: 'https://github.com/THUDM/ChatGLM3/releases',
+    updateSourceType: 'github',
+  },
+};
+
+const tool = toolsData[slug as string];
+
+if (!tool) {
+  return Astro.redirect('/tools');
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": ["Product", "SoftwareApplication"],
+  "name": tool.name,
+  "description": tool.description,
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Web",
+  "url": tool.url,
+  "image": tool.imageUrl,
+  "brand": {
+    "@type": "Brand",
+    "name": tool.name
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": tool.priceDetail.monthly?.toString() || "0",
+    "priceCurrency": tool.priceDetail.currency,
+    "availability": "https://schema.org/InStock",
+    "priceType": "starting from"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": tool.rating.toString(),
+    "reviewCount": tool.ratingCount.toString(),
+    "ratingExplanation": `${tool.rating} out of 5 stars based on ${tool.ratingCount} reviews`
+  },
+  "featureList": tool.features.join(', '),
+  "keywords": tool.tags.join(', '),
+  "category": tool.category,
+  "additionalProperty": [
+    {
+      "@type": "PropertyValue",
+      "name": "easeOfUse",
+      "value": tool.dimensions.easeOfUse.toString()
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "features",
+      "value": tool.dimensions.features.toString()
+    },
+    {
+      "@type": "PropertyValue",
+      "name": "value",
+      "value": tool.dimensions.value.toString()
+    }
+  ]
+};
+---
+
+<Layout
+  title={tool.name}
+  description={tool.description}
+  image={tool.imageUrl}
+  type="article"
+  jsonLd={jsonLd}
+>
+  <!-- Breadcrumb -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div class="flex items-center justify-between">
+        <nav class="flex items-center gap-2 text-sm">
+          <a href="/" class="text-gray-500 hover:text-gray-900">首页</a>
+          <span class="text-gray-400">/</span>
+          <a href="/tools" class="text-gray-500 hover:text-gray-900">AI工具库</a>
+          <span class="text-gray-400">/</span>
+          <span class="text-gray-900 font-medium">{tool.name}</span>
+        </nav>
+        <button
+          id="back-to-tools"
+          onclick="const isEn = window.location.pathname.startsWith('/en'); window.location.href = isEn ? '/en/tools' : '/tools';"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          返回列表
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2">
+        <!-- Hero Image -->
+        <div class="rounded-xl overflow-hidden mb-8">
+          <img src={tool.imageUrl} alt={tool.name} class="w-full h-auto" />
+        </div>
+
+        <!-- Title Section -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <h1 class="text-3xl font-bold">{tool.name}</h1>
+              {tool.isNew && <span class="badge bg-red-100 text-red-700">新收录</span>}
+            </div>
+            <FavoriteButton client:load targetType="tool" targetId={tool.id} locale="zh" />
+            <ShareButton client:load title={tool.name} description={tool.description} />
+            <button
+              id="copy-link-btn"
+              aria-label="复制链接"
+              onclick="navigator.clipboard.writeText(window.location.href).then(() => { const btn = document.getElementById('copy-link-btn'); if(btn) { btn.textContent = '已复制!'; setTimeout(() => { if(btn) btn.textContent = '复制链接'; }, 2000); } })"
+              class="p-2 rounded-lg text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
+              title="复制链接"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+              </svg>
+            </button>
+          </div>
+          <p class="text-lg text-gray-600">{tool.description}</p>
+        </div>
+
+        <!-- Features -->
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">核心功能</h2>
+          <div class="grid sm:grid-cols-2 gap-3">
+            {tool.features.map(feature => (
+              <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+                <span class="text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <!-- Rating Details -->
+        <section class="mb-8">
+          <h2 class="text-xl font-semibold mb-4">评分详情</h2>
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="text-5xl font-bold text-primary-600">{tool.rating}</div>
+              <div>
+                <div class="rating mb-2">
+                  <StarRating client:load targetType="tool" targetId={tool.id} size="lg" />
+                </div>
+                <p class="text-sm text-gray-500">{tool.ratingCount} 条评价</p>
+              </div>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">易用性</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-primary-500 rounded-full" style={`width: ${tool.dimensions.easeOfUse * 20}%`}></div>
+                  </div>
+                  <span class="text-sm font-medium w-8">{tool.dimensions.easeOfUse}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">功能丰富度</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-secondary-500 rounded-full" style={`width: ${tool.dimensions.features * 20}%`}></div>
+                  </div>
+                  <span class="text-sm font-medium w-8">{tool.dimensions.features}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-medium">性价比</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div class="h-full bg-green-500 rounded-full" style={`width: ${tool.dimensions.value * 20}%`}></div>
+                  </div>
+                  <span class="text-sm font-medium w-8">{tool.dimensions.value}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Alternatives -->
+        {(() => {
+          // Build a slug -> name lookup from all defined tools
+          const altNames = {};
+          Object.values(toolsData).forEach((t) => { altNames[t.slug] = t.name; });
+          // Only show alternatives that exist in our data
+          const validAlts = tool.alternatives.filter(a => altNames[a]);
+          if (validAlts.length === 0) return null;
+          return (
+            <section>
+              <h2 class="text-xl font-semibold mb-4">替代工具</h2>
+              <div class="flex flex-wrap gap-2">
+                {validAlts.map(alt => (
+                  <a href={`/tools/${alt}`} class="btn-outline text-sm">
+                    {altNames[alt]}
+                  </a>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* Comments Section */}
+        <section class="mt-12">
+          <CommentSection client:load targetType="tool" targetId={tool.id} locale="zh" showRating={true} />
+        </section>
+
+        <!-- Capability Expansion -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">能力拓展</h2>
+          <div class="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-100 p-6">
+            <div class="grid sm:grid-cols-2 gap-4">
+              {tool.features.slice(0, 4).map((feature, idx) => (
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900">{feature}</h4>
+                    <p class="text-sm text-gray-600 mt-1">
+                      {idx === 0 ? '点击了解该能力的详细应用场景' :
+                       idx === 1 ? '查看该能力在实际使用中的表现' :
+                       idx === 2 ? '探索该能力如何提升工作效率' :
+                       '了解该能力的最新更新和优化'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div class="mt-4 pt-4 border-t border-primary-100">
+              <p class="text-sm text-gray-600">
+                <span class="font-medium text-primary-700">提示：</span>
+                大多数AI工具支持API接入，您可以根据需要在第三方应用或自动化工作流中集成使用。
+                {tool.pricing === 'free' || tool.pricing === 'freemium' ? '该工具提供免费版本，建议先体验再决定是否付费升级。' : '付费版本通常提供更高的使用限额和更多高级功能。'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Update Notes -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">更新说明</h2>
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="flex items-center gap-4 mb-4">
+              <div class="w-12 h-12 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">最新更新</p>
+              </div>
+            </div>
+            {tool.updateSourceUrl ? (
+              <UpdateNotesClient
+                client:load
+                slug={tool.slug}
+                sourceUrl={tool.updateSourceUrl}
+                sourceType={tool.updateSourceType}
+              />
+            ) : tool.details?.updateNotes ? (
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                  <p class="text-sm text-gray-700">{tool.details.updateNotes}</p>
+                </div>
+              </div>
+            ) : (
+              <div class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0"></div>
+                  <p class="text-sm text-gray-700">工具评分和评价数据基于用户反馈定期更新</p>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-2 h-2 rounded-full bg-blue-500 mt-2 flex-shrink-0"></div>
+                  <p class="text-sm text-gray-700">功能列表和定价信息可能因官方更新而变化，建议以官网为准</p>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-2 h-2 rounded-full bg-purple-500 mt-2 flex-shrink-0"></div>
+                  <p class="text-sm text-gray-700">如发现信息有误，欢迎通过评论区反馈给我们</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        <!-- How to Get Started -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">如何使用{tool.name}</h2>
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            {tool.details?.howToUse ? (
+              <div class="space-y-4">
+                {tool.details.howToUse.map((step) => (
+                  <div class="flex gap-4">
+                    <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold flex-shrink-0">{step.step}</div>
+                    <div>
+                      <h4 class="font-medium text-gray-900 mb-1">{step.title}</h4>
+                      <p class="text-sm text-gray-600">{step.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div class="space-y-4">
+                <div class="flex gap-4">
+                  <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold flex-shrink-0">1</div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 mb-1">注册账户</h4>
+                    <p class="text-sm text-gray-600">访问{tool.name}官网，点击注册按钮创建账户。使用邮箱或Google/Apple账号快速注册。</p>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold flex-shrink-0">2</div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 mb-1">选择合适的套餐</h4>
+                    <p class="text-sm text-gray-600">根据你的使用需求，选择免费版或付费版。{tool.pricing === 'free' ? '该工具提供完全免费使用。' : tool.pricing === 'freemium' ? '免费版本已有基础功能，付费版本解锁更多高级特性。' : '付费版本提供完整功能。'}</p>
+                  </div>
+                </div>
+                <div class="flex gap-4">
+                  <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-semibold flex-shrink-0">3</div>
+                  <div>
+                    <h4 class="font-medium text-gray-900 mb-1">开始使用</h4>
+                    <p class="text-sm text-gray-600">登录后即可开始使用{tool.name}。{tool.features[0] ? `推荐从${tool.features[0]}功能开始体验。` : '探索各项功能，找到最适合你的使用方式。'}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <a href={tool.url} target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex items-center gap-2">
+                <span>立即开始使用</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <!-- Use Cases -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">适用场景</h2>
+          <div class="grid sm:grid-cols-2 gap-4">
+            {tool.details?.useCases ? (
+              tool.details.useCases.map((useCase) => (
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200 hover:border-primary-300 transition-colors">
+                  <div class="w-10 h-10 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <h4 class="font-medium text-gray-900 mb-2">{useCase.title}</h4>
+                  <p class="text-sm text-gray-600">{useCase.description}</p>
+                </div>
+              ))
+            ) : (
+              tool.features.slice(0, 4).map((feature, idx) => (
+                <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200 hover:border-primary-300 transition-colors">
+                  <div class="w-10 h-10 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <h4 class="font-medium text-gray-900 mb-2">{feature}</h4>
+                  <p class="text-sm text-gray-600">
+                    {idx === 0 ? '适合日常任务和初级使用场景' :
+                     idx === 1 ? '支持专业级应用和复杂任务' :
+                     idx === 2 ? '提升工作和学习效率的利器' :
+                     '探索AI的更多可能性'}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+
+        <!-- Tips & Best Practices -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">使用技巧</h2>
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-100 p-6">
+            <ul class="space-y-3">
+              {tool.details?.tips ? (
+                tool.details.tips.map((tip) => (
+                  <li class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <p class="text-sm text-gray-700">{tip}</p>
+                  </li>
+                ))
+              ) : (
+                <>
+                  <li class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <p class="text-sm text-gray-700">使用具体、清晰的提示词可以获得更准确的回答</p>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <p class="text-sm text-gray-700">充分利用上下文对话能力，在同一会话中连续追问</p>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <p class="text-sm text-gray-700">{tool.category === 'coding' ? '提供代码上下文和具体错误信息，更容易获得有效帮助' : '尝试不同的表达方式，找到最适合你的交互风格'}</p>
+                  </li>
+                  <li class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-amber-200 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                      </svg>
+                    </div>
+                    <p class="text-sm text-gray-700">{tool.pricing !== 'free' ? '利用免费额度充分体验后再决定是否付费' : '虽然是免费工具，但仍有使用限额，注意控制用量'}</p>
+                  </li>
+                </>
+              )}
+            </ul>
+          </div>
+        </section>
+
+        <!-- Related Tools (More Comprehensive) -->
+        {(() => {
+          // Get tools in same category
+          const sameCategoryTools = Object.values(toolsData).filter(t => t.category === tool.category && t.slug !== tool.slug).slice(0, 4);
+          const hasRelated = sameCategoryTools.length > 0;
+          if (!hasRelated) return null;
+          return (
+            <section class="mt-8">
+              <h2 class="text-xl font-semibold mb-4">相关工具</h2>
+              <div class="grid sm:grid-cols-2 gap-4">
+                {sameCategoryTools.map(t => (
+                  <a href={`/tools/${t.slug}`} class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-primary-300 hover:shadow-md transition-all group">
+                    <div class="flex items-center gap-3">
+                      <img src={t.imageUrl} alt={t.name} class="w-12 h-12 rounded-lg object-cover" loading="lazy" />
+                      <div class="flex-1 min-w-0">
+                        <h4 class="font-medium text-gray-900 group-hover:text-primary-600 transition-colors truncate">{t.name}</h4>
+                        <p class="text-sm text-gray-500 truncate">{t.description.slice(0, 40)}...</p>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        <span class="text-sm font-medium">{t.rating}</span>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          );
+        })()}
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="lg:col-span-1">
+        <div class="sticky top-24 space-y-6">
+          <!-- CTA Card -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <div class="text-center mb-6">
+              <span class={`badge text-lg px-4 py-1 ${
+                tool.pricing === 'free' ? 'badge-free' :
+                tool.pricing === 'paid' ? 'badge-paid' : 'badge-freemium'
+              }`}>
+                {tool.pricing === 'free' ? '免费' :
+                 tool.pricing === 'paid' ? `¥${tool.priceDetail.monthly}/月` : '免费+付费'}
+              </span>
+            </div>
+            <a
+              href={tool.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="btn-primary w-full text-center"
+            >
+              访问官网
+            </a>
+            <p class="text-xs text-gray-500 text-center mt-3">
+              链接为官方地址，点击后离开本站
+            </p>
+          </div>
+
+          <!-- Real-time Pricing -->
+          <ToolPricingRealtime
+            client:load
+            toolSlug={tool.slug}
+            toolName={tool.name}
+            officialUrl={tool.url}
+            locale="zh"
+          />
+
+          <!-- Compare Button -->
+          <CompareButton
+            client:load
+            toolSlug={tool.slug}
+            toolName={tool.name}
+            toolImage={tool.imageUrl}
+            locale="zh"
+          />
+
+          <!-- Compare Link -->
+          <div class="bg-primary-50 rounded-xl border border-primary-200 p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="font-semibold text-primary-900 mb-1">对比工具</h3>
+                <p class="text-xs text-primary-700">与其他工具多维度对比</p>
+              </div>
+              <a href="/compare" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                去对比 →
+              </a>
+            </div>
+          </div>
+
+          <!-- Quick Info -->
+          <div class="bg-white rounded-xl border border-gray-200 p-6">
+            <h3 class="font-semibold mb-4">基本信息</h3>
+            <dl class="space-y-3 text-sm">
+              <div class="flex justify-between">
+                <dt class="text-gray-500">分类</dt>
+                <dd class="font-medium">
+                  {tool.category === 'agent' ? 'Agent' :
+                   tool.category === 'writing' ? '写作' :
+                   tool.category === 'coding' ? '编程' :
+                   tool.category === 'design' ? '设计' :
+                   tool.category === 'research' ? '研究' : '对话'}
+                </dd>
+              </div>
+              <div class="flex justify-between">
+                <dt class="text-gray-500">标签</dt>
+                <dd class="font-medium text-right max-w-[150px]">
+                  {tool.tags.slice(0, 3).join(', ')}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Payment Solutions -->
+          <div class="bg-secondary-50 rounded-xl border border-secondary-200 p-6">
+            <h3 class="font-semibold mb-3 text-secondary-900">支付困难？</h3>
+            <p class="text-sm text-secondary-700 mb-4">
+              查看我们的支付解决方案，教你怎么轻松订阅
+            </p>
+            <a href="/payment" class="btn-secondary w-full text-center text-sm">
+              支付指南
+            </a>
+          </div>
+
+          <!-- University Policy -->
+          <div class="bg-green-50 rounded-xl border border-green-200 p-6">
+            <h3 class="font-semibold mb-3 text-green-900">大学让用吗？</h3>
+            <p class="text-sm text-green-700 mb-4">
+              查查看你学校的AI政策，避免违规
+            </p>
+            <a href="/policies" class="bg-green-600 text-white btn w-full text-center text-sm hover:bg-green-700">
+              查询政策
+            </a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>

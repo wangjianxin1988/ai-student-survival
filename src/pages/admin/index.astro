@@ -1,0 +1,380 @@
+---
+import Layout from '@/layouts/Layout.astro';
+
+export const prerender = false;
+
+// Simple server-side session check for admin access
+// In production, this should verify against a real auth system
+const adminSession = Astro.cookies.get('admin_session')?.value;
+const isDev = import.meta.env.DEV;
+---
+
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>管理后台 - AI留学生存指南</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 min-h-screen">
+
+    <!-- Login Check (client-side) -->
+    <div id="authGate" class="hidden">
+      <!-- Sidebar -->
+      <div class="fixed inset-y-0 left-0 w-64 bg-gray-900 text-white flex flex-col">
+        <div class="p-6 border-b border-gray-800">
+          <h1 class="text-xl font-bold">AI留学生存指南</h1>
+          <p class="text-gray-400 text-sm mt-1">管理后台</p>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-1">
+          <a href="/admin" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-800 text-white">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+            概览
+          </a>
+          <a href="/admin/content" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            内容管理
+          </a>
+          <a href="/admin/users" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            用户管理
+          </a>
+          <a href="/admin/analytics" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            数据分析
+          </a>
+          <a href="/admin/settings" class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-gray-800 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            系统设置
+          </a>
+        </nav>
+
+        <div class="p-4 border-t border-gray-800">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-sm font-bold" id="avatarInitial">A</div>
+            <div>
+              <p class="text-sm font-medium" id="adminName">Administrator</p>
+              <p class="text-xs text-gray-400" id="adminRole">admin</p>
+            </div>
+          </div>
+          <button
+            id="logoutBtn"
+            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            退出登录
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="ml-64 p-8">
+        <div class="mb-8">
+          <h2 class="text-3xl font-bold text-gray-900">管理后台概览</h2>
+          <p class="text-gray-500 mt-1">欢迎回来，<span id="welcomeName">管理员</span></p>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-500">AI工具总数</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1" id="statTools">500+</p>
+              </div>
+              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-500">大学政策</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1" id="statPolicies">200+</p>
+              </div>
+              <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-500">Prompt模板</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1" id="statPrompts">1000+</p>
+              </div>
+              <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-500">支付方案</p>
+                <p class="text-3xl font-bold text-gray-900 mt-1" id="statPayments">10+</p>
+              </div>
+              <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">快速操作</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <a href="/admin/content?action=new" class="flex flex-col items-center gap-2 p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors">
+              <svg class="w-8 h-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              <span class="text-sm font-medium text-gray-700">添加AI工具</span>
+            </a>
+            <a href="/admin/content?type=policy" class="flex flex-col items-center gap-2 p-4 border border-gray-200 rounded-lg hover:border-green-300 hover:bg-green-50 transition-colors">
+              <svg class="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              <span class="text-sm font-medium text-gray-700">更新政策</span>
+            </a>
+            <a href="/admin/users" class="flex flex-col items-center gap-2 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:bg-blue-50 transition-colors">
+              <svg class="w-8 h-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+              <span class="text-sm font-medium text-gray-700">用户列表</span>
+            </a>
+            <a href="/admin/analytics" class="flex flex-col items-center gap-2 p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors">
+              <svg class="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span class="text-sm font-medium text-gray-700">查看数据</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- TinaCMS Dev Mode Notice -->
+        {isDev && (
+          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
+            <div class="flex items-start gap-4">
+              <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-semibold text-yellow-900">TinaCMS 开发模式</h3>
+                <p class="text-sm text-yellow-800 mt-1">
+                  当前处于开发模式，可以访问 TinaCMS 内容编辑器。
+                  运行 <code class="bg-yellow-100 px-1 rounded">pnpm run tina</code> 启动 TinaCMS 开发服务器。
+                </p>
+                <a href="/admin/tina" class="inline-flex items-center gap-1 mt-3 text-sm font-medium text-yellow-900 hover:text-yellow-700">
+                  打开内容编辑器 →
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <!-- Deployment Status -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">部署状态</h3>
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">部署平台</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                Cloudflare Pages
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">适配器</span>
+              <span class="text-sm font-medium text-gray-900">@astrojs/cloudflare</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">输出模式</span>
+              <span class="text-sm font-medium text-gray-900">Hybrid (SSR + SSG)</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">运行时</span>
+              <span class="text-sm font-medium text-gray-900">Cloudflare Workers</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-gray-600">robots.txt</span>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 text-sm font-medium rounded-full">
+                <span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+                完整AI爬虫配置
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center bg-gray-100">
+      <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-100 rounded-full mb-4">
+            <svg class="w-8 h-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-900">管理后台</h1>
+          <p class="mt-2 text-gray-600">请登录以访问管理后台</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-8">
+          <div id="adminError" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm"></div>
+
+          <form id="adminLoginForm" class="space-y-5">
+            <div>
+              <label for="adminEmail" class="block text-sm font-medium text-gray-700 mb-2">管理员邮箱</label>
+              <input
+                type="email"
+                id="adminEmail"
+                required
+                autocomplete="email"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                placeholder="admin@example.com"
+              />
+            </div>
+            <div>
+              <label for="adminPassword" class="block text-sm font-medium text-gray-700 mb-2">密码</label>
+              <input
+                type="password"
+                id="adminPassword"
+                required
+                autocomplete="current-password"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                placeholder="••••••••"
+              />
+            </div>
+            <button
+              type="submit"
+              id="adminLoginBtn"
+              class="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors"
+            >
+              登录
+            </button>
+          </form>
+
+          <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p class="text-xs text-blue-800">
+              <strong>演示账号：</strong>admin@ai-student-survival.com / admin123
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-4 text-center">
+          <a href="/" class="text-sm text-gray-600 hover:text-primary-600">← 返回首页</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Admin credentials (same as login page)
+      const ADMIN_CREDENTIALS = [
+        { email: 'admin@ai-student-survival.com', password: 'admin123', role: 'admin', name: 'Administrator' },
+        { email: 'editor@ai-student-survival.com', password: 'editor123', role: 'editor', name: 'Editor' },
+      ];
+
+      const authGate = document.getElementById('authGate') as HTMLDivElement;
+      const loginScreen = document.getElementById('loginScreen') as HTMLDivElement;
+      const loginForm = document.getElementById('adminLoginForm') as HTMLFormElement;
+      const errorDiv = document.getElementById('adminError') as HTMLDivElement;
+      const logoutBtn = document.getElementById('logoutBtn') as HTMLButtonElement;
+
+      function showError(msg) {
+        errorDiv.textContent = msg;
+        errorDiv.classList.remove('hidden');
+      }
+
+      function checkAuth() {
+        const stored = sessionStorage.getItem('admin_session');
+        if (stored) {
+          try {
+            const session = JSON.parse(stored);
+            loginScreen.classList.add('hidden');
+            authGate.classList.remove('hidden');
+
+            // Populate user info
+            const initial = session.name ? session.name.charAt(0).toUpperCase() : 'A';
+            const avatarEl = document.getElementById('avatarInitial');
+            const nameEl = document.getElementById('adminName');
+            const roleEl = document.getElementById('adminRole');
+            const welcomeEl = document.getElementById('welcomeName');
+            if (avatarEl) avatarEl.textContent = initial;
+            if (nameEl) nameEl.textContent = session.name;
+            if (roleEl) roleEl.textContent = session.role;
+            if (welcomeEl) welcomeEl.textContent = session.name;
+            return;
+          } catch (e) {
+            sessionStorage.removeItem('admin_session');
+          }
+        }
+        loginScreen.classList.remove('hidden');
+        authGate.classList.add('hidden');
+      }
+
+      checkAuth();
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        showError('');
+
+        const email = (document.getElementById('adminEmail') as HTMLInputElement).value.trim();
+        const password = (document.getElementById('adminPassword') as HTMLInputElement).value;
+
+        await new Promise(resolve => setTimeout(resolve, 600));
+
+        const admin = ADMIN_CREDENTIALS.find(a => a.email === email && a.password === password);
+
+        if (admin) {
+          const session = {
+            email: admin.email,
+            name: admin.name,
+            role: admin.role,
+            loginAt: new Date().toISOString(),
+          };
+          sessionStorage.setItem('admin_session', JSON.stringify(session));
+          checkAuth();
+        } else {
+          showError('邮箱或密码错误');
+        }
+      });
+
+      logoutBtn?.addEventListener('click', () => {
+        sessionStorage.removeItem('admin_session');
+        window.location.href = '/admin/login';
+      });
+    </script>
+  </body>
+</html>

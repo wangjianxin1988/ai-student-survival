@@ -1,0 +1,204 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import CampusMap from '@/components/map/CampusMap';
+import { mapMarkers, universities } from '@/data/map-markers';
+import type { MapMarker } from '@/lib/types';
+import { CATEGORY_ICONS, CATEGORY_NAMES } from '@/lib/types';
+import { type Locale, t as translate } from '@/i18n';
+
+const currentPath = '/en/map';
+const locale: Locale = 'en';
+
+// Get unique categories
+const categories = [...new Set(mapMarkers.map(m => m.category))];
+---
+
+<Layout title="Campus Map - AI Student Survival Guide" locale={locale}>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8 flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Campus Map</h1>
+        <p class="text-gray-600">Explore campus facilities and find what you need</p>
+      </div>
+      <a
+        href="/en/map/add"
+        class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm"
+      >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Add Marker
+      </a>
+    </div>
+
+    <!-- Filter Controls -->
+    <div class="mb-6 flex flex-wrap gap-4 items-center">
+      <!-- University Filter -->
+      <div>
+        <label for="university-select" class="block text-sm font-medium text-gray-700 mb-1">
+          Select University
+        </label>
+        <select
+          id="university-select"
+          class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option value="">All Universities</option>
+          {universities.map(uni => (
+            <option value={uni.id}>{uni.name} ({uni.nameZh})</option>
+          ))}
+        </select>
+      </div>
+
+      <!-- Category Filter -->
+      <div>
+        <label for="category-select" class="block text-sm font-medium text-gray-700 mb-1">
+          Facility Type
+        </label>
+        <select
+          id="category-select"
+          class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+        >
+          <option value="">All Types</option>
+          {categories.map(cat => (
+            <option value={cat}>{CATEGORY_ICONS[cat]} {CATEGORY_NAMES[cat]}</option>
+          ))}
+        </select>
+      </div>
+
+      <!-- University Policy Link (shown when university is selected) -->
+      <div id="university-policy-link" class="hidden items-center gap-2">
+        <a
+          href="#"
+          id="policy-link"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          View University AI Policy
+        </a>
+      </div>
+    </div>
+
+    <!-- Map Container -->
+    <div class="mb-8">
+      <CampusMap
+        client:load
+        markers={mapMarkers}
+        height="500px"
+      />
+    </div>
+
+    <!-- Legend -->
+    <div class="mb-8 p-4 bg-gray-50 rounded-lg">
+      <h3 class="font-semibold text-gray-900 mb-3">Legend</h3>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+        {categories.map(cat => (
+          <div class="flex items-center gap-2">
+            <span class="text-xl">{CATEGORY_ICONS[cat]}</span>
+            <span class="text-sm text-gray-700">{CATEGORY_NAMES[cat]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Markers List -->
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">Campus Locations</h2>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {mapMarkers.map(marker => (
+          <div
+            class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+            data-marker
+            data-university={marker.universityId}
+            data-category={marker.category}
+          >
+            <div class="flex items-start gap-3">
+              <span class="text-2xl">{CATEGORY_ICONS[marker.category]}</span>
+              <div class="flex-1 min-w-0">
+                <h3 class="font-semibold text-gray-900 truncate">{marker.name}</h3>
+                <p class="text-sm text-gray-500 mb-1">{marker.universityName}</p>
+                <p class="text-sm text-gray-600 line-clamp-2">{marker.description}</p>
+                <div class="flex items-center gap-2 mt-2">
+                  <span class="text-yellow-500 text-sm">
+                    {'★'.repeat(Math.round(marker.rating))}
+                  </span>
+                  <span class="text-gray-400 text-xs">({marker.ratingCount})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Client-side filtering
+    const universitySelect = document.getElementById('university-select') as HTMLSelectElement;
+    const categorySelect = document.getElementById('category-select') as HTMLSelectElement;
+    const universityPolicyLink = document.getElementById('university-policy-link') as HTMLElement;
+    const policyLink = document.getElementById('policy-link') as HTMLAnchorElement;
+
+    // University data for policy links
+    const universityPolicyMap: Record<string, string> = {
+      'tsinghua': '/policies#tsinghua-university',
+      'peking': '/policies#peking-university',
+      'harvard': '/policies#harvard-university',
+      'stanford': '/policies#stanford-university',
+      'mit': '/policies#mit',
+      'cambridge': '/policies#university-of-cambridge',
+      'oxford': '/policies#university-of-oxford',
+      'ucb': '/policies#university-of-california-berkeley',
+      'ucl': '/policies#university-college-london',
+      'eth': '/policies#eth-zurich',
+      'ntu': '/policies#ntu',
+      'nus': '/policies#nus',
+      'toronto': '/policies#university-of-toronto',
+      'ubc': '/policies#ubc',
+      'melbourne': '/policies#university-of-melbourne',
+      'anu': '/policies#anu',
+      'lmu': '/policies#lmu-munich',
+      'tum': '/policies#tum',
+      'epfl': '/policies#epfl',
+      'columbia': '/policies#columbia-university',
+    };
+
+    // Get all marker cards
+    const markerCards = document.querySelectorAll('[data-marker]');
+
+    function filterMarkers() {
+      const selectedUniversity = universitySelect.value;
+      const selectedCategory = categorySelect.value;
+
+      // Show/hide policy link based on university selection
+      if (selectedUniversity && universityPolicyMap[selectedUniversity]) {
+        universityPolicyLink.classList.remove('hidden');
+        universityPolicyLink.classList.add('flex');
+        policyLink.href = universityPolicyMap[selectedUniversity];
+      } else {
+        universityPolicyLink.classList.add('hidden');
+        universityPolicyLink.classList.remove('flex');
+      }
+
+      markerCards.forEach(card => {
+        const universityId = card.getAttribute('data-university');
+        const category = card.getAttribute('data-category');
+
+        const matchesUniversity = !selectedUniversity || universityId === selectedUniversity;
+        const matchesCategory = !selectedCategory || category === selectedCategory;
+
+        if (matchesUniversity && matchesCategory) {
+          (card as HTMLElement).style.display = '';
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+    }
+
+    universitySelect?.addEventListener('change', filterMarkers);
+    categorySelect?.addEventListener('change', filterMarkers);
+  </script>
+</Layout>

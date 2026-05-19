@@ -1,0 +1,189 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import CampusMap from '@/components/map/CampusMap';
+import AddMarkerForm from '@/components/map/AddMarkerForm';
+import { universities } from '@/data/map-markers';
+import { type Locale } from '@/i18n';
+
+const currentPath = '/en/map/add';
+const locale: Locale = 'en';
+---
+
+<Layout title="Add Campus Marker - AI Student Survival Guide" locale={locale}>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="mb-8">
+      <div class="flex items-center gap-3 mb-2">
+        <a href="/en/map" class="text-gray-500 hover:text-gray-700">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </a>
+        <h1 class="text-3xl font-bold text-gray-900">Add Campus Marker</h1>
+      </div>
+      <p class="text-gray-600 ml-8">Mark campus facilities on the map to help other international students find what they need</p>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div class="flex gap-3">
+        <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="text-sm text-blue-800">
+          <p class="font-medium mb-1">Submission Guidelines</p>
+          <ul class="list-disc list-inside space-y-1 text-blue-700">
+            <li>Markers need to be reviewed before appearing on the map</li>
+            <li>Please ensure marker information accurately reflects the actual location</li>
+            <li>Click on the map to select marker position</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Map Section -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold text-gray-900">Select Location</h2>
+        <div id="map-container">
+          <CampusMap
+            client:load
+            markers={[]}
+            height="450px"
+            isAddMode={true}
+          />
+        </div>
+        <p class="text-sm text-gray-500">
+          <span class="text-primary-500">Tip:</span> Click anywhere on the map to set marker coordinates
+        </p>
+      </div>
+
+      <!-- Form Section -->
+      <div class="space-y-4">
+        <h2 class="text-lg font-semibold text-gray-900">Marker Information</h2>
+        <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <AddMarkerForm
+            client:load
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Submissions -->
+    <div class="mt-8">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">My Submissions</h2>
+      <div id="my-submissions" class="space-y-3">
+        <p class="text-gray-500 text-sm">No submissions yet</p>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    import { saveUGCMarker, getUGCMarkers } from '@/lib/marker-storage';
+    import type { MapMarker } from '@/lib/types';
+    import { universities } from '@/data/map-markers';
+
+    // Map click handler
+    let selectedCoordinates = { lat: 0, lng: 0 };
+
+    // Expose to global for CampusMap callback
+    (window as any).handleMapClick = (lat: number, lng: number) => {
+      selectedCoordinates = { lat, lng };
+      // Dispatch custom event to notify form
+      window.dispatchEvent(new CustomEvent('coordinates-updated', {
+        detail: { lat, lng }
+      }));
+    };
+
+    // Listen for form submissions from AddMarkerForm
+    document.addEventListener('marker-form-submit', async (e: CustomEvent) => {
+      const markerData = e.detail;
+
+      try {
+        // Save to localStorage
+        const saved = saveUGCMarker(markerData);
+
+        // Show success message
+        showNotification('Marker submitted! It will appear on the map after review.', 'success');
+
+        // Update submissions list
+        updateSubmissionsList();
+
+        // Redirect to map after short delay
+        setTimeout(() => {
+          window.location.href = '/en/map';
+        }, 1500);
+      } catch (error) {
+        console.error('Failed to save marker:', error);
+        showNotification('Submission failed, please try again', 'error');
+      }
+    });
+
+    // Show notification
+    function showNotification(message: string, type: 'success' | 'error') {
+      const notification = document.createElement('div');
+      notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+        type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+      }`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
+    // Update submissions list
+    function updateSubmissionsList() {
+      const container = document.getElementById('my-submissions');
+      if (!container) return;
+
+      const markers = getUGCMarkers();
+
+      if (markers.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No submissions yet</p>';
+        return;
+      }
+
+      container.innerHTML = markers.slice(-5).reverse().map(marker => `
+        <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl">${getCategoryIcon(marker.category)}</span>
+            <div>
+              <p class="font-medium text-gray-900">${marker.name}</p>
+              <p class="text-sm text-gray-500">${marker.universityName}</p>
+            </div>
+          </div>
+          <span class="px-2 py-1 text-xs font-medium rounded-full ${
+            marker.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+            marker.status === 'approved' ? 'bg-green-100 text-green-700' :
+            'bg-red-100 text-red-700'
+          }">
+            ${marker.status === 'pending' ? 'Pending' :
+              marker.status === 'approved' ? 'Approved' : 'Rejected'}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // Get category icon
+    function getCategoryIcon(category: string): string {
+      const icons: Record<string, string> = {
+        library: '📚',
+        canteen: '🍜',
+        dorm: '🏠',
+        supermarket: '🛒',
+        bank: '🏦',
+        restaurant: '🍽️',
+        danger: '⚠️',
+        safety: '✅',
+        other: '📍',
+      };
+      return icons[category] || '📍';
+    }
+
+    // Initial update
+    updateSubmissionsList();
+  </script>
+</Layout>

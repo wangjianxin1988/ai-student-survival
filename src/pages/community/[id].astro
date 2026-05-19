@@ -1,0 +1,29 @@
+---
+export const prerender = false;
+
+import { PostDetail } from '@/components/community';
+import Layout from '@/layouts/Layout.astro';
+import { getCurrentUser } from '@/lib/auth';
+
+const user = getCurrentUser();
+const postId = Astro.params.id;
+---
+
+<Layout title="帖子详情 - AI留学生存指南">
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="mb-6">
+        <a href="/community" class="text-blue-600 hover:text-blue-700 flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          返回社区
+        </a>
+      </div>
+
+      {postId && (
+        <PostDetail client:load postId={postId} currentUserId={user?.id} />
+      )}
+    </div>
+  </div>
+</Layout>

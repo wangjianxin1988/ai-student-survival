@@ -1,0 +1,286 @@
+---
+export const prerender = true;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, defaultLocale } from '@/i18n';
+
+// Force English locale
+const locale: Locale = 'en';
+
+// Helper to generate locale-aware hrefs
+function getLocaleHref(path: string): string {
+  return `/${locale}${path}`;
+}
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": translate(locale, 'site.name'),
+  "description": translate(locale, 'site.description'),
+  "url": "https://ai-student-survival.example.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://ai-student-survival.example.com/en/tools?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  },
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "AI Tools for Students",
+    "itemListElement": []
+  }
+};
+
+// Stats for display
+const stats = [
+  { value: '500+', label: translate(locale, 'home.painPoints.stats.tools'), href: getLocaleHref('/tools') },
+  { value: '20+', label: translate(locale, 'home.painPoints.stats.paymentSolutions'), href: getLocaleHref('/payment') },
+  { value: '200+', label: translate(locale, 'home.painPoints.stats.universityPolicies'), href: getLocaleHref('/policies') },
+  { value: '1000+', label: translate(locale, 'home.painPoints.stats.promptTemplates'), href: getLocaleHref('/prompts') },
+];
+
+// Pain points data with locale-aware hrefs
+const painPoints = [
+  { key: '1', title: translate(locale, 'home.painPoints.points.1.title'), desc: translate(locale, 'home.painPoints.points.1.description'), href: getLocaleHref('/tools') },
+  { key: '2', title: translate(locale, 'home.painPoints.points.2.title'), desc: translate(locale, 'home.painPoints.points.2.description'), href: getLocaleHref('/payment') },
+  { key: '3', title: translate(locale, 'home.painPoints.points.3.title'), desc: translate(locale, 'home.painPoints.points.3.description'), href: getLocaleHref('/policies') },
+  { key: '4', title: translate(locale, 'home.painPoints.points.4.title'), desc: translate(locale, 'home.painPoints.points.4.description'), href: getLocaleHref('/prompts') },
+];
+
+// Module cards data
+const modules = [
+  {
+    href: '/en/tools',
+    key: 'aiTools',
+    color: 'primary',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />`
+  },
+  {
+    href: '/en/payment',
+    key: 'payment',
+    color: 'secondary',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />`
+  },
+  {
+    href: '/en/policies',
+    key: 'policies',
+    color: 'green',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />`
+  },
+  {
+    href: '/en/prompts',
+    key: 'prompts',
+    color: 'orange',
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />`
+  },
+];
+
+// Footer links for English locale
+const footerLinks = {
+  coreFeatures: [
+    { href: '/en/tools', label: translate(locale, 'nav.aiTools'), desc: '100+ AI tools indexed' },
+    { href: '/en/payment', label: translate(locale, 'nav.payment'), desc: 'Virtual cards·Gift cards·Regional pricing' },
+    { href: '/en/policies', label: translate(locale, 'nav.policies'), desc: 'University AI policies' },
+    { href: '/en/prompts', label: translate(locale, 'nav.prompts'), desc: 'High-quality templates' },
+    { href: '/en/offers', label: translate(locale, 'nav.offers'), desc: 'Admissions experience' },
+    { href: '/en/questions', label: translate(locale, 'nav.questions'), desc: 'Student community' },
+  ],
+  toolCategories: [
+    { href: '/en/tools?category=writing', label: translate(locale, 'footer.writing') },
+    { href: '/en/tools?category=coding', label: translate(locale, 'footer.coding') },
+    { href: '/en/tools?category=design', label: translate(locale, 'footer.design') },
+    { href: '/en/tools?category=research', label: translate(locale, 'footer.research') },
+  ],
+  resources: [
+    { href: getLocaleHref('/faq'), label: translate(locale, 'nav.faq') },
+    { href: getLocaleHref('/compare'), label: translate(locale, 'nav.compare') },
+    { href: getLocaleHref('/map'), label: translate(locale, 'nav.map') },
+    { href: getLocaleHref('/survival'), label: translate(locale, 'nav.survival') },
+  ],
+  company: [
+    { href: getLocaleHref('/about'), label: translate(locale, 'nav.about') },
+    { href: getLocaleHref('/contact'), label: translate(locale, 'nav.contact') },
+    { href: getLocaleHref('/about#guide'), label: translate(locale, 'nav.useGuide') },
+  ],
+  legal: [
+    { href: getLocaleHref('/privacy'), label: translate(locale, 'nav.privacy') },
+    { href: getLocaleHref('/terms'), label: translate(locale, 'nav.terms') },
+  ],
+};
+---
+
+<Layout
+  title={translate(locale, 'site.name')}
+  description={translate(locale, 'site.description')}
+  type="website"
+  jsonLd={jsonLd}
+  locale={locale}
+>
+  <!-- Hero Section -->
+  <section class="hero-gradient text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+      <div class="max-w-3xl mx-auto text-center">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in">
+          {translate(locale, 'home.hero.title')}
+        </h1>
+        <p class="text-xl sm:text-2xl text-primary-100 mb-8 animate-slide-up">
+          {translate(locale, 'home.hero.subtitle')}
+        </p>
+        <p class="text-lg text-primary-200 mb-12 max-w-2xl mx-auto">
+          {translate(locale, 'home.hero.description')}
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up">
+          <a href={getLocaleHref('/map')} class="btn bg-white text-primary-700 hover:bg-primary-50 px-8 py-3 text-lg font-semibold">
+            {translate(locale, 'home.hero.exploreMap')}
+          </a>
+          <a href={getLocaleHref('/offers')} class="btn border-2 border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
+            {translate(locale, 'home.hero.viewOffers')}
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Modules -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold mb-4">{translate(locale, 'home.modules.title')}</h2>
+        <p class="text-gray-600 max-w-2xl mx-auto">{translate(locale, 'home.modules.subtitle')}</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {modules.map(mod => (
+          <a href={mod.href} class={`card p-6 hover:border-${mod.color}-300 group`}>
+            <div class={`w-12 h-12 rounded-xl bg-${mod.color}-100 text-${mod.color}-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" set:html={mod.icon} />
+            </div>
+            <h3 class="text-xl font-semibold mb-2 group-hover:text-primary-600 transition-colors">
+              {translate(locale, `home.modules.${mod.key}.title`)}
+            </h3>
+            <p class="text-gray-600 text-sm mb-4">
+              {translate(locale, `home.modules.${mod.key}.description`)}
+            </p>
+            <div class={`flex items-center text-${mod.color}-600 text-sm font-medium`}>
+              <span>{translate(locale, 'common.browse')}</span>
+              <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Pain Point Section -->
+  <section class="py-16 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <h2 class="text-3xl font-bold mb-6">{translate(locale, 'home.painPoints.title')}</h2>
+          <div class="space-y-4">
+            {painPoints.map((point, index) => (
+              <a href={point.href} class="flex items-start gap-4 p-2 rounded-lg hover:bg-white hover:shadow-md transition-all cursor-pointer">
+                <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span class="text-sm font-bold">{index + 1}</span>
+                </div>
+                <div>
+                  <h4 class="font-semibold mb-1">{point.title}</h4>
+                  <p class="text-gray-600 text-sm">{point.desc}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+          <h3 class="text-xl font-semibold mb-6 text-center">{translate(locale, 'home.modules.title')}</h3>
+          <div class="grid grid-cols-2 gap-4">
+            {stats.map((stat, index) => (
+              <a href={stat.href} class={`text-center p-4 rounded-xl ${
+                index === 0 ? 'bg-green-50' :
+                index === 1 ? 'bg-blue-50' :
+                index === 2 ? 'bg-purple-50' : 'bg-orange-50'
+              } hover:shadow-md transition-shadow block`}>
+                <div class={`text-3xl font-bold mb-2 ${
+                  index === 0 ? 'text-green-600' :
+                  index === 1 ? 'text-blue-600' :
+                  index === 2 ? 'text-purple-600' : 'text-orange-600'
+                }`}>{stat.value}</div>
+                <div class="text-sm text-gray-600">{stat.label}</div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
+        <!-- Core Features -->
+        <div class="lg:col-span-2">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <span class="font-semibold text-lg">{translate(locale, 'site.name')}</span>
+          </div>
+          <p class="text-gray-400 text-sm mb-4">
+            {translate(locale, 'footer.tagline')}
+          </p>
+          <div class="grid grid-cols-2 gap-x-4 gap-y-2">
+            {footerLinks.coreFeatures.map(link => (
+              <a href={link.href} class="text-gray-400 hover:text-white transition-colors text-sm py-1 flex flex-col">
+                <span class="font-medium text-white/80">{link.label}</span>
+                <span class="text-xs text-gray-500">{link.desc}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <!-- Tool Categories -->
+        <div>
+          <h4 class="font-semibold mb-4 text-white">{translate(locale, 'footer.toolsCategory')}</h4>
+          <ul class="space-y-2 text-sm text-gray-400">
+            {footerLinks.toolCategories.map(link => (
+              <li><a href={link.href} class="hover:text-white transition-colors">{link.label}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- Resources -->
+        <div>
+          <h4 class="font-semibold mb-4 text-white">{translate(locale, 'footer.resources')}</h4>
+          <ul class="space-y-2 text-sm text-gray-400">
+            {footerLinks.resources.map(link => (
+              <li><a href={link.href} class="hover:text-white transition-colors">{link.label}</a></li>
+            ))}
+          </ul>
+        </div>
+
+        <!-- About Us -->
+        <div>
+          <h4 class="font-semibold mb-4 text-white">{translate(locale, 'nav.about')}</h4>
+          <ul class="space-y-2 text-sm text-gray-400">
+            {footerLinks.company.map(link => (
+              <li><a href={link.href} class="hover:text-white transition-colors">{link.label}</a></li>
+            ))}
+          </ul>
+          <h4 class="font-semibold mb-4 mt-6 text-white">{translate(locale, 'nav.privacy')}</h4>
+          <ul class="space-y-2 text-sm text-gray-400">
+            {footerLinks.legal.map(link => (
+              <li><a href={link.href} class="hover:text-white transition-colors">{link.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-500">
+        <p>&copy; 2026 {translate(locale, 'site.name')}. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</Layout>

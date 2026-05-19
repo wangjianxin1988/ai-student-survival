@@ -1,0 +1,15 @@
+---
+import { CommunityFeed } from '@/components/community';
+import Layout from '@/layouts/Layout.astro';
+import { getCurrentUser } from '@/lib/auth';
+
+const user = getCurrentUser();
+---
+
+<Layout title="社区 - AI留学生存指南">
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-5xl mx-auto px-4">
+      <CommunityFeed client:load currentUserId={user?.id} />
+    </div>
+  </div>
+</Layout>

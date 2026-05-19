@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <!-- Main gradient - AI purple to blue -->
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8b5cf6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <!-- Accent gradient - warm orange to pink -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ec4899;stop-opacity:1" />
+    </linearGradient>
+    <!-- Background gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#312e81;stop-opacity:1" />
+    </linearGradient>
+    <!-- Glow effect -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background circle with gradient -->
+  <circle cx="60" cy="60" r="55" fill="url(#bgGrad)"/>
+
+  <!-- Outer ring -->
+  <circle cx="60" cy="60" r="52" fill="none" stroke="url(#mainGrad)" stroke-width="2" opacity="0.6"/>
+
+  <!-- Inner decorative ring -->
+  <circle cx="60" cy="60" r="46" fill="none" stroke="url(#accentGrad)" stroke-width="1.5" opacity="0.4" stroke-dasharray="8 4"/>
+
+  <!-- AI brain/circuit pattern - represents AI -->
+  <g filter="url(#glow)">
+    <!-- Central node -->
+    <circle cx="60" cy="55" r="8" fill="url(#mainGrad)"/>
+
+    <!-- Neural network connections -->
+    <path d="M60 47 L60 35" stroke="url(#mainGrad)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M52 55 L40 50" stroke="url(#mainGrad)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M68 55 L80 50" stroke="url(#mainGrad)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M52 62 L42 70" stroke="url(#mainGrad)" stroke-width="2" stroke-linecap="round"/>
+    <path d="M68 62 L78 70" stroke="url(#mainGrad)" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- Neural nodes -->
+    <circle cx="60" cy="32" r="4" fill="url(#accentGrad)"/>
+    <circle cx="37" cy="50" r="4" fill="url(#accentGrad)"/>
+    <circle cx="83" cy="50" r="4" fill="url(#accentGrad)"/>
+    <circle cx="40" cy="73" r="4" fill="url(#accentGrad)"/>
+    <circle cx="80" cy="73" r="4" fill="url(#accentGrad)"/>
+  </g>
+
+  <!-- Compass/Rocket element - represents survival/navigation -->
+  <g transform="translate(60, 78)">
+    <!-- Compass base -->
+    <path d="M0 -12 L3 -3 L0 0 L-3 -3 Z" fill="#f97316"/>
+    <path d="M0 12 L3 3 L0 0 L-3 3 Z" fill="#ec4899"/>
+    <path d="M-12 0 L-3 -3 L0 0 L-3 3 Z" fill="#8b5cf6"/>
+    <path d="M12 0 L3 -3 L0 0 L3 3 Z" fill="#3b82f6"/>
+    <!-- Center dot -->
+    <circle cx="0" cy="0" r="2.5" fill="white"/>
+  </g>
+
+  <!-- Text: MI -->
+  <text x="18" y="112" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="url(#mainGrad)">MI</text>
+
+  <!-- Text: TO -->
+  <text x="48" y="112" font-family="Arial, sans-serif" font-size="8" font-weight="normal" fill="#94a3b8">TO</text>
+</svg>

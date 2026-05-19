@@ -1,0 +1,273 @@
+---
+export const prerender = true;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate } from '@/i18n';
+
+// Force English locale
+const locale: Locale = 'en';
+
+// Helper to generate locale-aware hrefs
+function getLocaleHref(path: string): string {
+  return `/${locale}${path}`;
+}
+
+// FAQ data
+const faqCategories = [
+  {
+    title: translate(locale, 'faq.categories.general'),
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />`,
+    questions: [
+      {
+        q: translate(locale, 'faq.general.whatIs.title'),
+        a: translate(locale, 'faq.general.whatIs.answer'),
+      },
+      {
+        q: translate(locale, 'faq.general.whoFor.title'),
+        a: translate(locale, 'faq.general.whoFor.answer'),
+      },
+      {
+        q: translate(locale, 'faq.general.freeUse.title'),
+        a: translate(locale, 'faq.general.freeUse.answer'),
+      },
+      {
+        q: translate(locale, 'faq.general.howStart.title'),
+        a: translate(locale, 'faq.general.howStart.answer'),
+      },
+    ],
+  },
+  {
+    title: translate(locale, 'faq.categories.tools'),
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />`,
+    questions: [
+      {
+        q: translate(locale, 'faq.tools.howMany.title'),
+        a: translate(locale, 'faq.tools.howMany.answer'),
+      },
+      {
+        q: translate(locale, 'faq.tools.whichBest.title'),
+        a: translate(locale, 'faq.tools.whichBest.answer'),
+      },
+      {
+        q: translate(locale, 'faq.tools.pricing.title'),
+        a: translate(locale, 'faq.tools.pricing.answer'),
+      },
+      {
+        q: translate(locale, 'faq.tools.chinaAccess.title'),
+        a: translate(locale, 'faq.tools.chinaAccess.answer'),
+      },
+    ],
+  },
+  {
+    title: translate(locale, 'faq.categories.payment'),
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />`,
+    questions: [
+      {
+        q: translate(locale, 'faq.payment.methods.title'),
+        a: translate(locale, 'faq.payment.methods.answer'),
+      },
+      {
+        q: translate(locale, 'faq.payment.virtualCard.title'),
+        a: translate(locale, 'faq.payment.virtualCard.answer'),
+      },
+      {
+        q: translate(locale, 'faq.payment.giftCard.title'),
+        a: translate(locale, 'faq.payment.giftCard.answer'),
+      },
+      {
+        q: translate(locale, 'faq.payment.safety.title'),
+        a: translate(locale, 'faq.payment.safety.answer'),
+      },
+    ],
+  },
+  {
+    title: translate(locale, 'faq.categories.policy'),
+    icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />`,
+    questions: [
+      {
+        q: translate(locale, 'faq.policy.why.title'),
+        a: translate(locale, 'faq.policy.why.answer'),
+      },
+      {
+        q: translate(locale, 'faq.policy.checkMethod.title'),
+        a: translate(locale, 'faq.policy.checkMethod.answer'),
+      },
+      {
+        q: translate(locale, 'faq.policy.violation.title'),
+        a: translate(locale, 'faq.policy.violation.answer'),
+      },
+      {
+        q: translate(locale, 'faq.policy.allowAI.title'),
+        a: translate(locale, 'faq.policy.allowAI.answer'),
+      },
+    ],
+  },
+];
+
+// Contact info
+const contactInfo = {
+  email: 'support@ai-student-survival.com',
+  wechat: 'AIStudentHelper',
+};
+---
+
+<Layout
+  title={translate(locale, 'nav.faq')}
+  description={translate(locale, 'faq.description')}
+  locale={locale}
+>
+  <div class="bg-gradient-to-br from-primary-50 to-secondary-50 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Hero -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">
+          {translate(locale, 'faq.title')}
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          {translate(locale, 'faq.subtitle')}
+        </p>
+      </div>
+
+      <!-- Search -->
+      <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+        <div class="relative">
+          <input
+            type="text"
+            id="faq-search"
+            placeholder={translate(locale, 'faq.searchPlaceholder')}
+            class="w-full px-4 py-3 pl-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+          />
+          <svg class="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- FAQ Categories -->
+      <div class="space-y-8">
+        {faqCategories.map((category, catIndex) => (
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <!-- Category Header -->
+            <div class="bg-gradient-to-r from-primary-500 to-secondary-500 px-6 py-4 flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" set:html={category.icon} />
+              </div>
+              <h2 class="text-xl font-semibold text-white">{category.title}</h2>
+            </div>
+
+            <!-- Questions -->
+            <div class="divide-y divide-gray-100" id={`category-${catIndex}`}>
+              {category.questions.map((item, qIndex) => (
+                <div class="faq-item" data-question={item.q.toLowerCase()}>
+                  <button
+                    class="w-full px-6 py-4 text-left flex items-center justify-between gap-4 hover:bg-gray-50 transition-colors"
+                    onclick={`toggleFaq(this)`}
+                    aria-expanded="false"
+                  >
+                    <span class="font-medium text-gray-900">{item.q}</span>
+                    <svg class="w-5 h-5 text-gray-400 flex-shrink-0 faq-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  <div class="faq-answer hidden px-6 pb-4">
+                    <p class="text-gray-600 leading-relaxed">{item.a}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <!-- Still Have Questions -->
+      <div class="mt-12 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-2xl p-8 text-center text-white">
+        <h3 class="text-2xl font-bold mb-4">{translate(locale, 'faq.stillHaveQuestions')}</h3>
+        <p class="text-primary-100 mb-6 max-w-lg mx-auto">
+          {translate(locale, 'faq.contactDescription')}
+        </p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a
+            href={`mailto:${contactInfo.email}`}
+            class="inline-flex items-center gap-2 bg-white text-primary-600 px-6 py-3 rounded-lg font-medium hover:bg-primary-50 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            {translate(locale, 'faq.emailUs')}
+          </a>
+          <a
+            href={getLocaleHref('/questions')}
+            class="inline-flex items-center gap-2 border-2 border-white/30 text-white px-6 py-3 rounded-lg font-medium hover:bg-white/10 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+            </svg>
+            {translate(locale, 'faq.askCommunity')}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // FAQ Toggle functionality
+    function toggleFaq(button: HTMLButtonElement) {
+      const faqItem = button.closest('.faq-item');
+      const answer = faqItem?.querySelector('.faq-answer');
+      const arrow = button.querySelector('.faq-arrow');
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+      // Close all other FAQ items
+      document.querySelectorAll('.faq-item').forEach(item => {
+        const btn = item.querySelector('button');
+        const ans = item.querySelector('.faq-answer');
+        const arr = item.querySelector('.faq-arrow');
+        if (item !== faqItem) {
+          btn?.setAttribute('aria-expanded', 'false');
+          ans?.classList.add('hidden');
+          arr?.classList.remove('rotate-180');
+        }
+      });
+
+      // Toggle current FAQ item
+      if (isExpanded) {
+        button.setAttribute('aria-expanded', 'false');
+        answer?.classList.add('hidden');
+        arrow?.classList.remove('rotate-180');
+      } else {
+        button.setAttribute('aria-expanded', 'true');
+        answer?.classList.remove('hidden');
+        arrow?.classList.add('rotate-180');
+      }
+    }
+
+    // FAQ Search functionality
+    const searchInput = document.getElementById('faq-search') as HTMLInputElement;
+    searchInput?.addEventListener('input', (e) => {
+      const query = (e.target as HTMLInputElement).value.toLowerCase().trim();
+
+      document.querySelectorAll('.faq-item').forEach(item => {
+        const question = item.getAttribute('data-question') || '';
+        const answer = (item.querySelector('.faq-answer') as HTMLElement)?.textContent?.toLowerCase() || '';
+
+        if (query === '' || question.includes(query) || answer.includes(query)) {
+          (item as HTMLElement).style.display = '';
+        } else {
+          (item as HTMLElement).style.display = 'none';
+        }
+      });
+
+      // Show/hide empty categories
+      document.querySelectorAll('[id^="category-"]').forEach(category => {
+        const visibleItems = category.querySelectorAll('.faq-item:not([style*="display: none"])');
+        const parent = category.closest('.bg-white') as HTMLElement;
+        if (parent) {
+          parent.style.display = visibleItems.length > 0 ? '' : 'none';
+        }
+      });
+    });
+
+    // Make function available globally
+    (window as any).toggleFaq = toggleFaq;
+  </script>
+</Layout>

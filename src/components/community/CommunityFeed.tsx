@@ -1,0 +1,192 @@
+import React, { useState, useEffect } from 'react';
+import type { CommunityPost } from '@/lib/community/types';
+import { PostCard } from './PostCard';
+import { CategoryFilter, type CommunityCategory } from './CategoryFilter';
+import { getCurrentLocale, getLocaleHref } from '@/lib/i18n';
+
+const translations = {
+  zh: {
+    title: '社区动态',
+    latest: '最新',
+    popular: '热门',
+    createPost: '发布帖子',
+    loginToPost: '登录后可发帖',
+    noPosts: '暂无帖子',
+    beFirst: '成为第一个发布的人吧！',
+    prevPage: '上一页',
+    nextPage: '下一页',
+    page: '第',
+    pageOf: '/',
+    pageEnd: '页',
+  },
+  en: {
+    title: 'Community',
+    latest: 'Latest',
+    popular: 'Popular',
+    createPost: 'Create Post',
+    loginToPost: 'Login to Post',
+    noPosts: 'No posts yet',
+    beFirst: 'Be the first to post!',
+    prevPage: 'Previous',
+    nextPage: 'Next',
+    page: 'Page',
+    pageOf: 'of',
+    pageEnd: '',
+  },
+};
+
+interface CommunityFeedProps {
+  currentUserId?: string;
+  locale?: 'zh' | 'en';
+}
+
+export function CommunityFeed({ currentUserId, locale }: CommunityFeedProps) {
+  const currentLocale = locale || getCurrentLocale();
+  const t = translations[currentLocale];
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [category, setCategory] = useState<CommunityCategory>('all');
+  const [sort, setSort] = useState<'latest' | 'popular'>('latest');
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const limit = 20;
+
+  useEffect(() => {
+    fetchPosts();
+  }, [category, sort, page]);
+
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        sort,
+        limit: limit.toString(),
+        offset: (page * limit).toString(),
+      });
+      if (category !== 'all') {
+        params.set('category', category);
+      }
+
+      const response = await fetch(`/api/community?${params}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setPosts(data.data);
+        setTotal(data.meta.total);
+      }
+    } catch (error) {
+      console.error('Failed to fetch posts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async (postId: string) => {
+    if (!currentUserId) return;
+
+    try {
+      await fetch(`/api/community/${postId}/like`, { method: 'POST' });
+    } catch (error) {
+      console.error('Failed to like:', error);
+    }
+  };
+
+  const handleFavorite = async (postId: string) => {
+    if (!currentUserId) return;
+
+    try {
+      await fetch(`/api/community/${postId}/favorite`, { method: 'POST' });
+    } catch (error) {
+      console.error('Failed to favorite:', error);
+    }
+  };
+
+  const handlePostClick = (postId: string) => {
+    window.location.href = getLocaleHref(`/community/${postId}`, currentLocale);
+  };
+
+  const totalPages = Math.ceil(total / limit);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">{t.title}</h1>
+        <div className="flex items-center gap-4">
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value as 'latest' | 'popular')}
+            className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="latest">{t.latest}</option>
+            <option value="popular">{t.popular}</option>
+          </select>
+          {currentUserId ? (
+            <a
+              href={getLocaleHref('/community/create', currentLocale)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              {t.createPost}
+            </a>
+          ) : (
+            <a
+              href={getLocaleHref('/auth/login', currentLocale)}
+              className="px-4 py-2 bg-gray-200 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors"
+            >
+              {t.loginToPost}
+            </a>
+          )}
+        </div>
+      </div>
+
+      <CategoryFilter selected={category} onChange={setCategory} />
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        </div>
+      ) : posts.length === 0 ? (
+        <div className="text-center py-12 text-gray-500">
+          <p className="text-lg mb-2">{t.noPosts}</p>
+          <p className="text-sm">{t.beFirst}</p>
+        </div>
+      ) : (
+        <>
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                currentUserId={currentUserId}
+                onLike={handleLike}
+                onFavorite={handleFavorite}
+                onClick={handlePostClick}
+              />
+            ))}
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-8">
+              <button
+                onClick={() => setPage(Math.max(0, page - 1))}
+                disabled={page === 0}
+                className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t.prevPage}
+              </button>
+              <span className="text-sm text-gray-600">
+                {t.page} {page + 1} {t.pageOf} {totalPages} {t.pageEnd}
+              </span>
+              <button
+                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                disabled={page >= totalPages - 1}
+                className="px-4 py-2 border border-gray-200 rounded-lg text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {t.nextPage}
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}

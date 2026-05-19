@@ -1,0 +1,14 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { CreatePostPage } from '@/components/community/CreatePostPage';
+import { getCurrentUser } from '@/lib/auth';
+
+export const prerender = false;
+
+const locale = 'zh';
+const user = getCurrentUser();
+---
+
+<Layout title={locale === 'zh' ? '发布帖子 - 留学生问答社区' : 'Create Post - Q&A Community'}>
+  <CreatePostPage userId={user?.id || ''} client:only="react" />
+</Layout>

@@ -1,0 +1,14 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { CreatePostPage } from '@/components/community/CreatePostPage';
+import { getCurrentUser } from '@/lib/auth';
+
+export const prerender = false;
+
+const locale = 'en';
+const user = getCurrentUser();
+---
+
+<Layout title="Ask Question" locale={locale}>
+  <CreatePostPage userId={user?.id || ''} client:only="react" />
+</Layout>
