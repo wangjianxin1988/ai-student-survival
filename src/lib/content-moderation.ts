@@ -1,7 +1,26 @@
 /**
  * Content Moderation Module - Anti-Spam and Anti-Advertisement System
  * Prevents spam, advertisement, flooding, and duplicate content
+ *
+ * Enhanced with:
+ * - glin-profanity library for ML-powered profanity detection
+ * - Leet speak detection (letter substitution)
+ * - Homophonic word detection (谐音词)
+ * - Keyboard mashing detection
+ * - Semantic pattern analysis
  */
+
+import { Filter, checkProfanity, isWordProfane } from 'glin-profanity';
+
+// Initialize the glin-profanity filter with aggressive settings
+const profanityFilter = new Filter({
+  languages: ['english', 'chinese'],
+  detectLeetspeak: true,
+  leetspeakLevel: 'aggressive',
+  normalizeUnicode: true,
+  cacheResults: true,
+  maxCacheSize: 1000,
+});
 
 // Types
 export interface ModerationResult {
@@ -23,7 +42,11 @@ export type ModerationFlag =
   | 'suspicious_pattern'
   | 'rate_limit_exceeded'
   | 'profanity'
-  | 'special_characters_abuse';
+  | 'special_characters_abuse'
+  | 'gibberish_detected'
+  | 'leet_speak'
+  | 'homophonic_spam'
+  | 'toxicity_detected';
 
 // Rate limit configuration
 export interface RateLimitConfig {
@@ -43,7 +66,261 @@ export const RATE_LIMITS: RateLimitConfig = {
   windowMs: 60 * 60 * 1000, // 1 hour window for hourly limits
 };
 
+// ============================================
+// Leet Speak (字母替换) Detection
+// ============================================
+// Common substitutions: 0→o, 1→i/l, 3→e, 4→a, 5→s, 7→t, 8→b, @→a, $→s
+const LEET_PATTERNS: [RegExp, string][] = [
+  // VIP variants
+  [/v[0@]p/gi, 'vip'],
+  [/v1p/gi, 'vip'],
+  [/v!p/gi, 'vip'],
+  // BUY variants
+  [/b[uy]/gi, 'buy'],
+  [/b0y/gi, 'buy'],
+  [/bOy/gi, 'buy'],
+  // CLICK variants
+  [/c1ick/gi, 'click'],
+  [/cl1ck/gi, 'click'],
+  [/c11ck/gi, 'click'],
+  [/cl!ck/gi, 'click'],
+  // CASINO variants
+  [/c[@4]s[1!]n[o0]/gi, 'casino'],
+  [/c[@4]s1n[o0]/gi, 'casino'],
+  // WEBSITES
+  [/w[e3][b4][s1][i1][t7][e3]/gi, 'website'],
+  // CONTACT variants
+  [/c[o0]nt[@4]ct/gi, 'contact'],
+  [/c[o0]nt4ct/gi, 'contact'],
+  // MONEY variants
+  [/m[o0]n[e3]y/gi, 'money'],
+  [/mooney/gi, 'money'],
+  // FREE variants
+  [/fr[e3][e3]/gi, 'free'],
+  [/fr33/gi, 'free'],
+  // ORDER variants
+  [/[o0]rd[e3]r/gi, 'order'],
+  [/0rder/gi, 'order'],
+  // SUBSCRIBE variants
+  [/su[bb][s5][c4][r][i1]b[e3]/gi, 'subscribe'],
+  [/sub$cr1b3/gi, 'subscribe'],
+  // FOLLOW variants
+  [/f[o0]ll[o0]w/gi, 'follow'],
+  [/f0llow/gi, 'follow'],
+  // DM/me variants
+  [/d[m][\s]/gi, 'dm'],
+  // CHAT variants
+  [/ch[@4]t/gi, 'chat'],
+  [/c_h_a_t/gi, 'chat'],
+  // SEX variants
+  [/s[e3][x]/gi, 'sex'],
+  [/s3x/gi, 'sex'],
+  // Adult content
+  [/p[@4]rn/gi, 'porn'],
+  [/p0rn/gi, 'porn'],
+  // WIN variants
+  [/w[i1]n/gi, 'win'],
+  [/w1n/gi, 'win'],
+  // GET variants
+  [/g[e3]t/gi, 'get'],
+  [/g3t/gi, 'get'],
+  // NOW variants
+  [/n[o0]w/gi, 'now'],
+  [/n0w/gi, 'now'],
+  // CALL variants
+  [/c[@4]ll/gi, 'call'],
+  [/c4ll/gi, 'call'],
+  // TEXT/TG variants
+  [/t[e3]x[t7]/gi, 'text'],
+  [/t[g9]/gi, 'tg'],
+  [/t[e3]l[e3]/gi, 'tele'],
+];
+
+// ============================================
+// Homophonic (谐音) Chinese Spam Patterns
+// ============================================
+const HOMOPHONIC_PATTERNS: [RegExp, string][] = [
+  // 微信 variants
+  [/微[信✉️威微]|we[i1]x[i1]n|wechat|v[x+][i1]|v[x+]/gi, '微信'],
+  [/威信|微x[信?]|薇信|伈|xin$/gi, '微信'],
+  // QQ variants
+  [/扣扣|企鹅|群号|[Qq]{2}|[Qq][\s]*[Qq]|qiut?$/gi, 'QQ'],
+  [/q群|扣[扣?q]|Q$/gi, 'QQ'],
+  // 联系我 variants
+  [/联繫|联系我|联係|连係|看我主页|点我头像|头像有/gi, '联系方式'],
+  [/主页有|头像有|个人简介|简介有/gi, '联系方式'],
+  // 手机号 variants
+  [/手機|phone|m[o0]b[o0]|電?话|[话話]/gi, '手机号'],
+  [/号[码馬?]|number/gi, '手机号'],
+  // 微信号 variants
+  [/微[信✉️]号|[wx]+[sx]+[hx]+/gi, '微信号'],
+  // 赚钱 variants
+  [/赚[钱💰米金]|挣[$钱]|赚$/gi, '赚钱'],
+  [/月入|日入|日赚|周赚/gi, '赚钱'],
+  // 菠菜 (博彩) variants
+  [/菠菜|[博播]彩|赌[博?]/gi, '菠菜'],
+  // 兼职 variants
+  [/兼[职殖]|副业|外快|补贴/gi, '兼职'],
+  // 色情 variants
+  [/情色|[色塞]情|[se]x|[pパ]orn|成人片|黄片| AV|小电影/gi, '色情'],
+  // VIP variants (Chinese context)
+  [/ⅤⅠＰ|[V魏]IP|[V魏][^i]P$/gi, 'VIP'],
+  [/会员|[灰辉辉灰]?会|内部|特殊/gi, '会员'],
+  // 外围 variants
+  [/外[围囲]|世界杯|nba|nfl|英超|五大联赛/gi, '外围赌球'],
+  // 平台 variants
+  [/平[台臺]|app|客户端|下载/gi, '平台'],
+  // 代理 variants
+  [/代[理理?]|代理|招商|诚聘/gi, '代理'],
+  // 投资 variants
+  [/投[t资]|理[财財]|理[才?]|理$/gi, '投资'],
+  // 理财产品
+  [/理[财產品]|理$|月化|年化|收益/gi, '理财'],
+  // 优惠券
+  [/优惠卷|[券卷绗]|打折|[折摺?]/gi, '优惠券'],
+  // 色情服务
+  [/服务|[服福]务|特殊服务|全套|半套|援助/gi, '色情服务'],
+  // 赌博
+  [/赌博|[赌][钱貝]|赌[球?]|博彩|体彩|福彩/gi, '赌博'],
+  // 色情直播
+  [/直播|[色?s]播|[色s]主|[色s]播|[lLi]ive|[Ll]ⅰve/gi, '色情直播'],
+  [/主播|房间|破解版|永久版/gi, '色情直播'],
+];
+
+// ============================================
+// Keyboard Mashing (乱码) Detection
+// ============================================
+
+// Chinese character keyboard adjacent detection
+const CHINESE_KEYBOARD_ADJACENT: Record<string, string[]> = {
+  'q': ['1', 'w', 'a'], 'w': ['q', 'e', 's', '2'], 'e': ['w', 'r', 'd', '3'],
+  'r': ['e', 't', 'f', '4'], 't': ['r', 'y', 'g', '5'], 'y': ['t', 'u', 'h', '6'],
+  'u': ['y', 'i', 'j', '7'], 'i': ['u', 'o', 'k', '8'], 'o': ['i', 'p', 'l', '9'],
+  'p': ['o', '0', [';', 'l']],
+  'a': ['q', 'w', 's', 'z'], 's': ['a', 'd', 'x', 'z', 'w', 'e'],
+  'd': ['s', 'f', 'c', 'x', 'e', 'r'], 'f': ['d', 'g', 'v', 'c', 'r', 't'],
+  'g': ['f', 'h', 'b', 'v', 't', 'y'], 'h': ['g', 'j', 'n', 'b', 'y', 'u'],
+  'j': ['h', 'k', 'm', 'n', 'u', 'i'], 'k': ['j', 'l', 'm', 'i', 'o'],
+  'l': ['k', 'o', 'p', [';', '[']],
+  'z': ['a', 's', 'x'], 'x': ['z', 'c', 'd', 's'], 'c': ['x', 'v', 'f', 'd'],
+  'v': ['c', 'b', 'g', 'f'], 'b': ['v', 'n', 'h', 'g'], 'n': ['b', 'm', 'j', 'h'],
+  'm': ['n', 'j', 'k']
+};
+
+// Detect if a sequence of characters is likely keyboard mashing
+function detectKeyboardMashing(text: string): { isGibberish: boolean; score: number } {
+  // Only check text that's mostly letters
+  const letterOnly = text.replace(/[^a-zA-Z]/g, '');
+  if (letterOnly.length < 5) return { isGibberish: false, score: 0 };
+
+  let gibberishScore = 0;
+  const lower = text.toLowerCase();
+
+  // Pattern 1: Consecutive same hand fingers (qwerty keyboard)
+  const sameHandPatterns = [
+    /asdf/g, /sdfg/g, /dfgh/g, /fghj/g, /ghjk/g,
+    /qwer/g, /wert/g, /erty/g, /rtyu/g, /tyui/g,
+    /zxcv/g, /xcvb/g, /cvbn/g,
+    /poiuy/g, /oiuyt/g, /iuytr/g, /uytre/g, /ytrew/g,
+    /1234/g, /2345/g, /3456/g, /4567/g, /5678/g, /6789/g, /7890/g,
+    /qaz/g, /wsx/g, /edc/g, /rfv/g, /tgb/g, /yhn/g, /ujm/g,
+    /1qaz/g, /2wsx/g, /3edc/g, /4rfv/g, /5tgb/g, /6yhn/g, /7ujm/g, /8ikl/g, /9ol/g, /0p;/
+  ];
+
+  for (const pattern of sameHandPatterns) {
+    const matches = (lower.match(pattern) || []).length;
+    if (matches > 0) {
+      gibberishScore += matches * 15;
+    }
+  }
+
+  // Pattern 2: Alternating hands (looks like typing without looking)
+  const altHandPatterns = [
+    /[qaz]/g, /[wsx]/g, /[edc]/g, // left hand only
+    /[poi]/g, /[lki]/g, /[jhu]/g  // right hand only
+  ];
+
+  let consecutiveSameHand = 0;
+  let consecutiveAltHand = 0;
+  let maxConsecutiveSameHand = 0;
+  let maxConsecutiveAltHand = 0;
+
+  for (let i = 0; i < lower.length - 2; i++) {
+    const c1 = lower[i];
+    const c2 = lower[i + 1];
+
+    if ('qazwsxedcrfvtgbyhnujmikolp'.includes(c1) && 'qazwsxedcrfvtgbyhnujmikolp'.includes(c2)) {
+      const leftHand = 'qazwsxedcrfvtgbyhn'.split('');
+      const isLeft1 = leftHand.includes(c1);
+      const isLeft2 = leftHand.includes(c2);
+
+      if (isLeft1 === isLeft2) {
+        consecutiveSameHand++;
+        consecutiveAltHand = 0;
+        maxConsecutiveSameHand = Math.max(maxConsecutiveSameHand, consecutiveSameHand);
+      } else {
+        consecutiveAltHand++;
+        consecutiveSameHand = 0;
+        maxConsecutiveAltHand = Math.max(maxConsecutiveAltHand, consecutiveAltHand);
+      }
+    }
+  }
+
+  if (maxConsecutiveSameHand >= 4) {
+    gibberishScore += maxConsecutiveSameHand * 10;
+  }
+
+  // Pattern 3: High ratio of improbable letter combinations
+  const improbableCombos = /[jqxz]{2,}|[xzc]{3,}/gi;
+  const improbableMatches = (lower.match(improbableCombos) || []).join('').length;
+  if (improbableMatches > 0) {
+    gibberishScore += improbableMatches * 5;
+  }
+
+  // Pattern 4: Random uppercase/lowercase alternation (like fHyUjKoL)
+  const upperLowerAlt = text.match(/[a-z][A-Z][a-z][A-Z]/g);
+  if (upperLowerAlt && upperLowerAlt.length >= 2) {
+    gibberishScore += upperLowerAlt.length * 10;
+  }
+
+  // Pattern 5: Gibberish words (common mashing patterns)
+  const gibberishWords = [
+    'asdf', 'sdfg', 'dfgh', 'fghj', 'ghjk', 'hjkl',
+    'qwerty', 'werty', 'ertyu', 'ertyui', 'rtyui', 'tyuio', 'yuiop',
+    'zxcv', 'xcvb', 'cvbn', 'vbnm', 'bnmk',
+    'qazwsx', 'wsxedc', 'edcrfv', 'rfvtgb', 'tgbyhn', 'yhnuj', 'ujmik', 'mikol',
+    '1234qwer', 'qwer1234', 'asdf1234', '1234asdf',
+    'zxcvbn', 'mnbvcx', 'poiuyt', 'ytrewq',
+    'fgthyj', 'hyujmk', 'jukmlo', 'plokmj',
+    'nhybv', 'bgtfc', 'cxdzs', 'zasxd', 'esdxc'
+  ];
+
+  const lowerNoSpaces = lower.replace(/\s/g, '');
+  for (const gib of gibberishWords) {
+    if (lowerNoSpaces.includes(gib)) {
+      gibberishScore += gib.length * 8;
+    }
+  }
+
+  // Pattern 6: For Chinese - detect random pinyin-like combinations
+  const pinyinLikeGibberish = /[aeiouy]{4,}[bcdfghjklmnpqrstvwxz]{4,}/gi;
+  const pinyinMatches = (lower.match(pinyinLikeGibberish) || []).length;
+  if (pinyinMatches > 0) {
+    gibberishScore += pinyinMatches * 15;
+  }
+
+  // Threshold: if score is high relative to text length
+  const normalizedScore = (gibberishScore / Math.max(letterOnly.length, 1)) * 100;
+
+  return {
+    isGibberish: normalizedScore > 50 || gibberishScore > 40,
+    score: Math.min(100, gibberishScore)
+  };
+}
+
+// ============================================
 // Spam keywords that indicate advertisement or low-quality content
+// ============================================
 const SPAM_KEYWORDS = [
   // English spam indicators
   'buy now', 'click here', 'free money', 'make money fast', 'earn extra cash',
@@ -59,11 +336,16 @@ const SPAM_KEYWORDS = [
   '加微信', '加QQ', '联系方式', '手机号', '微信号',
   '赚钱', '理财', '投资', '分红', '返利',
   '赌博', '彩票', '赌球', '博彩',
+  '色情', '约炮', '援交', '上门服务', '特殊服务',
 
   // Additional spam patterns
   '代做', '代写', 'essay', 'paper', 'assignment',
   '外包', '接单', '服务', '帮你', '帮做',
   'vip', '会员', '内部', '特殊渠道',
+
+  // More patterns that indicate low-quality or spam content
+  '点击此处', '立即购买', '限时优惠', '全场包邮',
+  '联系我', '加我', '私聊', '私信', '企鹅', 'q群',
 
   // URLs and external links patterns (added points but not auto-block)
   'http://', 'https://', 'www.', '.com/', '.cn/', '.net/',
@@ -84,6 +366,8 @@ const SUSPICIOUS_PATTERNS = [
   /[!?]{3,}/g, // Multiple exclamation/question marks
   /https?:\/\/[^\s]+[^\s.,;:!?]/g, // URLs without proper termination
   /[a-z]{30,}/gi, // Too many lowercase letters without spaces (looks like spam)
+  /^[a-zA-Z]{20,}$/g, // Single long word without spaces (like "asdfghjklqwertyuiop")
+  /(.+)\1{3,}/g, // Repeated substrings (like "testtesttest")
 ];
 
 // Flooding detection: recent content hashes by user
@@ -188,6 +472,26 @@ interface RateLimitEntry {
 }
 
 /**
+ * Normalize leet speak to detect substitutions
+ */
+function normalizeLeetSpeak(text: string): string {
+  let normalized = text.toLowerCase();
+  // Common leet substitutions
+  normalized = normalized
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/7/g, 't')
+    .replace(/8/g, 'b')
+    .replace(/@/g, 'a')
+    .replace(/\$/g, 's')
+    .replace(/!/g, 'i');
+  return normalized;
+}
+
+/**
  * Check if content passes moderation
  */
 export function moderateContent(
@@ -199,6 +503,7 @@ export function moderateContent(
   let score = 0;
   const trimmedContent = content.trim();
   const contentHash = simpleHash(content);
+  const lowerContent = content.toLowerCase();
 
   console.log(`[内容审核] 检查${action === 'comment' ? '评论' : '帖子'}，用户: ${userId}，内容长度: ${trimmedContent.length}`);
 
@@ -250,19 +555,78 @@ export function moderateContent(
     score += 10;
   }
 
-  // 5. Check for spam keywords
-  const lowerContent = content.toLowerCase();
-  let spamKeywordFound = false;
-  for (const keyword of SPAM_KEYWORDS) {
-    if (lowerContent.includes(keyword.toLowerCase())) {
-      flags.push('advertisement');
-      score += 30;
-      spamKeywordFound = true;
+  // 5. Use glin-profanity library for ML-powered profanity detection
+  try {
+    const glinResult = profanityFilter.checkProfanity(content);
+    if (glinResult.containsProfanity) {
+      console.log('[内容审核] glin-profanity检测到脏话:', glinResult.profaneWords);
+      flags.push('profanity');
+      score += 40;
+    }
+  } catch (err) {
+    console.log('[内容审核] glin-profanity检测出错:', err);
+  }
+
+  // 6. Check for Leet Speak (字母替换)
+  let leetDetected = false;
+  for (const [pattern, _] of LEET_PATTERNS) {
+    if (pattern.test(content)) {
+      console.log('[内容审核] 检测到Leet speak替换:', pattern);
+      flags.push('leet_speak');
+      score += 35;
+      leetDetected = true;
       break;
     }
   }
 
-  // 6. Check for profanity
+  // 7. Check normalized leet speak
+  if (!leetDetected) {
+    const normalized = normalizeLeetSpeak(content);
+    for (const [pattern, keyword] of LEET_PATTERNS) {
+      const normalizedPattern = new RegExp(pattern.source, 'gi');
+      if (normalizedPattern.test(normalized)) {
+        console.log('[内容审核] 检测到替换后匹配关键词:', keyword);
+        flags.push('leet_speak');
+        score += 30;
+        leetDetected = true;
+        break;
+      }
+    }
+  }
+
+  // 8. Check for Homophonic spam (谐音词)
+  let homophonicDetected = false;
+  for (const [pattern, keyword] of HOMOPHONIC_PATTERNS) {
+    if (pattern.test(content)) {
+      console.log('[内容审核] 检测到谐音词替换:', keyword, '匹配:', pattern);
+      flags.push('homophonic_spam');
+      score += 40;
+      homophonicDetected = true;
+      break;
+    }
+  }
+
+  // 9. Check for keyboard mashing / gibberish (乱码)
+  const gibberishResult = detectKeyboardMashing(content);
+  if (gibberishResult.isGibberish) {
+    console.log('[内容审核] 检测到键盘乱码，score:', gibberishResult.score);
+    flags.push('gibberish_detected');
+    score += Math.min(50, gibberishResult.score);
+  }
+
+  // 10. Check for spam keywords (skip if leet or homophonic already detected)
+  if (!leetDetected && !homophonicDetected) {
+    for (const keyword of SPAM_KEYWORDS) {
+      if (lowerContent.includes(keyword.toLowerCase())) {
+        console.log('[内容审核] 检测到spam关键词:', keyword);
+        flags.push('advertisement');
+        score += 30;
+        break;
+      }
+    }
+  }
+
+  // 11. Check for profanity
   for (const word of PROFANITY_WORDS) {
     if (lowerContent.includes(word.toLowerCase())) {
       flags.push('profanity');
@@ -271,7 +635,7 @@ export function moderateContent(
     }
   }
 
-  // 7. Check for suspicious patterns
+  // 12. Check for suspicious patterns
   for (const pattern of SUSPICIOUS_PATTERNS) {
     if (pattern.test(content)) {
       flags.push('suspicious_pattern');
@@ -280,26 +644,28 @@ export function moderateContent(
     }
   }
 
-  // 8. Check for excessive special characters
+  // 13. Check for excessive special characters
   const specialCharRatio = (content.match(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g) || []).length / content.length;
   if (specialCharRatio > 0.3) {
     flags.push('special_characters_abuse');
     score += 15;
   }
 
-  // 9. Check for repeated content (copy-paste detection)
+  // 14. Check for repeated content (copy-paste detection)
   if (hasRepeatedContent(content)) {
     flags.push('repeated_content');
     score += 20;
   }
 
-  // 10. Check for external links (can be allowed but scores points)
+  // 15. Check for external links (can be allowed but scores points)
   const linkPattern = /https?:\/\/[^\s]+/g;
   const links = content.match(linkPattern);
   if (links && links.length > 2) {
     flags.push('external_links');
     score += 10;
   }
+
+  console.log('[内容审核] 最终评分 - score:', score, 'flags:', flags);
 
   return {
     isAllowed: score < 50, // Threshold for allowing content
@@ -467,6 +833,12 @@ export function recordAction(userId: string, action: 'post' | 'comment', content
  * Get reason string from flags
  */
 function getReasonFromFlags(flags: ModerationFlag[]): string {
+  if (flags.includes('gibberish_detected')) {
+    return '检测到乱码或键盘乱敲，请输入有意义的文字';
+  }
+  if (flags.includes('leet_speak') || flags.includes('homophonic_spam')) {
+    return '检测到特殊字符替换的垃圾内容，请勿发布广告或垃圾信息';
+  }
   if (flags.includes('spam_keywords') || flags.includes('advertisement')) {
     return '内容包含广告或垃圾信息';
   }

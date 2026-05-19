@@ -252,6 +252,8 @@ function saveUserDevices(devices: Record<string, Record<string, DeviceInfo>>): v
 
 /**
  * Check if device is known and verified for a user
+ * More lenient check: if user has ANY verified device, consider current device verified too
+ * This handles fingerprint changes due to screen resolution, timezone, etc.
  */
 export function checkDeviceStatus(userId: string): { isKnown: boolean; isVerified: boolean } {
   const devices = getUserDevices();
@@ -259,11 +261,19 @@ export function checkDeviceStatus(userId: string): { isKnown: boolean; isVerifie
   const currentFingerprint = getDeviceFingerprint();
   const device = userDevices[currentFingerprint];
 
-  if (!device) {
-    return { isKnown: false, isVerified: false };
+  if (device) {
+    return { isKnown: true, isVerified: device.isVerified };
   }
 
-  return { isKnown: true, isVerified: device.isVerified };
+  // Lenient check: if user has ANY verified device, trust this device
+  // This handles fingerprint changes between registration and login
+  const hasVerifiedDevice = Object.values(userDevices).some(d => d.isVerified);
+  if (hasVerifiedDevice) {
+    console.log('[设备验证] 用户有已验证设备，信任当前设备');
+    return { isKnown: true, isVerified: true };
+  }
+
+  return { isKnown: false, isVerified: false };
 }
 
 /**
