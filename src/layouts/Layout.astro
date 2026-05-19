@@ -13,7 +13,7 @@ interface Props {
   image?: string;
   type?: 'website' | 'article';
   canonicalUrl?: string;
-  jsonLd?: object;
+  jsonLd?: object | object[];
   locale?: Locale;
 }
 
@@ -84,8 +84,10 @@ function getAlternatePath(loc: Locale): string {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
 
-    <!-- Schema.org JSON-LD -->
-    {jsonLd && (
+    <!-- Schema.org JSON-LD (page-specific) -->
+    {Array.isArray(jsonLd) ? jsonLd.map(s => (
+      <script type="application/ld+json" set:html={JSON.stringify(s)} />
+    )) : jsonLd && (
       <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     )}
 

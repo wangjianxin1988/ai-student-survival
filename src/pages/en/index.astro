@@ -17,10 +17,10 @@ const jsonLd = {
   "@type": "WebSite",
   "name": translate(locale, 'site.name'),
   "description": translate(locale, 'site.description'),
-  "url": "https://ai-student-survival.example.com",
+  "url": "https://mi-to-ai.com/en",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://ai-student-survival.example.com/en/tools?q={search_term_string}",
+    "target": "https://mi-to-ai.com/en/tools?q={search_term_string}",
     "query-input": "required name=search_term_string"
   },
   "hasOfferCatalog": {
@@ -28,6 +28,92 @@ const jsonLd = {
     "name": "AI Tools for Students",
     "itemListElement": []
   }
+};
+
+// Homepage FAQPage Schema for GEO
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What AI tools are available for international students?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This platform provides a comprehensive database of 500+ AI tools including GPT-4, Claude, Midjourney, and many others, specifically curated for international students with information about pricing, payment methods, China accessibility, and academic use cases."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can students in China access Western AI tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Students in China can access Western AI tools through virtual cards (like Depax, AssistCard), gift cards, web-based tools, and specific China-friendly payment solutions with step-by-step guides."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What university policies should international students know about AI tool usage?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "University policies on AI tools vary by institution. Our policy database covers 200+ university AI guidelines, including restrictions on ChatGPT usage, academic integrity requirements, and approved tool lists."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I choose the right AI tool for my academic needs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our platform provides detailed comparisons of AI tools across categories including writing, research, coding, image generation, and language learning with pricing, features, China accessibility ratings, and student reviews."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What payment methods work for international students subscribing to AI tools?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Payment methods include international credit cards, virtual cards (Depax, Wenjin virtual card), Alipay/WeChat Pay with foreign card linking, cryptocurrency, and region-specific gift cards tested by real international students."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are AI tools allowed in academic work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Policies vary by university and country. Many universities allow AI as a learning aid but require disclosure. Some prohibit it for exams or graded assignments. Our database covers specific guidelines for 200+ institutions worldwide."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What AI tools work without credit card verification?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Free AI tools without credit card requirement include Claude (free tier), Copilot (free with Microsoft account), Gemini, Poe, and various open-source models. Our tools database filters for free-accessibility and China-friendly options."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can students share and discover AI tool recommendations?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This platform includes a community section where students can share tool reviews, survival guides, ask questions, and discover recommendations from fellow international students facing similar challenges."
+      }
+    }
+  ]
+};
+
+// BreadcrumbList Schema
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://mi-to-ai.com/en"
+    }
+  ]
 };
 
 // Stats for display
@@ -112,7 +198,7 @@ const footerLinks = {
   title={translate(locale, 'site.name')}
   description={translate(locale, 'site.description')}
   type="website"
-  jsonLd={jsonLd}
+  jsonLd={[jsonLd, faqSchema, breadcrumbSchema]}
   locale={locale}
 >
   <!-- Hero Section -->
