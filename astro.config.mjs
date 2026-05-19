@@ -4,7 +4,7 @@ import tailwind from '@astrojs/tailwind';
 import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
-  site: 'https://ai-student-survival.pages.dev',
+  site: 'https://mi-to-ai.com',
   output: 'hybrid',
   adapter: cloudflare({
     platformProxy: {

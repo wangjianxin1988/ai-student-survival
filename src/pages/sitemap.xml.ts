@@ -3,7 +3,7 @@ import type { APIRoute } from 'astro';
 // This endpoint must be rendered at runtime (not prerendered)
 export const prerender = false;
 
-const siteUrl = 'https://ai-student-survival.pages.dev';
+const siteUrl = 'https://mi-to-ai.com';
 
 // All static page routes
 const staticRoutes = [
