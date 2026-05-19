@@ -86,3 +86,17 @@ coverage/
 
 # ESLint cache
 .eslintcache
+
+# npm lock file (pnpm uses pnpm-lock.yaml)
+package-lock.json
+
+# Debug & test scripts (do not commit)
+debug_ui.cjs
+final-verification.cjs
+quick-questions-check.cjs
+test-auth.html
+ISSUE_ANALYSIS.md
+P3_DESIGN.md
+
+# Astro local settings
+.astro/settings.json

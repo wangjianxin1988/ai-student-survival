@@ -108,12 +108,29 @@ const contactInfo = {
   email: 'support@ai-student-survival.com',
   wechat: 'AIStudentHelper',
 };
+
+// Build FAQPage Schema for structured data
+const faqPageSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqCategories.flatMap(category =>
+    category.questions.map(q => ({
+      "@type": "Question",
+      "name": q.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": q.a
+      }
+    }))
+  )
+};
 ---
 
 <Layout
   title={translate(locale, 'nav.faq')}
   description={translate(locale, 'faq.description')}
   locale={locale}
+  jsonLd={faqPageSchema}
 >
   <div class="bg-gradient-to-br from-primary-50 to-secondary-50 py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1733,6 +1733,33 @@ const jsonLd = {
   type="article"
   jsonLd={jsonLd}
 >
+
+  <!-- BreadcrumbList Schema -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "首页",
+        "item": Astro.site?.toString() || "https://ai-student-survival.pages.dev"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "AI工具库",
+        "item": `${Astro.site?.toString() || "https://ai-student-survival.pages.dev"}/tools`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": tool.name,
+        "item": Astro.url.toString()
+      }
+    ]
+  })} />
+
   <!-- Breadcrumb -->
   <div class="bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
