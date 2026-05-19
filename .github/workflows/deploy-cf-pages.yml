@@ -21,17 +21,14 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@9 --activate
-
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Run lint
-        run: pnpm lint || true
+        run: npm run lint || true
 
       - name: Build
-        run: pnpm build
+        run: npm run build
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1.5.0
@@ -54,14 +51,11 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install pnpm
-        run: corepack enable && corepack prepare pnpm@9 --activate
-
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Type check
-        run: pnpm check || true
+        run: npm run check || true
 
       - name: Build
-        run: pnpm build
+        run: npm run build
