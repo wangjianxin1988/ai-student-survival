@@ -9,6 +9,7 @@ export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey &&
   supabaseAnonKey !== 'your-anon-key');
 
 // Create client with timeout configuration
+// realtime is disabled because Cloudflare Workers don't support WebSocket connections during build
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
@@ -20,6 +21,11 @@ export const supabase = isSupabaseConfigured
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
           return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
+        },
+      },
+      realtime: {
+        params: {
+          events: [], // Disable realtime events to avoid WebSocket issues in Workers
         },
       },
     })

@@ -20,6 +20,7 @@ export default defineConfig({
   vite: {
     ssr: {
       noExternal: ['@supabase/supabase-js'],
+      external: ['ws'],
     },
     resolve: {
       dedupe: ['react', 'react-dom'],
