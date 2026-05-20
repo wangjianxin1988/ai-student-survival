@@ -109,49 +109,36 @@ function getPolicyBadgeBg(policy: string | null) {
   }
 }
 
-// FAQ for SEO
+// FAQ for SEO (passed to Layout as faqItems prop)
 const faqItems = [
   {
-    "@type": "Question",
-    "name": locale === 'en' ? "Which US universities allow ChatGPT?" : "哪些美国大学允许使用ChatGPT？",
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": locale === 'en'
-        ? "MIT, Stanford, Harvard, Berkeley, Cornell and most other top US universities allow students to use ChatGPT under appropriate circumstances, but students must comply with course-specific policies and academic integrity principles."
-        : "MIT、Stanford、Harvard、Berkeley、Cornell等大多数美国顶尖大学都允许学生在适当情况下使用ChatGPT，但需要遵守各课程的具体规定和学术诚信原则。"
-    }
+    question: locale === 'en' ? "Which US universities allow ChatGPT?" : "哪些美国大学允许使用ChatGPT？",
+    answer: locale === 'en'
+      ? "MIT, Stanford, Harvard, Berkeley, Cornell and most other top US universities allow students to use ChatGPT under appropriate circumstances, but students must comply with course-specific policies and academic integrity principles."
+      : "MIT、Stanford、Harvard、Berkeley、Cornell等大多数美国顶尖大学都允许学生在适当情况下使用ChatGPT，但需要遵守各课程的具体规定和学术诚信原则。"
   },
   {
-    "@type": "Question",
-    "name": locale === 'en' ? "What is the UK university policy on AI tools?" : "英国大学对AI工具的政策是什么？",
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": locale === 'en'
-        ? "UK university policies vary. Cambridge and Imperial allow limited use of AI tools with emphasis on critical thinking; Oxford prohibits students from using generative AI for academic work. Please check specific university policy pages for details."
-        : "英国大学政策不一。Cambridge、Imperial允许有限度使用AI工具，强调批判性思维；Oxford则禁止学生使用生成式AI工具完成学术作业。请查看具体大学的政策页面了解详情。"
-    }
+    question: locale === 'en' ? "What is the UK university policy on AI tools?" : "英国大学对AI工具的政策是什么？",
+    answer: locale === 'en'
+      ? "UK university policies vary. Cambridge and Imperial allow limited use of AI tools with emphasis on critical thinking; Oxford prohibits students from using generative AI for academic work. Please check specific university policy pages for details."
+      : "英国大学政策不一。Cambridge、Imperial允许有限度使用AI工具，强调批判性思维；Oxford则禁止学生使用生成式AI工具完成学术作业。请查看具体大学的政策页面了解详情。"
   },
   {
-    "@type": "Question",
-    "name": locale === 'en' ? "What should I pay attention to when using AI tools?" : "使用AI工具需要注意什么？",
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": locale === 'en'
-        ? "1. Understand and comply with your school's specific policies 2. Clearly disclose the use of AI-generated content 3. Maintain academic integrity and be able to explain AI-assisted work 4. Critically evaluate AI output results"
-        : "1. 了解并遵守学校的具体政策 2. 明确标注AI生成内容的使用 3. 保持学术诚信，理解并能解释AI辅助完成的工作 4. 批判性评估AI输出结果"
-    }
+    question: locale === 'en' ? "What should I pay attention to when using AI tools?" : "使用AI工具需要注意什么？",
+    answer: locale === 'en'
+      ? "1. Understand and comply with your school's specific policies 2. Clearly disclose the use of AI-generated content 3. Maintain academic integrity and be able to explain AI-assisted work 4. Critically evaluate AI output results"
+      : "1. 了解并遵守学校的具体政策 2. 明确标注AI生成内容的使用 3. 保持学术诚信，理解并能解释AI辅助完成的工作 4. 批判性评估AI输出结果"
   }
 ];
 
 const pageJsonLd = {
   "@context": "https://schema.org",
-  "@type": ["CollectionPage", "FAQPage"],
+  "@type": "CollectionPage",
   "name": locale === 'en' ? 'University AI Policy Database' : '海外大学AI政策数据库',
   "description": locale === 'en'
     ? `Comprehensive database of AI usage policies from ${totalCount} universities worldwide`
     : `全面收录${totalCount}所海外大学AI使用政策`,
-  "url": "https://ai-student-survival.example.com/policies",
-  "mainEntity": faqItems
+  "url": "https://ai-student-survival.example.com/policies"
 };
 
 // Static tool data for recommendations
@@ -168,6 +155,7 @@ const allTools = [
     ? `Comprehensive database of AI usage policies from ${totalCount} universities worldwide`
     : `全面收录${totalCount}所海外大学AI使用政策的数据库`}
   jsonLd={pageJsonLd}
+  faqItems={faqItems}
 >
   <!-- Header -->
   <div class="bg-gradient-to-br from-green-600 to-teal-600 text-white">

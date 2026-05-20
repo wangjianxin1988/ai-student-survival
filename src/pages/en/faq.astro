@@ -104,6 +104,14 @@ const faqCategories = [
   },
 ];
 
+// Build faqItems array for Layout JSON-LD injection
+const faqItems = faqCategories.flatMap(category =>
+  category.questions.map(q => ({
+    question: q.q,
+    answer: q.a
+  }))
+);
+
 // Contact info
 const contactInfo = {
   email: 'support@ai-student-survival.com',
@@ -115,6 +123,7 @@ const contactInfo = {
   title={translate(locale, 'nav.faq')}
   description={translate(locale, 'faq.description')}
   locale={locale}
+  faqItems={faqItems}
 >
   <div class="bg-gradient-to-br from-primary-50 to-secondary-50 py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

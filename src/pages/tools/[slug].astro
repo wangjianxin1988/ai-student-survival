@@ -1677,53 +1677,78 @@ if (!tool) {
   return Astro.redirect('/tools');
 }
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": ["Product", "SoftwareApplication"],
-  "name": tool.name,
-  "description": tool.description,
-  "applicationCategory": "BusinessApplication",
-  "operatingSystem": "Web",
-  "url": tool.url,
-  "image": tool.imageUrl,
-  "brand": {
-    "@type": "Brand",
-    "name": tool.name
-  },
-  "offers": {
-    "@type": "Offer",
-    "price": tool.priceDetail.monthly?.toString() || "0",
-    "priceCurrency": tool.priceDetail.currency,
-    "availability": "https://schema.org/InStock",
-    "priceType": "starting from"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": tool.rating.toString(),
-    "reviewCount": tool.ratingCount.toString(),
-    "ratingExplanation": `${tool.rating} out of 5 stars based on ${tool.ratingCount} reviews`
-  },
-  "featureList": tool.features.join(', '),
-  "keywords": tool.tags.join(', '),
-  "category": tool.category,
-  "additionalProperty": [
-    {
-      "@type": "PropertyValue",
-      "name": "easeOfUse",
-      "value": tool.dimensions.easeOfUse.toString()
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": ["Product", "SoftwareApplication"],
+    "name": tool.name,
+    "description": tool.description,
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Web",
+    "url": tool.url,
+    "image": tool.imageUrl,
+    "brand": {
+      "@type": "Brand",
+      "name": tool.name
     },
-    {
-      "@type": "PropertyValue",
-      "name": "features",
-      "value": tool.dimensions.features.toString()
+    "offers": {
+      "@type": "Offer",
+      "price": tool.priceDetail.monthly?.toString() || "0",
+      "priceCurrency": tool.priceDetail.currency,
+      "availability": "https://schema.org/InStock",
+      "priceType": "starting from"
     },
-    {
-      "@type": "PropertyValue",
-      "name": "value",
-      "value": tool.dimensions.value.toString()
-    }
-  ]
-};
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": tool.rating.toString(),
+      "reviewCount": tool.ratingCount.toString(),
+      "ratingExplanation": `${tool.rating} out of 5 stars based on ${tool.ratingCount} reviews`
+    },
+    "featureList": tool.features.join(', '),
+    "keywords": tool.tags.join(', '),
+    "category": tool.category,
+    "additionalProperty": [
+      {
+        "@type": "PropertyValue",
+        "name": "easeOfUse",
+        "value": tool.dimensions.easeOfUse.toString()
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "features",
+        "value": tool.dimensions.features.toString()
+      },
+      {
+        "@type": "PropertyValue",
+        "name": "value",
+        "value": tool.dimensions.value.toString()
+      }
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": `${tool.name} 深度评测`,
+    "description": tool.description,
+    "author": {
+      "@type": "Organization",
+      "name": "MI TO AI"
+    },
+    "datePublished": tool.createdAt || "2026-05-01",
+    "dateModified": tool.updatedAt || new Date().toISOString().split('T')[0],
+    "publisher": {
+      "@type": "Organization",
+      "name": "MI TO AI留学生存指南",
+      "url": "https://mi-to-ai.com"
+    },
+    "about": {
+      "@type": "Product",
+      "name": tool.name,
+      "description": tool.description
+    },
+    "image": tool.imageUrl
+  }
+];
 ---
 
 <Layout
@@ -1732,33 +1757,12 @@ const jsonLd = {
   image={tool.imageUrl}
   type="article"
   jsonLd={jsonLd}
+  breadcrumbs={[
+    { name: '首页', href: '/' },
+    { name: 'AI工具库', href: '/tools' },
+    { name: tool.name }
+  ]}
 >
-
-  <!-- BreadcrumbList Schema -->
-  <script type="application/ld+json" set:html={JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "首页",
-        "item": Astro.site?.toString() || "https://ai-student-survival.pages.dev"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "AI工具库",
-        "item": `${Astro.site?.toString() || "https://ai-student-survival.pages.dev"}/tools`
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": tool.name,
-        "item": Astro.url.toString()
-      }
-    ]
-  })} />
 
   <!-- Breadcrumb -->
   <div class="bg-white border-b border-gray-200">
