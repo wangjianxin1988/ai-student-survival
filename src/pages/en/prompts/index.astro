@@ -32,7 +32,7 @@ const toolNames: Record<string, string> = {
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": ["ItemList", "FAQPage"],
+  "@type": "ItemList",
   "name": "AI Prompt Template Library for International Students",
   "description": "Curated AI prompt templates for international students covering applications, thesis, job search, daily communication and more",
   "numberOfItems": promptTemplates.length,
@@ -44,12 +44,37 @@ const jsonLd = {
     "genre": template.category,
   })),
 };
+
+// FAQ items for Layout JSON-LD injection
+const faqItems = [
+  {
+    question: "Are these Prompt templates free to use?",
+    answer: "Yes, all Prompt templates are completely free to use. You can copy them with one click and use them directly, or customize them according to your personal needs."
+  },
+  {
+    question: "Which AI tools do these Prompt templates support?",
+    answer: "Our templates cover mainstream AI tools including ChatGPT, Claude, Gemini, Kimi, and more. The detail page will indicate which tools are recommended."
+  },
+  {
+    question: "How do I choose the right Prompt template for my needs?",
+    answer: "We recommend filtering by scenario: use Application for applications, Thesis for academic papers, Job for career, Daily for everyday use, and Research for research purposes. You can also use the search function to find relevant templates."
+  },
+  {
+    question: "Can I customize Prompt templates?",
+    answer: "Of course, all templates are for reference only. You can modify placeholders or adjust instructions after copying to achieve better results for your specific needs."
+  },
+  {
+    question: "How can I improve the effectiveness of Prompt templates?",
+    answer: "Suggestions: 1) Continuously optimize your prompts based on AI output 2) Add more background information relevant to your specific scenario 3) Critically evaluate AI output results 4) Use the recommended tools for each template for best results."
+  }
+];
 ---
 
 <Layout
   title={translate(locale, 'prompts.title')}
   description={translate(locale, 'prompts.description')}
   jsonLd={jsonLd}
+  faqItems={faqItems}
   locale={locale}
 >
   <!-- Header -->

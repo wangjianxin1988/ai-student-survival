@@ -519,12 +519,36 @@ const jsonLd = {
     "aggregateRating": { "@type": "AggregateRating", "ratingValue": tool.rating.toString(), "reviewCount": tool.ratingCount.toString() }
   }))
 };
+const faqItems = [
+  {
+    question: "Which AI tools are free for international students?",
+    answer: "Most AI tools offer free versions, including ChatGPT (GPT-3.5), Claude (free tier), Gemini, Kimi, Qwen, and more. Paid versions typically offer stronger model capabilities, higher limits, and advanced features."
+  },
+  {
+    question: "What's the difference between ChatGPT Plus and the free version?",
+    answer: "ChatGPT Plus uses GPT-4 model, supports more complex reasoning tasks, has higher usage limits, and can access DALL-E image generation and plugins. The free version uses GPT-3.5 with relatively basic features."
+  },
+  {
+    question: "How can international students access AI tools from China?",
+    answer: "Options for accessing AI tools from China include: 1) Using local alternatives like Kimi, Qwen, or Wenxin Yige 2) Using school-provided academic ChatGPT/Claude accounts 3) Accessing international versions via VPN."
+  },
+  {
+    question: "Does GitHub Copilot offer student discounts?",
+    answer: "Yes, GitHub Education offers free education verification. Verified students and teachers can use GitHub Copilot for free. Apply through the GitHub Education page to claim your academic benefit."
+  },
+  {
+    question: "What should international students know about AI tool privacy policies?",
+    answer: "When using AI tools: 1) Avoid entering personal private information or unpublished academic work 2) Sensitive data may be used for model training 3) For commercial use, review the specific tool's privacy terms 4) For academic use, follow your school's AI policy guidelines."
+  }
+];
+
 ---
 
 <Layout
   title={translate(locale, 'tools.title')}
   description={translate(locale, 'tools.description')}
   jsonLd={jsonLd}
+  faqItems={faqItems}
   locale={locale}
 >
   <!-- Header -->
