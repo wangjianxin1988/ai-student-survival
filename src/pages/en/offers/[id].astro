@@ -13,6 +13,11 @@ const locale: Locale = 'en';
   title={translate(locale, 'offers.detail.title')}
   description={translate(locale, 'offers.detail.description')}
   locale={locale}
+  breadcrumbs={[
+    { name: 'Home', href: '/en/' },
+    { name: 'Offers', href: '/en/offers' },
+    { name: 'Offer Details' }
+  ]}
 >
   <OfferDetailClient offerId={Astro.params.id} locale={locale} client:only="react" />
 </Layout>

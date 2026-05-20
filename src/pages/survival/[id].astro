@@ -17,6 +17,11 @@ const locale: Locale = getLocaleFromUrl(Astro.url);
 <Layout
   title={locale === 'zh' ? '指南详情' : 'Guide Details'}
   description={locale === 'zh' ? '查看防坑防骗指南详情' : 'View survival guide details'}
+  breadcrumbs={[
+    { name: locale === 'zh' ? '首页' : 'Home', href: locale === 'zh' ? '/' : '/en/' },
+    { name: locale === 'zh' ? '防坑指南' : 'Survival Guides', href: locale === 'zh' ? '/survival' : '/en/survival' },
+    { name: locale === 'zh' ? '指南详情' : 'Guide Details' }
+  ]}
 >
   <SurvivalDetailClient guideId={id} locale={locale} client:only="react" />
 </Layout>

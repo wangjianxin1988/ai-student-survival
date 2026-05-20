@@ -17,6 +17,11 @@ const locale: Locale = 'en';
 <Layout
   title="Guide Details"
   description="View survival guide details"
+  breadcrumbs={[
+    { name: 'Home', href: '/en/' },
+    { name: 'Survival Guides', href: '/en/survival' },
+    { name: 'Guide Details' }
+  ]}
 >
   <SurvivalDetailClient guideId={id} locale={locale} client:only="react" />
 </Layout>

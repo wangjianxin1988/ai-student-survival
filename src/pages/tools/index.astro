@@ -14,6 +14,30 @@ const jsonLd = {
   "description": "Curated AI tools for international students",
 };
 
+// FAQ items for Layout JSON-LD injection
+const faqItems = [
+  {
+    question: "哪些AI工具对留学生是免费的？",
+    answer: "大多数AI工具提供免费版本，包括ChatGPT（GPT-3.5）、Claude（免费版）、Kimi、通义千问等。付费版本通常提供更强的模型能力、更高限量和高级功能。"
+  },
+  {
+    question: "ChatGPT Plus和免费版有什么区别？",
+    answer: "ChatGPT Plus使用GPT-4模型，支持更复杂的推理任务，拥有更高的使用限额，可使用DALL-E图像生成和插件功能。免费版使用GPT-3.5，功能相对基础。"
+  },
+  {
+    question: "留学生如何在国内访问AI工具？",
+    answer: "国内访问AI工具的方案包括：1) 使用国内平替工具如Kimi、通义千问、文心一言 2) 使用学校提供的学术版ChatGPT/Claude账号 3) 通过VPN访问国际版工具。"
+  },
+  {
+    question: "GitHub Copilot对学生有优惠吗？",
+    answer: "是的，GitHub Education提供免费教育认证，通过验证的学生和教师可免费使用GitHub Copilot。申请方式：在GitHub Education页面申请教育认证即可。"
+  },
+  {
+    question: "AI工具的隐私政策是怎样的？留学生需要注意什么？",
+    answer: "使用AI工具时请注意：1) 不要输入个人隐私信息或未发布的学术内容 2) 敏感数据可能用于模型训练 3) 商业用途建议查看具体工具的隐私条款 4) 学术使用请遵守学校的AI政策规定。"
+  }
+];
+
 const translations = {
   title: translate(locale, 'tools.title'),
   description: translate(locale, 'tools.description'),
@@ -47,6 +71,7 @@ const translations = {
   title={translations.title}
   description={translations.description}
   jsonLd={jsonLd}
+  faqItems={faqItems}
   locale={locale}
 >
   <!-- Header -->

@@ -81,7 +81,7 @@ const toolNames: Record<string, string> = {
 
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": ["ItemList", "FAQPage"],
+  "@type": "ItemList",
   "name": "留学生AI Prompt模板库",
   "description": "精选留学生常用的AI提示词模板，覆盖申请、论文、工作、日常等多个场景，帮助你快速上手AI工具",
   "numberOfItems": filteredTemplates.length,
@@ -93,12 +93,37 @@ const jsonLd = {
     "genre": template.category,
   })),
 };
+
+// FAQ items for Layout JSON-LD injection
+const faqItems = [
+  {
+    question: "这些Prompt模板是免费的吗？",
+    answer: "是的，所有Prompt模板完全免费使用。你可以一键复制并直接使用，也可以根据个人需求进行定制修改。"
+  },
+  {
+    question: "Prompt模板支持哪些AI工具？",
+    answer: "我们的模板覆盖主流AI工具，包括ChatGPT、Claude、Gemini、Kimi等。详情页会标注推荐使用的工具。"
+  },
+  {
+    question: "如何选择适合自己的Prompt模板？",
+    answer: "建议按场景分类筛选：申请类用Application、论文用Thesis、工作用Job、日常用Daily、研究用Research。也可以通过搜索功能找到相关模板。"
+  },
+  {
+    question: "可以自定义Prompt模板吗？",
+    answer: "当然可以，所有模板仅供参考。你可以在复制后根据自己的具体需求修改占位符或调整指令，以获得最佳效果。"
+  },
+  {
+    question: "如何提高Prompt的使用效果？",
+    answer: "建议：1) 根据AI输出持续优化提示词 2) 结合具体场景添加更多背景信息 3) 批判性评估AI输出结果 4) 参考模板推荐的工具使用效果更佳。"
+  }
+];
 ---
 
 <Layout
   title={translate(locale, 'prompts.title')}
   description={translate(locale, 'prompts.description')}
   jsonLd={jsonLd}
+  faqItems={faqItems}
   locale={locale}
 >
   <!-- Header -->

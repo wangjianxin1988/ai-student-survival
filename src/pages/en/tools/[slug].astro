@@ -1474,6 +1474,11 @@ const jsonLd = [
   image={tool.imageUrl}
   type="article"
   jsonLd={jsonLd}
+  breadcrumbs={[
+    { name: 'Home', href: '/en/' },
+    { name: 'AI Tools', href: '/en/tools' },
+    { name: tool.name }
+  ]}
 >
   <!-- Breadcrumb -->
   <div class="bg-white border-b border-gray-200">

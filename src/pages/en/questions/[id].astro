@@ -12,6 +12,11 @@ if (!id) {
 }
 ---
 
-<Layout title={locale === 'zh' ? '问题详情' : 'Question Details'} locale={locale}>
+<Layout title="Question Details" locale={locale} breadcrumbs={[
+    { name: 'Home', href: '/en/' },
+    { name: 'Q&A Community', href: '/en/questions' },
+    { name: 'Question Details' }
+  ]}
+>
   <QuestionDetailClient questionId={id} locale={locale} client:only="react" />
 </Layout>

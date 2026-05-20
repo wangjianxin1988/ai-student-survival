@@ -131,6 +131,11 @@ const prohibitedToolsList = availableTools.filter(tool => {
   description={`${locale === 'en' ? 'View' : '查看'}${policy.universityName}${locale === 'en' ? "'s AI usage policy" : '的AI使用政策'}`}
   jsonLd={jsonLd}
   locale={locale}
+  breadcrumbs={[
+    { name: locale === 'en' ? 'Home' : '首页', href: locale === 'en' ? '/en/' : '/' },
+    { name: locale === 'en' ? 'University Policies' : '大学政策', href: locale === 'en' ? '/en/policies' : '/policies' },
+    { name: policy.universityName }
+  ]}
 >
   <!-- Breadcrumb -->
   <div class="bg-white border-b border-gray-200">

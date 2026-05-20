@@ -132,6 +132,11 @@ const prohibitedToolsList = availableTools.filter(tool => {
   description={`View ${policy.universityNameEn}'s AI usage policy`}
   jsonLd={jsonLd}
   locale={locale}
+  breadcrumbs={[
+    { name: 'Home', href: '/en/' },
+    { name: 'University Policies', href: '/en/policies' },
+    { name: policy.universityNameEn }
+  ]}
 >
   <!-- Breadcrumb -->
   <div class="bg-white border-b border-gray-200">

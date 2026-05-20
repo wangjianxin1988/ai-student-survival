@@ -7,61 +7,44 @@ import PaymentSolutionsFilter from '@/components/payment/PaymentSolutionsFilter'
 // Get locale from URL
 const locale: Locale = getLocaleFromUrl(Astro.url);
 
-const jsonLd = {
+// FAQ items for Layout JSON-LD injection
+const faqItems = [
+  {
+    question: "留学生如何支付ChatGPT Plus？",
+    answer: "留学生支付ChatGPT Plus的常用方式包括：1) 虚拟卡服务（如Depay、WildCard）2) 礼品卡购买 3) 地区定价订阅（如土耳其区）4) 通过第三方平台代购。"
+  },
+  {
+    question: "什么是虚拟卡？留学生可以用吗？",
+    answer: "虚拟卡是一种预付费卡片，没有实体卡片但可以绑定到各种支付平台。留学生可以使用虚拟卡支付大部分海外AI工具服务，无需本地银行卡。常用的虚拟卡服务包括Depay和WildCard。"
+  },
+  {
+    question: "使用虚拟卡安全吗？",
+    answer: "正规虚拟卡服务是安全的，它们使用加密技术保护用户信息。但建议选择知名服务商，避免使用来路不明的平台。另外，虚拟卡只能用于正规AI服务订阅，不要用于其他用途。"
+  },
+  {
+    question: "如何开通Claude的付费订阅？",
+    answer: "Claude支持礼品卡充值和信用卡支付。留学生可以通过购买Anthropic官方礼品卡或使用虚拟卡（如Depay、WildCard）来完成订阅。详细教程请查看我们的支付解决方案页面。"
+  },
+  {
+    question: "地区定价是什么意思？安全吗？",
+    answer: "地区定价是利用不同国家的汇率和定价差异享受更低价格的方式。如土耳其区ChatGPT Plus约$8-10/月。但需要注意，部分平台可能对此有风险提示或限制，请谨慎使用。"
+  }
+];
+
+const pageJsonLd = {
   "@context": "https://schema.org",
-  "@type": ["CollectionPage", "FAQPage"],
+  "@type": "CollectionPage",
   "name": "留学生AI工具支付解决方案",
   "description": "一站式解决留学生支付AI工具的难题，包括虚拟卡、礼品卡、地区定价等方案，已帮助50000+留学生解决支付问题",
-  "url": "https://ai-student-survival.example.com/payment",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "留学生如何支付ChatGPT Plus？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "留学生支付ChatGPT Plus的常用方式包括：1) 虚拟卡服务（如Depay、WildCard）2) 礼品卡购买 3) 地区定价订阅（如土耳其区）4) 通过第三方平台代购。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "什么是虚拟卡？留学生可以用吗？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "虚拟卡是一种预付费卡片，没有实体卡片但可以绑定到各种支付平台。留学生可以使用虚拟卡支付大部分海外AI工具服务，无需本地银行卡。常用的虚拟卡服务包括Depay和WildCard。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "使用虚拟卡安全吗？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "正规虚拟卡服务是安全的，它们使用加密技术保护用户信息。但建议选择知名服务商，避免使用来路不明的平台。另外，虚拟卡只能用于正规AI服务订阅，不要用于其他用途。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "如何开通Claude的付费订阅？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Claude支持礼品卡充值和信用卡支付。留学生可以通过购买Anthropic官方礼品卡或使用虚拟卡（如Depay、WildCard）来完成订阅。详细教程请查看我们的支付解决方案页面。"
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "地区定价是什么意思？安全吗？",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "地区定价是利用不同国家的汇率和定价差异享受更低价格的方式。如土耳其区ChatGPT Plus约$8-10/月。但需要注意，部分平台可能对此有风险提示或限制，请谨慎使用。"
-      }
-    }
-  ]
+  "url": "https://ai-student-survival.example.com/payment"
 };
 ---
 
 <Layout
   title={translate(locale, 'payment.title')}
   description={translate(locale, 'payment.description')}
-  jsonLd={jsonLd}
+  jsonLd={pageJsonLd}
+  faqItems={faqItems}
   locale={locale}
 >
   <!-- Header -->
