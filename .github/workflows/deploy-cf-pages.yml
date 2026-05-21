@@ -32,9 +32,15 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Deploy to Cloudflare Pages
-        run: wrangler pages deploy dist --project-name=ai-student-survival
+        run: |
+          wrangler pages deploy dist --project-name=ai-student-survival \
+            --var=SUPABASE_URL:${{ secrets.SUPABASE_URL }} \
+            --var=SUPABASE_ANON_KEY:${{ secrets.SUPABASE_ANON_KEY }}
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
