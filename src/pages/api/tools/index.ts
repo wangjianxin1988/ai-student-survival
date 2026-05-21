@@ -128,8 +128,8 @@ export const GET: APIRoute = async ({ url }) => {
   let source: 'supabase' | 'static' = 'static';
 
   try {
-    const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
-    const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = (import.meta.env.SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL) as string;
+    const supabaseKey = (import.meta.env.SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY) as string;
 
     // Only try Supabase if credentials are configured
     if (supabaseUrl && supabaseKey && !supabaseUrl.includes('your-project')) {
