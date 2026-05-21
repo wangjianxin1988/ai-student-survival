@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ChatMessage } from './ChatMessage';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { ChatMessage } from "./ChatMessage";
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
   recommendedTools?: RecommendedTool[];
@@ -17,132 +17,148 @@ interface RecommendedTool {
 }
 
 interface ChatbotProps {
-  locale?: 'zh' | 'en';
+  locale?: "zh" | "en";
   toolsCount?: number;
   policiesCount?: number;
   paymentSolutionsCount?: number;
   promptsCount?: number;
 }
 
-const STORAGE_KEY = 'ai-student-chatbot-messages';
+const STORAGE_KEY = "ai-student-chatbot-messages";
 
 const translations = {
   zh: {
-    title: 'AI助手',
-    placeholder: '问我任何关于AI工具的问题...',
-    welcome: '你好！我是AI助手，可以帮你找到合适的AI工具、了解支付方案、查询大学政策等。有什么可以帮你的？',
+    title: "AI助手",
+    placeholder: "问我任何关于AI工具的问题...",
+    welcome:
+      "你好！我是AI助手，可以帮你找到合适的AI工具、了解支付方案、查询大学政策等。有什么可以帮你的？",
     suggestions: [
-      '推荐一个写作AI工具',
-      '哪个学校允许用ChatGPT？',
-      '没有信用卡怎么订阅ChatGPT？'
+      "推荐一个写作AI工具",
+      "哪个学校允许用ChatGPT？",
+      "没有信用卡怎么订阅ChatGPT？",
     ],
-    send: '发送',
-    thinking: '思考中...',
-    newChat: '新对话',
-    chatHistory: '历史对话',
-    clearHistory: '清空历史',
-    recommendedTools: '推荐工具'
+    send: "发送",
+    thinking: "思考中...",
+    newChat: "新对话",
+    chatHistory: "历史对话",
+    clearHistory: "清空历史",
+    recommendedTools: "推荐工具",
   },
   en: {
-    title: 'AI Assistant',
-    placeholder: 'Ask me anything about AI tools...',
-    welcome: 'Hello! I\'m your AI assistant. I can help you find the right AI tools, understand payment solutions, and check university policies. How can I help you?',
+    title: "AI Assistant",
+    placeholder: "Ask me anything about AI tools...",
+    welcome:
+      "Hello! I'm your AI assistant. I can help you find the right AI tools, understand payment solutions, and check university policies. How can I help you?",
     suggestions: [
-      'Recommend a writing AI tool',
-      'Which universities allow ChatGPT?',
-      'How to subscribe to ChatGPT without credit card?'
+      "Recommend a writing AI tool",
+      "Which universities allow ChatGPT?",
+      "How to subscribe to ChatGPT without credit card?",
     ],
-    send: 'Send',
-    thinking: 'Thinking...',
-    newChat: 'New Chat',
-    chatHistory: 'Chat History',
-    clearHistory: 'Clear History',
-    recommendedTools: 'Recommended Tools'
-  }
+    send: "Send",
+    thinking: "Thinking...",
+    newChat: "New Chat",
+    chatHistory: "Chat History",
+    clearHistory: "Clear History",
+    recommendedTools: "Recommended Tools",
+  },
 };
 
 // Contextual suggestions based on conversation state
 const contextualSuggestions = {
   zh: {
     initial: [
-      '推荐一个写作AI工具',
-      '哪个学校允许用ChatGPT？',
-      '没有信用卡怎么订阅ChatGPT？'
+      "推荐一个写作AI工具",
+      "哪个学校允许用ChatGPT？",
+      "没有信用卡怎么订阅ChatGPT？",
     ],
-    afterToolRecommendation: [
-      '这个工具贵吗？',
-      '有免费版吗？',
-      '怎么订阅？'
-    ],
-    afterPolicyQuestion: [
-      '其他学校呢？',
-      '国内大学允许用吗？',
-      '查询我的学校'
-    ],
-    afterPaymentQuestion: [
-      '虚拟卡安全吗？',
-      '哪个最便宜？',
-      '需要KYC吗？'
-    ]
+    afterToolRecommendation: ["这个工具贵吗？", "有免费版吗？", "怎么订阅？"],
+    afterPolicyQuestion: ["其他学校呢？", "国内大学允许用吗？", "查询我的学校"],
+    afterPaymentQuestion: ["虚拟卡安全吗？", "哪个最便宜？", "需要KYC吗？"],
   },
   en: {
     initial: [
-      'Recommend a writing AI tool',
-      'Which universities allow ChatGPT?',
-      'How to subscribe to ChatGPT without credit card?'
+      "Recommend a writing AI tool",
+      "Which universities allow ChatGPT?",
+      "How to subscribe to ChatGPT without credit card?",
     ],
     afterToolRecommendation: [
-      'Is it expensive?',
-      'Is there a free version?',
-      'How to subscribe?'
+      "Is it expensive?",
+      "Is there a free version?",
+      "How to subscribe?",
     ],
     afterPolicyQuestion: [
-      'What about other schools?',
-      'Do Chinese universities allow it?',
-      'Check my school'
+      "What about other schools?",
+      "Do Chinese universities allow it?",
+      "Check my school",
     ],
     afterPaymentQuestion: [
-      'Is virtual card safe?',
-      'Which is cheapest?',
-      'Need KYC?'
-    ]
-  }
+      "Is virtual card safe?",
+      "Which is cheapest?",
+      "Need KYC?",
+    ],
+  },
 };
 
 // Detect conversation context from messages
-function detectContext(messages: Message[], locale: 'zh' | 'en'): string {
-  if (messages.length <= 1) return 'initial';
+function detectContext(messages: Message[], locale: "zh" | "en"): string {
+  if (messages.length <= 1) return "initial";
 
-  const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
-  if (!lastAssistantMessage) return 'initial';
+  const lastAssistantMessage = [...messages]
+    .reverse()
+    .find((m) => m.role === "assistant");
+  if (!lastAssistantMessage) return "initial";
 
   const content = lastAssistantMessage.content.toLowerCase();
 
-  if (locale === 'zh') {
-    if (content.includes('推荐') || content.includes('工具')) return 'afterToolRecommendation';
-    if (content.includes('学校') || content.includes('大学') || content.includes('政策')) return 'afterPolicyQuestion';
-    if (content.includes('支付') || content.includes('信用卡') || content.includes('订阅') || content.includes('虚拟卡')) return 'afterPaymentQuestion';
+  if (locale === "zh") {
+    if (content.includes("推荐") || content.includes("工具"))
+      return "afterToolRecommendation";
+    if (
+      content.includes("学校") ||
+      content.includes("大学") ||
+      content.includes("政策")
+    )
+      return "afterPolicyQuestion";
+    if (
+      content.includes("支付") ||
+      content.includes("信用卡") ||
+      content.includes("订阅") ||
+      content.includes("虚拟卡")
+    )
+      return "afterPaymentQuestion";
   } else {
-    if (content.includes('recommend') || content.includes('tool')) return 'afterToolRecommendation';
-    if (content.includes('school') || content.includes('university') || content.includes('policy')) return 'afterPolicyQuestion';
-    if (content.includes('pay') || content.includes('credit card') || content.includes('subscribe') || content.includes('virtual card')) return 'afterPaymentQuestion';
+    if (content.includes("recommend") || content.includes("tool"))
+      return "afterToolRecommendation";
+    if (
+      content.includes("school") ||
+      content.includes("university") ||
+      content.includes("policy")
+    )
+      return "afterPolicyQuestion";
+    if (
+      content.includes("pay") ||
+      content.includes("credit card") ||
+      content.includes("subscribe") ||
+      content.includes("virtual card")
+    )
+      return "afterPaymentQuestion";
   }
 
-  return 'initial';
+  return "initial";
 }
 
 export default function Chatbot({
-  locale = 'zh',
+  locale = "zh",
   toolsCount = 35,
   policiesCount = 44,
   paymentSolutionsCount = 6,
-  promptsCount = 20
+  promptsCount = 20,
 }: ChatbotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [displayedContent, setDisplayedContent] = useState('');
+  const [displayedContent, setDisplayedContent] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -174,13 +190,15 @@ export default function Chatbot({
         try {
           const parsed = JSON.parse(stored);
           // Convert stored timestamps back to Date objects
-          const loadedMessages = parsed.map((msg: Message & { timestamp: string }) => ({
-            ...msg,
-            timestamp: new Date(msg.timestamp)
-          }));
+          const loadedMessages = parsed.map(
+            (msg: Message & { timestamp: string }) => ({
+              ...msg,
+              timestamp: new Date(msg.timestamp),
+            }),
+          );
           setMessages(loadedMessages);
         } catch (e) {
-          console.warn('Failed to load chat history:', e);
+          console.warn("Failed to load chat history:", e);
         }
       }
     }
@@ -194,7 +212,7 @@ export default function Chatbot({
         const messagesToStore = messages.slice(-50);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(messagesToStore));
       } catch (e) {
-        console.warn('Failed to save chat history:', e);
+        console.warn("Failed to save chat history:", e);
       }
     }
   }, [messages]);
@@ -204,18 +222,18 @@ export default function Chatbot({
     if (isOpen && messages.length === 0) {
       setMessages([
         {
-          id: 'welcome',
-          role: 'assistant',
+          id: "welcome",
+          role: "assistant",
           content: t.welcome,
-          timestamp: new Date()
-        }
+          timestamp: new Date(),
+        },
       ]);
     }
   }, [isOpen, t.welcome]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, displayedContent]);
 
   // Cleanup streaming interval on unmount
@@ -230,7 +248,7 @@ export default function Chatbot({
   // Typewriter effect for streaming responses
   const streamContent = useCallback((fullContent: string) => {
     setIsStreaming(true);
-    setDisplayedContent('');
+    setDisplayedContent("");
 
     let index = 0;
     const charsPerInterval = 3; // Characters per interval for typing effect
@@ -256,35 +274,35 @@ export default function Chatbot({
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      role: 'user',
+      role: "user",
       content: input.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     const newMessages = [...messages, userMessage];
     setMessages(newMessages);
-    setInput('');
+    setInput("");
     setIsLoading(true);
-    setDisplayedContent('');
+    setDisplayedContent("");
 
     // Build conversation history for context
     const conversationHistory = newMessages
       .slice(-10) // Last 10 messages for context
-      .map(m => ({
-        role: m.role as 'user' | 'assistant',
-        content: m.content
+      .map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
       }));
 
     try {
-      const response = await fetch('/api/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/chatbot", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: input.trim(),
           context: siteContext,
           locale,
-          conversationHistory
-        })
+          conversationHistory,
+        }),
       });
 
       const data = await response.json();
@@ -296,32 +314,33 @@ export default function Chatbot({
         // Create the assistant message with recommended tools
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
-          role: 'assistant',
+          role: "assistant",
           content: data.message,
           timestamp: new Date(),
-          recommendedTools: data.recommendedTools || []
+          recommendedTools: data.recommendedTools || [],
         };
-        setMessages(prev => [...prev, assistantMessage]);
+        setMessages((prev) => [...prev, assistantMessage]);
       } else {
-        throw new Error(data.error?.message || 'Failed to get response');
+        throw new Error(data.error?.message || "Failed to get response");
       }
     } catch (error) {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: locale === 'zh'
-          ? '抱歉，我现在无法回答。请稍后再试。'
-          : 'Sorry, I cannot answer right now. Please try again later.',
-        timestamp: new Date()
+        role: "assistant",
+        content:
+          locale === "zh"
+            ? "抱歉，我现在无法回答。请稍后再试。"
+            : "Sorry, I cannot answer right now. Please try again later.",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -341,17 +360,21 @@ export default function Chatbot({
 
   const startNewChat = () => {
     clearHistory();
-    setMessages([{
-      id: 'welcome',
-      role: 'assistant',
-      content: t.welcome,
-      timestamp: new Date()
-    }]);
+    setMessages([
+      {
+        id: "welcome",
+        role: "assistant",
+        content: t.welcome,
+        timestamp: new Date(),
+      },
+    ]);
   };
 
   // Get current suggestions based on conversation context
   const currentContext = detectContext(messages, locale);
-  const currentSuggestions = suggestions[currentContext as keyof typeof suggestions] || suggestions.initial;
+  const currentSuggestions =
+    suggestions[currentContext as keyof typeof suggestions] ||
+    suggestions.initial;
 
   return (
     <>
@@ -359,20 +382,54 @@ export default function Chatbot({
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 shadow-lg hover:shadow-xl transition-all flex items-center gap-2 ${
-          isOpen ? 'rotate-45' : ''
+          isOpen ? "rotate-45" : ""
         }`}
-        aria-label={isOpen ? (locale === 'zh' ? '关闭聊天' : 'Close Chat') : (locale === 'zh' ? '展开聊天' : 'Expand Chat')}
+        aria-label={
+          isOpen
+            ? locale === "zh"
+              ? "关闭聊天"
+              : "Close Chat"
+            : locale === "zh"
+              ? "展开聊天"
+              : "Expand Chat"
+        }
       >
         <span className="text-white text-sm font-medium">
-          {isOpen ? (locale === 'zh' ? '关闭' : 'Close') : (locale === 'zh' ? '展开' : 'Expand')}
+          {isOpen
+            ? locale === "zh"
+              ? "关闭"
+              : "Close"
+            : locale === "zh"
+              ? "展开"
+              : "Expand"}
         </span>
         {isOpen ? (
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         ) : (
-          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          <svg
+            className="w-5 h-5 text-white"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
+            />
           </svg>
         )}
       </button>
@@ -384,13 +441,25 @@ export default function Chatbot({
           <div className="bg-gradient-to-r from-primary-500 to-secondary-500 px-4 py-3 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                <svg
+                  className="w-6 h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
                 </svg>
               </div>
               <div>
                 <h3 className="text-white font-semibold">{t.title}</h3>
-                <p className="text-white/80 text-xs">{locale === 'zh' ? '在线' : 'Online'}</p>
+                <p className="text-white/80 text-xs">
+                  {locale === "zh" ? "在线" : "Online"}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -399,8 +468,18 @@ export default function Chatbot({
                 className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white"
                 title={t.newChat}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
                 </svg>
               </button>
               <button
@@ -408,8 +487,18 @@ export default function Chatbot({
                 className="p-1.5 rounded-full bg-white/20 hover:bg-white/30 transition-colors text-white"
                 title={t.clearHistory}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
               </button>
             </div>
@@ -419,7 +508,8 @@ export default function Chatbot({
           <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
             {messages.map((msg, index) => {
               // For the last assistant message, show streaming content if streaming
-              const isLastAssistant = msg.role === 'assistant' && index === messages.length - 1;
+              const isLastAssistant =
+                msg.role === "assistant" && index === messages.length - 1;
               const showStreaming = isLastAssistant && isStreaming;
 
               return (
@@ -427,7 +517,7 @@ export default function Chatbot({
                   key={msg.id}
                   message={{
                     ...msg,
-                    content: showStreaming ? displayedContent : msg.content
+                    content: showStreaming ? displayedContent : msg.content,
                   }}
                   locale={locale}
                 />
@@ -438,9 +528,18 @@ export default function Chatbot({
                 <div className="bg-gray-100 rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1">
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <span
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "0ms" }}
+                      />
+                      <span
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "150ms" }}
+                      />
+                      <span
+                        className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                        style={{ animationDelay: "300ms" }}
+                      />
                     </div>
                     <span className="text-xs text-gray-500">{t.thinking}</span>
                   </div>
@@ -454,7 +553,7 @@ export default function Chatbot({
           {messages.length > 1 && !isLoading && !isStreaming && (
             <div className="px-4 pb-2">
               <p className="text-xs text-gray-500 mb-2">
-                {locale === 'zh' ? '继续问：' : 'Continue asking:'}
+                {locale === "zh" ? "继续问：" : "Continue asking:"}
               </p>
               <div className="flex flex-wrap gap-2">
                 {currentSuggestions.slice(0, 3).map((s, i) => (
@@ -473,7 +572,9 @@ export default function Chatbot({
           {/* Initial Suggestions - show only on first message */}
           {messages.length === 1 && !isLoading && (
             <div className="px-4 pb-2">
-              <p className="text-xs text-gray-500 mb-2">{locale === 'zh' ? '试试这样问：' : 'Try asking:'}</p>
+              <p className="text-xs text-gray-500 mb-2">
+                {locale === "zh" ? "试试这样问：" : "Try asking:"}
+              </p>
               <div className="flex flex-wrap gap-2">
                 {currentSuggestions.map((s, i) => (
                   <button
@@ -495,7 +596,7 @@ export default function Chatbot({
                 ref={inputRef}
                 type="text"
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={t.placeholder}
                 className="flex-1 px-4 py-2.5 bg-gray-100 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -507,8 +608,18 @@ export default function Chatbot({
                 aria-label={t.send}
                 className="w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
               >
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                  />
                 </svg>
               </button>
             </div>

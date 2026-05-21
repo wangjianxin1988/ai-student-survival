@@ -4,7 +4,6 @@ import SearchModal from '@/components/common/SearchModal.astro';
 import Chatbot from '@/components/chatbot/Chatbot';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import ReactHeader from '@/components/ReactHeader';
-// import TinaCMSProvider from '@/components/tina/TinaCMSProvider.astro';
 import { type Locale, getLanguageSwitcherData, getAlternateUrl, t as translate, defaultLocale } from '@/i18n';
 
 interface BreadcrumbItem {
@@ -196,8 +195,6 @@ function getAlternatePath(loc: Locale): string {
     </style>
   </head>
   <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
-    <!-- TinaCMS Provider disabled for testing -->
-    <!-- <TinaCMSProvider /> -->
 
     <!-- Language Switcher (Floating) -->
     <div class="lang-switcher">

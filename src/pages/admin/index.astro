@@ -180,28 +180,6 @@ const isDev = import.meta.env.DEV;
           </div>
         </div>
 
-        <!-- TinaCMS Dev Mode Notice -->
-        {isDev && (
-          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 mb-8">
-            <div class="flex items-start gap-4">
-              <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 class="font-semibold text-yellow-900">TinaCMS 开发模式</h3>
-                <p class="text-sm text-yellow-800 mt-1">
-                  当前处于开发模式，可以访问 TinaCMS 内容编辑器。
-                  运行 <code class="bg-yellow-100 px-1 rounded">pnpm run tina</code> 启动 TinaCMS 开发服务器。
-                </p>
-                <a href="/admin/tina" class="inline-flex items-center gap-1 mt-3 text-sm font-medium text-yellow-900 hover:text-yellow-700">
-                  打开内容编辑器 →
-                </a>
-              </div>
-            </div>
-          </div>
-        )}
 
         <!-- Deployment Status -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">

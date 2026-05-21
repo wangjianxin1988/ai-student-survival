@@ -10,10 +10,7 @@
     "check": "astro check",
     "lint": "eslint src --ext .ts,.tsx,.astro",
     "format": "prettier --write \"src/**/*.{ts,tsx,astro,css}\"",
-    "test": "vitest",
-    "tina": "tinacms dev",
-    "tina:build": "tinacms build",
-    "tina:schema": "tinacms schema"
+    "test": "vitest"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
@@ -22,8 +19,6 @@
     "@astrojs/react": "^3.6.0",
     "@astrojs/tailwind": "^5.1.0",
     "@supabase/supabase-js": "^2.45.0",
-    "@tinacms/cli": "^2.3.1",
-    "@tinacms/toolkit": "^1.7.13",
     "@types/leaflet": "^1.9.21",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",

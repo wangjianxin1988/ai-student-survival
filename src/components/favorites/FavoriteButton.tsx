@@ -1,45 +1,53 @@
-import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange } from '@/lib/auth';
-import { getAuthLoginHref } from '@/lib/i18n';
-import { userStatsApi } from '@/lib/userProfile';
+import React, { useState, useEffect } from "react";
+import { getCurrentUser, onAuthStateChange } from "@/lib/auth";
+import { getAuthLoginHref } from "@/lib/i18n";
+import { userStatsApi } from "@/lib/userProfile";
 
 interface FavoriteButtonProps {
-  targetType: 'tool' | 'prompt' | 'policy' | 'payment_solution' | 'question';
+  targetType: "tool" | "prompt" | "policy" | "payment_solution" | "question";
   targetId: string;
-  locale?: 'zh' | 'en';
+  locale?: "zh" | "en";
 }
 
 const translations = {
   zh: {
-    addFavorite: '添加收藏',
-    removeFavorite: '取消收藏',
-    loginRequired: '请先登录',
+    addFavorite: "添加收藏",
+    removeFavorite: "取消收藏",
+    loginRequired: "请先登录",
   },
   en: {
-    addFavorite: 'Add to Favorites',
-    removeFavorite: 'Remove from Favorites',
-    loginRequired: 'Please login first',
+    addFavorite: "Add to Favorites",
+    removeFavorite: "Remove from Favorites",
+    loginRequired: "Please login first",
   },
 };
 
 // Demo mode favorites storage
-const FAVORITES_KEY = 'demo_favorites';
+const FAVORITES_KEY = "demo_favorites";
 
 function getDemoFavorites(): Record<string, string[]> {
-  if (typeof window === 'undefined') return {};
+  if (typeof window === "undefined") return {};
   const stored = localStorage.getItem(FAVORITES_KEY);
   return stored ? JSON.parse(stored) : {};
 }
 
 function saveDemoFavorites(favorites: Record<string, string[]>): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
 }
 
-export default function FavoriteButton({ targetType, targetId, locale = 'zh' }: FavoriteButtonProps) {
+export default function FavoriteButton({
+  targetType,
+  targetId,
+  locale = "zh",
+}: FavoriteButtonProps) {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<{ id: string; email: string; name?: string } | null>(null);
+  const [user, setUser] = useState<{
+    id: string;
+    email: string;
+    name?: string;
+  } | null>(null);
   const t = translations[locale];
 
   useEffect(() => {
@@ -58,7 +66,7 @@ export default function FavoriteButton({ targetType, targetId, locale = 'zh' }: 
     // Check if this item is favorited
     const favorites = getDemoFavorites();
     const key = `${targetType}_${targetId}`;
-    setIsFavorited(favorites[user?.id || 'anonymous']?.includes(key) || false);
+    setIsFavorited(favorites[user?.id || "anonymous"]?.includes(key) || false);
   }, [user, targetType, targetId]);
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -81,7 +89,7 @@ export default function FavoriteButton({ targetType, targetId, locale = 'zh' }: 
     if (isFavorited) {
       // Remove favorite
       if (favorites[userId]) {
-        favorites[userId] = favorites[userId].filter(k => k !== key);
+        favorites[userId] = favorites[userId].filter((k) => k !== key);
         if (favorites[userId].length === 0) {
           delete favorites[userId];
         }
@@ -103,7 +111,13 @@ export default function FavoriteButton({ targetType, targetId, locale = 'zh' }: 
     setIsLoading(false);
   };
 
-  const buttonText = isFavorited ? (locale === 'zh' ? '已收藏' : 'Favorited') : (locale === 'zh' ? '收藏' : 'Favorite');
+  const buttonText = isFavorited
+    ? locale === "zh"
+      ? "已收藏"
+      : "Favorited"
+    : locale === "zh"
+      ? "收藏"
+      : "Favorite";
 
   return (
     <button
@@ -113,14 +127,14 @@ export default function FavoriteButton({ targetType, targetId, locale = 'zh' }: 
       aria-pressed={isFavorited}
       className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-colors ${
         isFavorited
-          ? 'text-red-500 hover:text-red-600 bg-red-50'
-          : 'text-gray-500 hover:text-red-500 bg-gray-50 hover:bg-red-50'
+          ? "text-red-500 hover:text-red-600 bg-red-50"
+          : "text-gray-500 hover:text-red-500 bg-gray-50 hover:bg-red-50"
       }`}
       title={isFavorited ? t.removeFavorite : t.addFavorite}
     >
       <svg
-        className={`w-5 h-5 ${isLoading ? 'opacity-50' : ''}`}
-        fill={isFavorited ? 'currentColor' : 'none'}
+        className={`w-5 h-5 ${isLoading ? "opacity-50" : ""}`}
+        fill={isFavorited ? "currentColor" : "none"}
         stroke="currentColor"
         viewBox="0 0 24 24"
       >

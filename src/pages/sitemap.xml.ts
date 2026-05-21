@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 // This endpoint must be rendered at runtime (not prerendered)
 export const prerender = false;
@@ -25,37 +26,6 @@ const staticRoutes = [
   { url: '/api', priority: '0.3', changefreq: 'monthly' },
 ];
 
-// Dynamic tool slugs
-const toolSlugs = [
-  'chatgpt', 'claude', 'midjourney', 'github-copilot', 'notion-ai',
-  'perplexity', 'jasper', 'copyai', 'grammarly', 'quillbot',
-  'tabnine', 'cursor', 'replit', 'figma', 'dalle-3',
-  'stable-diffusion', 'kimi', 'gemini', 'webpilot', 'wenxin-yiyan',
-  'tongyi-qianwen', 'xunfei-xinghuo', 'zhixing-qingyan', 'doubao',
-  'hunyuan', 'shangliang', 'tiangong', 'pangu', 'tongyi-wanxiang',
-  'miaohua', 'liblib', 'xunfei-xiezuo', 'mita-writecat', 'caiyun-xiaomeng',
-];
-
-// Dynamic payment solution slugs
-const paymentSlugs = Array.from({ length: 10 }, (_, i) => String(i + 1));
-
-// Dynamic policy slugs
-const policySlugs = [
-  'mit', 'stanford', 'cambridge', 'oxford', 'unsw',
-  'toronto', 'eth', 'ntu', 'harvard', 'nus',
-];
-
-// English versions
-const enRoutes = staticRoutes.map(r => ({
-  url: `/en${r.url === '/' ? '' : r.url}`,
-  priority: r.priority,
-  changefreq: r.changefreq,
-}));
-
-const enToolSlugs = toolSlugs.map(slug => `/en/tools/${slug}`);
-const enPaymentSlugs = paymentSlugs.map(id => `/en/payment/${id}`);
-const enPolicySlugs = policySlugs.map(slug => `/en/policies/${slug}`);
-
 function formatDate(date: Date): string {
   return date.toISOString().split('T')[0];
 }
@@ -72,15 +42,78 @@ function escapeXml(str: string): string {
 export const GET: APIRoute = async () => {
   const today = formatDate(new Date());
 
+  // Static routes (always included)
+  const enRoutes = staticRoutes.map(r => ({
+    url: `/en${r.url === '/' ? '' : r.url}`,
+    priority: r.priority,
+    changefreq: r.changefreq,
+  }));
+
+  // ============ Dynamic routes from Supabase ============
+  let toolSlugs: string[] = [];
+  let policySlugs: string[] = [];
+  let paymentSlugs: string[] = [];
+  let offerIds: string[] = [];
+  let promptSlugs: string[] = [];
+
+  if (isSupabaseConfigured) {
+    // Fetch all dynamic slugs in parallel
+    const [
+      toolsResult,
+      policiesResult,
+      paymentsResult,
+      offersResult,
+      promptsResult,
+    ] = await Promise.allSettled([
+      supabase.from('tools').select('slug').eq('is_active', true),
+      supabase.from('university_policies').select('university_slug'),
+      supabase.from('payment_solutions').select('id'),
+      supabase.from('offers').select('id'),
+      supabase.from('prompt_templates').select('slug'),
+    ]);
+
+    if (toolsResult.status === 'fulfilled' && toolsResult.value.data) {
+      toolSlugs = toolsResult.value.data.map(t => t.slug);
+    }
+    if (policiesResult.status === 'fulfilled' && policiesResult.value.data) {
+      policySlugs = policiesResult.value.data.map(p => p.university_slug);
+    }
+    if (paymentsResult.status === 'fulfilled' && paymentsResult.value.data) {
+      paymentSlugs = paymentsResult.value.data.map(p => String(p.id));
+    }
+    if (offersResult.status === 'fulfilled' && offersResult.value.data) {
+      offerIds = offersResult.value.data.map(o => String(o.id));
+    }
+    if (promptsResult.status === 'fulfilled' && promptsResult.value.data) {
+      promptSlugs = promptsResult.value.data.map(p => p.slug);
+    }
+  }
+
+  // Build dynamic routes from fetched data
+  const toolRoutes = toolSlugs.map(slug => ({ url: `/tools/${slug}`, priority: '0.8', changefreq: 'weekly' }));
+  const enToolRoutes = toolSlugs.map(slug => ({ url: `/en/tools/${slug}`, priority: '0.8', changefreq: 'weekly' }));
+  const paymentRoutes = paymentSlugs.map(id => ({ url: `/payment/${id}`, priority: '0.7', changefreq: 'monthly' }));
+  const enPaymentRoutes = paymentSlugs.map(id => ({ url: `/en/payment/${id}`, priority: '0.7', changefreq: 'monthly' }));
+  const policyRoutes = policySlugs.map(slug => ({ url: `/policies/${slug}`, priority: '0.7', changefreq: 'monthly' }));
+  const enPolicyRoutes = policySlugs.map(slug => ({ url: `/en/policies/${slug}`, priority: '0.7', changefreq: 'monthly' }));
+  const offerRoutes = offerIds.map(id => ({ url: `/offers/${id}`, priority: '0.7', changefreq: 'monthly' }));
+  const enOfferRoutes = offerIds.map(id => ({ url: `/en/offers/${id}`, priority: '0.7', changefreq: 'monthly' }));
+  const promptRoutes = promptSlugs.map(slug => ({ url: `/prompts/${slug}`, priority: '0.6', changefreq: 'weekly' }));
+  const enPromptRoutes = promptSlugs.map(slug => ({ url: `/en/prompts/${slug}`, priority: '0.6', changefreq: 'weekly' }));
+
   const allRoutes = [
     ...staticRoutes,
     ...enRoutes,
-    ...toolSlugs.map(slug => ({ url: `/tools/${slug}`, priority: '0.8', changefreq: 'weekly' })),
-    ...enToolSlugs.map(url => ({ url, priority: '0.8', changefreq: 'weekly' })),
-    ...paymentSlugs.map(id => ({ url: `/payment/${id}`, priority: '0.7', changefreq: 'monthly' })),
-    ...enPaymentSlugs.map(url => ({ url, priority: '0.7', changefreq: 'monthly' })),
-    ...policySlugs.map(slug => ({ url: `/policies/${slug}`, priority: '0.7', changefreq: 'monthly' })),
-    ...enPolicySlugs.map(url => ({ url, priority: '0.7', changefreq: 'monthly' })),
+    ...toolRoutes,
+    ...enToolRoutes,
+    ...paymentRoutes,
+    ...enPaymentRoutes,
+    ...policyRoutes,
+    ...enPolicyRoutes,
+    ...offerRoutes,
+    ...enOfferRoutes,
+    ...promptRoutes,
+    ...enPromptRoutes,
     { url: '/community/create', priority: '0.6', changefreq: 'weekly' },
     { url: '/en/community/create', priority: '0.6', changefreq: 'weekly' },
     { url: '/offers/submit', priority: '0.5', changefreq: 'monthly' },

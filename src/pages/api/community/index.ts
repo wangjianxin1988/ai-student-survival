@@ -11,8 +11,10 @@ export const GET: APIRoute = async ({ request }) => {
   const limit = parseInt(url.searchParams.get('limit') || '20');
   const offset = parseInt(url.searchParams.get('offset') || '0');
   const sort = (url.searchParams.get('sort') as 'latest' | 'popular') || 'latest';
+  const autoPromotedParam = url.searchParams.get('auto_promoted');
+  const autoPromoted = autoPromotedParam === 'true' ? true : autoPromotedParam === 'false' ? false : undefined;
 
-  const result = await getPosts({ category, limit, offset, sort });
+  const result = await getPosts({ category, limit, offset, sort, autoPromoted });
 
   return new Response(
     JSON.stringify({

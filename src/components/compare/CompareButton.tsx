@@ -1,34 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
 interface CompareButtonProps {
   toolSlug: string;
   toolName: string;
   toolImage: string;
-  locale?: 'zh' | 'en';
+  locale?: "zh" | "en";
 }
 
-const STORAGE_KEY = 'compareToolIds';
+const STORAGE_KEY = "compareToolIds";
 const MAX_COMPARE = 5;
 
 const translations = {
   zh: {
-    addToCompare: '加入对比',
-    removeFromCompare: '移出对比',
-    added: '已添加',
-    maxReached: '最多对比 {count} 个工具',
-    alreadyAdded: '已在对比列表',
+    addToCompare: "加入对比",
+    removeFromCompare: "移出对比",
+    added: "已添加",
+    maxReached: "最多对比 {count} 个工具",
+    alreadyAdded: "已在对比列表",
   },
   en: {
-    addToCompare: 'Add to Compare',
-    removeFromCompare: 'Remove from Compare',
-    added: 'Added',
-    maxReached: 'Maximum {count} tools can be compared',
-    alreadyAdded: 'Already in compare list',
+    addToCompare: "Add to Compare",
+    removeFromCompare: "Remove from Compare",
+    added: "Added",
+    maxReached: "Maximum {count} tools can be compared",
+    alreadyAdded: "Already in compare list",
   },
 };
 
 function getCompareToolIds(): string[] {
-  if (typeof window === 'undefined') return [];
+  if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return [];
   try {
@@ -39,12 +39,17 @@ function getCompareToolIds(): string[] {
 }
 
 function saveCompareToolIds(ids: string[]): void {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
   if (!Array.isArray(ids)) ids = [];
   localStorage.setItem(STORAGE_KEY, JSON.stringify(ids));
 }
 
-export default function CompareButton({ toolSlug, toolName, toolImage, locale = 'zh' }: CompareButtonProps) {
+export default function CompareButton({
+  toolSlug,
+  toolName,
+  toolImage,
+  locale = "zh",
+}: CompareButtonProps) {
   const [isInCompare, setIsInCompare] = useState(false);
   const [compareCount, setCompareCount] = useState(0);
   const t = translations[locale];
@@ -62,9 +67,9 @@ export default function CompareButton({ toolSlug, toolName, toolImage, locale = 
       setIsInCompare(false);
       setCompareCount(0);
     };
-    window.addEventListener('compareListClearAll', handleClearAll);
+    window.addEventListener("compareListClearAll", handleClearAll);
     return () => {
-      window.removeEventListener('compareListClearAll', handleClearAll);
+      window.removeEventListener("compareListClearAll", handleClearAll);
     };
   }, []);
 
@@ -76,7 +81,7 @@ export default function CompareButton({ toolSlug, toolName, toolImage, locale = 
 
     if (isInCompare) {
       // Remove from compare
-      const newIds = ids.filter(id => id !== toolSlug);
+      const newIds = ids.filter((id) => id !== toolSlug);
       saveCompareToolIds(newIds);
       setIsInCompare(false);
       setCompareCount(newIds.length);
@@ -84,7 +89,7 @@ export default function CompareButton({ toolSlug, toolName, toolImage, locale = 
       // Add to compare
       if (ids.length >= MAX_COMPARE) {
         // Show notification or handle max
-        console.warn(t.maxReached.replace('{count}', String(MAX_COMPARE)));
+        console.warn(t.maxReached.replace("{count}", String(MAX_COMPARE)));
         return;
       }
       const newIds = [...ids, toolSlug];
@@ -94,9 +99,11 @@ export default function CompareButton({ toolSlug, toolName, toolImage, locale = 
     }
 
     // Dispatch custom event to notify compare page
-    window.dispatchEvent(new CustomEvent('compareListChange', {
-      detail: { toolSlug, isInCompare: !isInCompare }
-    }));
+    window.dispatchEvent(
+      new CustomEvent("compareListChange", {
+        detail: { toolSlug, isInCompare: !isInCompare },
+      }),
+    );
   };
 
   return (
@@ -104,14 +111,14 @@ export default function CompareButton({ toolSlug, toolName, toolImage, locale = 
       onClick={handleClick}
       className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
         isInCompare
-          ? 'bg-primary-100 text-primary-700 border border-primary-300 hover:bg-primary-200'
-          : 'bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 hover:text-gray-900'
+          ? "bg-primary-100 text-primary-700 border border-primary-300 hover:bg-primary-200"
+          : "bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 hover:text-gray-900"
       }`}
       title={isInCompare ? t.removeFromCompare : t.addToCompare}
     >
       <svg
-        className={`w-4 h-4 ${isInCompare ? 'text-primary-600' : 'text-gray-500'}`}
-        fill={isInCompare ? 'currentColor' : 'none'}
+        className={`w-4 h-4 ${isInCompare ? "text-primary-600" : "text-gray-500"}`}
+        fill={isInCompare ? "currentColor" : "none"}
         stroke="currentColor"
         viewBox="0 0 24 24"
       >

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import type { CommunityPost, PostComment } from '@/lib/community/types';
+import React, { useState, useEffect } from "react";
+import type { CommunityPost, PostComment } from "@/lib/community/types";
 
 interface PostDetailProps {
   postId: string;
@@ -7,46 +7,46 @@ interface PostDetailProps {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  tools: 'AI工具',
-  payment: '支付指南',
-  policy: '政策',
-  prompt: 'Prompt',
-  survival: '妙妙贴',
-  discussion: '讨论',
-  qa: '问答',
+  tools: "AI工具",
+  payment: "支付指南",
+  policy: "政策",
+  prompt: "Prompt",
+  survival: "妙妙贴",
+  discussion: "讨论",
+  qa: "问答",
 };
 
 const PRICING_LABELS: Record<string, string> = {
-  free: '免费',
-  freemium: '免费+付费',
-  paid: '付费',
+  free: "免费",
+  freemium: "免费+付费",
+  paid: "付费",
 };
 
 const DIFFICULTY_LABELS: Record<string, string> = {
-  easy: '简单',
-  medium: '中等',
-  hard: '困难',
+  easy: "简单",
+  medium: "中等",
+  hard: "困难",
 };
 
 const RELIABILITY_LABELS: Record<string, string> = {
-  high: '高可靠性',
-  medium: '中可靠性',
-  low: '低可靠性',
+  high: "高可靠性",
+  medium: "中可靠性",
+  low: "低可靠性",
 };
 
 const POLICY_LABELS: Record<string, string> = {
-  allowed: '允许使用AI',
-  restricted: '限制使用AI',
-  prohibited: '禁止使用AI',
-  case_by_case: '由课程决定',
+  allowed: "允许使用AI",
+  restricted: "限制使用AI",
+  prohibited: "禁止使用AI",
+  case_by_case: "由课程决定",
 };
 
 const SURVIVAL_CATEGORY_LABELS: Record<string, string> = {
-  scam: '防骗指南',
-  culture: '文化禁忌',
-  safety: '安全提醒',
-  legal: '法律须知',
-  other: '其他',
+  scam: "防骗指南",
+  culture: "文化禁忌",
+  safety: "安全提醒",
+  legal: "法律须知",
+  other: "其他",
 };
 
 function renderToolsMeta(meta: Record<string, unknown>) {
@@ -69,12 +69,21 @@ function renderToolsMeta(meta: Record<string, unknown>) {
       {!!meta.url && (
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">官网:</span>
-          <a href={String(meta.url)} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline break-all">
+          <a
+            href={String(meta.url)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:underline break-all"
+          >
             {String(meta.url)}
           </a>
         </div>
       )}
-      {!!(meta.features && Array.isArray(meta.features) && meta.features.length > 0) && (
+      {!!(
+        meta.features &&
+        Array.isArray(meta.features) &&
+        meta.features.length > 0
+      ) && (
         <div>
           <span className="text-sm text-gray-500">主要功能:</span>
           <ul className="mt-1 list-disc list-inside text-sm">
@@ -101,19 +110,25 @@ function renderPaymentMeta(meta: Record<string, unknown>) {
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">难度:</span>
           <span className="inline-block px-2 py-0.5 bg-green-100 text-green-700 rounded text-sm">
-            {DIFFICULTY_LABELS[String(meta.difficulty)] || String(meta.difficulty)}
+            {DIFFICULTY_LABELS[String(meta.difficulty)] ||
+              String(meta.difficulty)}
           </span>
         </div>
       )}
       {!!meta.reliability && (
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">可靠性:</span>
-          <span className={`inline-block px-2 py-0.5 rounded text-sm ${
-            String(meta.reliability) === 'high' ? 'bg-green-100 text-green-700' :
-            String(meta.reliability) === 'medium' ? 'bg-yellow-100 text-yellow-700' :
-            'bg-red-100 text-red-700'
-          }`}>
-            {RELIABILITY_LABELS[String(meta.reliability)] || String(meta.reliability)}
+          <span
+            className={`inline-block px-2 py-0.5 rounded text-sm ${
+              String(meta.reliability) === "high"
+                ? "bg-green-100 text-green-700"
+                : String(meta.reliability) === "medium"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : "bg-red-100 text-red-700"
+            }`}
+          >
+            {RELIABILITY_LABELS[String(meta.reliability)] ||
+              String(meta.reliability)}
           </span>
         </div>
       )}
@@ -139,22 +154,35 @@ function renderPolicyMeta(meta: Record<string, unknown>) {
       {!!meta.overallPolicy && (
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">总体政策:</span>
-          <span className={`inline-block px-2 py-0.5 rounded text-sm ${
-            String(meta.overallPolicy) === 'allowed' ? 'bg-green-100 text-green-700' :
-            String(meta.overallPolicy) === 'restricted' ? 'bg-yellow-100 text-yellow-700' :
-            String(meta.overallPolicy) === 'prohibited' ? 'bg-red-100 text-red-700' :
-            'bg-gray-100 text-gray-700'
-          }`}>
-            {POLICY_LABELS[String(meta.overallPolicy)] || String(meta.overallPolicy)}
+          <span
+            className={`inline-block px-2 py-0.5 rounded text-sm ${
+              String(meta.overallPolicy) === "allowed"
+                ? "bg-green-100 text-green-700"
+                : String(meta.overallPolicy) === "restricted"
+                  ? "bg-yellow-100 text-yellow-700"
+                  : String(meta.overallPolicy) === "prohibited"
+                    ? "bg-red-100 text-red-700"
+                    : "bg-gray-100 text-gray-700"
+            }`}
+          >
+            {POLICY_LABELS[String(meta.overallPolicy)] ||
+              String(meta.overallPolicy)}
           </span>
         </div>
       )}
-      {!!(meta.allowedTools && Array.isArray(meta.allowedTools) && meta.allowedTools.length > 0) && (
+      {!!(
+        meta.allowedTools &&
+        Array.isArray(meta.allowedTools) &&
+        meta.allowedTools.length > 0
+      ) && (
         <div>
           <span className="text-sm text-gray-500">允许使用的AI工具:</span>
           <div className="flex flex-wrap gap-1 mt-1">
             {(meta.allowedTools as string[]).map((tool, i) => (
-              <span key={i} className="px-2 py-0.5 bg-green-50 text-green-600 rounded text-xs">
+              <span
+                key={i}
+                className="px-2 py-0.5 bg-green-50 text-green-600 rounded text-xs"
+              >
                 {tool}
               </span>
             ))}
@@ -197,7 +225,8 @@ function renderSurvivalMeta(meta: Record<string, unknown>) {
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-500">分类:</span>
           <span className="inline-block px-2 py-0.5 bg-pink-100 text-pink-700 rounded text-sm">
-            {SURVIVAL_CATEGORY_LABELS[String(meta.survivalCategory)] || String(meta.survivalCategory)}
+            {SURVIVAL_CATEGORY_LABELS[String(meta.survivalCategory)] ||
+              String(meta.survivalCategory)}
           </span>
         </div>
       )}
@@ -216,15 +245,15 @@ function renderMeta(post: CommunityPost) {
   const meta = post.meta as unknown as Record<string, unknown>;
 
   switch (post.category) {
-    case 'tools':
+    case "tools":
       return renderToolsMeta(meta);
-    case 'payment':
+    case "payment":
       return renderPaymentMeta(meta);
-    case 'policy':
+    case "policy":
       return renderPolicyMeta(meta);
-    case 'prompt':
+    case "prompt":
       return renderPromptMeta(meta);
-    case 'survival':
+    case "survival":
       return renderSurvivalMeta(meta);
     default:
       return null;
@@ -232,7 +261,11 @@ function renderMeta(post: CommunityPost) {
 }
 
 function calculateScore(post: CommunityPost): number {
-  return (post.likesCount || 0) * 1 + (post.commentsCount || 0) * 2 + (post.favoritesCount || 0) * 3;
+  return (
+    (post.likesCount || 0) * 1 +
+    (post.commentsCount || 0) * 2 +
+    (post.favoritesCount || 0) * 3
+  );
 }
 
 export function PostDetail({ postId, currentUserId }: PostDetailProps) {
@@ -243,7 +276,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
   const [favorited, setFavorited] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const [favoritesCount, setFavoritesCount] = useState(0);
-  const [commentContent, setCommentContent] = useState('');
+  const [commentContent, setCommentContent] = useState("");
 
   useEffect(() => {
     fetchPost();
@@ -262,7 +295,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
         setFavoritesCount(data.data.favoritesCount || 0);
       }
     } catch (error) {
-      console.error('Failed to fetch post:', error);
+      console.error("Failed to fetch post:", error);
     } finally {
       setLoading(false);
     }
@@ -276,7 +309,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
         setComments(data.data);
       }
     } catch (error) {
-      console.error('Failed to fetch comments:', error);
+      console.error("Failed to fetch comments:", error);
     }
   };
 
@@ -284,14 +317,16 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId) return;
 
     try {
-      const response = await fetch(`/api/community/${postId}/like`, { method: 'POST' });
+      const response = await fetch(`/api/community/${postId}/like`, {
+        method: "POST",
+      });
       const data = await response.json();
       if (data.success) {
         setLiked(data.data.liked);
         setLikesCount(data.data.likesCount);
       }
     } catch (error) {
-      console.error('Failed to like:', error);
+      console.error("Failed to like:", error);
     }
   };
 
@@ -299,14 +334,16 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId) return;
 
     try {
-      const response = await fetch(`/api/community/${postId}/favorite`, { method: 'POST' });
+      const response = await fetch(`/api/community/${postId}/favorite`, {
+        method: "POST",
+      });
       const data = await response.json();
       if (data.success) {
         setFavorited(data.data.favorited);
         setFavoritesCount(data.data.favoritesCount);
       }
     } catch (error) {
-      console.error('Failed to favorite:', error);
+      console.error("Failed to favorite:", error);
     }
   };
 
@@ -316,21 +353,21 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
 
     try {
       const response = await fetch(`/api/community/${postId}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content: commentContent }),
       });
       const data = await response.json();
       if (data.success) {
         setComments([...comments, data.data]);
-        setCommentContent('');
+        setCommentContent("");
         // Update comments count
         if (post) {
           setPost({ ...post, commentsCount: (post.commentsCount || 0) + 1 });
         }
       }
     } catch (error) {
-      console.error('Failed to comment:', error);
+      console.error("Failed to comment:", error);
     }
   };
 
@@ -367,8 +404,10 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
         <h1 className="text-2xl font-bold text-gray-900 mb-4">{post.title}</h1>
 
         <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
-          <span className="font-medium text-gray-700">{post.userName || '匿名用户'}</span>
-          <span>{new Date(post.createdAt).toLocaleDateString('zh-CN')}</span>
+          <span className="font-medium text-gray-700">
+            {post.userName || "匿名用户"}
+          </span>
+          <span>{new Date(post.createdAt).toLocaleDateString("zh-CN")}</span>
           <span>阅读 {post.viewsCount || 0}</span>
         </div>
 
@@ -387,16 +426,28 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
         {(post.autoPromoted || post.directPublishRequested) && (
           <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-100">
             <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
               <div className="text-sm">
                 <p className="text-green-800 font-medium">
-                  {post.promoteSource === 'points' ? '直达' : '已推送'} {CATEGORY_LABELS[post.category] || post.category} 热门
+                  {post.promoteSource === "points" ? "直达" : "已推送"}{" "}
+                  {CATEGORY_LABELS[post.category] || post.category} 热门
                 </p>
                 {post.promoteScore !== undefined && (
                   <p className="text-green-600 mt-1">
-                    热度评分: {post.promoteScore} | 推送时间: {new Date(post.updatedAt).toLocaleDateString('zh-CN')}
+                    热度评分: {post.promoteScore} | 推送时间:{" "}
+                    {new Date(post.updatedAt).toLocaleDateString("zh-CN")}
                   </p>
                 )}
               </div>
@@ -405,30 +456,37 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
         )}
 
         {/* Heat progress for non-promoted posts in target categories */}
-        {!post.autoPromoted && post.category !== 'discussion' && post.category !== 'qa' && (
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-600">热度进度</span>
-              <span className="text-sm font-medium text-gray-900">
-                {calculateScore(post)} / 10
-              </span>
+        {!post.autoPromoted &&
+          post.category !== "discussion" &&
+          post.category !== "qa" && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-600">热度进度</span>
+                <span className="text-sm font-medium text-gray-900">
+                  {calculateScore(post)} / 10
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-blue-500 h-2 rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(100, (calculateScore(post) / 10) * 100)}%`,
+                  }}
+                />
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                点赞×1 + 评论×2 + 收藏×3 = 热度评分，≥10分自动推送
+              </p>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-blue-500 h-2 rounded-full transition-all"
-                style={{ width: `${Math.min(100, (calculateScore(post) / 10) * 100)}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              点赞×1 + 评论×2 + 收藏×3 = 热度评分，≥10分自动推送
-            </p>
-          </div>
-        )}
+          )}
 
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6 pt-6 border-t border-gray-100">
             {post.tags.map((tag) => (
-              <span key={tag} className="text-sm px-3 py-1 bg-gray-100 text-gray-600 rounded-full">
+              <span
+                key={tag}
+                className="text-sm px-3 py-1 bg-gray-100 text-gray-600 rounded-full"
+              >
                 #{tag}
               </span>
             ))}
@@ -440,11 +498,23 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
             onClick={handleLike}
             disabled={!currentUserId}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              liked ? 'bg-red-50 text-red-500' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              liked
+                ? "bg-red-50 text-red-500"
+                : "bg-gray-50 text-gray-600 hover:bg-gray-100"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            <svg className="w-5 h-5" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <svg
+              className="w-5 h-5"
+              fill={liked ? "currentColor" : "none"}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
             </svg>
             {likesCount} 点赞
           </button>
@@ -453,11 +523,23 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
             onClick={handleFavorite}
             disabled={!currentUserId}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-              favorited ? 'bg-yellow-50 text-yellow-500' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+              favorited
+                ? "bg-yellow-50 text-yellow-500"
+                : "bg-gray-50 text-gray-600 hover:bg-gray-100"
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            <svg className="w-5 h-5" fill={favorited ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            <svg
+              className="w-5 h-5"
+              fill={favorited ? "currentColor" : "none"}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+              />
             </svg>
             {favoritesCount} 收藏
           </button>
@@ -465,7 +547,9 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
       </article>
 
       <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">评论 ({comments.length})</h3>
+        <h3 className="text-lg font-bold text-gray-900 mb-4">
+          评论 ({comments.length})
+        </h3>
 
         {currentUserId ? (
           <form onSubmit={handleComment} className="mb-6">
@@ -488,7 +572,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
           </form>
         ) : (
           <div className="mb-6 p-4 bg-gray-50 rounded-lg text-center text-gray-600 text-sm">
-           登录后可发表评论
+            登录后可发表评论
           </div>
         )}
 
@@ -496,8 +580,14 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
           {comments.map((comment) => (
             <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-gray-900">{(comment as any).author?.name || comment.userName || '匿名用户'}</span>
-                <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleDateString('zh-CN')}</span>
+                <span className="font-medium text-gray-900">
+                  {(comment as any).author?.name ||
+                    comment.userName ||
+                    "匿名用户"}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {new Date(comment.createdAt).toLocaleDateString("zh-CN")}
+                </span>
               </div>
               <p className="text-gray-700">{comment.content}</p>
             </div>

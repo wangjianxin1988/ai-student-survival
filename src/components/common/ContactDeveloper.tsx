@@ -1,92 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import MathCaptcha from './MathCaptcha';
+import React, { useState, useEffect } from "react";
+import MathCaptcha from "./MathCaptcha";
 
 interface ContactFormProps {
-  locale?: 'zh' | 'en';
+  locale?: "zh" | "en";
 }
 
 const translations = {
   zh: {
-    title: '联系开发者',
-    subtitle: '有问题或建议？我们很乐意听到您的反馈！',
-    name: '姓名',
-    namePlaceholder: '您的姓名',
-    email: '邮箱',
-    emailPlaceholder: 'your@email.com',
-    type: '反馈类型',
-    typeFeedback: '功能反馈',
-    typeBug: '问题报告',
-    typeFeature: '功能建议',
-    typeOther: '其他',
-    message: '反馈内容',
-    messagePlaceholder: '请详细描述您的问题或建议...',
-    submit: '发送反馈',
-    submitting: '发送中...',
-    success: '反馈已发送！感谢您的反馈。',
-    error: '发送失败，请稍后重试',
-    rateLimited: '提交过于频繁，请稍后再试',
-    validationError: '请填写所有必填字段',
-    invalidEmail: '请输入有效的邮箱地址',
-    messageTooShort: '反馈内容太短，请详细描述',
-    developerWechat: '开发者微信',
-    developerEmail: '开发者邮箱',
-    contactDirect: '也可以直接联系开发者',
+    title: "联系开发者",
+    subtitle: "有问题或建议？我们很乐意听到您的反馈！",
+    name: "姓名",
+    namePlaceholder: "您的姓名",
+    email: "邮箱",
+    emailPlaceholder: "your@email.com",
+    type: "反馈类型",
+    typeFeedback: "功能反馈",
+    typeBug: "问题报告",
+    typeFeature: "功能建议",
+    typeOther: "其他",
+    message: "反馈内容",
+    messagePlaceholder: "请详细描述您的问题或建议...",
+    submit: "发送反馈",
+    submitting: "发送中...",
+    success: "反馈已发送！感谢您的反馈。",
+    error: "发送失败，请稍后重试",
+    rateLimited: "提交过于频繁，请稍后再试",
+    validationError: "请填写所有必填字段",
+    invalidEmail: "请输入有效的邮箱地址",
+    messageTooShort: "反馈内容太短，请详细描述",
+    developerWechat: "开发者微信",
+    developerEmail: "开发者邮箱",
+    contactDirect: "也可以直接联系开发者",
   },
   en: {
-    title: 'Contact Developer',
-    subtitle: 'Have questions or suggestions? We\'d love to hear your feedback!',
-    name: 'Name',
-    namePlaceholder: 'Your name',
-    email: 'Email',
-    emailPlaceholder: 'your@email.com',
-    type: 'Feedback Type',
-    typeFeedback: 'Feedback',
-    typeBug: 'Bug Report',
-    typeFeature: 'Feature Request',
-    typeOther: 'Other',
-    message: 'Message',
-    messagePlaceholder: 'Please describe your question or suggestion in detail...',
-    submit: 'Send Feedback',
-    submitting: 'Sending...',
-    success: 'Feedback sent! Thank you for your feedback.',
-    error: 'Failed to send. Please try again later.',
-    rateLimited: 'Submitting too frequently. Please try again later.',
-    validationError: 'Please fill in all required fields',
-    invalidEmail: 'Please enter a valid email address',
-    messageTooShort: 'Message too short. Please provide more details.',
-    developerWechat: 'Developer WeChat',
-    developerEmail: 'Developer Email',
-    contactDirect: 'You can also contact the developer directly',
+    title: "Contact Developer",
+    subtitle: "Have questions or suggestions? We'd love to hear your feedback!",
+    name: "Name",
+    namePlaceholder: "Your name",
+    email: "Email",
+    emailPlaceholder: "your@email.com",
+    type: "Feedback Type",
+    typeFeedback: "Feedback",
+    typeBug: "Bug Report",
+    typeFeature: "Feature Request",
+    typeOther: "Other",
+    message: "Message",
+    messagePlaceholder:
+      "Please describe your question or suggestion in detail...",
+    submit: "Send Feedback",
+    submitting: "Sending...",
+    success: "Feedback sent! Thank you for your feedback.",
+    error: "Failed to send. Please try again later.",
+    rateLimited: "Submitting too frequently. Please try again later.",
+    validationError: "Please fill in all required fields",
+    invalidEmail: "Please enter a valid email address",
+    messageTooShort: "Message too short. Please provide more details.",
+    developerWechat: "Developer WeChat",
+    developerEmail: "Developer Email",
+    contactDirect: "You can also contact the developer directly",
   },
 };
 
-export default function ContactForm({ locale = 'zh' }: ContactFormProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [type, setType] = useState<'feedback' | 'bug' | 'feature' | 'other'>('feedback');
-  const [message, setMessage] = useState('');
+export default function ContactForm({ locale = "zh" }: ContactFormProps) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [type, setType] = useState<"feedback" | "bug" | "feature" | "other">(
+    "feedback",
+  );
+  const [message, setMessage] = useState("");
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'success' | 'error' | 'rateLimited'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [status, setStatus] = useState<
+    "idle" | "success" | "error" | "rateLimited"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
   const t = translations[locale];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!captchaVerified) {
-      setErrorMessage(locale === 'zh' ? '请先完成验证' : 'Please complete verification first');
+      setErrorMessage(
+        locale === "zh" ? "请先完成验证" : "Please complete verification first",
+      );
       return;
     }
 
     setIsSubmitting(true);
-    setStatus('idle');
-    setErrorMessage('');
+    setStatus("idle");
+    setErrorMessage("");
 
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           email,
@@ -99,29 +106,29 @@ export default function ContactForm({ locale = 'zh' }: ContactFormProps) {
       const result = await response.json();
 
       if (result.success) {
-        setStatus('success');
-        setName('');
-        setEmail('');
-        setType('feedback');
-        setMessage('');
+        setStatus("success");
+        setName("");
+        setEmail("");
+        setType("feedback");
+        setMessage("");
         setCaptchaVerified(false);
       } else {
-        setStatus('error');
-        if (result.error?.code === 'RATE_LIMITED') {
-          setStatus('rateLimited');
+        setStatus("error");
+        if (result.error?.code === "RATE_LIMITED") {
+          setStatus("rateLimited");
           setErrorMessage(t.rateLimited);
-        } else if (result.error?.code === 'VALIDATION_ERROR') {
+        } else if (result.error?.code === "VALIDATION_ERROR") {
           setErrorMessage(t.validationError);
-        } else if (result.error?.code === 'INVALID_EMAIL') {
+        } else if (result.error?.code === "INVALID_EMAIL") {
           setErrorMessage(t.invalidEmail);
-        } else if (result.error?.code === 'MESSAGE_TOO_SHORT') {
+        } else if (result.error?.code === "MESSAGE_TOO_SHORT") {
           setErrorMessage(t.messageTooShort);
         } else {
           setErrorMessage(result.error?.message || t.error);
         }
       }
     } catch (err) {
-      setStatus('error');
+      setStatus("error");
       setErrorMessage(t.error);
     } finally {
       setIsSubmitting(false);
@@ -132,20 +139,32 @@ export default function ContactForm({ locale = 'zh' }: ContactFormProps) {
     setCaptchaVerified(verified);
   };
 
-  if (status === 'success') {
+  if (status === "success") {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
         <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-          <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          <svg
+            className="w-8 h-8 text-green-500"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 13l4 4L19 7"
+            />
           </svg>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">{t.success}</h3>
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          {t.success}
+        </h3>
         <button
-          onClick={() => setStatus('idle')}
+          onClick={() => setStatus("idle")}
           className="mt-4 text-primary-600 hover:text-primary-700 font-medium"
         >
-          {locale === 'zh' ? '发送另一条反馈' : 'Send another feedback'}
+          {locale === "zh" ? "发送另一条反馈" : "Send another feedback"}
         </button>
       </div>
     );
@@ -163,21 +182,39 @@ export default function ContactForm({ locale = 'zh' }: ContactFormProps) {
         <h3 className="font-medium text-blue-900 mb-2">{t.contactDirect}</h3>
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2">
-            <span className="text-blue-700 font-medium">{t.developerWechat}:</span>
-            <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900 font-mono">jian_xin_happy</code>
+            <span className="text-blue-700 font-medium">
+              {t.developerWechat}:
+            </span>
+            <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900 font-mono">
+              jian_xin_happy
+            </code>
             <button
-              onClick={() => navigator.clipboard.writeText('jian_xin_happy')}
+              onClick={() => navigator.clipboard.writeText("jian_xin_happy")}
               className="text-blue-600 hover:text-blue-800"
-              title={locale === 'zh' ? '复制微信号' : 'Copy WeChat ID'}
+              title={locale === "zh" ? "复制微信号" : "Copy WeChat ID"}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                />
               </svg>
             </button>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-blue-700 font-medium">{t.developerEmail}:</span>
-            <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900 font-mono">contact@example.com</code>
+            <span className="text-blue-700 font-medium">
+              {t.developerEmail}:
+            </span>
+            <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900 font-mono">
+              contact@example.com
+            </code>
           </div>
         </div>
       </div>
