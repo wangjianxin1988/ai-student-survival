@@ -128,16 +128,9 @@ export const GET: APIRoute = async ({ url }) => {
   let source: 'supabase' | 'static' = 'static';
 
   try {
-    const supabaseUrl = (import.meta.env.SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL) as string;
-    const supabaseKey = (import.meta.env.SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY) as string;
-
-    // Only try Supabase if credentials are configured
-    if (supabaseUrl && supabaseKey && !supabaseUrl.includes('your-project')) {
-      tools = await getTools(params);
-      source = 'supabase';
-    } else {
-      throw new Error('Supabase not configured');
-    }
+    // getTools uses hardcoded credentials in supabase.ts for Cloudflare Pages SSR reliability
+    tools = await getTools(params);
+    source = 'supabase';
   } catch (error) {
     console.warn('Supabase API fetch failed, using static fallback');
     // Use static fallback data

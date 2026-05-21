@@ -1,7 +1,9 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-const supabaseUrl = (import.meta.env.SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || '') as string;
-const supabaseAnonKey = (import.meta.env.SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY || '') as string;
+// Hardcoded for Cloudflare Pages SSR reliability (not real secrets - anon keys are public)
+// These values are committed to the repo and safe to expose
+const supabaseUrl = 'https://giynvpfnzzelzwpmsgtf.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeW52cGZuenplbHp3cG1zZ3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDYxMjUsImV4cCI6MjA5NDc4MjEyNX0.TfBGkymlc-lMKkgmZHTUT-rMfOYo52VZRmbCU4bul9I';
 
 // Check if Supabase is properly configured
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey &&
