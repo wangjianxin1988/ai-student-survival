@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "./AuthProvider";
 import { demoAuthApi } from "@/lib/auth";
 import { TurnstileWidget } from "./TurnstileWidget";
 
@@ -63,7 +62,6 @@ export default function LoginForm({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
-  const { user, loading, signIn, signInWithGoogle, signInWithGithub, signInWithMagicLink } = useAuth();
 
   // Get returnTo from URL if not provided via props (for ?redirect=xxx from middleware)
   const getReturnTo = () => {
@@ -126,7 +124,7 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await signIn(email, password);
+      const result = await demoAuthApi.signIn(email, password);
       if (result.success) {
         redirectAfterLogin();
       } else {
@@ -140,14 +138,14 @@ export default function LoginForm({
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await signInWithGoogle();
+    const result = await demoAuthApi.signInWithOAuth('google');
     if (result.error) {
       setError(result.error);
     }
   };
 
   const handleGithubSignIn = async () => {
-    const result = await signInWithGithub();
+    const result = await demoAuthApi.signInWithOAuth('github');
     if (result.error) {
       setError(result.error);
     }
@@ -159,7 +157,7 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await signInWithMagicLink(magicLinkEmail);
+      const result = await demoAuthApi.signInWithMagicLink(magicLinkEmail);
       if (result.success) {
         setMagicLinkSent(true);
       } else {

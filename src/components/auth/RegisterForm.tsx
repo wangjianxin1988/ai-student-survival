@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "./AuthProvider";
 import { demoAuthApi } from "@/lib/auth";
 import { TurnstileWidget } from "./TurnstileWidget";
 
@@ -68,7 +67,6 @@ export default function RegisterForm({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
-  const { signUp, signInWithGoogle, signInWithGithub } = useAuth();
 
   // Password strength checker
   const getPasswordStrength = (
@@ -145,7 +143,7 @@ export default function RegisterForm({
     setIsLoading(true);
 
     try {
-      const result = await signUp(email, password, name);
+      const result = await demoAuthApi.signUp(email, password, name);
       if (result.success) {
         redirectAfterRegister();
       } else {
@@ -159,14 +157,14 @@ export default function RegisterForm({
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await signInWithGoogle();
+    const result = await demoAuthApi.signInWithOAuth('google');
     if (result.error) {
       setError(result.error);
     }
   };
 
   const handleGithubSignIn = async () => {
-    const result = await signInWithGithub();
+    const result = await demoAuthApi.signInWithOAuth('github');
     if (result.error) {
       setError(result.error);
     }
