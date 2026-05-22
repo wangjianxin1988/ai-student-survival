@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthProvider";
+import { demoAuthApi } from "@/lib/auth";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 interface RegisterFormProps {
@@ -67,7 +68,7 @@ export default function RegisterForm({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
-  const { user, loading, signUp, signInWithGoogle, signInWithGithub } = useAuth();
+  const { signUp, signInWithGoogle, signInWithGithub } = useAuth();
 
   // Password strength checker
   const getPasswordStrength = (
@@ -101,13 +102,31 @@ export default function RegisterForm({
     }
   };
 
-  // Guard: check auth state on mount using useAuth state
+  // Guard: check auth state on mount — use direct API call with timeout fallback
   useEffect(() => {
-    if (!loading) {
-      setIsLoggedIn(!!user);
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const checkAuth = async () => {
+      try {
+        timeout = setTimeout(() => {
+          console.warn('[RegisterForm] Auth check timeout, rendering form');
+          setAuthChecked(true);
+          setIsLoggedIn(false);
+        }, 3000);
+
+        const user = await demoAuthApi.getUser();
+        clearTimeout(timeout);
+        setIsLoggedIn(!!user);
+      } catch (err) {
+        console.error('[RegisterForm] Auth check error:', err);
+        clearTimeout(timeout);
+        setIsLoggedIn(false);
+      }
       setAuthChecked(true);
-    }
-  }, [loading, user]);
+    };
+
+    checkAuth();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

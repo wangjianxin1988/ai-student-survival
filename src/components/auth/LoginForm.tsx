@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthProvider";
+import { demoAuthApi } from "@/lib/auth";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 interface LoginFormProps {
@@ -90,13 +91,34 @@ export default function LoginForm({
     }
   };
 
-  // Guard: check auth state on mount using useAuth state
+  // Guard: check auth state on mount — use direct API call with timeout fallback
+  // This avoids depending on AuthProvider's loading state which may not initialize in time
   useEffect(() => {
-    if (!loading) {
-      setIsLoggedIn(!!user);
+    let timeout: ReturnType<typeof setTimeout>;
+
+    const checkAuth = async () => {
+      try {
+        // Set a timeout fallback — if auth doesn't respond in 3s, render the form anyway
+        timeout = setTimeout(() => {
+          console.warn('[LoginForm] Auth check timeout, rendering form');
+          setAuthChecked(true);
+          setIsLoggedIn(false);
+        }, 3000);
+
+        // Try to get user from Supabase directly
+        const user = await demoAuthApi.getUser();
+        clearTimeout(timeout);
+        setIsLoggedIn(!!user);
+      } catch (err) {
+        console.error('[LoginForm] Auth check error:', err);
+        clearTimeout(timeout);
+        setIsLoggedIn(false);
+      }
       setAuthChecked(true);
-    }
-  }, [loading, user]);
+    };
+
+    checkAuth();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
