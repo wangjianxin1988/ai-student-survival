@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "./AuthProvider";
 import { TurnstileWidget } from "./TurnstileWidget";
+import { supabase } from "@/lib/supabase";
 
 interface LoginFormProps {
   locale?: "zh" | "en";
@@ -138,17 +139,27 @@ export default function LoginForm({
 
   const handleGoogleSignIn = async () => {
     setError("");
-    const result = await signInWithGoogle();
-    if (result.error) {
-      setError(result.error);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
     }
   };
 
   const handleGithubSignIn = async () => {
     setError("");
-    const result = await signInWithGithub();
-    if (result.error) {
-      setError(result.error);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
     }
   };
 

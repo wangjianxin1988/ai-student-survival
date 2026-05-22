@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { demoAuthApi } from "@/lib/auth";
 import { TurnstileWidget } from "./TurnstileWidget";
+import { supabase } from "@/lib/supabase";
 
 interface RegisterFormProps {
   locale?: "zh" | "en";
@@ -157,16 +158,26 @@ export default function RegisterForm({
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await demoAuthApi.signInWithOAuth('google');
-    if (result.error) {
-      setError(result.error);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
     }
   };
 
   const handleGithubSignIn = async () => {
-    const result = await demoAuthApi.signInWithOAuth('github');
-    if (result.error) {
-      setError(result.error);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) {
+      setError(error.message);
     }
   };
 
