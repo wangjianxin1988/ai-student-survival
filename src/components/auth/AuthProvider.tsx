@@ -43,9 +43,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function initAuth() {
       try {
+        // Set a timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          console.warn('[AuthProvider] Init timeout, proceeding anyway');
+          setLoading(false);
+        }, 5000);
+
         const {
           data: { session },
         } = await supabase.auth.getSession();
+        clearTimeout(timeoutId);
+
         if (session?.user) {
           setUser({
             id: session.user.id,
@@ -55,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           });
         }
       } catch (err) {
-        console.error("Auth init error:", err);
+        console.error("[AuthProvider] Init error:", err);
       } finally {
         setLoading(false);
       }
