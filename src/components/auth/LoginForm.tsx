@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { demoAuthApi } from "@/lib/auth";
+import { useAuth } from "./AuthProvider";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 interface LoginFormProps {
@@ -20,11 +20,16 @@ const translations = {
     googleSignIn: "Google",
     githubSignIn: "GitHub",
     forgotPassword: "忘记密码？",
+    resetPassword: "重置密码",
+    resetPasswordTitle: "重置密码",
+    resetPasswordSent: "重置链接已发送到您的邮箱",
+    backToLogin: "返回登录",
     loading: "登录中...",
     error: "登录失败",
     magicLink: "邮箱验证码登录",
     sendMagicLink: "发送验证码",
     magicLinkSent: "验证码已发送，请查收邮箱",
+    verifyHuman: "请先完成人机验证",
   },
   en: {
     title: "Sign In",
@@ -37,11 +42,16 @@ const translations = {
     googleSignIn: "Google",
     githubSignIn: "GitHub",
     forgotPassword: "Forgot password?",
+    resetPassword: "Reset Password",
+    resetPasswordTitle: "Reset Password",
+    resetPasswordSent: "Reset link sent to your email",
+    backToLogin: "Back to Login",
     loading: "Signing in...",
     error: "Sign in failed",
     magicLink: "Magic Link",
     sendMagicLink: "Send Link",
     magicLinkSent: "Check your email for the login link",
+    verifyHuman: "Please complete verification first",
   },
 };
 
@@ -57,13 +67,17 @@ export default function LoginForm({
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
+  const { user, loading, signIn, signInWithGoogle, signInWithGithub, signInWithMagicLink } = useAuth();
 
-  // Get returnTo from URL if not provided via props (for ?redirect=xxx from middleware)
+  // Get returnTo from URL if not provided via props
   const getReturnTo = () => {
     if (returnTo) return returnTo;
     if (typeof window !== "undefined") {
@@ -74,13 +88,12 @@ export default function LoginForm({
     return null;
   };
 
-  // Helper to redirect after successful login
+  // Redirect after successful login
   const redirectAfterLogin = () => {
     const finalReturnTo = getReturnTo();
     if (finalReturnTo) {
       window.location.href = finalReturnTo;
     } else {
-      // Try to go back to previous page, fallback to '/'
       if (window.history.length > 1) {
         window.history.back();
       } else {
@@ -89,34 +102,13 @@ export default function LoginForm({
     }
   };
 
-  // Guard: check auth state on mount — use direct API call with timeout fallback
-  // This avoids depending on AuthProvider's loading state which may not initialize in time
+  // Guard: check auth state on mount
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
-
-    const checkAuth = async () => {
-      try {
-        // Set a timeout fallback — if auth doesn't respond in 3s, render the form anyway
-        timeout = setTimeout(() => {
-          console.warn('[LoginForm] Auth check timeout, rendering form');
-          setAuthChecked(true);
-          setIsLoggedIn(false);
-        }, 3000);
-
-        // Try to get user from Supabase directly
-        const user = await demoAuthApi.getUser();
-        clearTimeout(timeout);
-        setIsLoggedIn(!!user);
-      } catch (err) {
-        console.error('[LoginForm] Auth check error:', err);
-        clearTimeout(timeout);
-        setIsLoggedIn(false);
-      }
+    if (!loading) {
+      setIsLoggedIn(!!user);
       setAuthChecked(true);
-    };
-
-    checkAuth();
-  }, []);
+    }
+  }, [loading, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,7 +116,7 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await demoAuthApi.signIn(email, password);
+      const result = await signIn(email, password);
       if (result.success) {
         redirectAfterLogin();
       } else {
@@ -138,14 +130,16 @@ export default function LoginForm({
   };
 
   const handleGoogleSignIn = async () => {
-    const result = await demoAuthApi.signInWithOAuth('google');
+    setError("");
+    const result = await signInWithGoogle();
     if (result.error) {
       setError(result.error);
     }
   };
 
   const handleGithubSignIn = async () => {
-    const result = await demoAuthApi.signInWithOAuth('github');
+    setError("");
+    const result = await signInWithGithub();
     if (result.error) {
       setError(result.error);
     }
@@ -157,9 +151,29 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await demoAuthApi.signInWithMagicLink(magicLinkEmail);
+      const result = await signInWithMagicLink(magicLinkEmail);
       if (result.success) {
         setMagicLinkSent(true);
+      } else {
+        setError(result.error || "发送失败");
+      }
+    } catch (err) {
+      setError("发送失败");
+    }
+
+    setIsLoading(false);
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      // Use magic link flow for password reset
+      const result = await signInWithMagicLink(forgotPasswordEmail);
+      if (result.success) {
+        setForgotPasswordSent(true);
       } else {
         setError(result.error || "发送失败");
       }
@@ -199,6 +213,99 @@ export default function LoginForm({
     );
   }
 
+  // Show forgot password form
+  if (showForgotPassword) {
+    return (
+      <div className="w-full max-w-md mx-auto">
+        <h2 className="text-2xl font-bold text-center mb-6">{t.resetPasswordTitle}</h2>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
+          </div>
+        )}
+
+        {forgotPasswordSent ? (
+          <div className="space-y-4">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+              {t.resetPasswordSent}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setShowForgotPassword(false);
+                setForgotPasswordSent(false);
+                setForgotPasswordEmail("");
+                setError("");
+              }}
+              className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors"
+            >
+              {t.backToLogin}
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleForgotPassword} className="space-y-4">
+            <p className="text-sm text-gray-600 mb-4">
+              {locale === "zh"
+                ? "输入您的注册邮箱，我们将发送重置密码链接"
+                : "Enter your registered email, we'll send a password reset link"}
+            </p>
+            <div>
+              <label
+                htmlFor="forgotEmail"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                {t.email}
+              </label>
+              <input
+                type="email"
+                id="forgotEmail"
+                value={forgotPasswordEmail}
+                onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                placeholder="email@example.com"
+              />
+            </div>
+
+            {/* Turnstile Verification */}
+            <div className="mt-4">
+              <TurnstileWidget
+                onVerify={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken("")}
+              />
+              {!turnstileToken && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {t.verifyHuman}
+                </p>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              disabled={!turnstileToken || isLoading}
+              className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? t.loading : t.resetPassword}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowForgotPassword(false);
+                setError("");
+                setTurnstileToken("");
+              }}
+              className="w-full text-sm text-gray-600 hover:text-gray-900"
+            >
+              ← {t.backToLogin}
+            </button>
+          </form>
+        )}
+      </div>
+    );
+  }
+
   // Show login form
   return (
     <div className="w-full max-w-md mx-auto">
@@ -229,6 +336,8 @@ export default function LoginForm({
               placeholder="email@example.com"
             />
           </div>
+
+          {/* Turnstile Verification */}
           <div className="mt-4">
             <TurnstileWidget
               onVerify={(token) => setTurnstileToken(token)}
@@ -236,10 +345,11 @@ export default function LoginForm({
             />
             {!turnstileToken && (
               <p className="text-xs text-gray-500 mt-1">
-                {locale === "zh" ? "请先完成人机验证" : "Please complete verification first"}
+                {t.verifyHuman}
               </p>
             )}
           </div>
+
           <button
             type="submit"
             disabled={!turnstileToken || isLoading}
@@ -247,17 +357,23 @@ export default function LoginForm({
           >
             {isLoading ? t.loading : t.sendMagicLink}
           </button>
+
           {magicLinkSent && (
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
               {t.magicLinkSent}
             </div>
           )}
+
           <button
             type="button"
-            onClick={() => setShowMagicLink(false)}
+            onClick={() => {
+              setShowMagicLink(false);
+              setTurnstileToken("");
+              setError("");
+            }}
             className="w-full text-sm text-gray-600 hover:text-gray-900"
           >
-            ← 返回邮箱密码登录
+            ← {locale === "zh" ? "返回邮箱密码登录" : "Back to email login"}
           </button>
         </form>
       ) : (
@@ -299,9 +415,33 @@ export default function LoginForm({
               />
             </div>
 
+            {/* Forgot Password Link */}
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-sm text-primary-600 hover:text-primary-700"
+              >
+                {t.forgotPassword}
+              </button>
+            </div>
+
+            {/* Turnstile Verification for Login */}
+            <div className="mt-4">
+              <TurnstileWidget
+                onVerify={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken("")}
+              />
+              {!turnstileToken && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {t.verifyHuman}
+                </p>
+              )}
+            </div>
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={!turnstileToken || isLoading}
               className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? t.loading : t.submit}
@@ -317,6 +457,7 @@ export default function LoginForm({
             </button>
           </div>
 
+          {/* OAuth Buttons */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">

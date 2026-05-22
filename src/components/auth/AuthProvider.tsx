@@ -147,13 +147,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithMagicLink = useCallback(
     async (email: string) => {
       try {
+        // First check if user exists in our users table
+        const { data: profileData, error: profileError } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', email.toLowerCase())
+          .single();
+
+        // If profile not found, user doesn't exist
+        if (profileError || !profileData) {
+          return { success: false, error: '该邮箱尚未注册，请先注册账号' };
+        }
+
+        // User exists, send magic link
         const { error } = await supabase.auth.signInWithOtp({
           email,
           options: {
             emailRedirectTo: `${window.location.origin}/auth/callback`,
           },
         });
-        if (error) return { success: false, error: error.message };
+        if (error) {
+          // Handle specific error cases
+          if (error.message.toLowerCase().includes('user not found') ||
+              error.message.toLowerCase().includes('invalid')) {
+            return { success: false, error: '该邮箱尚未注册，请先注册账号' };
+          }
+          return { success: false, error: error.message };
+        }
         return { success: true };
       } catch (err) {
         return { success: false, error: "发生未知错误" };
