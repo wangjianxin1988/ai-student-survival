@@ -40,7 +40,6 @@ const translations = {
 };
 
 export default function ReactHeader({ locale = 'zh', currentPath = '/', siteName }: ReactHeaderProps) {
-  const { isDemoMode } = useAuth();
   const t = translations[locale];
   const links = baseNavLinks.map(link => ({
     href: getLocaleHref(link.href, locale),

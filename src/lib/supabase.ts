@@ -1,14 +1,19 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-// Hardcoded for Cloudflare Pages SSR reliability (not real secrets - anon keys are public)
-// These values are committed to the repo and safe to expose
-const supabaseUrl = 'https://giynvpfnzzelzwpmsgtf.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeW52cGZuenplbHp3cG1zZ3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDYxMjUsImV4cCI6MjA5NDc4MjEyNX0.TfBGkymlc-lMKkgmZHTUT-rMfOYo52VZRmbCU4bul9I';
+// Read from environment variables (Vite/Astro import.meta.env)
+// For Cloudflare Pages: defined in wrangler.toml [vars] as PUBLIC_SUPABASE_*
+// For GitHub Actions: passed as env vars with PUBLIC_ prefix
+const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined)
+  || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
+const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
+  || '';
 
 // Check if Supabase is properly configured
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey &&
-  supabaseUrl !== 'https://your-project.supabase.co' &&
-  supabaseAnonKey !== 'your-anon-key');
+export const isSupabaseConfigured = Boolean(
+  supabaseUrl && supabaseAnonKey &&
+  !supabaseUrl.includes('your-project') &&
+  !supabaseAnonKey.includes('your-anon-key')
+);
 
 // Lazy-loaded Supabase client to avoid WebSocket initialization during build
 let _supabase: SupabaseClient | null = null;
@@ -17,7 +22,6 @@ function getSupabaseClient(): SupabaseClient {
   if (_supabase) return _supabase;
 
   if (!isSupabaseConfigured) {
-    // Return a client that will fail gracefully - actual API calls won't happen without config
     return createClient('https://placeholder.supabase.co', 'placeholder-key', {
       auth: { autoRefreshToken: false, persistSession: false },
       global: { fetch: () => Promise.reject(new Error('Supabase not configured')) },
@@ -26,13 +30,13 @@ function getSupabaseClient(): SupabaseClient {
 
   _supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
-      autoRefreshToken: false,
-      persistSession: false,
+      autoRefreshToken: true,     // ✅ Enable token auto-refresh
+      persistSession: true,        // ✅ Enable session persistence (localStorage)
     },
     global: {
       fetch: (url, options) => {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+        const timeout = setTimeout(() => controller.abort(), 5000);
         return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
       },
     },
@@ -109,7 +113,6 @@ export interface DbUniversityPolicy {
   usnews_rank: number | null;
   overall_policy: 'allowed' | 'restricted' | 'prohibited' | 'case_by_case' | null;
   overall_summary: string | null;
-  // 场景政策
   teaching_policy: string | null;
   assignment_policy: string | null;
   group_project_policy: string | null;
@@ -117,16 +120,13 @@ export interface DbUniversityPolicy {
   thesis_policy: string | null;
   research_policy: string | null;
   coding_policy: string | null;
-  // 工具
   allowed_tools: string[];
   restricted_tools: string[];
   prohibited_tools: string[];
-  // 规范
   citation_requirement: string | null;
   disclosure_requirement: string | null;
   penalty: string | null;
   data_privacy: string | null;
-  // 来源
   source_url: string | null;
   source_url_backup: string | null;
   policy_document_title: string | null;
@@ -153,7 +153,6 @@ export interface DbPromptTemplate {
   tags: string[];
   created_at: string;
   updated_at: string;
-  // 更新说明来源
   update_source_url?: string;
   update_source_type?: 'github' | 'changelog' | 'blog' | 'none';
 }
@@ -167,20 +166,12 @@ export interface Tool {
   category: 'writing' | 'coding' | 'design' | 'research' | 'communication' | 'agent';
   subcategory: string;
   pricing: 'free' | 'freemium' | 'paid';
-  priceDetail: {
-    monthly?: number;
-    yearly?: number;
-    currency: string;
-  };
+  priceDetail: { monthly?: number; yearly?: number; currency: string };
   url: string;
   imageUrl: string;
   rating: number;
   ratingCount: number;
-  dimensions: {
-    easeOfUse: number;
-    features: number;
-    value: number;
-  };
+  dimensions: { easeOfUse: number; features: number; value: number };
   tags: string[];
   features: string[];
   alternatives: string[];
@@ -193,7 +184,6 @@ export interface Tool {
     tips: string[];
     updateNotes: string;
   };
-  // 更新说明实时抓取配置
   updateSourceUrl?: string;
   updateSourceType?: 'github' | 'changelog' | 'blog' | 'none';
 }
@@ -230,7 +220,6 @@ export interface UniversityPolicy {
   usnewsRank: number;
   overallPolicy: 'allowed' | 'restricted' | 'prohibited' | 'case_by_case';
   overallSummary: string;
-  // 场景政策
   teachingPolicy: string;
   assignmentPolicy: string;
   groupProjectPolicy: string;
@@ -238,16 +227,13 @@ export interface UniversityPolicy {
   thesisPolicy: string;
   researchPolicy: string;
   codingPolicy: string;
-  // 工具
   allowedTools: string[];
   restrictedTools: string[];
   prohibitedTools: string[];
-  // 规范
   citationRequirement: string;
   disclosureRequirement: string;
   penalty: string;
   dataPrivacy: string;
-  // 来源
   sourceUrl: string;
   sourceUrlBackup: string;
   policyDocumentTitle: string;
@@ -311,6 +297,49 @@ export function transformTool(dbTool: DbTool): Tool {
   };
 }
 
+export function transformUniversityPolicy(db: DbUniversityPolicy): UniversityPolicy {
+  return {
+    id: db.id,
+    universityName: db.university_name,
+    universityNameEn: db.university_name_en || db.university_name,
+    universitySlug: db.university_slug,
+    country: db.country,
+    countryEn: db.country_en || db.country,
+    region: db.region || '',
+    city: db.city || '',
+    flagEmoji: db.flag_emoji || '🏛️',
+    qsRank: db.qs_rank || 0,
+    timesRank: db.times_rank || 0,
+    usnewsRank: db.usnews_rank || 0,
+    overallPolicy: db.overall_policy || 'case_by_case',
+    overallSummary: db.overall_summary || '',
+    teachingPolicy: db.teaching_policy || '',
+    assignmentPolicy: db.assignment_policy || '',
+    groupProjectPolicy: db.group_project_policy || '',
+    examPolicy: db.exam_policy || '',
+    thesisPolicy: db.thesis_policy || '',
+    researchPolicy: db.research_policy || '',
+    codingPolicy: db.coding_policy || '',
+    allowedTools: db.allowed_tools || [],
+    restrictedTools: db.restricted_tools || [],
+    prohibitedTools: db.prohibited_tools || [],
+    citationRequirement: db.citation_requirement || '',
+    disclosureRequirement: db.disclosure_requirement || '',
+    penalty: db.penalty || '',
+    dataPrivacy: db.data_privacy || '',
+    sourceUrl: db.source_url || '',
+    sourceUrlBackup: db.source_url_backup || '',
+    policyDocumentTitle: db.policy_document_title || '',
+    lastUpdated: db.last_updated || '',
+    nextReviewDate: db.next_review_date || '',
+    version: db.version || '1.0',
+    verified: db.verified || false,
+    verifiedBy: db.verified_by || '',
+    createdAt: db.created_at,
+    updatedAt: db.updated_at,
+  };
+}
+
 // API helper functions
 export async function getTools(params?: {
   category?: string;
@@ -363,7 +392,7 @@ export async function getPaymentSolutions(params?: {
     query = query.contains('tool_ids', [params.toolId]);
   }
 
-  const { data, error } = await query.order('rating', { ascending: false });
+  const { data, error } = query.order('rating', { ascending: false });
 
   if (error) throw error;
   return data as DbPaymentSolution[];
@@ -394,49 +423,6 @@ export async function getUniversityPolicies(params?: {
 
   if (error) throw error;
   return (data as DbUniversityPolicy[]).map(transformUniversityPolicy);
-}
-
-export function transformUniversityPolicy(db: DbUniversityPolicy): UniversityPolicy {
-  return {
-    id: db.id,
-    universityName: db.university_name,
-    universityNameEn: db.university_name_en || db.university_name,
-    universitySlug: db.university_slug,
-    country: db.country,
-    countryEn: db.country_en || db.country,
-    region: db.region || '',
-    city: db.city || '',
-    flagEmoji: db.flag_emoji || '🏛️',
-    qsRank: db.qs_rank || 0,
-    timesRank: db.times_rank || 0,
-    usnewsRank: db.usnews_rank || 0,
-    overallPolicy: db.overall_policy || 'case_by_case',
-    overallSummary: db.overall_summary || '',
-    teachingPolicy: db.teaching_policy || '',
-    assignmentPolicy: db.assignment_policy || '',
-    groupProjectPolicy: db.group_project_policy || '',
-    examPolicy: db.exam_policy || '',
-    thesisPolicy: db.thesis_policy || '',
-    researchPolicy: db.research_policy || '',
-    codingPolicy: db.coding_policy || '',
-    allowedTools: db.allowed_tools || [],
-    restrictedTools: db.restricted_tools || [],
-    prohibitedTools: db.prohibited_tools || [],
-    citationRequirement: db.citation_requirement || '',
-    disclosureRequirement: db.disclosure_requirement || '',
-    penalty: db.penalty || '',
-    dataPrivacy: db.data_privacy || '',
-    sourceUrl: db.source_url || '',
-    sourceUrlBackup: db.source_url_backup || '',
-    policyDocumentTitle: db.policy_document_title || '',
-    lastUpdated: db.last_updated || '',
-    nextReviewDate: db.next_review_date || '',
-    version: db.version || '1.0',
-    verified: db.verified || false,
-    verifiedBy: db.verified_by || '',
-    createdAt: db.created_at,
-    updatedAt: db.updated_at,
-  };
 }
 
 export async function getPromptTemplates(params?: {

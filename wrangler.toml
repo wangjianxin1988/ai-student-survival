@@ -4,8 +4,8 @@ name = "ai-student-survival"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
-# 环境变量 - 在 Astro SSR 中通过 import.meta.env.SUPABASE_* 访问
+# 环境变量 - 在 Astro SSR 中通过 import.meta.env.PUBLIC_* 访问
 [vars]
-SUPABASE_URL = "https://giynvpfnzzelzwpmsgtf.supabase.co"
-SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeW52cGZuenplbHp3cG1zZ3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDYxMjUsImV4cCI6MjA5NDc4MjEyNX0.TfBGkymlc-lMKkgmZHTUT-rMfOYo52VZRmbCU4bul9I"
+PUBLIC_SUPABASE_URL = "https://giynvpfnzzelzwpmsgtf.supabase.co"
+PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeW52cGZuenplbHp3cG1zZ3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDYxMjUsImV4cCI6MjA5NDc4MjEyNX0.TfBGkymlc-lMKkgmZHTUT-rMfOYo52VZRmbCU4bul9I"
 

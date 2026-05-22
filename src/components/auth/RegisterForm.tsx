@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { demoAuthApi } from "@/lib/auth";
-import {
-  isPasswordVerified,
-  setPasswordVerified,
-  verifyPassword,
-} from "@/lib/passwordAuth";
 import { useAuth } from "./AuthProvider";
 
 interface RegisterFormProps {
@@ -26,19 +21,13 @@ const translations = {
     orContinueWith: "或其他方式注册",
     googleSignIn: "Google",
     githubSignIn: "GitHub",
-    appleSignIn: "Apple",
     loading: "注册中...",
     error: "注册失败",
     passwordMismatch: "两次密码输入不一致",
     passwordTooShort: "密码至少6个字符",
-    demoMode: "演示模式",
-    demoModeHint: "Supabase未配置，使用演示模式注册",
-    passwordRequired: "请输入访问密码",
-    passwordPlaceholder: "输入访问密码",
-    enterSite: "进入网站",
-    passwordError: "密码错误",
-    passwordSuccess: "密码验证成功",
-    passwordSuccessHint: "您已获得访问权限，可以使用以下方式注册",
+    passwordWeak: "密码强度：弱",
+    passwordMedium: "密码强度：中等",
+    passwordStrong: "密码强度：强",
   },
   en: {
     title: "Register",
@@ -52,19 +41,13 @@ const translations = {
     orContinueWith: "or continue with",
     googleSignIn: "Google",
     githubSignIn: "GitHub",
-    appleSignIn: "Apple",
     loading: "Registering...",
     error: "Registration failed",
     passwordMismatch: "Passwords do not match",
     passwordTooShort: "Password must be at least 6 characters",
-    demoMode: "Demo Mode",
-    demoModeHint: "Supabase not configured, using demo mode",
-    passwordRequired: "Password required",
-    passwordPlaceholder: "Enter access password",
-    enterSite: "Enter Site",
-    passwordError: "Incorrect password",
-    passwordSuccess: "Password verified",
-    passwordSuccessHint: "You have access. Use the options below to register.",
+    passwordWeak: "Weak",
+    passwordMedium: "Medium",
+    passwordStrong: "Strong",
   },
 };
 
@@ -81,11 +64,9 @@ export default function RegisterForm({
   const [isLoading, setIsLoading] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [passwordVerified, setPasswordVerifiedLocal] = useState(false);
-  const [accessPassword, setAccessPassword] = useState("");
 
   const t = translations[locale];
-  const { signInWithGoogle, signInWithGithub, signInWithApple } = useAuth();
+  const { signInWithGoogle, signInWithGithub } = useAuth();
 
   // Password strength checker
   const getPasswordStrength = (
@@ -119,41 +100,16 @@ export default function RegisterForm({
     }
   };
 
-  // Guard: check auth state on mount and check password verification
+  // Guard: check auth state on mount
   useEffect(() => {
     const checkAuth = async () => {
-      // Check password verification status
-      if (isPasswordVerified()) {
-        setPasswordVerifiedLocal(true);
-      }
-
-      // Check if user is logged in via demoAuthApi
+      // Check if user is logged in via Supabase
       const user = await demoAuthApi.getUser();
       setIsLoggedIn(!!user);
       setAuthChecked(true);
     };
     checkAuth();
   }, []);
-
-  // Handle password verification
-  const handlePasswordSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    // Simulate network delay for security
-    await new Promise((resolve) => setTimeout(resolve, 300));
-
-    if (verifyPassword(accessPassword)) {
-      setPasswordVerifiedLocal(true);
-      setPasswordVerified();
-    } else {
-      setError(t.passwordError);
-      setAccessPassword("");
-    }
-
-    setIsLoading(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,10 +142,6 @@ export default function RegisterForm({
   };
 
   const handleGoogleSignIn = async () => {
-    if (!passwordVerified) {
-      setError("请先输入访问密码");
-      return;
-    }
     const result = await signInWithGoogle();
     if (result.error) {
       setError(result.error);
@@ -197,22 +149,7 @@ export default function RegisterForm({
   };
 
   const handleGithubSignIn = async () => {
-    if (!passwordVerified) {
-      setError("请先输入访问密码");
-      return;
-    }
     const result = await signInWithGithub();
-    if (result.error) {
-      setError(result.error);
-    }
-  };
-
-  const handleAppleSignIn = async () => {
-    if (!passwordVerified) {
-      setError("请先输入访问密码");
-      return;
-    }
-    const result = await signInWithApple();
     if (result.error) {
       setError(result.error);
     }
@@ -247,77 +184,10 @@ export default function RegisterForm({
     );
   }
 
-  // If password not verified, show password entry form
-  if (!passwordVerified) {
-    return (
-      <div className="w-full max-w-md mx-auto">
-        <h2 className="text-2xl font-bold text-center mb-6">MI TO AI</h2>
-
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <form onSubmit={handlePasswordSubmit} className="space-y-4">
-            <div>
-              <label
-                htmlFor="accessPassword"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                {t.passwordRequired}
-              </label>
-              <input
-                type="password"
-                id="accessPassword"
-                value={accessPassword}
-                onChange={(e) => setAccessPassword(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                placeholder={t.passwordPlaceholder}
-                autoFocus
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={isLoading || !accessPassword}
-              className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? t.loading : t.enterSite}
-            </button>
-          </form>
-        </div>
-
-        <p className="mt-6 text-center text-sm text-gray-500">
-          演示模式密码保护 | 密码由管理员提供
-        </p>
-
-        <p className="mt-6 text-center text-sm text-gray-600">
-          {t.hasAccount}{" "}
-          <button
-            onClick={
-              onSwitchToLogin ?? (() => (window.location.href = "/auth/login"))
-            }
-            className="text-primary-600 hover:text-primary-700 font-medium"
-          >
-            {t.login}
-          </button>
-        </p>
-      </div>
-    );
-  }
-
-  // Password verified - show registration form with OAuth options
+  // Show registration form
   return (
     <div className="w-full max-w-md mx-auto">
       <h2 className="text-2xl font-bold text-center mb-6">{t.title}</h2>
-
-      <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
-        <div className="font-medium">{t.passwordSuccess}</div>
-        <div className="text-green-600">{t.passwordSuccessHint}</div>
-      </div>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
@@ -503,15 +373,6 @@ export default function RegisterForm({
             <span className="text-sm font-medium">{t.githubSignIn}</span>
           </button>
 
-          <button
-            onClick={handleAppleSignIn}
-            className="flex items-center justify-center gap-2 py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-            </svg>
-            <span className="text-sm font-medium">{t.appleSignIn}</span>
-          </button>
         </div>
       </div>
 

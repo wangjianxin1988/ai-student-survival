@@ -1,7 +1,7 @@
 ---
 name: ChatGPT
 slug: chatgpt
-description: OpenAI开发的AI对话助手，支持写作、编程、分析等多种任务
+description: OpenAI的对话AI，能帮你写作、写代码、分析问题。免费版够用，Plus版响应更快
 category: communication
 subcategory: chatbot
 pricing: freemium

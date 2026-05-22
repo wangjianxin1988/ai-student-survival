@@ -1,7 +1,7 @@
 ---
 name: Claude
 slug: claude
-description: Anthropic开发的AI助手，擅长长文本处理和复杂分析
+description: Anthropic做的AI助手，长文本处理能力强，适合需要读长文章或写长文的时候用
 category: communication
 subcategory: chatbot
 pricing: freemium
