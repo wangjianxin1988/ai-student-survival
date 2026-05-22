@@ -213,7 +213,7 @@ export default function ContactForm({ locale = "zh" }: ContactFormProps) {
               {t.developerEmail}:
             </span>
             <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900 font-mono">
-              contact@example.com
+              18801400211@163.com
             </code>
           </div>
         </div>

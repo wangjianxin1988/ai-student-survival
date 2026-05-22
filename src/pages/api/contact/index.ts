@@ -159,7 +159,7 @@ export const GET: APIRoute = async () => {
         ],
         developerContact: {
           wechat: 'jian_xin_happy',
-          email: 'contact@example.com',
+          email: '18801400211@163.com',
         },
       },
     }),

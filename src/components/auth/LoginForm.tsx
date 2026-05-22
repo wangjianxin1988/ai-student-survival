@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { demoAuthApi } from "@/lib/auth";
 import { useAuth } from "./AuthProvider";
+import { TurnstileWidget } from "./TurnstileWidget";
 
 interface LoginFormProps {
   locale?: "zh" | "en";
@@ -57,11 +57,12 @@ export default function LoginForm({
   const [showMagicLink, setShowMagicLink] = useState(false);
   const [magicLinkEmail, setMagicLinkEmail] = useState("");
   const [magicLinkSent, setMagicLinkSent] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
-  const { signInWithGoogle, signInWithGithub } = useAuth();
+  const { user, loading, signIn, signInWithGoogle, signInWithGithub, signInWithMagicLink } = useAuth();
 
   // Get returnTo from URL if not provided via props (for ?redirect=xxx from middleware)
   const getReturnTo = () => {
@@ -89,16 +90,13 @@ export default function LoginForm({
     }
   };
 
-  // Guard: check auth state on mount
+  // Guard: check auth state on mount using useAuth state
   useEffect(() => {
-    const checkAuth = async () => {
-      // Check if user is logged in via Supabase
-      const user = await demoAuthApi.getUser();
+    if (!loading) {
       setIsLoggedIn(!!user);
       setAuthChecked(true);
-    };
-    checkAuth();
-  }, []);
+    }
+  }, [loading, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,7 +104,7 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await demoAuthApi.signIn(email, password);
+      const result = await signIn(email, password);
       if (result.success) {
         redirectAfterLogin();
       } else {
@@ -139,7 +137,7 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await demoAuthApi.signInWithMagicLink(magicLinkEmail);
+      const result = await signInWithMagicLink(magicLinkEmail);
       if (result.success) {
         setMagicLinkSent(true);
       } else {
@@ -211,9 +209,20 @@ export default function LoginForm({
               placeholder="email@example.com"
             />
           </div>
+          <div className="mt-4">
+            <TurnstileWidget
+              onVerify={(token) => setTurnstileToken(token)}
+              onExpire={() => setTurnstileToken("")}
+            />
+            {!turnstileToken && (
+              <p className="text-xs text-gray-500 mt-1">
+                {locale === "zh" ? "请先完成人机验证" : "Please complete verification first"}
+              </p>
+            )}
+          </div>
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={!turnstileToken || isLoading}
             className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? t.loading : t.sendMagicLink}
@@ -300,10 +309,10 @@ export default function LoginForm({
               </div>
             </div>
 
-            <div className="mt-4 grid grid-cols-3 gap-3">
+            <div className="mt-4 flex flex-wrap justify-center gap-3">
               <button
                 onClick={handleGoogleSignIn}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-w-[140px]"
               >
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
                   <path
@@ -328,7 +337,7 @@ export default function LoginForm({
 
               <button
                 onClick={handleGithubSignIn}
-                className="flex items-center justify-center gap-2 py-2.5 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-w-[140px]"
               >
                 <svg
                   className="w-5 h-5"

@@ -5,3 +5,6 @@ allowBuilds:
   protobufjs: true
   sharp: true
   workerd: true
+publicHoistPattern:
+  - "*react-turnstile*"
+  - "*@marsidev*"

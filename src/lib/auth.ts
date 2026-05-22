@@ -260,6 +260,7 @@ export const demoAuthApi = {
 
   /**
    * Sign in with magic link (email OTP)
+   * Only sends magic link if the email is already registered
    */
   async signInWithMagicLink(email: string): Promise<MagicLinkResult> {
     if (!isSupabaseConfigured) {
@@ -267,6 +268,20 @@ export const demoAuthApi = {
     }
 
     try {
+      // First check if user exists by attempting to get user profile
+      // This will fail for non-existent users
+      const { data: profileData, error: profileError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .single();
+
+      // If profile not found, user doesn't exist
+      if (profileError || !profileData) {
+        return { success: false, error: '该邮箱尚未注册，请先注册账号' };
+      }
+
+      // User exists, now send magic link
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -275,6 +290,11 @@ export const demoAuthApi = {
       });
 
       if (error) {
+        // Handle specific error cases
+        if (error.message.toLowerCase().includes('user not found') ||
+            error.message.toLowerCase().includes('invalid')) {
+          return { success: false, error: '该邮箱尚未注册，请先注册账号' };
+        }
         return { success: false, error: error.message };
       }
 
