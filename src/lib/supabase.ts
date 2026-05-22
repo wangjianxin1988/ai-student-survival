@@ -1,11 +1,13 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
 // Read from environment variables (Vite/Astro import.meta.env)
-// For Cloudflare Pages: defined in wrangler.toml [vars] as PUBLIC_SUPABASE_*
-// For GitHub Actions: passed as env vars with PUBLIC_ prefix
+// Cloudflare Pages runtime: wrangler.toml vars exposed as SUPABASE_URL / SUPABASE_ANON_KEY
+// GitHub Actions build: env vars exposed as PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_ANON_KEY
 const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined)
+  || (import.meta.env.SUPABASE_URL as string | undefined)
   || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
 const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
+  || (import.meta.env.SUPABASE_ANON_KEY as string | undefined)
   || '';
 
 // Check if Supabase is properly configured
