@@ -104,7 +104,14 @@ export default function LoginForm({
 
   // Guard: check auth state on mount
   useEffect(() => {
+    // If still loading after 2s, proceed anyway to show the form
+    const fallbackTimeout = setTimeout(() => {
+      setAuthChecked(true);
+      setIsLoggedIn(false);
+    }, 2000);
+
     if (!loading) {
+      clearTimeout(fallbackTimeout);
       setIsLoggedIn(!!user);
       setAuthChecked(true);
     }
