@@ -208,14 +208,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// Safe default values for SSR and fallback scenarios
+const safeDefault: AuthContextType = {
+  user: null,
+  loading: true,
+  signIn: async () => ({ success: false, error: "Auth not initialized" }),
+  signUp: async () => ({ success: false, error: "Auth not initialized" }),
+  signOut: async () => {},
+  signInWithGoogle: async () => ({ error: "Auth not initialized" }),
+  signInWithGithub: async () => ({ error: "Auth not initialized" }),
+  signInWithMagicLink: async () => ({ success: false, error: "Auth not initialized" }),
+};
+
 export function useAuth() {
   const context = useContext(AuthContext);
-  // Throw error if AuthProvider is not found - this should not happen in normal usage
+  // Return safe default during SSR instead of throwing
+  // This prevents SSR hydration errors while maintaining type safety
   if (context === undefined) {
-    throw new Error(
-      "useAuth must be used within an AuthProvider. " +
-      "Make sure LoginForm is wrapped by AuthProvider in the layout."
-    );
+    return safeDefault;
   }
   return context;
 }
