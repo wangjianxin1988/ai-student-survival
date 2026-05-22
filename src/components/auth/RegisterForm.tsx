@@ -377,6 +377,7 @@ export default function RegisterForm({
 
         <div className="mt-4 flex flex-wrap justify-center gap-3">
           <button
+            type="button"
             onClick={handleGoogleSignIn}
             className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-w-[140px]"
           >
@@ -402,6 +403,7 @@ export default function RegisterForm({
           </button>
 
           <button
+            type="button"
             onClick={handleGithubSignIn}
             className="flex items-center justify-center gap-2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors min-w-[140px]"
           >
