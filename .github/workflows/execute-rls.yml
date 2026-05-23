@@ -15,20 +15,26 @@ jobs:
         run: |
           echo "Executing RLS migration..."
 
-          # Read the RLS SQL file
-          SQL_CONTENT=$(cat supabase/migrations/20260523_add_rls_policies.sql)
+          # Create JSON payload file to avoid shell escaping issues
+          cat > /tmp/rls_payload.json << 'JSONEOF'
+          {"query": "PLACEHOLDER"}
+          JSONEOF
+
+          # Read the RLS SQL file, encode properly, and inject into JSON
+          jq --arg sql "$(cat supabase/migrations/20260523_add_rls_policies.sql | jq -Rs .)" \
+            '.query = $sql' /tmp/rls_payload.json > /tmp/rls_request.json
 
           # Execute via Supabase Management API
           RESPONSE=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
             -H "Content-Type: application/json" \
-            -d "{\"query\": \"$(echo "$SQL_CONTENT" | jq -Rs .)\"}")
+            -d @/tmp/rls_request.json)
 
           echo "Response: $RESPONSE"
 
           # Check if the query succeeded
-          if echo "$RESPONSE" | grep -q '"error"'; then
+          if echo "$RESPONSE" | grep -qi '"error"'; then
             echo "Error detected in response"
             echo "$RESPONSE" | jq .
             exit 1
