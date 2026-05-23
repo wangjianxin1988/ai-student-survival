@@ -25,3 +25,28 @@ jobs:
             exit 1
           fi
           echo "RLS migration executed"
+
+      - name: Configure Cloudflare Turnstile
+        run: |
+          echo "Checking existing Turnstile sites..."
+          RESPONSE=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+          echo "Turnstile response: $RESPONSE"
+          TURNSTILE_COUNT=$(echo "$RESPONSE" | jq -r '.result | length')
+          echo "Found $TURNSTILE_COUNT Turnstile site(s)"
+          if [ "$TURNSTILE_COUNT" = "0" ] || [ "$TURNSTILE_COUNT" = "null" ]; then
+            echo "Creating Turnstile site..."
+            CREATE=$(curl -s -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{"name": "mi-to-ai.com", "domain": "mi-to-ai.com", "mode": "non-interactive"}')
+            echo "Create response: $CREATE"
+            SITE_KEY=$(echo "$CREATE" | jq -r '.result.sitekey // empty')
+          else
+            SITE_KEY=$(echo "$RESPONSE" | jq -r '.[0].sitekey // .result[0].sitekey // empty')
+          fi
+          echo "Site key: $SITE_KEY"
+          echo "::notice::Turnstile Site Key: $SITE_KEY"
