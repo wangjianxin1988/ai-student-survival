@@ -57,10 +57,23 @@ export default function CampusMap({
       mapInstanceRef.current = map;
 
       // Tile layer - OpenStreetMap
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 19,
       }).addTo(map);
+
+      // Satellite tile layer option
+      const satelliteTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: '&copy; Esri',
+        maxZoom: 19,
+      });
+
+      // Layer control for Street/Satellite toggle
+      const baseMaps = {
+        'Street Map': tileLayer,
+        'Satellite': satelliteTileLayer,
+      };
+      L.control.layers(baseMaps).addTo(map);
 
       // Click handler for add mode
       if (isAddMode && onMapClick) {
@@ -77,13 +90,16 @@ export default function CampusMap({
         markersLayerRef.current.clearLayers();
         markers.forEach(marker => {
           const uni = universities.find(u => u.id === marker.universityId);
-          const popup = L.popup()
-            .setContent(`
-              <div class="p-2">
-                <h3 class="font-semibold">${marker.nameZh || marker.name}</h3>
-                <p class="text-sm text-gray-600">${marker.descriptionZh || marker.description}</p>
-              </div>
-            `);
+          const popupContent = `
+            <div class="p-2 min-w-[200px]">
+              <h3 class="font-semibold text-sm">${marker.nameZh || marker.name}</h3>
+              <p class="text-xs text-gray-500 mt-1">${marker.universityName || ''}</p>
+              <p class="text-xs text-gray-600 mt-1">${marker.descriptionZh || marker.description || ''}</p>
+              ${marker.rating ? `<div class="flex items-center mt-2 text-xs">${marker.rating}/5 (${marker.ratingCount || 0} reviews)</div>` : ''}
+              <a href="/map?marker=${marker.id}" class="block mt-2 text-xs text-blue-500 hover:text-blue-700">View Details</a>
+            </div>
+          `;
+          const popup = L.popup().setContent(popupContent);
           L.marker([marker.coordinates.lat, marker.coordinates.lng])
             .bindPopup(popup)
             .addTo(markersLayerRef.current);
@@ -109,13 +125,16 @@ export default function CampusMap({
       const L = (await import('leaflet')).default;
       markersLayerRef.current.clearLayers();
       markers.forEach(marker => {
-        const popup = L.popup()
-          .setContent(`
-            <div class="p-2">
-              <h3 class="font-semibold">${marker.nameZh || marker.name}</h3>
-              <p class="text-sm text-gray-600">${marker.descriptionZh || marker.description}</p>
-            </div>
-          `);
+        const popupContent = `
+          <div class="p-2 min-w-[200px]">
+            <h3 class="font-semibold text-sm">${marker.nameZh || marker.name}</h3>
+            <p class="text-xs text-gray-500 mt-1">${marker.universityName || ''}</p>
+            <p class="text-xs text-gray-600 mt-1">${marker.descriptionZh || marker.description || ''}</p>
+            ${marker.rating ? `<div class="flex items-center mt-2 text-xs">${marker.rating}/5 (${marker.ratingCount || 0} reviews)</div>` : ''}
+            <a href="/map?marker=${marker.id}" class="block mt-2 text-xs text-blue-500 hover:text-blue-700">View Details</a>
+          </div>
+        `;
+        const popup = L.popup().setContent(popupContent);
         L.marker([marker.coordinates.lat, marker.coordinates.lng])
           .bindPopup(popup)
           .addTo(markersLayerRef.current);
@@ -146,7 +165,7 @@ export default function CampusMap({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" style={{ zIndex: 1 }}>
       <div
         ref={mapRef}
         style={{ height }}

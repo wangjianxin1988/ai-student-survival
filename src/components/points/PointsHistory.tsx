@@ -79,7 +79,14 @@ export function PointsHistory({ userId }: PointsHistoryProps) {
         </div>
       ) : transactions.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          <p>暂无积分记录</p>
+          <p className="text-lg mb-2">暂无积分记录</p>
+          <p className="text-sm">在社区发帖、评论可获得积分奖励</p>
+          <a
+            href="/questions"
+            className="inline-block mt-4 px-4 py-2 bg-primary-500 text-white rounded-lg text-sm hover:bg-primary-600 transition-colors"
+          >
+            前往社区
+          </a>
         </div>
       ) : (
         <>

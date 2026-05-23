@@ -23,6 +23,7 @@ const categories = [...new Set(mapMarkers.map(m => m.category))];
       </div>
       <a
         href="/map/add"
+        aria-label="添加新标记"
         class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors shadow-sm"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -58,4 +59,4 @@ const categories = [...new Set(mapMarkers.map(m => m.category))];
       共 {universities.length} 所大学 · {mapMarkers.length} 个地点标记
     </div>
   </main>
-</ Layout>
+</Layout>

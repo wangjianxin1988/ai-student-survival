@@ -581,7 +581,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
             <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-medium text-gray-900">
-                  {(comment as any).author?.name ||
+                  {comment.author?.name ||
                     comment.userName ||
                     "匿名用户"}
                 </span>

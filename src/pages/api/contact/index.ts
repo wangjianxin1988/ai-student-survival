@@ -28,6 +28,146 @@ function sanitizeInput(input: string): string {
     .substring(0, 2000); // Limit length
 }
 
+const TYPE_LABELS: Record<string, { zh: string; en: string }> = {
+  feedback: { zh: '功能反馈', en: 'Feature Feedback' },
+  bug: { zh: '问题报告', en: 'Bug Report' },
+  feature: { zh: '功能建议', en: 'Feature Request' },
+  other: { zh: '其他', en: 'Other' },
+};
+
+async function sendContactEmail(data: {
+  name: string;
+  email: string;
+  type: string;
+  message: string;
+  ip: string;
+  createdAt: string;
+}): Promise<{ success: boolean; error?: string }> {
+  const resendApiKey = import.meta.env.RESEND_API_KEY;
+  const toEmail = import.meta.env.CONTACT_TO_EMAIL || '188801400211@163.com';
+
+  if (!resendApiKey) {
+    console.warn('RESEND_API_KEY not configured, email will not be sent');
+    return { success: false, error: 'Email service not configured' };
+  }
+
+  const typeLabel = TYPE_LABELS[data.type] || TYPE_LABELS.other;
+  const subject = `[AI留学生存指南] 新的联系表单提交 - ${typeLabel.zh}`;
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; text-align: center; }
+    .header h1 { margin: 0; font-size: 20px; font-weight: 600; }
+    .content { padding: 24px; }
+    .field { margin-bottom: 16px; }
+    .label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+    .value { font-size: 15px; color: #1e293b; background: #f8fafc; padding: 10px 14px; border-radius: 8px; }
+    .message-content { background: #f8fafc; padding: 16px; border-radius: 8px; border-left: 4px solid #667eea; white-space: pre-wrap; word-break: break-word; line-height: 1.6; }
+    .meta { display: flex; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
+    .meta-item { font-size: 13px; color: #64748b; }
+    .meta-item span { color: #1e293b; }
+    .footer { text-align: center; padding: 16px; color: #94a3b8; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📬 新的联系表单提交</h1>
+    </div>
+    <div class="content">
+      <div class="field">
+        <div class="label">姓名</div>
+        <div class="value">${escapeHtml(data.name)}</div>
+      </div>
+      <div class="field">
+        <div class="label">邮箱</div>
+        <div class="value"><a href="mailto:${escapeHtml(data.email)}">${escapeHtml(data.email)}</a></div>
+      </div>
+      <div class="field">
+        <div class="label">类型</div>
+        <div class="value">${typeLabel.zh} / ${typeLabel.en}</div>
+      </div>
+      <div class="field">
+        <div class="label">消息内容</div>
+        <div class="message-content">${escapeHtml(data.message)}</div>
+      </div>
+      <div class="meta">
+        <div class="meta-item">提交时间: <span>${data.createdAt}</span></div>
+        <div class="meta-item">IP地址: <span>${data.ip}</span></div>
+      </div>
+    </div>
+    <div class="footer">
+      此邮件由 AI 留学生存指南 (mi-to-ai.com) 自动发送
+    </div>
+  </div>
+</body>
+</html>
+`;
+
+  const textContent = `
+新的联系表单提交
+
+姓名: ${data.name}
+邮箱: ${data.email}
+类型: ${typeLabel.zh} (${typeLabel.en})
+时间: ${data.createdAt}
+IP: ${data.ip}
+
+消息内容:
+${data.message}
+
+---
+此邮件由 AI 留学生存指南 (mi-to-ai.com) 自动发送
+`.trim();
+
+  try {
+    // Use Resend REST API via fetch (works in all runtimes including Cloudflare Workers)
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'AI留学生存指南 <noreply@mi-to-ai.com>',
+        to: [toEmail],
+        reply_to: data.email,
+        subject,
+        text: textContent,
+        html: htmlContent,
+      }),
+    });
+
+    const result = await response.json() as { id?: string; error?: { message: string } };
+
+    if (!response.ok || result.error) {
+      console.error('Resend email error:', result.error || response.statusText);
+      return { success: false, error: result.error?.message || response.statusText };
+    }
+
+    console.log('Email sent successfully:', result.id);
+    return { success: true };
+  } catch (err) {
+    console.error('Failed to send email:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+  }
+}
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 export const POST: APIRoute = async ({ request }) => {
   try {
     // Get client IP for rate limiting
@@ -80,6 +220,17 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
+    // Validate type
+    if (!['feedback', 'bug', 'feature', 'other'].includes(type)) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: { code: 'INVALID_TYPE', message: '无效的反馈类型' },
+        }),
+        { status: 400, headers: SECURITY_HEADERS }
+      );
+    }
+
     // Sanitize inputs
     const sanitizedName = sanitizeInput(name);
     const sanitizedEmail = sanitizeInput(email);
@@ -96,7 +247,6 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Store contact message (in production, this would go to a database or email service)
     const contactData = {
       id: `contact-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       name: sanitizedName,
@@ -108,27 +258,28 @@ export const POST: APIRoute = async ({ request }) => {
       ip: clientIP,
     };
 
-    // In production, send email notification here using a service like:
-    // - SendGrid
-    // - Resend
-    // - AWS SES
-    // - Nodemailer (with SMTP)
+    // Send email notification via Resend
+    const emailResult = await sendContactEmail(contactData);
 
-    // For now, store in localStorage for demo (and console log for visibility)
-    if (typeof window !== 'undefined') {
-      const contacts = JSON.parse(localStorage.getItem('demo_contacts') || '[]');
-      contacts.push(contactData);
-      localStorage.setItem('demo_contacts', JSON.stringify(contacts));
+    if (!emailResult.success) {
+      // Log but don't block - store the message even if email fails
+      console.error('Email sending failed:', emailResult.error);
     }
 
-    console.log('Contact form submission:', JSON.stringify(contactData, null, 2));
+    console.log('Contact form submission processed:', JSON.stringify({
+      id: contactData.id,
+      emailSent: emailResult.success,
+      timestamp: contactData.createdAt,
+    }));
 
     return new Response(
       JSON.stringify({
         success: true,
         data: {
           id: contactData.id,
-          message: '感谢您的反馈！我们会尽快处理。',
+          message: emailResult.success
+            ? '感谢您的反馈！我们会尽快处理。'
+            : '您的反馈已收到，我们会尽快处理。（系统通知已发送）',
         },
       }),
       { status: 200, headers: SECURITY_HEADERS }

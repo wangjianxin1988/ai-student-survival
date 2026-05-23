@@ -111,6 +111,12 @@ export interface CommunityPost {
   updatedAt: string;
 }
 
+export interface PostCommentAuthor {
+  id?: string;
+  name?: string;
+  avatar?: string;
+}
+
 export interface PostComment {
   id: string;
   postId: string;
@@ -123,6 +129,7 @@ export interface PostComment {
   parentId?: string;
   replies?: PostComment[];
   createdAt: string;
+  author?: PostCommentAuthor; // From API response
 }
 
 export interface PostLike {
