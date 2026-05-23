@@ -1,7 +1,6 @@
 name: Execute RLS Migration and Configure Turnstile
 
 on:
-  workflow_dispatch:
   push:
     branches: [main]
 
