@@ -165,9 +165,12 @@ export const demoAuthApi = {
       notifyAuthChange(user);
 
       return { success: true };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Sign in error:', err);
-      return { success: false, error: '发生未知错误' };
+      if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+        return { success: false, error: '请求超时，请重试' };
+      }
+      return { success: false, error: err?.message || '发生未知错误' };
     }
   },
 
@@ -200,9 +203,12 @@ export const demoAuthApi = {
       }
 
       return { success: false, error: '注册未完成' };
-    } catch (err) {
+    } catch (err: any) {
       console.error('Sign up error:', err);
-      return { success: false, error: '发生未知错误' };
+      if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
+        return { success: false, error: '请求超时，请重试' };
+      }
+      return { success: false, error: err?.message || '发生未知错误' };
     }
   },
 

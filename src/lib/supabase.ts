@@ -38,7 +38,8 @@ function getSupabaseClient(): SupabaseClient {
     global: {
       fetch: (url, options) => {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
+        // Supabase auth operations (especially signup) can take up to 15s
+        const timeout = setTimeout(() => controller.abort(), 15000);
         return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
       },
     },
