@@ -4,15 +4,64 @@ import { supabase } from '@/lib/supabase';
 
 export const prerender = false;
 
-// Handle OAuth callback
 const locale = Astro.url.searchParams.get('locale') || 'zh';
 const code = Astro.url.searchParams.get('code');
+const error = Astro.url.searchParams.get('error');
 
-if (code) {
-  // The code will be exchanged by Supabase client-side
-  // Redirect to home page after a short delay
-  return Astro.redirect(`/?auth_callback=true`);
+// If there's an OAuth error, redirect to login with error
+if (error) {
+  return Astro.redirect(`/${locale === 'en' ? 'en/' : ''}auth/login?error=${encodeURIComponent(error)}`);
 }
+
+// Exchange the OAuth code for a session
+if (code) {
+  try {
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (exchangeError) {
+      console.error('OAuth code exchange error:', exchangeError);
+      return Astro.redirect(`/${locale === 'en' ? 'en/' : ''}auth/login?error=${encodeURIComponent(exchangeError.message)}`);
+    }
+
+    // Set Supabase auth cookies for server-side session
+    if (data.session) {
+      const maxAge = data.session.expires_in ?? 3600;
+      Astro.cookies.set('sb-access-token', data.session.access_token, {
+        maxAge,
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: true,
+        secure: true,
+      });
+      Astro.cookies.set('sb-refresh-token', data.session.refresh_token, {
+        maxAge: maxAge * 2,
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: true,
+        secure: true,
+      });
+      Astro.cookies.set('sb-auth-token', JSON.stringify({
+        access_token: data.session.access_token,
+        refresh_token: data.session.refresh_token,
+      }), {
+        maxAge,
+        path: '/',
+        sameSite: 'lax',
+        httpOnly: true,
+        secure: true,
+      });
+    }
+
+    // Redirect to home after successful login
+    return Astro.redirect(`/${locale === 'en' ? 'en/' : ''}?oauth_success=true`);
+  } catch (err) {
+    console.error('OAuth callback error:', err);
+    return Astro.redirect(`/${locale === 'en' ? 'en/' : ''}auth/login?error=oauth_failed`);
+  }
+}
+
+// No code provided, redirect to login
+return Astro.redirect(`/${locale === 'en' ? 'en/' : ''}auth/login`);
 ---
 
 <Layout title="Processing...">
@@ -24,12 +73,4 @@ if (code) {
       </p>
     </div>
   </div>
-
-  <script is:inline>
-    // Supabase handles the callback automatically
-    // Redirect to home after a delay
-    setTimeout(() => {
-      window.location.href = '/';
-    }, 2000);
-  </script>
 </Layout>

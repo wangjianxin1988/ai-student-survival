@@ -181,17 +181,7 @@ export default function RegisterForm({
     }
   };
 
-  // Guard: Don't show form if auth check not complete
-  if (!authChecked) {
-    return (
-      <div className="w-full max-w-md mx-auto flex items-center justify-center min-h-[200px]">
-        <div className="text-gray-500">
-          {locale === "zh" ? "加载中..." : "Loading..."}
-        </div>
-      </div>
-    );
-  }
-
+  // Redirect if already logged in (background check, don't block form render)
   if (isLoggedIn) {
     return (
       <div className="w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[200px]">

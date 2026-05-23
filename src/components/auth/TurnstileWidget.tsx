@@ -74,8 +74,16 @@ export function TurnstileWidget({
       // Script already loaded in this session — proceed immediately
       setIsLoaded(true);
     } else {
-      // Script tag exists but window.turnstile not yet ready — wait for callback
+      // Script tag already in DOM but window.turnstile not ready yet (cached script).
+      // The onload already fired so callback won't be called.
+      // Poll briefly until window.turnstile is available.
       loadScript();
+      const poll = setInterval(() => {
+        if (window.turnstile) {
+          clearInterval(poll);
+          setIsLoaded(true);
+        }
+      }, 50);
     }
 
     return () => {
