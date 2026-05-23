@@ -7,6 +7,8 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    outputs:
+      site_key: ${{ steps.cfstep.outputs.SITE_KEY }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,6 +29,7 @@ jobs:
           echo "RLS migration executed"
 
       - name: Configure Cloudflare Turnstile
+        id: cfstep
         run: |
           echo "Checking existing Turnstile sites..."
           RESPONSE=$(curl -s -X GET \
@@ -50,3 +53,4 @@ jobs:
           fi
           echo "Site key: $SITE_KEY"
           echo "::notice::Turnstile Site Key: $SITE_KEY"
+          echo "SITE_KEY=$SITE_KEY" >> $GITHUB_OUTPUT
