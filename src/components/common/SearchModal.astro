@@ -116,8 +116,41 @@ const { locale = 'zh' } = Astro.props;
       { name: '大学AI政策', url: '/policies', description: '首家全面收录海外大学AI使用政策' },
       { name: 'Prompt模板库', url: '/prompts', description: '精选留学生常用的Prompt模板' },
       { name: '工具对比', url: '/compare', description: '横向对比多个AI工具' },
-    ]
+    ],
+    // Dynamically loaded on first search
+    community: null as Array<{name: string; url: string; description: string}> | null,
+    policies: null as Array<{name: string; url: string; description: string}> | null,
   };
+
+  // Lazy-load community posts and policies
+  async function loadDynamicSearchData() {
+    if (searchData.community === null) {
+      try {
+        const res = await fetch('/api/community?limit=30&sort=latest');
+        const data = await res.json();
+        if (data.success && data.data) {
+          searchData.community = data.data.slice(0, 30).map((post: any) => ({
+            name: post.title || post.content?.slice(0, 60) || '社区帖子',
+            url: `/community/${post.id}`,
+            description: post.content?.slice(0, 120) || '',
+          }));
+        }
+      } catch { /* ignore */ }
+    }
+    if (searchData.policies === null) {
+      try {
+        const res = await fetch('/api/policies');
+        const data = await res.json();
+        if (data.success && data.data) {
+          searchData.policies = data.data.slice(0, 20).map((policy: any) => ({
+            name: policy.university || policy.name || '大学政策',
+            url: `/policies/${policy.slug || policy.id}`,
+            description: policy.summary || policy.ai_policy || '',
+          }));
+        }
+      } catch { /* ignore */ }
+    }
+  }
 
   // Search History Management
   const SEARCH_HISTORY_KEY = 'demo_search_history';
@@ -250,6 +283,14 @@ const { locale = 'zh' } = Astro.props;
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
                 </svg>
+              ` : item.type === 'community' ? `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                </svg>
+              ` : item.type === 'policy' ? `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
               ` : `
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -260,6 +301,8 @@ const { locale = 'zh' } = Astro.props;
               <div class="flex items-center gap-2">
                 <span class="font-medium text-gray-900">${item.name}</span>
                 ${item.category ? `<span class="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">${item.category}</span>` : ''}
+                ${item.type === 'community' ? `<span class="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded">社区</span>` : ''}
+                ${item.type === 'policy' ? `<span class="text-xs px-1.5 py-0.5 bg-green-50 text-green-600 rounded">政策</span>` : ''}
               </div>
               <p class="text-sm text-gray-500 truncate">${item.description}</p>
             </div>
@@ -286,7 +329,7 @@ const { locale = 'zh' } = Astro.props;
     });
   }
 
-  function search(query: string) {
+  async function search(query: string) {
     if (!query.trim()) {
       resetToInitialState();
       return;
@@ -297,9 +340,12 @@ const { locale = 'zh' } = Astro.props;
     // Add to search history
     addToSearchHistory(query);
 
+    // Load dynamic data (community posts, policies) on first search
+    await loadDynamicSearchData();
+
     const q = query.toLowerCase();
 
-    // Simulate async search
+    // Simulate a short delay for instant-appearing results
     setTimeout(() => {
       const results: typeof currentResults = [];
 
@@ -324,8 +370,32 @@ const { locale = 'zh' } = Astro.props;
         }
       });
 
-      showResults(results.slice(0, 10));
-    }, 150);
+      // Search community posts
+      if (searchData.community) {
+        searchData.community.forEach(post => {
+          if (
+            post.name.toLowerCase().includes(q) ||
+            post.description.toLowerCase().includes(q)
+          ) {
+            results.push({ type: 'community', ...post });
+          }
+        });
+      }
+
+      // Search university policies
+      if (searchData.policies) {
+        searchData.policies.forEach(policy => {
+          if (
+            policy.name.toLowerCase().includes(q) ||
+            policy.description.toLowerCase().includes(q)
+          ) {
+            results.push({ type: 'policy', ...policy });
+          }
+        });
+      }
+
+      showResults(results.slice(0, 15));
+    }, 200);
   }
 
   // Event Listeners

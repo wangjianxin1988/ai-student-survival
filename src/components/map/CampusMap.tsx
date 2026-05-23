@@ -162,7 +162,7 @@ export default function CampusMap({
   }
 
   return (
-    <div className="relative" style={{ zIndex: 1 }}>
+    <div className="relative">
       <div
         ref={mapRef}
         style={{ height }}

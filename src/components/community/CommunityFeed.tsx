@@ -3,7 +3,6 @@ import type { CommunityPost } from "@/lib/community/types";
 import { PostCard } from "./PostCard";
 import { CategoryFilter, type CommunityCategory } from "./CategoryFilter";
 import { getCurrentLocale, getLocaleHref } from "@/lib/i18n";
-import { useAuth } from "@/components/auth/AuthProvider";
 
 const translations = {
   zh: {
@@ -43,13 +42,22 @@ interface CommunityFeedProps {
   locale?: "zh" | "en";
 }
 
+// Demo session key - same as in auth.ts and AuthProvider.tsx
+const DEMO_SESSION_KEY = 'demo_session';
+
+// Read demo user from sessionStorage (same logic as AuthProvider)
+function getDemoUserFromSession(): { id: string; email: string; name?: string; avatar?: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(DEMO_SESSION_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return null;
+}
+
 export function CommunityFeed({ currentUserId: serverUserId, locale }: CommunityFeedProps) {
   const currentLocale = locale || getCurrentLocale();
   const t = translations[currentLocale];
-
-  // Use AuthProvider for auth state (client-side) instead of server-side prop
-  // AuthProvider is initialized client-side and reads from sessionStorage/demo_session
-  const { user: authUser, loading: authLoading } = useAuth();
 
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [featuredPosts, setFeaturedPosts] = useState<CommunityPost[]>([]);
@@ -58,10 +66,33 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   const [sort, setSort] = useState<"latest" | "popular">("latest");
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
+  const [clientUserId, setClientUserId] = useState<string | undefined>(serverUserId);
   const limit = 20;
 
-  // Determine if user is logged in: prefer AuthProvider (client-side) over server prop
-  const currentUserId = authUser?.id || serverUserId || undefined;
+  // Poll sessionStorage for demo session changes (same tab doesn't fire storage event)
+  useEffect(() => {
+    const checkDemoSession = () => {
+      const demoUser = getDemoUserFromSession();
+      if (demoUser) {
+        setClientUserId(prev => {
+          if (!prev || prev !== demoUser.id) {
+            return demoUser.id;
+          }
+          return prev;
+        });
+      }
+    };
+
+    // Check immediately
+    checkDemoSession();
+
+    // Poll every 500ms
+    const interval = setInterval(checkDemoSession, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Determine if user is logged in: prefer client-side session over server prop
+  const currentUserId = clientUserId || serverUserId || undefined;
   const isLoggedIn = Boolean(currentUserId);
 
   useEffect(() => {
@@ -111,7 +142,6 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
 
   const handleLike = async (postId: string) => {
     if (!currentUserId) return;
-
     try {
       await fetch(`/api/community/${postId}/like`, { method: "POST" });
     } catch (error) {
@@ -121,7 +151,6 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
 
   const handleFavorite = async (postId: string) => {
     if (!currentUserId) return;
-
     try {
       await fetch(`/api/community/${postId}/favorite`, { method: "POST" });
     } catch (error) {
@@ -134,26 +163,6 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   };
 
   const totalPages = Math.ceil(total / limit);
-
-  // Show skeleton during auth loading (only on initial hydration)
-  if (authLoading && !currentUserId && !serverUserId) {
-    return (
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
-          <div className="h-10 w-24 bg-gray-200 rounded animate-pulse" />
-        </div>
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-lg shadow p-4 animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-3 bg-gray-200 rounded w-1/2" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
