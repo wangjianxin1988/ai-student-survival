@@ -5,7 +5,82 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  setup:
     runs-on: ubuntu-latest
+    outputs:
+      site_key: ${{ steps.turnstile.outputs.SITE_KEY }}
     steps:
-      - run: echo "test"
+      - uses: actions/checkout@v4
+
+      - name: Execute RLS via Supabase Management API
+        run: |
+          echo "Executing RLS migration..."
+          SQL_JSON=$(cat supabase/migrations/20260523_add_rls_policies.sql | jq -Rs .)
+          RESPONSE=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": $SQL_JSON}")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -qi '"error"'; then
+            echo "$RESPONSE" | jq .
+            exit 1
+          fi
+          echo "RLS migration executed"
+
+      - name: Configure Cloudflare Turnstile
+        id: turnstile
+        run: |
+          echo "Checking existing Turnstile sites..."
+          RESPONSE=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+          echo "Turnstile response: $RESPONSE"
+          TURNSTILE_COUNT=$(echo "$RESPONSE" | jq -r '.result | length')
+          echo "Found $TURNSTILE_COUNT Turnstile site(s)"
+          if [ "$TURNSTILE_COUNT" = "0" ] || [ "$TURNSTILE_COUNT" = "null" ]; then
+            echo "Creating Turnstile site..."
+            CREATE=$(curl -s -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{"name": "mi-to-ai.com", "domain": "mi-to-ai.com", "mode": "non-interactive"}')
+            echo "Create response: $CREATE"
+            SITE_KEY=$(echo "$CREATE" | jq -r '.result.sitekey // empty')
+          else
+            SITE_KEY=$(echo "$RESPONSE" | jq -r '.[0].sitekey // .result[0].sitekey // empty')
+          fi
+          echo "Site key: $SITE_KEY"
+          echo "SITE_KEY=$SITE_KEY" >> $GITHUB_OUTPUT
+
+      - name: Set GitHub Secret
+        if: steps.turnstile.outputs.SITE_KEY != '' && steps.turnstile.outputs.SITE_KEY != 'null' && steps.turnstile.outputs.SITE_KEY != 'empty'
+        run: |
+          echo "Setting PUBLIC_TURNSTILE_SITE_KEY secret..."
+          pip install pynacl -q 2>/dev/null || true
+          PUB_KEY_JSON=$(curl -s -X GET \
+            "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/public-key" \
+            -H "Authorization: Bearer ${{ github.token }}")
+          KEY_ID=$(echo "$PUB_KEY_JSON" | jq -r '.key_id')
+          PUB_KEY=$(echo "$PUB_KEY_JSON" | jq -r '.key')
+          ENCRYPTED=$(python3 -c "
+import base64
+from nacl import encoding, public
+key_bytes = base64.b64decode('$PUB_KEY')
+pub_key = public.PublicKey(key_bytes[:32])
+sealed_box = public.SealedBox(pub_key)
+encrypted = sealed_box.encrypt(b'${{ steps.turnstile.outputs.SITE_KEY }}')
+print(base64.b64encode(encrypted).decode())
+")
+          RESULT=$(curl -s -X PUT \
+            "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/PUBLIC_TURNSTILE_SITE_KEY" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"encrypted_value\": \"$ENCRYPTED\", \"key_id\": \"$KEY_ID\"}")
+          echo "Secret set result: $RESULT"
+
+      - name: Note about OAuth Redirect URLs
+        run: |
+          echo "Note: OAuth redirect URLs must be set manually"
+          echo "URL: https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/auth/providers"
