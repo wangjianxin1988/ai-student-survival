@@ -49,34 +49,36 @@ export function TurnstileWidget({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
-  // Use unique ID to avoid Cloudflare auto-placement conflicts
+  // Stable unique ID (not reactive) to avoid Cloudflare auto-placement conflicts
   const widgetId = useRef(`turnstile-${Math.random().toString(36).slice(2, 8)}`);
 
   useEffect(() => {
-    // Check if already rendered
     if (widgetIdRef.current) return;
 
-    // Define the callback (may be called multiple times if script already loaded)
-    window.onloadTurnstileCallback = () => {
-      setIsLoaded(true);
+    // Script loading + callback setup
+    const loadScript = () => {
+      window.onloadTurnstileCallback = () => setIsLoaded(true);
     };
 
-    // Load the Turnstile script if not already loaded
     if (!document.getElementById("cf-turnstile-script")) {
+      loadScript();
       const script = document.createElement("script");
       script.id = "cf-turnstile-script";
-      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit";
+      script.src =
+        "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit";
       script.async = true;
       script.defer = true;
       script.onerror = () => setHasError(true);
       document.head.appendChild(script);
     } else if (window.turnstile) {
-      // Script already loaded
+      // Script already loaded in this session — proceed immediately
       setIsLoaded(true);
+    } else {
+      // Script tag exists but window.turnstile not yet ready — wait for callback
+      loadScript();
     }
 
     return () => {
-      // Cleanup: remove widget on unmount
       if (widgetIdRef.current && window.turnstile) {
         try {
           window.turnstile.remove(widgetIdRef.current);
@@ -88,12 +90,12 @@ export function TurnstileWidget({
     };
   }, []);
 
-  // Render widget when script is loaded
+  // Render widget when script is ready
   useEffect(() => {
     if (!isLoaded || !containerRef.current || widgetIdRef.current) return;
 
-    // Test keys (Cloudflare's "always pass") don't fire onVerify callback.
-    // Emit a dummy token immediately so forms can proceed.
+    // Test keys use "always pass" mode which doesn't fire onVerify.
+    // Emit dummy token immediately so forms can proceed without UI.
     if (IS_TEST_KEY) {
       onVerify("TEST_TOKEN_DUMMY");
       return;
@@ -118,7 +120,7 @@ export function TurnstileWidget({
       retryInterval: 8000,
     });
 
-    setIsLoaded(false); // Reset after render to prevent re-renders
+    setIsLoaded(false);
   }, [isLoaded, onVerify, onExpire]);
 
   if (hasError) {
