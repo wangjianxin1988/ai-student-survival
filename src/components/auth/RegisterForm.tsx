@@ -116,7 +116,7 @@ export default function RegisterForm({
         const user = await demoAuthApi.getUser();
         clearTimeout(timeout);
         setIsLoggedIn(!!user);
-      } catch {
+      } catch (err) {
         console.error('[RegisterForm] Auth check error:', err);
         clearTimeout(timeout);
         setIsLoggedIn(false);

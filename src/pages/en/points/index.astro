@@ -1,0 +1,37 @@
+---
+import { PointsBalance, PointsHistory, PointsShop } from '@/components/points';
+import Layout from '@/layouts/Layout.astro';
+import { getCurrentUser } from '@/lib/auth';
+import { getUserPoints } from '@/lib/points';
+import { POINTS_SHOP_PACKAGES } from '@/lib/points/config';
+
+export const prerender = false;
+
+const locale = 'en';
+
+const user = getCurrentUser();
+
+if (!user) {
+  return Astro.redirect('/en/auth/login?redirect=/en/points');
+}
+
+const result = await getUserPoints(user.id);
+const balance = result.balance;
+const totalEarned = result.totalEarned;
+const totalSpent = result.totalSpent;
+---
+
+<Layout title="Points Center - AI Student Survival Guide" locale="en">
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4">
+      <h1 class="text-2xl font-bold text-gray-900 mb-6">Points Center</h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <PointsBalance client:load balance={balance} totalEarned={totalEarned} totalSpent={totalSpent} />
+        <PointsShop client:load packages={POINTS_SHOP_PACKAGES} currentBalance={balance} />
+      </div>
+
+      <PointsHistory client:load userId={user.id} />
+    </div>
+  </div>
+</Layout>

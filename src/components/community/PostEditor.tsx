@@ -913,7 +913,7 @@ export function PostEditor({
         tags,
         meta: Object.keys(finalMeta).length > 0 ? finalMeta : undefined,
       });
-    } catch {
+    } catch (err) {
       setError(err instanceof Error ? err.message : "提交失败");
     } finally {
       setLoading(false);

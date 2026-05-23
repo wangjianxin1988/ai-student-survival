@@ -97,6 +97,9 @@ let isInitialized = false;
 type AuthChangeCallback = (user: DemoUser | null) => void;
 const authChangeListeners: Set<AuthChangeCallback> = new Set();
 
+// Track if demo storage listener is set up
+let demoStorageListenerSetUp = false;
+
 /**
  * Initialize the auth module - fetches current session
  * Should be called on app startup
@@ -176,24 +179,21 @@ export function onAuthStateChange(callback: AuthChangeCallback): () => void {
       currentUser = user;
       authChangeListeners.forEach(cb => cb(user));
     });
-  } else if (!isSupabaseConfigured) {
-    // For demo mode, set up a storage event listener to sync across tabs
-    if (typeof window !== 'undefined') {
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === DEMO_SESSION_KEY) {
-          const newUser = e.newValue ? JSON.parse(e.newValue) : null;
-          currentUser = newUser;
-          authChangeListeners.forEach(cb => cb(newUser));
-        }
-      };
-      window.addEventListener('storage', handleStorageChange);
+  }
 
-      // Return cleanup function that includes removing the listener
-      return () => {
-        authChangeListeners.delete(callback);
-        window.removeEventListener('storage', handleStorageChange);
-      };
-    }
+  // Always set up demo session storage listener for cross-tab sync
+  // This handles the case where Supabase is configured but no Supabase user
+  // is logged in (i.e., demo mode on a Supabase-enabled site)
+  if (typeof window !== 'undefined' && !demoStorageListenerSetUp) {
+    demoStorageListenerSetUp = true;
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === DEMO_SESSION_KEY) {
+        const newUser = e.newValue ? JSON.parse(e.newValue) : null;
+        currentUser = newUser;
+        authChangeListeners.forEach(cb => cb(newUser));
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
   }
 
   return () => {
