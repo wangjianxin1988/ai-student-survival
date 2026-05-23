@@ -136,7 +136,7 @@ export async function initAuth(): Promise<DemoUser | null> {
  * Get the current user from cache (synchronous)
  * For async initialization, call initAuth() first
  * Falls back to demo session if Supabase is not configured OR
- * if Supabase is configured but no user is logged in
+ * if Supabase is configured but no Supabase user is logged in
  */
 export function getCurrentUser(): DemoUser | null {
   if (typeof window === 'undefined') return null;
@@ -283,6 +283,10 @@ export const demoAuthApi = {
       });
 
       if (error) {
+        // Rate limit error - provide user-friendly message
+        if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
+          return { success: false, error: '操作过于频繁，请稍后再试（90秒后重试）' };
+        }
         return { success: false, error: error.message };
       }
 
@@ -294,8 +298,7 @@ export const demoAuthApi = {
           notifyAuthChange(user);
           return { success: true };
         }
-        // No session = email confirmation required
-        // Clear any cached user since they're not actually logged in
+        // Has user object but no session = email confirmation required
         currentUser = null;
         return {
           success: false,
@@ -304,7 +307,15 @@ export const demoAuthApi = {
         };
       }
 
-      return { success: false, error: '注册未完成，请稍后重试' };
+      // No user in data (user === null) = email confirmation required
+      // Supabase returns { user: null, session: null } when signup succeeds
+      // but requires email confirmation
+      currentUser = null;
+      return {
+        success: false,
+        error: '请前往邮箱查收验证邮件，完成账号激活后再登录。验证邮件可能位于垃圾邮件文件夹。',
+        verificationRequired: true,
+      };
     } catch (err: any) {
       console.error('Sign up error:', err);
       if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
