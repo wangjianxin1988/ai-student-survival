@@ -1,20 +1,9 @@
 ---
 import { PointsBalance, PointsHistory, PointsShop } from '@/components/points';
 import Layout from '@/layouts/Layout.astro';
-import { getCurrentUser } from '@/lib/auth';
-import { getUserPoints } from '@/lib/points';
 import { POINTS_SHOP_PACKAGES } from '@/lib/points/config';
 
-const user = getCurrentUser();
-
-if (!user) {
-  return Astro.redirect('/auth/login?redirect=/points');
-}
-
-const result = await getUserPoints(user.id);
-const balance = result.balance;
-const totalEarned = result.totalEarned;
-const totalSpent = result.totalSpent;
+export const prerender = false;
 ---
 
 <Layout title="积分中心 - AI留学生存指南">
@@ -22,12 +11,96 @@ const totalSpent = result.totalSpent;
     <div class="max-w-4xl mx-auto px-4">
       <h1 class="text-2xl font-bold text-gray-900 mb-6">积分中心</h1>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <PointsBalance client:load balance={balance} totalEarned={totalEarned} totalSpent={totalSpent} />
-        <PointsShop client:load packages={POINTS_SHOP_PACKAGES} currentBalance={balance} />
+      <!-- Auth guard: redirect to login if not authenticated -->
+      <div id="points-auth-guard" class="hidden">
+        <!-- Authenticated content loaded client-side -->
+        <div id="points-content" class="hidden">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div id="points-balance-placeholder" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+              <div class="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+              <div class="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+              <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+            </div>
+            <div id="points-shop-placeholder" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+              <div class="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+              <div class="h-20 bg-gray-200 rounded mb-2"></div>
+            </div>
+          </div>
+          <div id="points-history-placeholder" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-pulse">
+            <div class="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div class="h-8 bg-gray-200 rounded mb-2"></div>
+            <div class="h-8 bg-gray-200 rounded w-3/4"></div>
+          </div>
+        </div>
       </div>
 
-      <PointsHistory client:load userId={user.id} />
+      <!-- Login prompt (shown when not authenticated) -->
+      <div id="points-login-prompt" class="hidden text-center py-16">
+        <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold text-gray-900 mb-2">请先登录</h2>
+        <p class="text-gray-500 mb-6">登录后即可查看积分余额和历史记录</p>
+        <a href="/auth/login?redirect=/points" class="inline-block px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors">
+          登录
+        </a>
+      </div>
     </div>
   </div>
 </Layout>
+
+<script>
+  async function checkAuth() {
+    const guard = document.getElementById('points-auth-guard');
+    const loginPrompt = document.getElementById('points-login-prompt');
+    const content = document.getElementById('points-content');
+    if (!guard || !loginPrompt) return;
+
+    try {
+      // Import and call the auth check
+      const { getCurrentUser } = await import('/src/lib/auth.ts');
+      const user = getCurrentUser();
+
+      if (!user) {
+        guard.classList.add('hidden');
+        loginPrompt.classList.remove('hidden');
+        return;
+      }
+
+      // User is authenticated, load points data
+      guard.classList.remove('hidden');
+      loginPrompt.classList.add('hidden');
+
+      try {
+        const res = await fetch(`/api/points?userId=${user.id}`);
+        const data = await res.json();
+
+        // Update balance display
+        if (data.success && data.data) {
+          const d = data.data;
+          const balanceEl = document.getElementById('points-balance-placeholder');
+          if (balanceEl) {
+            balanceEl.innerHTML = `
+              <div class="text-sm text-gray-500 mb-1">当前余额</div>
+              <div class="text-3xl font-bold text-primary-600 mb-1">${d.balance ?? 0}</div>
+              <div class="text-xs text-gray-400">已获得 ${d.totalEarned ?? 0} · 已使用 ${d.totalSpent ?? 0}</div>
+            `;
+            balanceEl.classList.remove('animate-pulse');
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load points:', e);
+      }
+
+      if (content) content.classList.remove('hidden');
+    } catch (e) {
+      console.error('Auth check failed:', e);
+      guard.classList.add('hidden');
+      loginPrompt.classList.remove('hidden');
+    }
+  }
+
+  checkAuth();
+</script>
