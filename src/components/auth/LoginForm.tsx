@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "./AuthProvider";
+import { demoAuthApi } from "@/lib/auth";
 import { TurnstileWidget } from "./TurnstileWidget";
-import { supabase } from "@/lib/supabase";
 
 interface LoginFormProps {
   locale?: "zh" | "en";
@@ -77,7 +76,7 @@ export default function LoginForm({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
-  const { user, loading, signIn, signInWithGoogle, signInWithGithub, signInWithMagicLink } = useAuth();
+  const { user, loading } = { user: null, loading: false };
 
   // Get returnTo from URL if not provided via props
   const getReturnTo = () => {
@@ -104,20 +103,28 @@ export default function LoginForm({
     }
   };
 
-  // Guard: check auth state on mount
+  // Guard: check auth state on mount using demoAuthApi directly
   useEffect(() => {
-    // If still loading after 2s, proceed anyway to show the form
-    const fallbackTimeout = setTimeout(() => {
-      setAuthChecked(true);
-      setIsLoggedIn(false);
-    }, 2000);
+    let fallbackTimeout: ReturnType<typeof setTimeout>;
 
-    if (!loading) {
-      clearTimeout(fallbackTimeout);
-      setIsLoggedIn(!!user);
+    const checkAuth = async () => {
+      try {
+        fallbackTimeout = setTimeout(() => {
+          setAuthChecked(true);
+          setIsLoggedIn(false);
+        }, 3000);
+        const user = await demoAuthApi.getUser();
+        clearTimeout(fallbackTimeout);
+        setIsLoggedIn(!!user);
+      } catch {
+        clearTimeout(fallbackTimeout);
+        setIsLoggedIn(false);
+      }
       setAuthChecked(true);
-    }
-  }, [loading, user]);
+    };
+
+    checkAuth();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +132,7 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await signIn(email, password);
+      const result = await demoAuthApi.signIn(email, password);
       if (result.success) {
         redirectAfterLogin();
       } else {
@@ -139,29 +146,13 @@ export default function LoginForm({
   };
 
   const handleGoogleSignIn = async () => {
-    setError("");
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      setError(error.message);
-    }
+    const result = await demoAuthApi.signInWithOAuth('google');
+    if (result.error) setError(result.error);
   };
 
   const handleGithubSignIn = async () => {
-    setError("");
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      setError(error.message);
-    }
+    const result = await demoAuthApi.signInWithOAuth('github');
+    if (result.error) setError(result.error);
   };
 
   const handleMagicLink = async (e: React.FormEvent) => {
@@ -170,7 +161,7 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      const result = await signInWithMagicLink(magicLinkEmail);
+      const result = await demoAuthApi.signInWithMagicLink(magicLinkEmail);
       if (result.success) {
         setMagicLinkSent(true);
       } else {
@@ -190,7 +181,7 @@ export default function LoginForm({
 
     try {
       // Use magic link flow for password reset
-      const result = await signInWithMagicLink(forgotPasswordEmail);
+      const result = await demoAuthApi.signInWithMagicLink(forgotPasswordEmail);
       if (result.success) {
         setForgotPasswordSent(true);
       } else {
