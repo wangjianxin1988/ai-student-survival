@@ -38,77 +38,62 @@ import Layout from '@/layouts/Layout.astro';
 </Layout>
 
 <script>
-const DEMO_USERS_KEY = 'demo_users';
 const DEMO_SESSION_KEY = 'demo_session';
 
 function generateId() {
   return 'demo-' + Math.random().toString(36).substring(2, 15);
 }
 
-function getDemoUsers() {
-  const stored = localStorage.getItem(DEMO_USERS_KEY);
-  return stored ? JSON.parse(stored) : {};
-}
-
-function saveDemoUsers(users) {
-  localStorage.setItem(DEMO_USERS_KEY, JSON.stringify(users));
+// Save demo session
+function saveDemoSession(user: any) {
+  sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(user));
 }
 
 // 检查存储
 document.getElementById('test-storage').addEventListener('click', () => {
   const result = document.getElementById('storage-result');
   const session = sessionStorage.getItem(DEMO_SESSION_KEY);
-  const users = localStorage.getItem(DEMO_USERS_KEY);
+  const users = localStorage.getItem('demo_users');
 
-  result.innerHTML = `sessionStorage['${DEMO_SESSION_KEY}']:\n${session || '(null)'}\n\nlocalStorage['${DEMO_USERS_KEY}']:\n${users || '(null)'}`;
+  result.innerHTML = `sessionStorage['${DEMO_SESSION_KEY}']:\n${session || '(null)'}\n\nlocalStorage['demo_users']:\n${users || '(null)'}`;
 });
 
 // 快速登录
 document.getElementById('test-login').addEventListener('click', async () => {
   const result = document.getElementById('login-result');
-  const email = document.getElementById('test-email').value;
-  const password = document.getElementById('test-password').value;
-  const name = document.getElementById('test-name').value;
+  const email = (document.getElementById('test-email') as HTMLInputElement).value;
+  const password = (document.getElementById('test-password') as HTMLInputElement).value;
+  const name = (document.getElementById('test-name') as HTMLInputElement).value;
 
   result.textContent = '登录中...';
 
   // 模拟延迟
   await new Promise(r => setTimeout(r, 500));
 
-  // 查找用户
-  const users = getDemoUsers();
-  const user = Object.values(users).find(u => u.email === email && u.password === password);
+  // 创建新用户
+  const newUser = {
+    id: generateId(),
+    email,
+    password,
+    name,
+    created_at: new Date().toISOString()
+  };
 
-  if (user) {
-    const { password: _, ...demoUser } = user;
-    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(demoUser));
-    result.innerHTML = `<span class="text-green-600">登录成功！</span>\n用户: ${JSON.stringify(demoUser, null, 2)}`;
+  // 保存到localStorage
+  const users = JSON.parse(localStorage.getItem('demo_users') || '{}');
+  users[newUser.id] = newUser;
+  localStorage.setItem('demo_users', JSON.stringify(users));
 
-    // 延迟跳转
-    setTimeout(() => {
-      window.location.href = '/user/favorites';
-    }, 1000);
-  } else {
-    // 创建新用户
-    const newUser = {
-      id: generateId(),
-      email,
-      password,
-      name,
-      created_at: new Date().toISOString()
-    };
-    users[newUser.id] = newUser;
-    saveDemoUsers(users);
+  // 保存到sessionStorage
+  const { password: _, ...demoUser } = newUser;
+  saveDemoSession(demoUser);
 
-    const { password: _, ...demoUser } = newUser;
-    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(demoUser));
-    result.innerHTML = `<span class="text-green-600">注册并登录成功！</span>\n用户: ${JSON.stringify(demoUser, null, 2)}`;
+  result.innerHTML = `<span class="text-green-600">登录成功！</span>\n用户: ${JSON.stringify(demoUser, null, 2)}`;
 
-    // 延迟跳转
-    setTimeout(() => {
-      window.location.href = '/user/favorites';
-    }, 1000);
-  }
+  // 延迟跳转
+  setTimeout(() => {
+    window.location.href = '/user';
+  }, 1000);
 });
 
 // 检查状态

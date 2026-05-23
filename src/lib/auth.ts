@@ -3,6 +3,8 @@
  *
  * This module provides authentication functionality using Supabase.
  * It replaces the previous demo/localStorage-based auth system.
+ * Falls back to sessionStorage-based demo auth when Supabase is not configured OR
+ * when Supabase is configured but user is not logged in.
  */
 
 import { supabase, isSupabaseConfigured } from './supabase';
@@ -39,6 +41,9 @@ export interface MagicLinkResult {
   error?: string;
 }
 
+// Demo session storage key
+const DEMO_SESSION_KEY = 'demo_session';
+
 // Convert Supabase User to DemoUser format
 function toDemoUser(user: User | null): DemoUser | null {
   if (!user) return null;
@@ -52,6 +57,36 @@ function toDemoUser(user: User | null): DemoUser | null {
     isVerified: user.email_confirmed_at != null || user.confirmed_at != null,
     isVerifiedOffer: user.user_metadata?.is_verified_offer || false,
   };
+}
+
+// Read demo user from sessionStorage (for fallback when Supabase is not configured)
+function getDemoUserFromSession(): DemoUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const sessionData = sessionStorage.getItem(DEMO_SESSION_KEY);
+    if (sessionData) {
+      return JSON.parse(sessionData);
+    }
+  } catch (e) {
+    console.error('Failed to parse demo session:', e);
+  }
+  return null;
+}
+
+// Save demo user to sessionStorage
+export function saveDemoSession(user: DemoUser): void {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(user));
+  } catch (e) {
+    console.error('Failed to save demo session:', e);
+  }
+}
+
+// Clear demo session
+export function clearDemoSession(): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(DEMO_SESSION_KEY);
 }
 
 // Current user cache (synchronous access)
@@ -69,31 +104,50 @@ const authChangeListeners: Set<AuthChangeCallback> = new Set();
 export async function initAuth(): Promise<DemoUser | null> {
   if (typeof window === 'undefined') return null;
 
-  if (!isSupabaseConfigured) {
-    return null;
-  }
-
   if (isInitialized) {
     return currentUser;
   }
 
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    currentUser = toDemoUser(session?.user ?? null);
-    isInitialized = true;
-    return currentUser;
-  } catch (error) {
-    console.error('Error initializing auth:', error);
-    return null;
+  if (isSupabaseConfigured) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        currentUser = toDemoUser(session.user);
+        isInitialized = true;
+        return currentUser;
+      }
+      // No Supabase session - fall through to demo session check
+    } catch (error) {
+      console.error('Error initializing Supabase auth:', error);
+      // Fall through to demo auth on error
+    }
   }
+
+  // Fallback to demo session (either Supabase not configured or no Supabase user)
+  currentUser = getDemoUserFromSession();
+  isInitialized = true;
+  return currentUser;
 }
 
 /**
  * Get the current user from cache (synchronous)
  * For async initialization, call initAuth() first
+ * Falls back to demo session if Supabase is not configured OR
+ * if Supabase is configured but no user is logged in
  */
 export function getCurrentUser(): DemoUser | null {
   if (typeof window === 'undefined') return null;
+
+  // If we have a cached user, return it
+  if (currentUser !== null) {
+    return currentUser;
+  }
+
+  // Always try demo session as fallback
+  // This handles both:
+  // 1. Supabase not configured
+  // 2. Supabase configured but no Supabase user logged in
+  currentUser = getDemoUserFromSession();
   return currentUser;
 }
 
@@ -109,14 +163,11 @@ export function onAuthStateChange(callback: AuthChangeCallback): () => void {
     callback(currentUser);
   }
 
-  // Set up Supabase listener and initialize auth if not already done
   if (isSupabaseConfigured && typeof window !== 'undefined') {
     // Initialize auth if not yet done
     if (!isInitialized) {
       initAuth().then(user => {
-        if (user) {
-          callback(user);
-        }
+        callback(user);
       });
     }
 
@@ -125,6 +176,24 @@ export function onAuthStateChange(callback: AuthChangeCallback): () => void {
       currentUser = user;
       authChangeListeners.forEach(cb => cb(user));
     });
+  } else if (!isSupabaseConfigured) {
+    // For demo mode, set up a storage event listener to sync across tabs
+    if (typeof window !== 'undefined') {
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === DEMO_SESSION_KEY) {
+          const newUser = e.newValue ? JSON.parse(e.newValue) : null;
+          currentUser = newUser;
+          authChangeListeners.forEach(cb => cb(newUser));
+        }
+      };
+      window.addEventListener('storage', handleStorageChange);
+
+      // Return cleanup function that includes removing the listener
+      return () => {
+        authChangeListeners.delete(callback);
+        window.removeEventListener('storage', handleStorageChange);
+      };
+    }
   }
 
   return () => {
@@ -147,7 +216,18 @@ export const demoAuthApi = {
    */
   async signIn(email: string, password: string): Promise<AuthResult> {
     if (!isSupabaseConfigured) {
-      return { success: false, error: 'Supabase not configured' };
+      // Demo mode: create/update demo session
+      const demoUser: DemoUser = {
+        id: 'demo-' + Math.random().toString(36).substring(2, 15),
+        email,
+        name: email.split('@')[0],
+        created_at: new Date().toISOString(),
+        role: 'member',
+      };
+      saveDemoSession(demoUser);
+      currentUser = demoUser;
+      notifyAuthChange(demoUser);
+      return { success: true };
     }
 
     try {
@@ -179,7 +259,18 @@ export const demoAuthApi = {
    */
   async signUp(email: string, password: string, name: string): Promise<AuthResult> {
     if (!isSupabaseConfigured) {
-      return { success: false, error: 'Supabase not configured' };
+      // Demo mode: create demo session
+      const demoUser: DemoUser = {
+        id: 'demo-' + Math.random().toString(36).substring(2, 15),
+        email,
+        name,
+        created_at: new Date().toISOString(),
+        role: 'member',
+      };
+      saveDemoSession(demoUser);
+      currentUser = demoUser;
+      notifyAuthChange(demoUser);
+      return { success: true };
     }
 
     try {
@@ -216,14 +307,19 @@ export const demoAuthApi = {
    * Sign out
    */
   async signOut(): Promise<void> {
-    if (!isSupabaseConfigured) return;
-
-    try {
-      await supabase.auth.signOut();
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.auth.signOut();
+        currentUser = null;
+        notifyAuthChange(null);
+      } catch (err) {
+        console.error('Sign out error:', err);
+      }
+    } else {
+      // Demo mode: clear session
+      clearDemoSession();
       currentUser = null;
       notifyAuthChange(null);
-    } catch (err) {
-      console.error('Sign out error:', err);
     }
   },
 
@@ -238,7 +334,7 @@ export const demoAuthApi = {
    * Check if logged in
    */
   isLoggedIn(): boolean {
-    return currentUser !== null;
+    return getCurrentUser() !== null;
   },
 
   /**
@@ -246,7 +342,7 @@ export const demoAuthApi = {
    */
   async signInWithOAuth(provider: 'google' | 'github'): Promise<OAuthResult> {
     if (!isSupabaseConfigured) {
-      return { error: 'Supabase not configured' };
+      return { error: 'Demo mode: OAuth not available' };
     }
 
     try {
@@ -270,7 +366,7 @@ export const demoAuthApi = {
    */
   async signInWithMagicLink(email: string): Promise<MagicLinkResult> {
     if (!isSupabaseConfigured) {
-      return { success: false, error: 'Supabase not configured' };
+      return { success: false, error: 'Demo mode: Magic link not available' };
     }
 
     try {

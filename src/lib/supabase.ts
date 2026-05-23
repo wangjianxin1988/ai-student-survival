@@ -9,6 +9,9 @@ const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined)
 const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
   || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined)
   || '';
+const supabaseServiceKey = (import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined)
+  || (typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined)
+  || '';
 
 // Check if Supabase is properly configured
 export const isSupabaseConfigured = Boolean(
@@ -53,6 +56,43 @@ function getSupabaseClient(): SupabaseClient {
 export const supabase = new Proxy({} as SupabaseClient, {
   get(target, prop) {
     const client = getSupabaseClient();
+    const value = (client as any)[prop];
+    if (typeof value === 'function') {
+      return value.bind(client);
+    }
+    return value;
+  },
+});
+
+// Admin client with service role key (bypasses RLS) - for server-side operations only
+let _supabaseAdmin: SupabaseClient | null = null;
+
+function getSupabaseAdminClient(): SupabaseClient {
+  if (_supabaseAdmin) return _supabaseAdmin;
+
+  if (!supabaseServiceKey || !supabaseUrl.includes('supabase.co')) {
+    // Fallback to anon client if service key not configured
+    console.warn('SUPABASE_SERVICE_ROLE_KEY not configured, using anon client for admin operations');
+    return getSupabaseClient();
+  }
+
+  _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: {
+      fetch: (url, options) => {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 15000);
+        return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
+      },
+    },
+  });
+
+  return _supabaseAdmin;
+}
+
+export const supabaseAdmin = new Proxy({} as SupabaseClient, {
+  get(target, prop) {
+    const client = getSupabaseAdminClient();
     const value = (client as any)[prop];
     if (typeof value === 'function') {
       return value.bind(client);

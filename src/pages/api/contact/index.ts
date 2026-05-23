@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { checkSensitiveEndpoint, SENSITIVE_ENDPOINTS } from '@/lib/rate-limit';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const prerender = false;
 
@@ -262,13 +263,41 @@ export const POST: APIRoute = async ({ request }) => {
     const emailResult = await sendContactEmail(contactData);
 
     if (!emailResult.success) {
-      // Log but don't block - store the message even if email fails
-      console.error('Email sending failed:', emailResult.error);
+      console.warn('Email sending failed:', emailResult.error);
+    }
+
+    // Persist to database (dual storage - survives even if email fails)
+    let dbRecordId: string | null = null;
+    try {
+      const { data: dbData, error: dbError } = await supabaseAdmin
+        .from('contact_messages')
+        .insert({
+          name: sanitizedName,
+          email: sanitizedEmail,
+          type,
+          message: sanitizedMessage,
+          ip_address: clientIP,
+          captcha_verified: captchaVerified || false,
+          email_sent: emailResult.success,
+          status: 'pending',
+        })
+        .select('id')
+        .single();
+
+      if (dbError) {
+        console.error('Failed to save contact message to database:', dbError);
+      } else {
+        dbRecordId = dbData?.id || null;
+        console.log('Contact message saved to database:', dbRecordId);
+      }
+    } catch (dbErr) {
+      console.error('Database save error:', dbErr);
     }
 
     console.log('Contact form submission processed:', JSON.stringify({
-      id: contactData.id,
+      id: dbRecordId || contactData.id,
       emailSent: emailResult.success,
+      dbSaved: !!dbRecordId,
       timestamp: contactData.createdAt,
     }));
 
@@ -276,7 +305,7 @@ export const POST: APIRoute = async ({ request }) => {
       JSON.stringify({
         success: true,
         data: {
-          id: contactData.id,
+          id: dbRecordId || contactData.id,
           message: emailResult.success
             ? '感谢您的反馈！我们会尽快处理。'
             : '您的反馈已收到，我们会尽快处理。（系统通知已发送）',

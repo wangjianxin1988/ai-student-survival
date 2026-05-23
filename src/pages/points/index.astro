@@ -8,7 +8,7 @@ import { POINTS_SHOP_PACKAGES } from '@/lib/points/config';
 const user = getCurrentUser();
 
 if (!user) {
-  return Astro.redirect('/login?redirect=/points');
+  return Astro.redirect('/auth/login?redirect=/points');
 }
 
 const result = await getUserPoints(user.id);
