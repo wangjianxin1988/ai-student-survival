@@ -5,7 +5,7 @@ interface CreatePostPageProps {
   userId: string;
 }
 
-export function CreatePostPage({ userId }: CreatePostPageProps) {
+export function CreatePostPage({ userId: _userId }: CreatePostPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (data: {

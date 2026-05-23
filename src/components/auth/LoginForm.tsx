@@ -72,7 +72,7 @@ export default function LoginForm({
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
   const [magicLinkToken, setMagicLinkToken] = useState("");
   const [forgotToken, setForgotToken] = useState("");
-  const [authChecked, setAuthChecked] = useState(false);
+  const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
@@ -137,7 +137,7 @@ export default function LoginForm({
       } else {
         setError(result.error || t.error);
       }
-    } catch (err) {
+    } catch {
       setError(t.error);
     }
 
@@ -166,7 +166,7 @@ export default function LoginForm({
       } else {
         setError(result.error || "发送失败");
       }
-    } catch (err) {
+    } catch {
       setError("发送失败");
     }
 
@@ -186,7 +186,7 @@ export default function LoginForm({
       } else {
         setError(result.error || "发送失败");
       }
-    } catch (err) {
+    } catch {
       setError("发送失败");
     }
 

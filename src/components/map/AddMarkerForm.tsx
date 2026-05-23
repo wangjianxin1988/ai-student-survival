@@ -11,7 +11,7 @@ interface AddMarkerFormProps {
 
 export default function AddMarkerForm({
   initialCoordinates,
-  onSubmit,
+  onSubmit: _onSubmit,
   onCancel,
 }: AddMarkerFormProps) {
   const [formData, setFormData] = useState({

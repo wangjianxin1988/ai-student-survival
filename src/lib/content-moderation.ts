@@ -141,7 +141,9 @@ const LEET_PATTERNS: [RegExp, string][] = [
 // ============================================
 const HOMOPHONIC_PATTERNS: [RegExp, string][] = [
   // 微信 variants
+  // eslint-disable-next-line no-misleading-character-class
   [/微[信✉️威微]|we[i1]x[i1]n|wechat|v[x+][i1]|v[x+]/gi, '微信'],
+  // eslint-disable-next-line no-misleading-character-class
   [/威信|微x[信?]|薇信|伈|xin$/gi, '微信'],
   // QQ variants
   [/扣扣|企鹅|群号|[Qq]{2}|[Qq][\s]*[Qq]|qiut?$/gi, 'QQ'],
@@ -153,8 +155,10 @@ const HOMOPHONIC_PATTERNS: [RegExp, string][] = [
   [/手機|phone|m[o0]b[o0]|電?话|[话話]/gi, '手机号'],
   [/号[码馬?]|number/gi, '手机号'],
   // 微信号 variants
+  // eslint-disable-next-line no-misleading-character-class
   [/微[信✉️]号|[wx]+[sx]+[hx]+/gi, '微信号'],
   // 赚钱 variants
+  // eslint-disable-next-line no-misleading-character-class
   [/赚[钱💰米金]|挣[$钱]|赚$/gi, '赚钱'],
   [/月入|日入|日赚|周赚/gi, '赚钱'],
   // 菠菜 (博彩) variants
@@ -645,6 +649,7 @@ export function moderateContent(
   }
 
   // 13. Check for excessive special characters
+  // eslint-disable-next-line no-useless-escape
   const specialCharRatio = (content.match(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/g) || []).length / content.length;
   if (specialCharRatio > 0.3) {
     flags.push('special_characters_abuse');

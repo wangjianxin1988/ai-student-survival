@@ -24,7 +24,7 @@ const translations = {
 export default function OfferComment({ comment, locale = 'zh', onLike }: OfferCommentProps) {
   const [liked, setLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(comment.likes);
-  const t = translations[locale];
+  const _t = translations[locale];
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);

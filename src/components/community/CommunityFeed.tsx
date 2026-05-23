@@ -66,7 +66,7 @@ export function CommunityFeed({ currentUserId, locale }: CommunityFeedProps) {
         if (data.success && data.data.length > 0) {
           setFeaturedPosts(data.data);
         }
-      } catch (e) {
+      } catch {
         // ignore
       }
     };

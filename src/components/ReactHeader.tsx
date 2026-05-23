@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import UserMenu from '@/components/auth/UserMenu';
 import NotificationCenter from '@/components/common/NotificationCenter';
 import OnboardingGuide from '@/components/common/OnboardingGuide';
-import { useAuth } from '@/components/auth/AuthProvider';
 import { defaultLocale } from '@/i18n';
 
 interface ReactHeaderProps {

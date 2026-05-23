@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import MathCaptcha from "./MathCaptcha";
 
 interface ContactFormProps {
@@ -127,7 +127,7 @@ export default function ContactForm({ locale = "zh" }: ContactFormProps) {
           setErrorMessage(result.error?.message || t.error);
         }
       }
-    } catch (err) {
+    } catch {
       setStatus("error");
       setErrorMessage(t.error);
     } finally {

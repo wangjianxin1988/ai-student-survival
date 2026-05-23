@@ -18,6 +18,36 @@ interface CampusMapProps {
   onMapClick?: (lat: number, lng: number) => void;
 }
 
+/** Build marker popup HTML (DRY - single source of truth) */
+function buildPopupContent(marker: MapMarker, universityName?: string): string {
+  return `
+    <div class="p-2 min-w-[200px]">
+      <h3 class="font-semibold text-sm">${marker.nameZh || marker.name}</h3>
+      <p class="text-xs text-gray-500 mt-1">${universityName || ''}</p>
+      <p class="text-xs text-gray-600 mt-1">${marker.descriptionZh || marker.description || ''}</p>
+      ${marker.rating ? `<div class="flex items-center mt-2 text-xs">${marker.rating}/5 (${marker.ratingCount || 0} reviews)</div>` : ''}
+      <a href="/map?marker=${marker.id}" class="block mt-2 text-xs text-blue-500 hover:text-blue-700">View Details</a>
+    </div>
+  `;
+}
+
+/** Add all markers to the map layer */
+async function addMarkersToLayer(
+  L: any,
+  layer: any,
+  markers: MapMarker[],
+  universities: University[]
+) {
+  layer.clearLayers();
+  markers.forEach(marker => {
+    const uni = universities.find(u => u.id === marker.universityId);
+    const content = buildPopupContent(marker, uni?.name || uni?.nameZh);
+    L.marker([marker.coordinates.lat, marker.coordinates.lng])
+      .bindPopup(L.popup().setContent(content))
+      .addTo(layer);
+  });
+}
+
 export default function CampusMap({
   markers = [],
   selectedUniversity,
@@ -87,23 +117,7 @@ export default function CampusMap({
 
       // Add existing markers
       if (markers.length > 0) {
-        markersLayerRef.current.clearLayers();
-        markers.forEach(marker => {
-          const uni = universities.find(u => u.id === marker.universityId);
-          const popupContent = `
-            <div class="p-2 min-w-[200px]">
-              <h3 class="font-semibold text-sm">${marker.nameZh || marker.name}</h3>
-              <p class="text-xs text-gray-500 mt-1">${marker.universityName || ''}</p>
-              <p class="text-xs text-gray-600 mt-1">${marker.descriptionZh || marker.description || ''}</p>
-              ${marker.rating ? `<div class="flex items-center mt-2 text-xs">${marker.rating}/5 (${marker.ratingCount || 0} reviews)</div>` : ''}
-              <a href="/map?marker=${marker.id}" class="block mt-2 text-xs text-blue-500 hover:text-blue-700">View Details</a>
-            </div>
-          `;
-          const popup = L.popup().setContent(popupContent);
-          L.marker([marker.coordinates.lat, marker.coordinates.lng])
-            .bindPopup(popup)
-            .addTo(markersLayerRef.current);
-        });
+        await addMarkersToLayer(L, markersLayerRef.current, markers, universities);
       }
     };
 
@@ -120,29 +134,8 @@ export default function CampusMap({
   // Update markers when they change
   useEffect(() => {
     if (!mapInstanceRef.current || !markersLayerRef.current) return;
-
-    const updateMarkers = async () => {
-      const L = (await import('leaflet')).default;
-      markersLayerRef.current.clearLayers();
-      markers.forEach(marker => {
-        const popupContent = `
-          <div class="p-2 min-w-[200px]">
-            <h3 class="font-semibold text-sm">${marker.nameZh || marker.name}</h3>
-            <p class="text-xs text-gray-500 mt-1">${marker.universityName || ''}</p>
-            <p class="text-xs text-gray-600 mt-1">${marker.descriptionZh || marker.description || ''}</p>
-            ${marker.rating ? `<div class="flex items-center mt-2 text-xs">${marker.rating}/5 (${marker.ratingCount || 0} reviews)</div>` : ''}
-            <a href="/map?marker=${marker.id}" class="block mt-2 text-xs text-blue-500 hover:text-blue-700">View Details</a>
-          </div>
-        `;
-        const popup = L.popup().setContent(popupContent);
-        L.marker([marker.coordinates.lat, marker.coordinates.lng])
-          .bindPopup(popup)
-          .addTo(markersLayerRef.current);
-      });
-    };
-
-    updateMarkers();
-  }, [markers]);
+    addMarkersToLayer(null, markersLayerRef.current, markers, universities);
+  }, [markers, universities]);
 
   // Update center when selectedUniversity changes
   useEffect(() => {

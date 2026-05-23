@@ -64,7 +64,7 @@ export default function RegisterForm({
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string>("");
-  const [authChecked, setAuthChecked] = useState(false);
+  const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
@@ -116,7 +116,7 @@ export default function RegisterForm({
         const user = await demoAuthApi.getUser();
         clearTimeout(timeout);
         setIsLoggedIn(!!user);
-      } catch (err) {
+      } catch {
         console.error('[RegisterForm] Auth check error:', err);
         clearTimeout(timeout);
         setIsLoggedIn(false);
@@ -150,7 +150,7 @@ export default function RegisterForm({
       } else {
         setError(result.error || t.error);
       }
-    } catch (err) {
+    } catch {
       setError(t.error);
     }
 

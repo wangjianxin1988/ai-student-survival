@@ -96,7 +96,7 @@ export function getUnreadCount(): number {
 }
 
 // Initialize demo notifications for new users
-export function initDemoNotifications(userId: string): void {
+export function initDemoNotifications(_userId: string): void {
   const existing = getStoredNotifications();
   // Check if user already has notifications
   const userHasNotifications = existing.some(

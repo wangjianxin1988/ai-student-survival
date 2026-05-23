@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 // Payment Solutions Data - Static data for payment solutions page
 // Comprehensive payment solutions for ALL 20 AI tools in the tools database
 // This data is used when Supabase is not configured or as fallback
@@ -3317,7 +3318,9 @@ Hermes Agent是一个具有自进化能力的AI Agent框架，GitHub 100K+ Stars
 python -m venv hermes-env
 source hermes-env/bin/activate  # Linux/Mac
 # or
+/* eslint-disable no-useless-escape */
 .\hermes-env\Scripts\activate  # Windows
+/* eslint-enable no-useless-escape */
 
 # 安装
 pip install hermes-agent

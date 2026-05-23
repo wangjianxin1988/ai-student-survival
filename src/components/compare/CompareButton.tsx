@@ -46,8 +46,8 @@ function saveCompareToolIds(ids: string[]): void {
 
 export default function CompareButton({
   toolSlug,
-  toolName,
-  toolImage,
+  toolName: _toolName,
+  toolImage: _toolImage,
   locale = "zh",
 }: CompareButtonProps) {
   const [isInCompare, setIsInCompare] = useState(false);

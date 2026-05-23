@@ -104,15 +104,16 @@ export function PostCard({
     const meta = post.meta as unknown as Record<string, unknown>;
 
     switch (post.category) {
-      case "tools":
+      case "tools": {
         const pricing = meta.pricing as string;
         return pricing ? (
           <span className="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-600 font-medium">
             {PRICING_LABELS[pricing] || pricing}
           </span>
         ) : null;
+      }
 
-      case "payment":
+      case "payment": {
         const difficulty = meta.difficulty as string;
         const reliability = meta.reliability as string;
         return (
@@ -137,8 +138,9 @@ export function PostCard({
             )}
           </>
         );
+      }
 
-      case "policy":
+      case "policy": {
         const overallPolicy = meta.overallPolicy as string;
         const universityName = meta.universityName as string;
         return (
@@ -165,8 +167,9 @@ export function PostCard({
             )}
           </>
         );
+      }
 
-      case "survival":
+      case "survival": {
         const survivalCategory = meta.survivalCategory as string;
         const country = meta.country as string;
         return (
@@ -183,6 +186,7 @@ export function PostCard({
             )}
           </>
         );
+      }
 
       default:
         return null;

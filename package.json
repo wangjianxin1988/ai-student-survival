@@ -1,7 +1,7 @@
 {
   "name": "ai-student-survival",
   "type": "module",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AI留学生存指南 - AI Native website for Chinese international students",
   "scripts": {
     "dev": "astro dev",
@@ -42,6 +42,7 @@
     "playwright": "^1.60.0",
     "prettier": "^3.3.0",
     "prettier-plugin-astro": "^0.14.0",
+    "tsx": "^4.22.3",
     "typescript": "^5.9.3",
     "vitest": "^2.0.0"
   },

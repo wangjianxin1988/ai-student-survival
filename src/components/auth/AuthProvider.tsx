@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             avatar_url: session.user.user_metadata?.avatar_url,
           });
         }
-      } catch (err) {
+      } catch {
         console.error("[AuthProvider] Init error:", err);
       } finally {
         clearTimeout(timeoutId);
@@ -101,7 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         if (error) return { success: false, error: error.message };
         return { success: true };
-      } catch (err) {
+      } catch {
         return { success: false, error: "发生未知错误" };
       }
     },
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         if (error) return { success: false, error: error.message };
         return { success: true };
-      } catch (err) {
+      } catch {
         return { success: false, error: "发生未知错误" };
       }
     },
@@ -183,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return { success: false, error: error.message };
         }
         return { success: true };
-      } catch (err) {
+      } catch {
         return { success: false, error: "发生未知错误" };
       }
     },

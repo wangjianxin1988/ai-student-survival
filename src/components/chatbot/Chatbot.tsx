@@ -323,7 +323,7 @@ export default function Chatbot({
       } else {
         throw new Error(data.error?.message || "Failed to get response");
       }
-    } catch (error) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",

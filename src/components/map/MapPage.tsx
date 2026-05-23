@@ -10,13 +10,6 @@ interface University {
   location: { lat: number; lng: number };
 }
 
-interface University {
-  id: string;
-  name: string;
-  nameZh: string;
-  location: { lat: number; lng: number };
-}
-
 interface MapPageProps {
   markers: MapMarker[];
   universities: University[];
@@ -54,7 +47,7 @@ export default function MapPage({
   }, [markers, selectedUniversity, selectedCategory, searchQuery]);
 
   // Get unique universities that have markers (for display purposes)
-  const markerUniIds = useMemo(() => {
+  const _markerUniIds = useMemo(() => {
     return new Set(markers.map(m => m.universityId));
   }, [markers]);
 
