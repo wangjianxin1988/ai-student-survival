@@ -54,3 +54,27 @@ jobs:
           echo "Site key: $SITE_KEY"
           echo "::notice::Turnstile Site Key: $SITE_KEY"
           echo "SITE_KEY=$SITE_KEY" >> $GITHUB_OUTPUT
+
+      - name: Set GitHub Secret with Turnstile Site Key
+        if: steps.cfstep.outputs.SITE_KEY != '' && steps.cfstep.outputs.SITE_KEY != 'null' && steps.cfstep.outputs.SITE_KEY != 'empty'
+        run: |
+          echo "Setting PUBLIC_TURNSTILE_SITE_KEY secret..."
+          pip install pynacl -q 2>/dev/null || true
+          # Write Python script to file to avoid quoting issues
+          printf '%s\n' "import base64" "from nacl import encoding, public" "" "pub_key_b64 = open('/tmp/pub_key.txt').read().strip()" "site_key = open('/tmp/site_key.txt').read().strip()" "key_bytes = base64.b64decode(pub_key_b64)" "pub_key = public.PublicKey(key_bytes[:32])" "sealed_box = public.SealedBox(pub_key)" "encrypted = sealed_box.encrypt(site_key.encode())" "print(base64.b64encode(encrypted).decode())" > /tmp/encrypt.py
+          echo "${{ steps.cfstep.outputs.SITE_KEY }}" > /tmp/site_key.txt
+          PUB_KEY_JSON=$(curl -s -X GET "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/public-key" -H "Authorization: Bearer ${{ github.token }}")
+          KEY_ID=$(echo "$PUB_KEY_JSON" | jq -r '.key_id')
+          echo "$PUB_KEY_JSON" | jq -r '.key' > /tmp/pub_key.txt
+          ENCRYPTED=$(python3 /tmp/encrypt.py)
+          echo "Secret encrypted: $ENCRYPTED"
+          RESULT=$(curl -s -X PUT "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/PUBLIC_TURNSTILE_SITE_KEY" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"encrypted_value\": \"$ENCRYPTED\", \"key_id\": \"$KEY_ID\"}")
+          echo "Secret set result: $RESULT"
+
+      - name: Note about OAuth Redirect URLs
+        run: |
+          echo "Note: OAuth redirect URLs must be set manually"
+          echo "URL: https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/auth/providers"
