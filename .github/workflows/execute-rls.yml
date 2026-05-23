@@ -1,0 +1,166 @@
+name: Execute RLS Migration and Configure Turnstile
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  execute-rls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Execute RLS policies via Supabase Management API
+        run: |
+          echo "Executing RLS migration..."
+
+          # Read the RLS SQL file and properly encode as JSON
+          SQL_JSON=$(cat supabase/migrations/20260523_add_rls_policies.sql | jq -Rs .)
+
+          # Execute via Supabase Management API
+          RESPONSE=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": $SQL_JSON}")
+
+          echo "Response: $RESPONSE"
+
+          if echo "$RESPONSE" | grep -qi '"error"'; then
+            echo "Error detected in response"
+            echo "$RESPONSE" | jq .
+            exit 1
+          else
+            echo "RLS migration executed successfully"
+          fi
+
+  configure-turnstile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get or create Cloudflare Turnstile site
+        run: |
+          echo "Checking existing Turnstile sites..."
+          RESPONSE=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+
+          echo "Turnstile sites response: $RESPONSE"
+
+          TURNSTILE_COUNT=$(echo "$RESPONSE" | jq -r '.result | length')
+          echo "Found $TURNSTILE_COUNT Turnstile site(s)"
+
+          if [ "$TURNSTILE_COUNT" = "0" ] || [ "$TURNSTILE_COUNT" = "null" ]; then
+            echo "No Turnstile site found, creating one..."
+            CREATE_RESPONSE=$(curl -s -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{"name": "mi-to-ai.com", "domain": "mi-to-ai.com", "mode": "non-interactive"}')
+
+            echo "Create response: $CREATE_RESPONSE"
+            SITE_KEY=$(echo "$CREATE_RESPONSE" | jq -r '.result.sitekey // empty')
+          else
+            echo "Using existing Turnstile site..."
+            SITE_KEY=$(echo "$RESPONSE" | jq -r '.[0].sitekey // .result[0].sitekey // empty')
+          fi
+
+          echo "SITE_KEY=$SITE_KEY" >> $GITHUB_OUTPUT
+
+          if [ -n "$SITE_KEY" ] && [ "$SITE_KEY" != "null" ] && [ "$SITE_KEY" != "empty" ]; then
+            echo "::notice::Turnstile Site Key: $SITE_KEY"
+            echo "Turnstile Site Key retrieved successfully"
+          else
+            echo "Could not get Turnstile site key"
+            echo "$RESPONSE" | jq .
+          fi
+
+  configure-oauth:
+    needs: execute-rls
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure OAuth Redirect URLs
+        run: |
+          echo "Checking OAuth configuration..."
+
+          # Supabase OAuth config API requires Personal Access Token
+          # Service role key does NOT work for this endpoint
+          for PROVIDER in github google; do
+            echo "Checking ${PROVIDER} OAuth config..."
+            RESPONSE=$(curl -s -X GET \
+              "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/config/url/${PROVIDER}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+            echo "Current ${PROVIDER} config: $RESPONSE"
+          done
+
+          echo "Note: OAuth redirect URLs must be set manually in Supabase Dashboard"
+          echo "URL: https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/auth/providers"
+          echo "Add https://mi-to-ai.com/auth/callback to both GitHub and Google redirect URLs"
+
+  update-turnstile-secret:
+    needs: configure-turnstile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set PUBLIC_TURNSTILE_SITE_KEY GitHub secret
+        run: |
+          echo "Setting PUBLIC_TURNSTILE_SITE_KEY secret..."
+
+          # Get the public key for repo secret encryption
+          PUB_KEY_JSON=$(curl -s -X GET \
+            "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/public-key" \
+            -H "Authorization: Bearer ${{ github.token }}")
+
+          KEY_ID=$(echo "$PUB_KEY_JSON" | jq -r '.key_id')
+          PUB_KEY=$(echo "$PUB_KEY_JSON" | jq -r '.key')
+
+          echo "Got public key, ID: $KEY_ID"
+
+          # Get site key from previous job output
+          SITE_KEY="${{ needs.configure-turnstile.outputs.SITE_KEY }}"
+
+          if [ -z "$SITE_KEY" ] || [ "$SITE_KEY" = "null" ] || [ "$SITE_KEY" = "empty" ]; then
+            echo "No site key available from configure-turnstile job"
+            echo "::notice::Please configure Turnstile manually at https://dash.cloudflare.com/turnstile"
+            echo "Then add PUBLIC_TURNSTILE_SITE_KEY to GitHub Secrets"
+            exit 0
+          fi
+
+          echo "Site key to set: $SITE_KEY"
+
+          # Install pynacl for encryption
+          pip install pynacl -q 2>/dev/null || true
+
+          # Encrypt secret using the repo's public key (SealedBox X25519)
+          ENCRYPTED=$(python3 -c "
+import base64
+import sys
+from nacl import encoding, public
+key_bytes = base64.b64decode('$PUB_KEY')
+pub_key = public.PublicKey(key_bytes[:32])
+sealed_box = public.SealedBox(pub_key)
+encrypted = sealed_box.encrypt(b'$SITE_KEY')
+print(base64.b64encode(encrypted).decode())
+")
+
+          echo "Secret encrypted"
+
+          # Set the secret via GitHub API
+          RESULT=$(curl -s -X PUT \
+            "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/PUBLIC_TURNSTILE_SITE_KEY" \
+            -H "Authorization: Bearer ${{ github.token }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"encrypted_value\": \"$ENCRYPTED\", \"key_id\": \"$KEY_ID\"}")
+
+          echo "Set secret result: $RESULT"
+
+          if echo "$RESULT" | grep -q '"updated_at"\|"created_at"'; then
+            echo "::notice::PUBLIC_TURNSTILE_SITE_KEY secret updated successfully!"
+          else
+            echo "Secret update may have failed"
+            echo "$RESULT" | jq .
+          fi
