@@ -1,4 +1,4 @@
-import { Turnstile } from '@marsidev/react-turnstile';
+import { useEffect, useRef, useState } from "react";
 
 interface TurnstileWidgetProps {
   onVerify: (token: string) => void;
@@ -6,27 +6,124 @@ interface TurnstileWidgetProps {
   className?: string;
 }
 
+// Cloudflare Turnstile sitekey - use test key for development
+const SITE_KEY =
+  (import.meta.env as any).PUBLIC_TURNSTILE_SITE_KEY ||
+  "1x00000000000000000000AA";
+
+declare global {
+  interface Window {
+    onloadTurnstileCallback: () => void;
+    turnstile: {
+      render: (
+        container: HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          "error-callback"?: (error: unknown) => void;
+          "expired-callback"?: () => void;
+          theme?: "light" | "dark" | "auto";
+          size?: "normal" | "compact" | "invisible";
+          tabindex?: number;
+          language?: string;
+          retryInterval?: number;
+          retry?: "auto" | "never";
+        }
+      ) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
+
 export function TurnstileWidget({
   onVerify,
   onExpire,
   className,
 }: TurnstileWidgetProps) {
-  // Use Cloudflare test sitekey for development
-  // In production, replace with real sitekey from Cloudflare Dashboard
-  const siteKey =
-    import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+  const containerRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  useEffect(() => {
+    // Check if already rendered
+    if (widgetIdRef.current) return;
+
+    // Define the callback
+    window.onloadTurnstileCallback = () => {
+      setIsLoaded(true);
+    };
+
+    // Load the Turnstile script if not already loaded
+    if (!document.getElementById("cf-turnstile-script")) {
+      const script = document.createElement("script");
+      script.id = "cf-turnstile-script";
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onloadTurnstileCallback&render=explicit";
+      script.async = true;
+      script.defer = true;
+      script.onerror = () => setHasError(true);
+      document.head.appendChild(script);
+    } else if (window.turnstile) {
+      // Script already loaded
+      setIsLoaded(true);
+    }
+
+    return () => {
+      // Cleanup: remove widget on unmount
+      if (widgetIdRef.current && window.turnstile) {
+        try {
+          window.turnstile.remove(widgetIdRef.current);
+        } catch {
+          // Ignore errors during cleanup
+        }
+        widgetIdRef.current = null;
+      }
+    };
+  }, []);
+
+  // Render widget when script is loaded
+  useEffect(() => {
+    if (!isLoaded || !containerRef.current || widgetIdRef.current) return;
+
+    widgetIdRef.current = window.turnstile.render(containerRef.current, {
+      sitekey: SITE_KEY,
+      callback: (token: string) => {
+        onVerify(token);
+      },
+      "error-callback": () => {
+        setHasError(true);
+      },
+      "expired-callback": () => {
+        widgetIdRef.current = null;
+        onExpire?.();
+      },
+      theme: "light",
+      size: "normal",
+      tabindex: 0,
+      retry: "auto",
+      retryInterval: 8000,
+    });
+
+    setIsLoaded(false); // Reset after render to prevent re-renders
+  }, [isLoaded, onVerify, onExpire]);
+
+  if (hasError) {
+    return (
+      <div className={className}>
+        <p className="text-xs text-red-500">
+          人机验证加载失败，请刷新页面重试
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={className}>
-      <Turnstile
-        siteKey={siteKey}
-        onVerify={(token) => onVerify(token)}
-        onExpire={onExpire}
-        options={{
-          theme: 'auto',
-          size: 'flexible',
-        }}
-      />
+      <div ref={containerRef} id="cf-turnstile" />
+      {!widgetIdRef.current && !hasError && (
+        <p className="text-xs text-gray-400 mt-1">加载验证组件中...</p>
+      )}
     </div>
   );
 }

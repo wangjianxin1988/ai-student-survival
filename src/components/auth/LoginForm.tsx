@@ -71,7 +71,8 @@ export default function LoginForm({
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState("");
+  const [magicLinkToken, setMagicLinkToken] = useState("");
+  const [forgotToken, setForgotToken] = useState("");
   const [authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -289,10 +290,10 @@ export default function LoginForm({
             {/* Turnstile Verification */}
             <div className="mt-4">
               <TurnstileWidget
-                onVerify={(token) => setTurnstileToken(token)}
-                onExpire={() => setTurnstileToken("")}
+                onVerify={(token) => setForgotToken(token)}
+                onExpire={() => setForgotToken("")}
               />
-              {!turnstileToken && (
+              {!forgotToken && (
                 <p className="text-xs text-gray-500 mt-1">
                   {t.verifyHuman}
                 </p>
@@ -301,7 +302,7 @@ export default function LoginForm({
 
             <button
               type="submit"
-              disabled={!turnstileToken || isLoading}
+              disabled={!forgotToken || isLoading}
               className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? t.loading : t.resetPassword}
@@ -312,7 +313,7 @@ export default function LoginForm({
               onClick={() => {
                 setShowForgotPassword(false);
                 setError("");
-                setTurnstileToken("");
+                setForgotToken("");
               }}
               className="w-full text-sm text-gray-600 hover:text-gray-900"
             >
@@ -358,10 +359,10 @@ export default function LoginForm({
           {/* Turnstile Verification */}
           <div className="mt-4">
             <TurnstileWidget
-              onVerify={(token) => setTurnstileToken(token)}
-              onExpire={() => setTurnstileToken("")}
+              onVerify={(token) => setMagicLinkToken(token)}
+              onExpire={() => setMagicLinkToken("")}
             />
-            {!turnstileToken && (
+            {!magicLinkToken && (
               <p className="text-xs text-gray-500 mt-1">
                 {t.verifyHuman}
               </p>
@@ -370,7 +371,7 @@ export default function LoginForm({
 
           <button
             type="submit"
-            disabled={!turnstileToken || isLoading}
+            disabled={!magicLinkToken || isLoading}
             className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? t.loading : t.sendMagicLink}
@@ -386,7 +387,7 @@ export default function LoginForm({
             type="button"
             onClick={() => {
               setShowMagicLink(false);
-              setTurnstileToken("");
+              setMagicLinkToken("");
               setError("");
             }}
             className="w-full text-sm text-gray-600 hover:text-gray-900"
@@ -444,22 +445,9 @@ export default function LoginForm({
               </button>
             </div>
 
-            {/* Turnstile Verification for Login */}
-            <div className="mt-4">
-              <TurnstileWidget
-                onVerify={(token) => setTurnstileToken(token)}
-                onExpire={() => setTurnstileToken("")}
-              />
-              {!turnstileToken && (
-                <p className="text-xs text-gray-500 mt-1">
-                  {t.verifyHuman}
-                </p>
-              )}
-            </div>
-
             <button
               type="submit"
-              disabled={!turnstileToken || isLoading}
+              disabled={isLoading}
               className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? t.loading : t.submit}
