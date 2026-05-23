@@ -1,11 +1,24 @@
 import React, { useState } from 'react';
+import AuthGate from '@/components/auth/AuthGate';
 import { PostEditor } from './PostEditor';
 
 interface CreatePostPageProps {
   userId: string;
 }
 
+/**
+ * CreatePostPage - Wrapper that handles auth check client-side
+ * AuthGate ensures user is logged in before showing the post editor
+ */
 export function CreatePostPage({ userId: _userId }: CreatePostPageProps) {
+  return (
+    <AuthGate>
+      <CreatePostContent />
+    </AuthGate>
+  );
+}
+
+function CreatePostContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (data: {

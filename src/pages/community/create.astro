@@ -1,13 +1,6 @@
 ---
 import { CreatePostPage } from '@/components/community/CreatePostPage';
 import Layout from '@/layouts/Layout.astro';
-import { getCurrentUser } from '@/lib/auth';
-
-const user = getCurrentUser();
-
-if (!user) {
-  return Astro.redirect('/auth/login?redirect=/community/create');
-}
 ---
 
 <Layout title="发布帖子 - AI留学生存指南">
@@ -22,7 +15,8 @@ if (!user) {
         </a>
       </div>
 
-      <CreatePostPage client:load userId={user.id} />
+      <!-- AuthGate: React component that handles client-side auth check -->
+      <CreatePostPage client:load userId="" />
     </div>
   </div>
 </Layout>

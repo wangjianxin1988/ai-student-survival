@@ -3,6 +3,7 @@ import type { CommunityPost } from "@/lib/community/types";
 import { PostCard } from "./PostCard";
 import { CategoryFilter, type CommunityCategory } from "./CategoryFilter";
 import { getCurrentLocale, getLocaleHref } from "@/lib/i18n";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 const translations = {
   zh: {
@@ -42,9 +43,14 @@ interface CommunityFeedProps {
   locale?: "zh" | "en";
 }
 
-export function CommunityFeed({ currentUserId, locale }: CommunityFeedProps) {
+export function CommunityFeed({ currentUserId: serverUserId, locale }: CommunityFeedProps) {
   const currentLocale = locale || getCurrentLocale();
   const t = translations[currentLocale];
+
+  // Use AuthProvider for auth state (client-side) instead of server-side prop
+  // AuthProvider is initialized client-side and reads from sessionStorage/demo_session
+  const { user: authUser, loading: authLoading } = useAuth();
+
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [featuredPosts, setFeaturedPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,6 +59,10 @@ export function CommunityFeed({ currentUserId, locale }: CommunityFeedProps) {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const limit = 20;
+
+  // Determine if user is logged in: prefer AuthProvider (client-side) over server prop
+  const currentUserId = authUser?.id || serverUserId || undefined;
+  const isLoggedIn = Boolean(currentUserId);
 
   useEffect(() => {
     fetchPosts();
@@ -125,6 +135,26 @@ export function CommunityFeed({ currentUserId, locale }: CommunityFeedProps) {
 
   const totalPages = Math.ceil(total / limit);
 
+  // Show skeleton during auth loading (only on initial hydration)
+  if (authLoading && !currentUserId && !serverUserId) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
+          <div className="h-10 w-24 bg-gray-200 rounded animate-pulse" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-lg shadow p-4 animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+              <div className="h-3 bg-gray-200 rounded w-1/2" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -138,7 +168,7 @@ export function CommunityFeed({ currentUserId, locale }: CommunityFeedProps) {
             <option value="latest">{t.latest}</option>
             <option value="popular">{t.popular}</option>
           </select>
-          {currentUserId ? (
+          {isLoggedIn ? (
             <a
               href={getLocaleHref("/community/create", currentLocale)}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
