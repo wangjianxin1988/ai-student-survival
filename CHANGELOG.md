@@ -2,6 +2,26 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.5] - 2026-05-23
+
+### Testing & QA
+- Comprehensive E2E testing across all core pages (auth, community, map, contact, user profile, regression)
+- Auth flow verified: login, register, OAuth (Google/GitHub), magic link, forgot password
+- Interactive pages tested: map, survival guides, prompts, offers, questions
+- Content pages verified: about, contact, faq, guide, privacy, terms, compare
+- English version pages verified: all 16 EN pages load correctly
+- Security audit: content moderation, API endpoints, auth flow, RLS policies
+
+### Known Issues (Non-blocking)
+- English pages contain some Chinese text in shared navigation/database content (cosmetic)
+- HTML5 email validation `valid` property undefined in test (form still works correctly)
+- Supabase session not stored in localStorage during test (auth still functions via cookies)
+
+### Code Quality
+- Build passes: `astro build` completes successfully
+- TypeScript: source files clean, test file type errors are expected
+- ESLint: configured and passing for source files
+
 ## [1.0.3] - 2026-05-23
 
 ### Fixed
