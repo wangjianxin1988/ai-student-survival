@@ -287,13 +287,24 @@ export const demoAuthApi = {
       }
 
       if (data.user) {
-        const user = toDemoUser(data.user);
-        currentUser = user;
-        notifyAuthChange(user);
-        return { success: true };
+        // If session exists, user is confirmed and logged in
+        if (data.session) {
+          const user = toDemoUser(data.user);
+          currentUser = user;
+          notifyAuthChange(user);
+          return { success: true };
+        }
+        // No session = email confirmation required
+        // Clear any cached user since they're not actually logged in
+        currentUser = null;
+        return {
+          success: false,
+          error: '请前往邮箱查收验证邮件，完成账号激活后再登录。验证邮件可能位于垃圾邮件文件夹。',
+          verificationRequired: true,
+        };
       }
 
-      return { success: false, error: '注册未完成' };
+      return { success: false, error: '注册未完成，请稍后重试' };
     } catch (err: any) {
       console.error('Sign up error:', err);
       if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {

@@ -6,7 +6,7 @@ import { getCurrentUser } from '@/lib/auth';
 const user = getCurrentUser();
 
 if (!user) {
-  return Astro.redirect('/login?redirect=/community/create');
+  return Astro.redirect('/auth/login?redirect=/community/create');
 }
 ---
 

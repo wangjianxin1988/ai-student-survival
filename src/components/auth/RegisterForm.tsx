@@ -66,6 +66,7 @@ export default function RegisterForm({
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   const t = translations[locale];
 
@@ -147,6 +148,8 @@ export default function RegisterForm({
       const result = await demoAuthApi.signUp(email, password, name);
       if (result.success) {
         redirectAfterRegister();
+      } else if (result.verificationRequired) {
+        setEmailVerified(true);
       } else {
         setError(result.error || t.error);
       }
@@ -180,6 +183,36 @@ export default function RegisterForm({
       setError(error.message);
     }
   };
+
+  // Show email verification success message
+  if (emailVerified) {
+    return (
+      <div className="text-center py-8">
+        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold mb-2">
+          {locale === "zh" ? "注册成功！" : "Registration Successful!"}
+        </h2>
+        <p className="text-gray-600 mb-2">
+          {locale === "zh"
+            ? `验证邮件已发送至 ${email}，请查收并点击邮件中的链接完成激活。`
+            : `A verification email has been sent to ${email}. Please check your inbox and click the link to activate your account.`}
+        </p>
+        <p className="text-sm text-gray-500 mb-6">
+          {locale === "zh" ? "邮件可能在垃圾邮件文件夹中" : "Check your spam folder if you don't see it"}
+        </p>
+        <a
+          href={locale === "zh" ? "/auth/login" : "/en/auth/login"}
+          className="inline-block px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors"
+        >
+          {locale === "zh" ? "前往登录" : "Go to Login"}
+        </a>
+      </div>
+    );
+  }
 
   // Redirect if already logged in (background check, don't block form render)
   if (isLoggedIn) {
