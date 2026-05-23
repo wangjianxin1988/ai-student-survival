@@ -9,5 +9,4 @@ pages_build_output_dir = "dist"
 # GitHub Actions 构建时通过 PUBLIC_SUPABASE_* 前缀传入 (Vite 会自动暴露为 import.meta.env.PUBLIC_*)
 [vars]
 SUPABASE_URL = "https://giynvpfnzzelzwpmsgtf.supabase.co"
-SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeW52cGZuenplbHp3cG1zZ3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDYxMjUsImV4cCI6MjA5NDc4MjEyNX0.TfBGkymlc-lMKkgmZHTUT-rMfOYo52VZRmbCU4bul9I"
-
+# SUPABASE_ANON_KEY 在 Cloudflare Dashboard 环境变量中配置，不在此文件中硬编码

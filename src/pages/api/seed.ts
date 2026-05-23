@@ -1,8 +1,12 @@
 import type { APIRoute } from 'astro';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = 'https://giynvpfnzzelzwpmsgtf.supabase.co';
-const ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdpeW52cGZuenplbHp3cG1zZ3RmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkyMDYxMjUsImV4cCI6MjA5NDc4MjEyNX0.TfBGkymlc-lMKkgmZHTUT-rMfOYo52VZRmbCU4bul9I';
+const SUPABASE_URL = (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined)
+  || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined)
+  || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
+const ANON_KEY = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
+  || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined)
+  || '';
 
 // Simple admin token for this endpoint (one-time use)
 const ADMIN_TOKEN = 'ai-student-survival-seed-2024';
