@@ -46,22 +46,58 @@ export function TurnstileWidget({
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   // Stable unique ID (not reactive) to avoid Cloudflare auto-placement conflicts
   const widgetId = useRef(`turnstile-${Math.random().toString(36).slice(2, 8)}`);
 
+  // Keep callbacks stable to prevent re-renders
+  const onVerifyRef = useRef(onVerify);
+  const onExpireRef = useRef(onExpire);
+  useEffect(() => { onVerifyRef.current = onVerify; }, [onVerify]);
+  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
+
   useEffect(() => {
     if (widgetIdRef.current) return;
 
-    // Script loading + callback setup
-    const loadScript = () => {
-      window.onloadTurnstileCallback = () => setIsLoaded(true);
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+    const renderWidget = (token?: string) => {
+      if (!containerRef.current || widgetIdRef.current) return;
+      if (token) {
+        // For test keys, emit token directly without rendering widget
+        onVerifyRef.current(token);
+        widgetIdRef.current = "test-widget";
+        return;
+      }
+
+      widgetIdRef.current = window.turnstile.render(containerRef.current, {
+        sitekey: SITE_KEY,
+        callback: (tk) => onVerifyRef.current(tk),
+        "error-callback": () => setHasError(true),
+        "expired-callback": () => {
+          widgetIdRef.current = null;
+          onExpireRef.current?.();
+        },
+        theme: "light",
+        size: "normal",
+        tabindex: 0,
+        retry: "auto",
+        retryInterval: 8000,
+      });
     };
 
-    if (!document.getElementById("cf-turnstile-script")) {
-      loadScript();
+    if (window.turnstile) {
+      // Script already loaded
+      setIsReady(true);
+      renderWidget();
+    } else if (!document.getElementById("cf-turnstile-script")) {
+      // Load script
+      window.onloadTurnstileCallback = () => {
+        setIsReady(true);
+        renderWidget();
+      };
       const script = document.createElement("script");
       script.id = "cf-turnstile-script";
       script.src =
@@ -70,66 +106,36 @@ export function TurnstileWidget({
       script.defer = true;
       script.onerror = () => setHasError(true);
       document.head.appendChild(script);
-    } else if (window.turnstile) {
-      // Script already loaded in this session — proceed immediately
-      setIsLoaded(true);
     } else {
-      // Script tag already in DOM but window.turnstile not ready yet (cached script).
-      // The onload already fired so callback won't be called.
-      // Poll briefly until window.turnstile is available.
-      loadScript();
-      const poll = setInterval(() => {
+      // Script tag exists but window.turnstile not ready yet
+      window.onloadTurnstileCallback = () => {
+        setIsReady(true);
+        renderWidget();
+      };
+      pollInterval = setInterval(() => {
         if (window.turnstile) {
-          clearInterval(poll);
-          setIsLoaded(true);
+          clearInterval(pollInterval!);
+          setIsReady(true);
+          renderWidget();
         }
       }, 50);
     }
 
     return () => {
-      if (widgetIdRef.current && window.turnstile) {
-        try {
-          window.turnstile.remove(widgetIdRef.current);
-        } catch {
-          // Ignore errors during cleanup
-        }
-        widgetIdRef.current = null;
+      if (pollInterval) clearInterval(pollInterval);
+      if (widgetIdRef.current && widgetIdRef.current !== "test-widget" && window.turnstile) {
+        try { window.turnstile.remove(widgetIdRef.current); } catch { /* ignore */ }
       }
+      widgetIdRef.current = null;
     };
   }, []);
 
-  // Render widget when script is ready
+  // For test keys: emit token when ready, even if widget not rendered
   useEffect(() => {
-    if (!isLoaded || !containerRef.current || widgetIdRef.current) return;
-
-    // Test keys use "always pass" mode which doesn't fire onVerify.
-    // Emit dummy token immediately so forms can proceed without UI.
-    if (IS_TEST_KEY) {
-      onVerify("TEST_TOKEN_DUMMY");
-      return;
-    }
-
-    widgetIdRef.current = window.turnstile.render(containerRef.current, {
-      sitekey: SITE_KEY,
-      callback: (token: string) => {
-        onVerify(token);
-      },
-      "error-callback": () => {
-        setHasError(true);
-      },
-      "expired-callback": () => {
-        widgetIdRef.current = null;
-        onExpire?.();
-      },
-      theme: "light",
-      size: "normal",
-      tabindex: 0,
-      retry: "auto",
-      retryInterval: 8000,
-    });
-
-    setIsLoaded(false);
-  }, [isLoaded, onVerify, onExpire]);
+    if (!isReady || !IS_TEST_KEY || widgetIdRef.current) return;
+    widgetIdRef.current = "test-widget";
+    onVerifyRef.current("TEST_TOKEN_DUMMY");
+  }, [isReady]);
 
   if (hasError) {
     return (
