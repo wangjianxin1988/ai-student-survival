@@ -136,10 +136,17 @@ function getLocaleHref(path: string): string {
           ></textarea>
         </div>
 
+        <!-- Error message container -->
+        <div id="form-error" class="mb-4 p-4 bg-red-50 text-red-700 rounded-lg hidden"></div>
+
+        <!-- Success message container -->
+        <div id="form-success" class="mb-4 p-4 bg-green-50 text-green-700 rounded-lg hidden"></div>
+
         <div class="text-center">
           <button
             type="submit"
-            class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+            id="submit-btn"
+            class="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {translate(locale, 'contact.form.submit')}
           </button>
@@ -168,16 +175,68 @@ function getLocaleHref(path: string): string {
 
   <script>
     const form = document.getElementById('contact-form') as HTMLFormElement;
+    const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+    const errorDiv = document.getElementById('form-error') as HTMLDivElement;
+    const successDiv = document.getElementById('form-success') as HTMLDivElement;
 
     form?.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Clear previous messages
+      errorDiv.classList.add('hidden');
+      successDiv.classList.add('hidden');
+
+      // Disable submit button and show loading state
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '发送中...';
+
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
 
-      // Simulate form submission
-      alert('感谢您的反馈！我们会尽快回复您。\n\n(联系功能开发中，暂时模拟提交)');
-      form.reset();
+      // Map subject select value to API type
+      const subjectMap: Record<string, string> = {
+        'general': 'feedback',
+        'feedback': 'feedback',
+        'bug': 'bug',
+        'feature': 'feature',
+        'collaboration': 'other'
+      };
+      const type = subjectMap[data.subject as string] || 'other';
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: data.name,
+            email: data.email,
+            type: type,
+            message: data.message
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          successDiv.textContent = result.data?.message || '感谢您的反馈！我们会尽快处理。';
+          successDiv.classList.remove('hidden');
+          form.reset();
+          // Scroll to success message
+          successDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          errorDiv.textContent = result.error?.message || '提交失败，请稍后重试。';
+          errorDiv.classList.remove('hidden');
+          // Scroll to error message
+          errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } catch (error) {
+        errorDiv.textContent = '网络错误，请检查网络连接后重试。';
+        errorDiv.classList.remove('hidden');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+      }
     });
   </script>
 </Layout>

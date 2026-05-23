@@ -186,10 +186,10 @@ export default function ContactForm({ locale = "zh" }: ContactFormProps) {
               {t.developerWechat}:
             </span>
             <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900 font-mono">
-              jian_xin_happy
+              {import.meta.env.PUBLIC_DEVELOPER_WECHAT || 'jian_xin_happy'}
             </code>
             <button
-              onClick={() => navigator.clipboard.writeText("jian_xin_happy")}
+              onClick={() => navigator.clipboard.writeText(import.meta.env.PUBLIC_DEVELOPER_WECHAT || 'jian_xin_happy')}
               className="text-blue-600 hover:text-blue-800"
               title={locale === "zh" ? "复制微信号" : "Copy WeChat ID"}
             >
@@ -213,7 +213,7 @@ export default function ContactForm({ locale = "zh" }: ContactFormProps) {
               {t.developerEmail}:
             </span>
             <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-900 font-mono">
-              18801400211@163.com
+              {import.meta.env.PUBLIC_DEVELOPER_EMAIL || 'contact@mi-to-ai.com'}
             </code>
           </div>
         </div>

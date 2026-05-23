@@ -158,8 +158,8 @@ export const GET: APIRoute = async () => {
           { value: 'other', label: '其他', labelEn: 'Other' },
         ],
         developerContact: {
-          wechat: 'jian_xin_happy',
-          email: '18801400211@163.com',
+          wechat: import.meta.env.PUBLIC_DEVELOPER_WECHAT || 'jian_xin_happy',
+          email: import.meta.env.PUBLIC_DEVELOPER_EMAIL || 'contact@mi-to-ai.com',
         },
       },
     }),

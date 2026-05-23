@@ -1,7 +1,7 @@
 {
   "name": "ai-student-survival",
   "type": "module",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI留学生存指南 - AI Native website for Chinese international students",
   "scripts": {
     "dev": "astro dev",

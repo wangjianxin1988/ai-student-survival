@@ -76,7 +76,6 @@ export default function LoginForm({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const t = translations[locale];
-  const { user, loading } = { user: null, loading: false };
 
   // Get returnTo from URL if not provided via props
   const getReturnTo = () => {
