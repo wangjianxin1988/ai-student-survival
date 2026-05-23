@@ -5,7 +5,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 interface User {
   id: string;
@@ -36,6 +36,30 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Demo session key - must match the key used in auth.ts
+const DEMO_SESSION_KEY = 'demo_session';
+
+// Read demo user from sessionStorage
+function getDemoUserFromSession(): User | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const sessionData = sessionStorage.getItem(DEMO_SESSION_KEY);
+    if (sessionData) {
+      const demoUser = JSON.parse(sessionData);
+      // Convert DemoUser to User format
+      return {
+        id: demoUser.id,
+        email: demoUser.email || '',
+        name: demoUser.name,
+        avatar_url: demoUser.avatar,
+      };
+    }
+  } catch (e) {
+    console.error('[AuthProvider] Failed to parse demo session:', e);
+  }
+  return null;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -49,19 +73,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }, 3000);
 
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email || "",
-            name: session.user.user_metadata?.name,
-            avatar_url: session.user.user_metadata?.avatar_url,
-          });
+        // First check demo session (for fallback/demo mode)
+        const demoUser = getDemoUserFromSession();
+        if (demoUser) {
+          console.log('[AuthProvider] Demo session found, using demo user');
+          setUser(demoUser);
+          clearTimeout(timeoutId);
+          setLoading(false);
+          return;
         }
-      } catch {
+
+        // Then check Supabase if configured
+        if (isSupabaseConfigured) {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+
+          if (session?.user) {
+            setUser({
+              id: session.user.id,
+              email: session.user.email || "",
+              name: session.user.user_metadata?.name,
+              avatar_url: session.user.user_metadata?.avatar_url,
+            });
+          }
+        }
+      } catch (err) {
         console.error("[AuthProvider] Init error:", err);
       } finally {
         clearTimeout(timeoutId);
@@ -73,23 +110,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || "",
-          name: session.user.user_metadata?.name,
-          avatar_url: session.user.user_metadata?.avatar_url,
-        });
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
+    if (isSupabaseConfigured && typeof window !== 'undefined') {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (session?.user) {
+          setUser({
+            id: session.user.id,
+            email: session.user.email || "",
+            name: session.user.user_metadata?.name,
+            avatar_url: session.user.user_metadata?.avatar_url,
+          });
+        } else {
+          // Check if there's a demo session before setting to null
+          const demoUser = getDemoUserFromSession();
+          if (demoUser) {
+            setUser(demoUser);
+          } else {
+            setUser(null);
+          }
+        }
+        setLoading(false);
+      });
 
-    return () => subscription.unsubscribe();
+      return () => subscription.unsubscribe();
+    }
+
+    // Set up storage event listener for demo session cross-tab sync
+    if (typeof window !== 'undefined') {
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === DEMO_SESSION_KEY) {
+          if (e.newValue) {
+            try {
+              const demoUser = JSON.parse(e.newValue);
+              setUser({
+                id: demoUser.id,
+                email: demoUser.email || '',
+                name: demoUser.name,
+                avatar_url: demoUser.avatar,
+              });
+            } catch {}
+          } else {
+            setUser(null);
+          }
+        }
+      };
+      window.addEventListener('storage', handleStorageChange);
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
   }, []);
 
   const signIn = useCallback(
@@ -128,11 +196,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    // Clear demo session if it exists
+    sessionStorage.removeItem(DEMO_SESSION_KEY);
     setUser(null);
+
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut();
+    }
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
+    if (!isSupabaseConfigured) {
+      return { error: "Demo mode: OAuth not available" };
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -143,6 +219,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signInWithGithub = useCallback(async () => {
+    if (!isSupabaseConfigured) {
+      return { error: "Demo mode: OAuth not available" };
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {
@@ -154,6 +233,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signInWithMagicLink = useCallback(
     async (email: string) => {
+      if (!isSupabaseConfigured) {
+        return { success: false, error: "Demo mode: Magic link not available" };
+      }
       try {
         // First check if user exists in our users table
         const { data: profileData, error: profileError } = await supabase
