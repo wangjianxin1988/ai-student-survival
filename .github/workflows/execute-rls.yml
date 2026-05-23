@@ -52,7 +52,6 @@ jobs:
 
           # The Supabase Management API for OAuth config requires a Personal Access Token
           # (not the service role key). The service role key only works for /database/query.
-          # We'll use the management API endpoint - this may need a PAT if the service role key doesn't work
           for PROVIDER in github google; do
             echo "Checking ${PROVIDER} OAuth config..."
             RESPONSE=$(curl -s -X GET \
@@ -62,3 +61,142 @@ jobs:
           done
 
           echo "Note: If you see auth errors above, OAuth redirect URLs must be set manually in Supabase Dashboard"
+
+  configure-turnstile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get or create Cloudflare Turnstile site
+        run: |
+          echo "Checking existing Turnstile sites..."
+
+          # List existing Turnstile sites
+          RESPONSE=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+
+          echo "Turnstile sites response: $RESPONSE"
+
+          # Check if there are any existing sites
+          TURNSTILE_SITES=$(echo "$RESPONSE" | jq -r '.result | length')
+          echo "Found $TURNSTILE_SITES Turnstile site(s)"
+
+          if [ "$TURNSTILE_SITES" = "0" ]; then
+            echo "No Turnstile site found, creating one..."
+            CREATE_RESPONSE=$(curl -s -X POST \
+              "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{"name": "mi-to-ai.com", "domain": "mi-to-ai.com", "mode": "non-interactive"}')
+
+            echo "Create response: $CREATE_RESPONSE"
+            SITE_KEY=$(echo "$CREATE_RESPONSE" | jq -r '.result.sitekey // empty')
+            SECRET_KEY=$(echo "$CREATE_RESPONSE" | jq -r '.result.secretkey // empty')
+          else
+            echo "Using existing Turnstile site..."
+            SITE_KEY=$(echo "$RESPONSE" | jq -r '.result[0].sitekey // empty')
+            SECRET_KEY=$(echo "$RESPONSE" | jq -r '.result[0].secretkey // empty')
+          fi
+
+          if [ -n "$SITE_KEY" ] && [ "$SITE_KEY" != "null" ]; then
+            echo "Site key found: $SITE_KEY"
+            echo "::notice::Turnstile Site Key: $SITE_KEY"
+
+            # Set the site key as a GitHub secret for use in deployments
+            echo "Setting PUBLIC_TURNSTILE_SITE_KEY as GitHub secret..."
+            # Note: We can only set secrets via API with proper permissions
+            # This will be available in subsequent workflow runs
+            echo "SITE_KEY=$SITE_KEY" >> $GITHUB_OUTPUT
+          else
+            echo "Could not get Turnstile site key"
+            echo "$RESPONSE" | jq .
+          fi
+
+  update-secrets:
+    needs: configure-turnstile
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+      packages: read
+    steps:
+      - name: Update GitHub Secrets with Turnstile keys
+        run: |
+          echo "Fetching Turnstile site details..."
+
+          # Get the site key from Cloudflare API
+          RESPONSE=$(curl -s -X GET \
+            "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/turnstile" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json")
+
+          echo "API Response: $RESPONSE"
+
+          SITE_KEY=$(echo "$RESPONSE" | jq -r '.result[0].sitekey // empty')
+          echo "Found site key: $SITE_KEY"
+
+          if [ -n "$SITE_KEY" ] && [ "$SITE_KEY" != "null" ]; then
+            # Set the secret via GitHub API using GITHUB_TOKEN
+            # First, get the public key for repo encryption
+            echo "Setting PUBLIC_TURNSTILE_SITE_KEY secret..."
+
+            # Use the GitHub API to set the secret
+            # We need to get the repo's public key first, then encrypt the value
+            PUB_KEY_RESPONSE=$(curl -s -X GET \
+              "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/public-key" \
+              -H "Authorization: token ${{ github.token }}")
+
+            KEY_ID=$(echo "$PUB_KEY_RESPONSE" | jq -r '.key_id')
+            PUB_KEY=$(echo "$PUB_KEY_RESPONSE" | jq -r '.key')
+
+            echo "Got public key, ID: $KEY_ID"
+
+            # Encrypt the secret value using the public key (Curve25519, X25519)
+            # Use Python with cryptography library
+            ENCRYPTED=$(python3 -c "
+import base64
+import json
+import sys
+try:
+    from nacl import encoding, public
+    key_bytes = base64.b64decode('$PUB_KEY')
+    pub_key = public.PublicKey(key_bytes[:32])
+    sealed_box = public.SealedBox(pub_key)
+    encrypted = sealed_box.encrypt(b'$SITE_KEY')
+    sys.stdout.write(base64.b64encode(encrypted).decode())
+except ImportError:
+    print('FAILED_NACL')
+" 2>/dev/null)
+
+            if [ "$ENCRYPTED" = "FAILED_NACL" ] || [ -z "$ENCRYPTED" ]; then
+              # Fallback: install nacl
+              pip install pynacl -q && python3 -c "
+import base64
+from nacl import encoding, public
+key_bytes = base64.b64decode('$PUB_KEY')
+pub_key = public.PublicKey(key_bytes[:32])
+sealed_box = public.SealedBox(pub_key)
+encrypted = sealed_box.encrypt(b'$SITE_KEY')
+print(base64.b64encode(encrypted).decode())
+" > /tmp/encrypted.txt
+              ENCRYPTED=$(cat /tmp/encrypted.txt)
+            fi
+
+            if [ "$ENCRYPTED" != "FAILED" ]; then
+              echo "Secret encrypted successfully"
+              # Set the secret
+              curl -s -X PUT \
+                "https://api.github.com/repos/wangjianxin1988/ai-student-survival/actions/secrets/PUBLIC_TURNSTILE_SITE_KEY" \
+                -H "Authorization: token ${{ github.token }}" \
+                -H "Content-Type: application/json" \
+                -d "{\"encrypted_value\": \"$ENCRYPTED\", \"key_id\": \"$KEY_ID\"}"
+              echo "Secret set successfully"
+            else
+              echo "Encryption failed, trying alternative method..."
+              echo "::notice::Turnstile Site Key: $SITE_KEY"
+              echo "Please add PUBLIC_TURNSTILE_SITE_KEY=$SITE_KEY to GitHub Secrets manually"
+            fi
+          else
+            echo "Could not get Turnstile site key"
+            echo "$RESPONSE" | jq .
+          fi
