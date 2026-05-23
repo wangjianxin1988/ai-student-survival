@@ -52,19 +52,28 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
             -H "Content-Type: application/json")
           echo "Turnstile response: $RESPONSE"
-          TURNSTILE_COUNT=$(echo "$RESPONSE" | jq -r '.result | length')
-          echo "Found $TURNSTILE_COUNT Turnstile site(s)"
-          if [ "$TURNSTILE_COUNT" = "0" ] || [ "$TURNSTILE_COUNT" = "null" ]; then
-            echo "Creating Turnstile site..."
-            CREATE=$(curl -s -X POST \
-              "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/turnstile" \
-              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-              -H "Content-Type: application/json" \
-              -d '{"name": "mi-to-ai.com", "domain": "mi-to-ai.com", "mode": "non-interactive"}')
-            echo "Create response: $CREATE"
-            SITE_KEY=$(echo "$CREATE" | jq -r '.result.sitekey // empty')
+          if echo "$RESPONSE" | grep -q '"success":true'; then
+            TURNSTILE_COUNT=$(echo "$RESPONSE" | jq -r '.result | length')
+            echo "Found $TURNSTILE_COUNT Turnstile site(s)"
+            if [ "$TURNSTILE_COUNT" = "0" ] || [ "$TURNSTILE_COUNT" = "null" ]; then
+              echo "Creating Turnstile site..."
+              CREATE=$(curl -s -X POST \
+                "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/turnstile" \
+                -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+                -H "Content-Type: application/json" \
+                -d '{"name": "mi-to-ai.com", "domain": "mi-to-ai.com", "mode": "non-interactive"}')
+              echo "Create response: $CREATE"
+              SITE_KEY=$(echo "$CREATE" | jq -r '.result.sitekey // empty')
+            else
+              SITE_KEY=$(echo "$RESPONSE" | jq -r '.[0].sitekey // .result[0].sitekey // empty')
+            fi
           else
-            SITE_KEY=$(echo "$RESPONSE" | jq -r '.[0].sitekey // .result[0].sitekey // empty')
+            echo "Cloudflare API returned error - likely missing Turnstile permission"
+            echo "::error::CLOUDFLARE_API_TOKEN needs 'Cloudflare Turnstile:Edit' permission"
+            echo "::error::Please update the token at https://dash.cloudflare.com/profile/api-tokens"
+            echo "Or create a Turnstile site manually at https://dash.cloudflare.com/turnstile"
+            echo "Then add the site key as PUBLIC_TURNSTILE_SITE_KEY in GitHub Secrets"
+            SITE_KEY=""
           fi
           echo "Site key: $SITE_KEY"
           echo "::notice::Turnstile Site Key: $SITE_KEY"
