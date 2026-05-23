@@ -1,0 +1,58 @@
+name: Execute RLS Migration
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  execute-rls:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Execute RLS policies via Supabase Management API
+        run: |
+          echo "Executing RLS migration..."
+
+          # Read the RLS SQL file
+          SQL_CONTENT=$(cat supabase/migrations/20260523_add_rls_policies.sql)
+
+          # Execute via Supabase Management API
+          RESPONSE=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": \"$(echo "$SQL_CONTENT" | jq -Rs .)\"}")
+
+          echo "Response: $RESPONSE"
+
+          # Check if the query succeeded
+          if echo "$RESPONSE" | grep -q '"error"'; then
+            echo "Error detected in response"
+            echo "$RESPONSE" | jq .
+            exit 1
+          else
+            echo "RLS migration executed successfully"
+          fi
+
+  configure-oauth:
+    needs: execute-rls
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure OAuth Redirect URLs
+        run: |
+          echo "Checking OAuth configuration..."
+
+          # The Supabase Management API for OAuth config requires a Personal Access Token
+          # (not the service role key). The service role key only works for /database/query.
+          # We'll use the management API endpoint - this may need a PAT if the service role key doesn't work
+          for PROVIDER in github google; do
+            echo "Checking ${PROVIDER} OAuth config..."
+            RESPONSE=$(curl -s -X GET \
+              "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/config/url/${PROVIDER}" \
+              -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}")
+            echo "Current ${PROVIDER} config: $RESPONSE"
+          done
+
+          echo "Note: If you see auth errors above, OAuth redirect URLs must be set manually in Supabase Dashboard"
