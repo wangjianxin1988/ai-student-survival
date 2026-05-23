@@ -6,10 +6,13 @@ interface TurnstileWidgetProps {
   className?: string;
 }
 
-// Cloudflare Turnstile sitekey - use test key for development
+// Cloudflare Turnstile sitekey
+// Test key: 1x00000000000000000000AA (always passes, no user interaction needed)
+// Real key: Set PUBLIC_TURNSTILE_SITE_KEY environment variable
 const SITE_KEY =
   (import.meta.env as any).PUBLIC_TURNSTILE_SITE_KEY ||
   "1x00000000000000000000AA";
+const IS_TEST_KEY = SITE_KEY === "1x00000000000000000000AA";
 
 declare global {
   interface Window {
@@ -46,11 +49,14 @@ export function TurnstileWidget({
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
 
+  // Use unique ID to avoid Cloudflare auto-placement conflicts
+  const widgetId = useRef(`turnstile-${Math.random().toString(36).slice(2, 8)}`);
+
   useEffect(() => {
     // Check if already rendered
     if (widgetIdRef.current) return;
 
-    // Define the callback
+    // Define the callback (may be called multiple times if script already loaded)
     window.onloadTurnstileCallback = () => {
       setIsLoaded(true);
     };
@@ -86,6 +92,13 @@ export function TurnstileWidget({
   useEffect(() => {
     if (!isLoaded || !containerRef.current || widgetIdRef.current) return;
 
+    // Test keys (Cloudflare's "always pass") don't fire onVerify callback.
+    // Emit a dummy token immediately so forms can proceed.
+    if (IS_TEST_KEY) {
+      onVerify("TEST_TOKEN_DUMMY");
+      return;
+    }
+
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       sitekey: SITE_KEY,
       callback: (token: string) => {
@@ -120,7 +133,7 @@ export function TurnstileWidget({
 
   return (
     <div className={className}>
-      <div ref={containerRef} id="cf-turnstile" />
+      <div ref={containerRef} id={widgetId.current} />
       {!widgetIdRef.current && !hasError && (
         <p className="text-xs text-gray-400 mt-1">加载验证组件中...</p>
       )}
