@@ -32,7 +32,7 @@ function buildPopupContent(marker: MapMarker, universityName?: string): string {
 }
 
 /** Add all markers to the map layer */
-async function addMarkersToLayer(
+function addMarkersToLayer(
   L: any,
   layer: any,
   markers: MapMarker[],
@@ -62,6 +62,9 @@ export default function CampusMap({
   const mapInstanceRef = useRef<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const markersLayerRef = useRef<any>(null);
+  // Store L reference for use in update effect
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const LRef = useRef<any>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapRef.current) return;
@@ -70,6 +73,7 @@ export default function CampusMap({
     const initMap = async () => {
       const L = (await import('leaflet')).default;
       await import('leaflet/dist/leaflet.css');
+      LRef.current = L; // Store L for later use
 
       // Default center: Beijing
       let center: [number, number] = [39.9042, 116.4074];
@@ -117,7 +121,7 @@ export default function CampusMap({
 
       // Add existing markers
       if (markers.length > 0) {
-        await addMarkersToLayer(L, markersLayerRef.current, markers, universities);
+        addMarkersToLayer(L, markersLayerRef.current, markers, universities);
       }
     };
 
@@ -131,10 +135,10 @@ export default function CampusMap({
     };
   }, []);
 
-  // Update markers when they change
+  // Update markers when they change (including filter changes)
   useEffect(() => {
-    if (!mapInstanceRef.current || !markersLayerRef.current) return;
-    addMarkersToLayer(null, markersLayerRef.current, markers, universities);
+    if (!mapInstanceRef.current || !markersLayerRef.current || !LRef.current) return;
+    addMarkersToLayer(LRef.current, markersLayerRef.current, markers, universities);
   }, [markers, universities]);
 
   // Update center when selectedUniversity changes
