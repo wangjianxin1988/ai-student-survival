@@ -1,0 +1,42 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import LoginForm from '@/components/auth/LoginForm';
+
+export const prerender = false;
+
+const titles = {
+  zh: { title: '登录', h1: '欢迎回来', subtitle: '登录到您的账户', back: '返回首页' },
+  en: { title: 'Sign In', h1: 'Welcome Back', subtitle: 'Sign in to your account', back: 'Back to Home' },
+};
+
+const locale = 'en';
+const t = titles[locale];
+---
+
+<Layout title={t.title} description="Sign in to MI TO AI Student Survival Guide" locale={locale}>
+  <div class="min-h-[calc(100vh-200px)] flex items-center justify-center py-12 px-4">
+    <div class="w-full max-w-md">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">
+          {t.h1}
+        </h1>
+        <p class="mt-2 text-gray-600">
+          {t.subtitle}
+        </p>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <LoginForm
+          locale={locale}
+          client:load
+        />
+      </div>
+
+      <div class="mt-6 text-center">
+        <a href="/" class="text-sm text-gray-600 hover:text-primary-600 transition-colors">
+          ← {t.back}
+        </a>
+      </div>
+    </div>
+  </div>
+</Layout>
