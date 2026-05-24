@@ -146,12 +146,38 @@ export function getCurrentUser(): DemoUser | null {
     return currentUser;
   }
 
-  // Always try demo session as fallback
-  // This handles both:
-  // 1. Supabase not configured
-  // 2. Supabase configured but no Supabase user logged in
-  currentUser = getDemoUserFromSession();
-  return currentUser;
+  // Try demo session first (fast, synchronous)
+  const demoUser = getDemoUserFromSession();
+  if (demoUser) {
+    currentUser = demoUser;
+    return currentUser;
+  }
+
+  // Check Supabase localStorage session directly (synchronous)
+  // Supabase stores session in localStorage with key: sb-{project-ref}-auth-token
+  if (isSupabaseConfigured) {
+    try {
+      const storageKey = `sb-${supabaseUrl.replace(/^https?:\/\//, '')}-auth-token`;
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
+        if (accessToken) {
+          // Session exists - decode user from the stored session
+          // Supabase stores user in the 'user' field or decoded from access_token
+          const userData = parsed?.user || parsed?.tokens?.user;
+          if (userData) {
+            currentUser = toDemoUser(userData);
+            return currentUser;
+          }
+        }
+      }
+    } catch (e) {
+      console.error('[getCurrentUser] Failed to read Supabase session:', e);
+    }
+  }
+
+  return null;
 }
 
 /**

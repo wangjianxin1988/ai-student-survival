@@ -296,19 +296,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: "Demo mode: Magic link not available" };
       }
       try {
-        // First check if user exists in our users table
-        const { data: profileData, error: profileError } = await supabase
-          .from('users')
-          .select('id')
-          .eq('email', email.toLowerCase())
-          .single();
-
-        // If profile not found, user doesn't exist
-        if (profileError || !profileData) {
-          return { success: false, error: '该邮箱尚未注册，请先注册账号' };
-        }
-
-        // User exists, send magic link
+        // Supabase sends magic link regardless of whether the email exists
+        // (for security - don't reveal whether an account exists)
         const { error } = await supabase.auth.signInWithOtp({
           email,
           options: {
@@ -316,11 +305,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
         if (error) {
-          // Handle specific error cases
-          if (error.message.toLowerCase().includes('user not found') ||
-              error.message.toLowerCase().includes('invalid')) {
-            return { success: false, error: '该邮箱尚未注册，请先注册账号' };
-          }
           return { success: false, error: error.message };
         }
         return { success: true };

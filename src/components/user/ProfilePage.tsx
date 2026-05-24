@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { initAuth, getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
 import {
   userStatsApi,
@@ -83,17 +83,27 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
   const t = translations[locale];
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    let cancelled = false;
 
-    if (currentUser) {
-      const userProfile = userStatsApi.getOrCreateProfile(currentUser);
-      setProfile(userProfile);
-      const history = userStatsApi.getPointsHistory(currentUser.id, 50);
-      setPointsHistory(history);
+    async function loadUser() {
+      // Initialize auth - this properly reads Supabase session from localStorage
+      const currentUser = await initAuth();
+      if (cancelled) return;
+
+      setUser(currentUser);
+
+      if (currentUser) {
+        const userProfile = userStatsApi.getOrCreateProfile(currentUser);
+        setProfile(userProfile);
+        const history = userStatsApi.getPointsHistory(currentUser.id, 50);
+        setPointsHistory(history);
+      }
     }
 
+    loadUser();
+
     const unsubscribe = onAuthStateChange((newUser) => {
+      if (cancelled) return;
       setUser(newUser);
       if (newUser) {
         const userProfile = userStatsApi.getOrCreateProfile(newUser);
@@ -105,7 +115,10 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
       }
     });
 
-    return unsubscribe;
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
   }, []);
 
   // Set loading to false when we have user data OR when user is confirmed null (no session)
