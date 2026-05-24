@@ -2,7 +2,8 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getServerUser } from '@/lib/server-auth';
-import { getPosts, supabase } from '@/lib/community';
+import { getPosts } from '@/lib/community';
+import { supabase } from '@/lib/supabase';
 import { createPost } from '@/lib/community/service';
 import { contentModerationApi } from '@/lib/content-moderation';
 
