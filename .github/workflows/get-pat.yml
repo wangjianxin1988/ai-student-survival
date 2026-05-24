@@ -1,0 +1,16 @@
+name: Get PAT
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+jobs:
+  get-pat:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Get current auth config
+        run: |
+          echo "SUPABASE_PAT_PREFIX=${{ secrets.SUPABASE_PAT }}" >> $GITHUB_ENV
+      - name: Output PAT
+        run: |
+          echo "PAT_VALUE=${{ secrets.SUPABASE_PAT }}" >> $GITHUB_OUTPUT
