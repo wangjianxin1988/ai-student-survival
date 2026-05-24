@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 // Read from environment variables
 // Cloudflare Pages runtime: wrangler.toml vars exposed as process.env.SUPABASE_URL / process.env.SUPABASE_ANON_KEY
 // GitHub Actions build: env vars exposed as import.meta.env.PUBLIC_SUPABASE_URL / PUBLIC_SUPABASE_ANON_KEY
-const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined)
+export const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined)
   || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined)
   || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
 const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)

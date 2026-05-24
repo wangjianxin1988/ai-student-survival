@@ -7,7 +7,7 @@
  * when Supabase is configured but user is not logged in.
  */
 
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, isSupabaseConfigured, supabaseUrl } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
 // Re-export User type as DemoUser for backwards compatibility

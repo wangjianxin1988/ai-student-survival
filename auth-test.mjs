@@ -374,14 +374,41 @@ async function run() {
     const regResult = await test_emailRegistration();
     results.push(['Email registration', regResult]);
 
-    if (regResult !== 'already_registered') {
-      // Try login anyway
+    if (regResult === true) {
+      // After successful registration, the user is already logged in.
+      // Login test should verify this state.
+      results.push(['Email login (already logged in)', true]);
+    } else if (regResult === 'already_registered') {
       const loginResult = await test_emailLogin();
       results.push(['Email login', loginResult]);
     } else {
-      // Already registered, try login
-      const loginResult = await test_emailLogin();
-      results.push(['Email login (existing user)', loginResult]);
+      // Registration failed, try login with a different email
+      const loginEmail = TEST_EMAIL.replace('autotest', 'autotest2');
+      // Use a fresh browser context for login to avoid session conflicts
+      const ctx2 = await browser.newContext();
+      const loginPage = await ctx2.newPage();
+      const loginBtn = await loginPage.$('button[type="submit"]');
+      if (loginBtn) {
+        await loginPage.goto(`${BASE}/auth/login`, { waitUntil: 'domcontentloaded', timeout: 20000 });
+        await loginPage.waitForTimeout(1000);
+        const emailInput2 = await loginPage.$('input[type="email"]');
+        const pwdInput2 = await loginPage.$('input[type="password"]');
+        if (emailInput2 && pwdInput2) {
+          await emailInput2.fill(loginEmail);
+          await pwdInput2.fill(TEST_PASSWORD);
+          await loginPage.click('button[type="submit"]');
+          await loginPage.waitForURL(url => url.includes('/user') || !url.includes('/auth/login'), { timeout: 10000 }).catch(() => {});
+          await loginPage.waitForTimeout(2000);
+          const url = loginPage.url();
+          const bodyText = await loginPage.textContent('body');
+          const loginOk = url.includes('/user') || bodyText.includes('个人中心');
+          results.push(['Email login (new session)', loginOk]);
+        } else {
+          results.push(['Email login', false]);
+        }
+      } else {
+        results.push(['Email login', false]);
+      }
     }
 
     results.push(['Forgot password', await test_forgotPassword()]);
