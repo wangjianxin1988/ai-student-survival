@@ -3,6 +3,7 @@ name: Supabase Config
 on:
   workflow_dispatch:
 
+# Reparse to enable workflow_dispatch trigger
 jobs:
   configure-supabase:
     runs-on: ubuntu-latest
