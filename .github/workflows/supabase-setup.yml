@@ -2,6 +2,55 @@ name: Supabase Setup
 
 on:
   workflow_dispatch:
+    inputs:
+      google_client_id:
+        description: 'Google OAuth Client ID'
+        required: false
+        type: string
+      google_client_secret:
+        description: 'Google OAuth Client Secret'
+        required: false
+        type: string
+      github_client_id:
+        description: 'GitHub OAuth Client ID'
+        required: false
+        type: string
+      github_client_secret:
+        description: 'GitHub OAuth Client Secret'
+        required: false
+        type: string
+      smtp_host:
+        description: 'SMTP Host (e.g. smtp.resend.com, leave empty to use Supabase built-in SMTP)'
+        required: false
+        type: string
+        default: ''
+      smtp_port:
+        description: 'SMTP Port (587 for TLS, 465 for SSL)'
+        required: false
+        type: string
+        default: '587'
+      smtp_user:
+        description: 'SMTP User'
+        required: false
+        type: string
+      smtp_pass:
+        description: 'SMTP Password / API Key'
+        required: false
+        type: string
+      smtp_sender_email:
+        description: 'SMTP Sender Email (e.g. noreply@mi-to-ai.com)'
+        required: false
+        type: string
+      smtp_sender_name:
+        description: 'SMTP Sender Name'
+        required: false
+        type: string
+        default: 'MI TO AI'
+
+env:
+  SUPABASE_REF: giynvpfnzzelzwpmsgtf
+  SITE_URL: https://mi-to-ai.com
+  CALLBACK_URL: https://mi-to-ai.com/auth/callback
 
 jobs:
   configure-supabase:
@@ -9,37 +58,126 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure Supabase Auth Settings
+      # ── 1. Configure Auth Settings ──────────────────────────────────────────
+      - name: Configure Auth Settings
         run: |
-          echo "=== Step 1: Set Site URL and OAuth redirect URLs ==="
+          echo "=== Configure Auth Settings ==="
           AUTH_RESP=$(curl -s -X PATCH \
-            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/config/auth" \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
-            -d '{"siteUrl": "https://mi-to-ai.com", "uriAllowList": "https://mi-to-ai.com/auth/callback,https://mi-to-ai.com/**,http://localhost:3000/**"}')
-          echo "Auth config response: $AUTH_RESP"
+            -d '{
+              "site_url": "https://mi-to-ai.com",
+              "uri_allow_list": "https://mi-to-ai.com/auth/callback,https://mi-to-ai.com/**,http://localhost:3000/**",
+              "mailer_autoconfirm": false,
+              "smtp_admin_email": "admin@mi-to-ai.com",
+              "jwt_expiry": 3600,
+              "refresh_token_rotation": true
+            }')
+          echo "Auth config: $AUTH_RESP"
 
-      - name: SMTP Configuration Note
+      # ── 2. Configure Google OAuth ──────────────────────────────────────────
+      - name: Configure Google OAuth
+        if: inputs.google_client_id != ''
         run: |
-          echo "=== SMTP Configuration (Manual Step) ==="
-          echo "To enable email verification and password reset emails:"
-          echo "1. Go to: https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/auth/templates"
-          echo "2. Or: https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/settings/auth"
-          echo "3. Configure SMTP with your email provider (Resend recommended)"
-          echo ""
-          echo "For Resend SMTP:"
-          echo "  Host: smtp.resend.com"
-          echo "  Port: 587 (TLS) or 465 (SSL)"
-          echo "  User: resend"
-          echo "  Password: Your Resend API Key"
-          echo "  Sender: noreply@mi-to-ai.com"
-          echo ""
-          echo "Current: mailer_autoconfirm=true (immediate login, no email verification)"
-          echo "After SMTP setup: Set mailer_autoconfirm=false to require email verification"
+          echo "=== Configure Google OAuth ==="
+          GOOGLE_RESP=$(curl -s -X PATCH \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/providers/google" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "enabled": true,
+              "client_id": "${{ inputs.google_client_id }}",
+              "client_secret": "${{ inputs.google_client_secret }}",
+              "redirect_uri": "https://giynvpfnzzelzwpmsgtf.supabase.co/auth/v1/callback"
+            }')
+          echo "Google OAuth: $GOOGLE_RESP"
 
+      # ── 3. Configure GitHub OAuth ─────────────────────────────────────────
+      - name: Configure GitHub OAuth
+        if: inputs.github_client_id != ''
+        run: |
+          echo "=== Configure GitHub OAuth ==="
+          GITHUB_RESP=$(curl -s -X PATCH \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/providers/github" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "enabled": true,
+              "client_id": "${{ inputs.github_client_id }}",
+              "client_secret": "${{ inputs.github_client_secret }}",
+              "redirect_uri": "https://giynvpfnzzelzwpmsgtf.supabase.co/auth/v1/callback"
+            }')
+          echo "GitHub OAuth: $GITHUB_RESP"
+
+      # ── 4. Configure SMTP ─────────────────────────────────────────────────
+      - name: Configure SMTP (Custom)
+        if: inputs.smtp_host != ''
+        run: |
+          echo "=== Configure Custom SMTP ==="
+          SMTP_RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/smtp" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "host": "${{ inputs.smtp_host }}",
+              "port": ${{ inputs.smtp_port }},
+              "user": "${{ inputs.smtp_user }}",
+              "password": "${{ inputs.smtp_pass }}",
+              "sender_email": "${{ inputs.smtp_sender_email }}",
+              "sender_name": "${{ inputs.smtp_sender_name }}"
+            }')
+          echo "SMTP config: $SMTP_RESP"
+
+      - name: Configure SMTP (Supabase Built-in)
+        if: inputs.smtp_host == ''
+        run: |
+          echo "=== Using Supabase Built-in SMTP (no custom SMTP configured) ==="
+          echo "Supabase Pro plan includes built-in SMTP with 4,000 emails/day."
+          echo "To enable: Authentication -> Email -> Enable custom SMTP (optional)."
+
+      # ── 5. Update Email Templates ─────────────────────────────────────────
+      - name: Update Email Templates
+        run: |
+          echo "=== Update Email Templates ==="
+
+          # Confirm Signup Template
+          CONFIRM_RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/templates/confirm_signup" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "subject": "激活您的 MI TO AI 账号",
+              "template_body": "<!DOCTYPE html><html><body style=\"font-family: -apple-system, BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb;\"><div style=\"background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);\"><h1 style=\"color: #1f2937; margin: 0 0 16px;\">欢迎注册 MI TO AI！</h1><p style=\"color: #4b5563; line-height: 1.6; margin: 0 0 24px;\">感谢您注册 AI留学生存指南。请点击下方按钮完成账号激活：</p><a href=\"{{ .ConfirmationURL }}\" style=\"display: inline-block; background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;\">激活账号</a><p style=\"color: #9ca3af; font-size: 14px; margin: 24px 0 0;\">如果按钮无法点击，请复制以下链接到浏览器打开：<br>{{ .ConfirmationURL }}</p><hr style=\"border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;\"><p style=\"color: #9ca3af; font-size: 12px;\">此邮件由 MI TO AI 自动发送，请勿回复。</p></div></body></html>"
+            }')
+          echo "Confirm signup: $CONFIRM_RESP"
+
+          # Reset Password Template
+          RESET_RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/templates/reset_password" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "subject": "重置您的 MI TO AI 密码",
+              "template_body": "<!DOCTYPE html><html><body style=\"font-family: -apple-system, BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb;\"><div style=\"background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);\"><h1 style=\"color: #1f2937; margin: 0 0 16px;\">重置密码</h1><p style=\"color: #4b5563; line-height: 1.6; margin: 0 0 24px;\">您请求重置密码，请点击下方按钮设置新密码（链接 1 小时内有效）：</p><a href=\"{{ .ConfirmationURL }}\" style=\"display: inline-block; background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;\">设置新密码</a><p style=\"color: #9ca3af; font-size: 14px; margin: 24px 0 0;\">如果按钮无法点击，请复制以下链接：<br>{{ .ConfirmationURL }}</p><hr style=\"border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;\"><p style=\"color: #ef4444; font-size: 12px;\">⚠️ 如果您没有请求重置密码，请忽略此邮件。</p></div></body></html>"
+            }')
+          echo "Reset password: $RESET_RESP"
+
+          # Invite User Template
+          INVITE_RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/templates/invite_user" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "subject": "您被邀请加入 MI TO AI",
+              "template_body": "<!DOCTYPE html><html><body style=\"font-family: -apple-system, BlinkMacSystemFont,Segoe UI,Roboto,sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f9fafb;\"><div style=\"background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);\"><h1 style=\"color: #1f2937; margin: 0 0 16px;\">您被邀请加入 AI留学生存指南</h1><p style=\"color: #4b5563; line-height: 1.6; margin: 0 0 24px;\">点击下方按钮接受邀请：</p><a href=\"{{ .ConfirmationURL }}\" style=\"display: inline-block; background: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600;\">接受邀请</a><p style=\"color: #9ca3af; font-size: 14px; margin: 24px 0 0;\">链接：{{ .ConfirmationURL }}</p></div></body></html>"
+            }')
+          echo "Invite user: $INVITE_RESP"
+
+      # ── 6. Create contact_messages table ──────────────────────────────────
       - name: Create contact_messages table
         run: |
-          echo "=== Step 2: Create contact_messages table ==="
+          echo "=== Create contact_messages table ==="
           SQL=$(printf '%s ' \
             "CREATE TABLE IF NOT EXISTS contact_messages (" \
             "id UUID PRIMARY KEY DEFAULT gen_random_uuid()," \
@@ -62,8 +200,30 @@ jobs:
             'CREATE POLICY "Anyone can insert contact messages" ON contact_messages FOR INSERT WITH CHECK (true);')
           SQL_ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           DB_RESP=$(curl -s -X POST \
-            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
             -d "$SQL_ESCAPED")
           echo "DB response: $DB_RESP"
+
+      # ── 7. Summary ────────────────────────────────────────────────────────
+      - name: Summary
+        run: |
+          echo ""
+          echo "✅ Supabase configuration complete!"
+          echo ""
+          echo "--- Configuration Summary ---"
+          echo "Site URL: https://mi-to-ai.com"
+          echo "OAuth redirect: https://mi-to-ai.com/auth/callback"
+          echo "Email verification: ENABLED (mailer_autoconfirm=false)"
+          echo ""
+          echo "OAuth Providers: ${{ inputs.google_client_id != '' && 'Google ✓' || 'Google ✗ (provide credentials)' }}"
+          echo "                  ${{ inputs.github_client_id != '' && 'GitHub ✓' || 'GitHub ✗ (provide credentials)' }}"
+          echo ""
+          echo "SMTP: ${{ inputs.smtp_host != '' && 'Custom SMTP configured' || 'Supabase built-in SMTP' }}"
+          echo ""
+          echo "Next steps:"
+          echo "1. Verify OAuth in: Dashboard -> Authentication -> Providers"
+          echo "2. Verify SMTP in: Dashboard -> Authentication -> SMTP Settings"
+          echo "3. Test login: https://mi-to-ai.com/auth/login"
+          echo "4. Test email: Register a new account and check inbox"
