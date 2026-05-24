@@ -9,10 +9,11 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export async function createPost(
   supabase: SupabaseClient,
   userId: string,
-  input: CreatePostInput
+  input: CreatePostInput,
+  accessToken?: string
 ): Promise<{ success: boolean; post?: CommunityPost; error?: string }> {
   // 创建帖子
-  const post = await storage.createPost(userId, input);
+  const post = await storage.createPost(userId, input, accessToken);
 
   if (!post) {
     return { success: false, error: 'Failed to create post' };

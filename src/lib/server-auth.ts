@@ -35,7 +35,7 @@ export async function getServerUser(request: Request): Promise<ServerUser | null
     const { data: { user }, error } = await supabase.auth.getUser(accessToken);
 
     if (error) {
-      console.error('[server-auth] getUser error:', error.message);
+      console.error('[server-auth] getUser error:', error.message, 'status:', error.status);
       return null;
     }
 

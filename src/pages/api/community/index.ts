@@ -2,7 +2,8 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getServerUser } from '@/lib/server-auth';
-import { getPosts, createPost } from '@/lib/community';
+import { getPosts, supabase } from '@/lib/community';
+import { createPost } from '@/lib/community/service';
 import { contentModerationApi } from '@/lib/content-moderation';
 
 export const GET: APIRoute = async ({ request }) => {
@@ -34,6 +35,10 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
+  // Extract access token for RLS auth
+  const authHeader = request.headers.get('Authorization') || '';
+  const accessToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+
   const user = await getServerUser(request);
 
   if (!user) {
@@ -78,7 +83,7 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    const newPost = await createPost(user.id, {
+    const result = await createPost(supabase, user.id, {
       title,
       content,
       category,
@@ -86,13 +91,13 @@ export const POST: APIRoute = async ({ request }) => {
       images,
       status,
       meta,
-    });
+    }, accessToken || undefined);
 
-    if (!newPost) {
+    if (!result.success || !result.post) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: { code: 'CREATE_ERROR', message: 'Failed to create post' },
+          error: { code: 'CREATE_ERROR', message: result.error || 'Failed to create post' },
         }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
@@ -101,7 +106,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(
       JSON.stringify({
         success: true,
-        data: newPost,
+        data: result.post,
       }),
       { status: 201, headers: { 'Content-Type': 'application/json' } }
     );

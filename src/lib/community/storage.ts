@@ -1,6 +1,20 @@
 // 社区帖子存储操作
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import type { CommunityPost, CreatePostInput, UpdatePostInput, PostLike, PostFavorite } from './types';
+
+// Create a Supabase client with the user's access token for RLS auth
+function getAuthClient(accessToken?: string) {
+  if (!accessToken) return supabase;
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    },
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 export async function getPosts(options?: {
   category?: string;
@@ -121,14 +135,16 @@ export async function getPostById(id: string): Promise<CommunityPost | null> {
 
 export async function createPost(
   userId: string,
-  input: CreatePostInput
+  input: CreatePostInput,
+  accessToken?: string
 ): Promise<CommunityPost | null> {
   // 生成摘要
   const excerpt = input.content.length > 200
     ? input.content.substring(0, 200) + '...'
     : input.content;
 
-  const { data, error } = await supabase
+  const client = getAuthClient(accessToken);
+  const { data, error } = await client
     .from('community_posts')
     .insert({
       user_id: userId,
