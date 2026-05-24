@@ -1,0 +1,13 @@
+name: Test Dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      test_value:
+        description: 'Test'
+        required: false
+        type: string
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Test: \${{ inputs.test_value }}"
