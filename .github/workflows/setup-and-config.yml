@@ -18,13 +18,13 @@ jobs:
           SQL_JSON=$(cat supabase/migrations/20260523_add_rls_policies.sql | jq -Rs .)
           RESPONSE=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
             -d "{\"query\": $SQL_JSON}")
           echo "Response: $RESPONSE"
           if echo "$RESPONSE" | grep -qi '"error"'; then
             echo "Supabase Management API requires a Personal Access Token (PAT)"
-            echo "The service role key does not work for Management API"
+            echo "Update SUPABASE_PAT in GitHub Secrets if this fails"
             echo "Please execute the RLS migration manually at:"
             echo "https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/sql"
           else
