@@ -7,16 +7,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Configure SMTP via API
+      - name: Configure SMTP via PATCH
         run: |
-          echo "=== Checking current SMTP config ==="
+          echo "=== Current SMTP config ==="
           CURRENT=$(curl -s "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/config/auth" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}")
           echo "Current SMTP: $(echo $CURRENT | python3 -c "import sys,json; d=json.load(sys.stdin); print('host='+d.get('smtp_host','EMPTY')+' port='+str(d.get('smtp_port','')))")"
           
           if echo "$CURRENT" | python3 -c "import sys,json; d=json.load(sys.stdin); print('SET' if d.get('smtp_host') else 'EMPTY')" | grep -q EMPTY; then
-            echo "=== SMTP not configured, configuring now ==="
-            RESP=$(curl -s -w "\n%{http_code}" -X POST \
+            echo "=== Configuring SMTP via PATCH ==="
+            # Try PATCH to /config/smtp
+            RESP=$(curl -s -w "\nHTTP:%{http_code}" -X PATCH \
               "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/config/smtp" \
               -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
               -H "Content-Type: application/json" \
@@ -30,13 +31,8 @@ jobs:
               }")
             HTTP_CODE=$(echo "$RESP" | tail -1)
             BODY=$(echo "$RESP" | head -1)
-            echo "SMTP config HTTP: $HTTP_CODE"
-            echo "SMTP config response: $BODY"
+            echo "PATCH /config/smtp HTTP: $HTTP_CODE"
+            echo "PATCH response: $BODY"
           else
             echo "=== SMTP already configured ==="
           fi
-          
-          echo "=== Verifying SMTP config ==="
-          FINAL=$(curl -s "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/config/auth" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}")
-          echo "Final SMTP: $(echo $FINAL | python3 -c "import sys,json; d=json.load(sys.stdin); print('host='+d.get('smtp_host','EMPTY')+' port='+str(d.get('smtp_port','')))")"
