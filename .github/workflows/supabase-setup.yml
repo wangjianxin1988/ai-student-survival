@@ -70,7 +70,6 @@ jobs:
               "site_url": "https://mi-to-ai.com",
               "uri_allow_list": "https://mi-to-ai.com/auth/callback,https://mi-to-ai.com/**,http://localhost:3000/**",
               "mailer_autoconfirm": false,
-              "smtp_admin_email": "admin@mi-to-ai.com",
               "jwt_expiry": 3600,
               "refresh_token_rotation": true
             }')
@@ -136,56 +135,89 @@ jobs:
           echo "Supabase Pro plan includes built-in SMTP with 4,000 emails/day."
           echo "To enable: Authentication -> Email -> Enable custom SMTP (optional)."
 
-      # ── 5. Update Email Templates ─────────────────────────────────────────
-      - name: Update Email Templates
+      # ── 5. Configure Email Templates (Manual) ─────────────────────────────
+      # NOTE: Supabase Management API does NOT support custom email templates.
+      # Email templates must be configured manually in the Supabase Dashboard.
+      - name: Configure Email Templates (Manual)
         run: |
-          echo "=== Update Email Templates ==="
-
-          # Write template body to JSON file for proper UTF-8 encoding
-          cat > /tmp/confirm_template.json << 'TEMPLATE'
-          {
-            "subject": "激活您的 MI TO AI 账号",
-            "template_body": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>激活账号</title>\n</head>\n<body style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;\">\n<div style=\"background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);\">\n<h1 style=\"color: #1f2937; margin: 0 0 16px;\">&#27426;&#36814;&#27880;&#20876; MI TO AI&#65281;</h1>\n<p style=\"color: #4b5563; line-height: 1.6; margin: 0 0 24px;\">&#24863;&#35874;&#24744;&#27880;&#20876; AI&#30003;&#27966;&#29983;&#23384;&#25345;&#21331;&#12290;&#35831;&#28857;&#20987;&#19979;&#26041;&#25353;&#38062;&#23436;&#25104;&#36134;&#21495;&#28608;&#27963;&#65306;</p>\n<a href=\"{{ .ConfirmationURL }}\" style=\"display: inline-block; background-color: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 16px;\">&#28608;&#27963;&#36134;&#21495;</a>\n<p style=\"color: #9ca3af; font-size: 14px; margin: 24px 0 0;\">&#22914;&#26524;&#25353;&#38062;&#26080;&#27861;&#28857;&#20987;&#65292;&#35831;&#22797;&#21046;&#20197;&#19979;&#38142;&#25509;&#21040;&#27983;&#35270;&#22120;&#25171;&#24320;&#65306;<br><span style=\"word-break: break-all;\">{{ .ConfirmationURL }}</span></p>\n<hr style=\"border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;\">\n<p style=\"color: #9ca3af; font-size: 12px;\">&#27492;&#37038;&#20214;&#30001; MI TO AI &#33258;&#21160;&#21457;&#36865;&#65292;&#35831;&#21152;&#38548;&#21487;&#33021;&#25244;&#38500;&#37038;&#20214;&#25991;&#20214;&#22841;&#12290;</p>\n</div>\n</body>\n</html>"
-          }
-          TEMPLATE
-
-          cat > /tmp/reset_template.json << 'TEMPLATE'
-          {
-            "subject": "重置您的 MI TO AI 密码",
-            "template_body": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>&#37325;&#32622;&#23494;&#30721;</title>\n</head>\n<body style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;\">\n<div style=\"background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);\">\n<h1 style=\"color: #1f2937; margin: 0 0 16px;\">&#37325;&#32622;&#23494;&#30721;</h1>\n<p style=\"color: #4b5563; line-height: 1.6; margin: 0 0 24px;\">&#24744;&#35831;&#27714;&#37325;&#32622;&#23494;&#30721;&#65292;&#35831;&#28857;&#20987;&#19979;&#26041;&#25353;&#38062;&#35774;&#32622;&#26032;&#23494;&#30721;&#65288;&#38142;&#25509; 1 &#23567;&#26102;&#20869;&#26377;&#25928;&#65289;&#65306;</p>\n<a href=\"{{ .ConfirmationURL }}\" style=\"display: inline-block; background-color: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 16px;\">&#35774;&#32622;&#26032;&#23494;&#30721;</a>\n<p style=\"color: #9ca3af; font-size: 14px; margin: 24px 0 0;\">&#22914;&#26524;&#25353;&#38062;&#26080;&#27861;&#28857;&#20987;&#65292;&#35831;&#22797;&#21046;&#20197;&#19979;&#38142;&#25509;&#65306;<br><span style=\"word-break: break-all;\">{{ .ConfirmationURL }}</span></p>\n<hr style=\"border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;\">\n<p style=\"color: #ef4444; font-size: 12px;\">&#9660;&#22768;&#21916;&#24744;&#27880;&#24847;&#65306;&#22914;&#26524;&#24744;&#27880;&#24847;&#37325;&#32622;&#23494;&#30721;&#65292;&#35831;&#24536;&#35760;&#27492;&#37038;&#20214;&#12290;</p>\n</div>\n</body>\n</html>"
-          }
-          TEMPLATE
-
-          cat > /tmp/invite_template.json << 'TEMPLATE'
-          {
-            "subject": "您被邀请加入 MI TO AI",
-            "template_body": "<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"UTF-8\">\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">\n<title>&#36992;&#35831;</title>\n</head>\n<body style=\"font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;\">\n<div style=\"background-color: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);\">\n<h1 style=\"color: #1f2937; margin: 0 0 16px;\">&#24744;&#34987;&#36992;&#35831;&#21152;&#20837; AI&#30003;&#27966;&#29983;&#23384;&#25345;&#21331;</h1>\n<p style=\"color: #4b5563; line-height: 1.6; margin: 0 0 24px;\">&#28857;&#20987;&#19979;&#26041;&#25353;&#38062;&#25509;&#21463;&#36992;&#35831;&#65306;</p>\n<a href=\"{{ .ConfirmationURL }}\" style=\"display: inline-block; background-color: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 16px;\">&#25509;&#21463;&#36992;&#35831;</a>\n<p style=\"color: #9ca3af; font-size: 14px; margin: 24px 0 0;\">&#38142;&#25509;&#65306;<span style=\"word-break: break-all;\">{{ .ConfirmationURL }}</span></p>\n</div>\n</body>\n</html>"
-          }
-          TEMPLATE
-
-          # Confirm Signup
-          CONFIRM_RESP=$(curl -s -X POST \
-            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/templates/confirm_signup" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
-            -H "Content-Type: application/json" \
-            -d @/tmp/confirm_template.json)
-          echo "Confirm signup: $CONFIRM_RESP"
-
-          # Reset Password
-          RESET_RESP=$(curl -s -X POST \
-            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/templates/reset_password" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
-            -H "Content-Type: application/json" \
-            -d @/tmp/reset_template.json)
-          echo "Reset password: $RESET_RESP"
-
-          # Invite User
-          INVITE_RESP=$(curl -s -X POST \
-            "https://api.supabase.com/v1/projects/$SUPABASE_REF/config/auth/templates/invite_user" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
-            -H "Content-Type: application/json" \
-            -d @/tmp/invite_template.json)
-          echo "Invite user: $INVITE_RESP"
+          echo "=== Email Templates Configuration ==="
+          echo ""
+          echo "Supabase Management API does NOT support custom email templates."
+          echo "Email templates must be configured manually in the Dashboard."
+          echo ""
+          echo "To configure custom email templates:"
+          echo "   1. Go to: https://supabase.com/dashboard/project/$SUPABASE_REF/auth/templates"
+          echo "   2. For each template (Confirm signup, Reset password, Invite user):"
+          echo "      - Enable Custom Body"
+          echo "      - Paste the HTML template below"
+          echo "      - Enable Custom Subject and enter the Chinese subject"
+          echo ""
+          echo "=== Confirm Signup Template ==="
+          echo "Subject: 激活您的 MI TO AI 账号"
+          echo ""
+          cat << 'TEMPLATE_EOF'
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>激活账号</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+<div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+<h1 style="color: #1f2937; margin: 0 0 16px;">欢迎注册 MI TO AI！</h1>
+<p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px;">感谢您注册 AI 申派生存指南。请点击下方按钮完成账号激活：</p>
+<a href="{{ .ConfirmationURL }}" style="display: inline-block; background-color: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 16px;">激活账号</a>
+<p style="color: #9ca3af; font-size: 14px; margin: 24px 0 0;">如果按钮无法点击，请复制以下链接到浏览器打开：<br><span style="word-break: break-all;">{{ .ConfirmationURL }}</span></p>
+<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+<p style="color: #9ca3af; font-size: 12px;">此邮件由 MI TO AI 自动发送。</p>
+</div>
+</body>
+</html>
+TEMPLATE_EOF
+          echo ""
+          echo "=== Reset Password Template ==="
+          echo "Subject: 重置您的 MI TO AI 密码"
+          echo ""
+          cat << 'TEMPLATE_EOF'
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>重置密码</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+<div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+<h1 style="color: #1f2937; margin: 0 0 16px;">重置密码</h1>
+<p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px;">您请求重置密码，请点击下方按钮设置新密码（链接 1 小时内有效）：</p>
+<a href="{{ .ConfirmationURL }}" style="display: inline-block; background-color: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 16px;">设置新密码</a>
+<p style="color: #9ca3af; font-size: 14px; margin: 24px 0 0;">如果按钮无法点击，请复制以下链接：<br><span style="word-break: break-all;">{{ .ConfirmationURL }}</span></p>
+<hr style="border: none; border-top: 1px solid #e5e7eb; margin: 24px 0;">
+<p style="color: #ef4444; font-size: 12px;">如果您未发起重置密码请求，请忽略此邮件。</p>
+</div>
+</body>
+</html>
+TEMPLATE_EOF
+          echo ""
+          echo "=== Invite User Template ==="
+          echo "Subject: 您被邀请加入 MI TO AI"
+          echo ""
+          cat << 'TEMPLATE_EOF'
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>邀请</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;">
+<div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+<h1 style="color: #1f2937; margin: 0 0 16px;">您被邀请加入 AI 申派生存指南</h1>
+<p style="color: #4b5563; line-height: 1.6; margin: 0 0 24px;">点击下方按钮接受邀请：</p>
+<a href="{{ .ConfirmationURL }}" style="display: inline-block; background-color: #6366f1; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-bottom: 16px;">接受邀请</a>
+<p style="color: #9ca3af; font-size: 14px; margin: 24px 0 0;">链接：<span style="word-break: break-all;">{{ .ConfirmationURL }}</span></p>
+</div>
+</body>
+</html>
+TEMPLATE_EOF
 
       # ── 6. Create contact_messages table ──────────────────────────────────
       - name: Create contact_messages table
