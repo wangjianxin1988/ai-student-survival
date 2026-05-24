@@ -6,7 +6,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 export const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | undefined)
   || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined)
   || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
-const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
+export const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
   || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined)
   || '';
 const supabaseServiceKey = (import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined)
