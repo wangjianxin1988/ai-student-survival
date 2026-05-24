@@ -94,11 +94,8 @@ export default function LoginForm({
     if (finalReturnTo) {
       window.location.href = finalReturnTo;
     } else {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "/";
-      }
+      // Default to user center instead of unreliable history.back()
+      window.location.href = `/${locale === 'en' ? 'en/' : ''}user`;
     }
   };
 

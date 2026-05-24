@@ -94,11 +94,7 @@ export default function RegisterForm({
     if (returnTo) {
       window.location.href = returnTo;
     } else {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = "/";
-      }
+      window.location.href = `/${locale === 'en' ? 'en/' : ''}user`;
     }
   };
 
@@ -161,6 +157,7 @@ export default function RegisterForm({
   };
 
   const handleGoogleSignIn = async () => {
+    sessionStorage.setItem('oauth_return_to', `/${locale === 'en' ? 'en/' : ''}user`);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -173,6 +170,7 @@ export default function RegisterForm({
   };
 
   const handleGithubSignIn = async () => {
+    sessionStorage.setItem('oauth_return_to', `/${locale === 'en' ? 'en/' : ''}user`);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "github",
       options: {

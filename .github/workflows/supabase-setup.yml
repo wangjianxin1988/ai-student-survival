@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure Supabase Site URL and OAuth Redirect URLs
+      - name: Configure Supabase Auth Settings
         run: |
           echo "=== Step 1: Set Site URL and OAuth redirect URLs ==="
           AUTH_RESP=$(curl -s -X PATCH \
@@ -18,6 +18,24 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"siteUrl": "https://mi-to-ai.com", "uriAllowList": "https://mi-to-ai.com/auth/callback,https://mi-to-ai.com/**,http://localhost:3000/**"}')
           echo "Auth config response: $AUTH_RESP"
+
+      - name: SMTP Configuration Note
+        run: |
+          echo "=== SMTP Configuration (Manual Step) ==="
+          echo "To enable email verification and password reset emails:"
+          echo "1. Go to: https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/auth/templates"
+          echo "2. Or: https://supabase.com/dashboard/project/giynvpfnzzelzwpmsgtf/settings/auth"
+          echo "3. Configure SMTP with your email provider (Resend recommended)"
+          echo ""
+          echo "For Resend SMTP:"
+          echo "  Host: smtp.resend.com"
+          echo "  Port: 587 (TLS) or 465 (SSL)"
+          echo "  User: resend"
+          echo "  Password: Your Resend API Key"
+          echo "  Sender: noreply@mi-to-ai.com"
+          echo ""
+          echo "Current: mailer_autoconfirm=true (immediate login, no email verification)"
+          echo "After SMTP setup: Set mailer_autoconfirm=false to require email verification"
 
       - name: Create contact_messages table
         run: |

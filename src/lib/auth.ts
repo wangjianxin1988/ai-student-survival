@@ -361,13 +361,16 @@ export const demoAuthApi = {
 
   /**
    * Sign in with OAuth provider
+   * @param returnTo - URL to redirect to after successful OAuth (defaults to /user)
    */
-  async signInWithOAuth(provider: 'google' | 'github'): Promise<OAuthResult> {
+  async signInWithOAuth(provider: 'google' | 'github', returnTo = '/user'): Promise<OAuthResult> {
     if (!isSupabaseConfigured) {
       return { error: 'Demo mode: OAuth not available' };
     }
 
     try {
+      // Store returnTo in sessionStorage so callback page can read it
+      sessionStorage.setItem('oauth_return_to', returnTo);
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
@@ -384,7 +387,7 @@ export const demoAuthApi = {
 
   /**
    * Sign in with magic link (email OTP)
-   * Only sends magic link if the email is already registered
+   * Sends a magic link to the email address
    */
   async signInWithMagicLink(email: string): Promise<MagicLinkResult> {
     if (!isSupabaseConfigured) {
@@ -392,20 +395,8 @@ export const demoAuthApi = {
     }
 
     try {
-      // First check if user exists by attempting to get user profile
-      // This will fail for non-existent users
-      const { data: profileData, error: profileError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', email.toLowerCase())
-        .single();
-
-      // If profile not found, user doesn't exist
-      if (profileError || !profileData) {
-        return { success: false, error: '该邮箱尚未注册，请先注册账号' };
-      }
-
-      // User exists, now send magic link
+      // Send magic link - Supabase handles email sending
+      // Note: magic link is sent regardless of whether email exists
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
