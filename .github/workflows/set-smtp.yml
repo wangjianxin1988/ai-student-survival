@@ -1,0 +1,28 @@
+name: Set SMTP
+on:
+  push:
+    branches: [master]
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SMTP via API
+        run: |
+          RESP=$(curl -s -w "\n%{http_code}" -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/config/smtp" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "host": "smtp.resend.com",
+              "port": 587,
+              "user": "resend",
+              "password": "re_fRYASk3f_BdRNVH2yoW7v3UVvU6BphqTW",
+              "sender_email": "noreply@mi-to-ai.com",
+              "sender_name": "MI TO AI"
+            }')
+          HTTP_CODE=$(echo "$RESP" | tail -1)
+          BODY=$(echo "$RESP" | head -1)
+          echo "HTTP_CODE=$HTTP_CODE"
+          echo "BODY_LENGTH=${#BODY}"
+          echo "BODY=$BODY"
