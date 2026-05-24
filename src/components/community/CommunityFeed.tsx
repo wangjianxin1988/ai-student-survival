@@ -3,6 +3,7 @@ import type { CommunityPost } from "@/lib/community/types";
 import { PostCard } from "./PostCard";
 import { CategoryFilter, type CommunityCategory } from "./CategoryFilter";
 import { getCurrentLocale, getLocaleHref } from "@/lib/i18n";
+import { getAccessToken } from "@/lib/auth";
 
 const translations = {
   zh: {
@@ -143,7 +144,13 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   const handleLike = async (postId: string) => {
     if (!currentUserId) return;
     try {
-      await fetch(`/api/community/${postId}/like`, { method: "POST" });
+      const accessToken = getAccessToken();
+      await fetch(`/api/community/${postId}/like`, {
+        method: "POST",
+        headers: {
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
+      });
     } catch (error) {
       console.error("Failed to like:", error);
     }
@@ -152,7 +159,13 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   const handleFavorite = async (postId: string) => {
     if (!currentUserId) return;
     try {
-      await fetch(`/api/community/${postId}/favorite`, { method: "POST" });
+      const accessToken = getAccessToken();
+      await fetch(`/api/community/${postId}/favorite`, {
+        method: "POST",
+        headers: {
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
+      });
     } catch (error) {
       console.error("Failed to favorite:", error);
     }

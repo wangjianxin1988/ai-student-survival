@@ -3,7 +3,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { supabase } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+import { getServerUser } from '@/lib/server-auth';
 import { POINTS_CONFIG } from '@/lib/points/config';
 import { getUserBalance, recordTransaction } from '@/lib/points/storage';
 
@@ -11,7 +11,7 @@ const HOT_BOOST_COST = Math.abs(POINTS_CONFIG.ACTIONS.HOT_BOOST); // 20
 const HOT_BOOST_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const POST: APIRoute = async ({ request }) => {
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
 
   if (!user) {
     return new Response(

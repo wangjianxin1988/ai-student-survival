@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { getCurrentUser } from '@/lib/auth';
+import { getServerUser } from '@/lib/server-auth';
 import { getPostById, deletePost } from '@/lib/community';
 import { updatePost } from '@/lib/community/storage';
 
@@ -18,7 +18,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     );
   }
 
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
   const post = await getPostById(postId);
 
   if (!post) {
@@ -42,7 +42,7 @@ export const GET: APIRoute = async ({ params, request }) => {
 
 export const PUT: APIRoute = async ({ params, request }) => {
   const postId = params.id;
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
 
   if (!user) {
     return new Response(
@@ -99,7 +99,7 @@ export const PUT: APIRoute = async ({ params, request }) => {
 
 export const DELETE: APIRoute = async ({ params, request }) => {
   const postId = params.id;
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
 
   if (!user) {
     return new Response(

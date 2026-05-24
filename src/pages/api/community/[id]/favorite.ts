@@ -2,12 +2,12 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { supabase } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+import { getServerUser } from '@/lib/server-auth';
 import { toggleFavorite, getPostById } from '@/lib/community/service';
 
 export const POST: APIRoute = async ({ params, request }) => {
   const postId = params.id;
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
 
   if (!user) {
     return new Response(

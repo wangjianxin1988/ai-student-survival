@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { getCurrentUser } from '@/lib/auth';
+import { getServerUser } from '@/lib/server-auth';
 import { getPosts, createPost } from '@/lib/community';
 import { contentModerationApi } from '@/lib/content-moderation';
 
@@ -34,7 +34,7 @@ export const GET: APIRoute = async ({ request }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
 
   if (!user) {
     return new Response(

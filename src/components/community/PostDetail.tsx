@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import type { CommunityPost, PostComment } from "@/lib/community/types";
+import { getAccessToken } from "@/lib/auth";
 
 interface PostDetailProps {
   postId: string;
@@ -317,8 +318,12 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId) return;
 
     try {
+      const accessToken = getAccessToken();
       const response = await fetch(`/api/community/${postId}/like`, {
         method: "POST",
+        headers: {
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
       });
       const data = await response.json();
       if (data.success) {
@@ -334,8 +339,12 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId) return;
 
     try {
+      const accessToken = getAccessToken();
       const response = await fetch(`/api/community/${postId}/favorite`, {
         method: "POST",
+        headers: {
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
       });
       const data = await response.json();
       if (data.success) {
@@ -352,9 +361,13 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId || !commentContent.trim()) return;
 
     try {
+      const accessToken = getAccessToken();
       const response = await fetch(`/api/community/${postId}/comments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+        },
         body: JSON.stringify({ content: commentContent }),
       });
       const data = await response.json();

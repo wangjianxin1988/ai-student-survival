@@ -133,6 +133,27 @@ export async function initAuth(): Promise<DemoUser | null> {
 }
 
 /**
+ * Get the Supabase access token from localStorage for SSR API auth.
+ * Returns the Bearer token to include in Authorization headers.
+ */
+export function getAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    // Supabase localStorage key format: sb-{project-ref}-auth-token
+    // project-ref is extracted from supabaseUrl (the domain part without https://)
+    const projectRef = supabaseUrl.replace(/^https?:\/\//, '').replace(/\.supabase\.co$/, '');
+    const storageKey = `sb-${projectRef}-auth-token`;
+    const raw = localStorage.getItem(storageKey);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return parsed?.tokens?.access_token || parsed?.access_token || null;
+    }
+  } catch (_) {}
+  return null;
+}
+
+/**
  * Get the current user from cache (synchronous)
  * For async initialization, call initAuth() first
  * Falls back to demo session if Supabase is not configured OR

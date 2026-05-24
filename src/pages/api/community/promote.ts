@@ -3,7 +3,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { supabase } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+import { getServerUser } from '@/lib/server-auth';
 import { POINTS_CONFIG } from '@/lib/points/config';
 import { getUserBalance } from '@/lib/points/storage';
 import { recordTransaction } from '@/lib/points/storage';
@@ -14,7 +14,7 @@ import type { CommunityPost } from '@/lib/community/types';
 const DIRECT_PUBLISH_COST = Math.abs(POINTS_CONFIG.ACTIONS.DIRECT_PUBLISH); // 50
 
 export const POST: APIRoute = async ({ request }) => {
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
 
   if (!user) {
     return new Response(

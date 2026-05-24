@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { supabase } from '@/lib/supabase';
-import { getCurrentUser } from '@/lib/auth';
+import { getServerUser } from '@/lib/server-auth';
 import { getPostById } from '@/lib/community/storage';
 import { earnPoints } from '@/lib/points/service';
 import { checkAndPromote } from '@/lib/auto-promote/service';
@@ -66,7 +66,7 @@ export const GET: APIRoute = async ({ params }) => {
 
 export const POST: APIRoute = async ({ params, request }) => {
   const postId = params.id;
-  const user = getCurrentUser();
+  const user = await getServerUser(request);
 
   if (!user) {
     return new Response(
