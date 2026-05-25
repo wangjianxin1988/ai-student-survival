@@ -44,20 +44,23 @@ export interface MagicLinkResult {
 
 /**
  * Check if an email has an OAuth-linked account (Google/GitHub) in Supabase.
- * Uses admin client to query auth.users (server-side, bypasses RLS).
+ * Uses a SECURITY DEFINER RPC function that runs with service role privileges,
+ * bypassing RLS without needing admin API access.
  * Returns the provider name ('google' | 'github') if found, null otherwise.
  */
 async function getOAuthProviderForEmail(email: string): Promise<string | null> {
   if (!isSupabaseConfigured || !email) return null;
   try {
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers();
-    if (error) return null;
-    const user = data?.users?.find(
-      (u) => u.email?.toLowerCase() === email.toLowerCase()
-    );
-    if (!user) return null;
-    const provider = user.app_metadata?.provider;
-    if (provider && typeof provider === 'string') return provider;
+    // Use supabaseAdmin (service role key) — SECURITY DEFINER function runs
+    // with service role privileges, allowing access to auth.users
+    const { data, error } = await supabaseAdmin.rpc('get_oauth_provider_v2', {
+      p_email: email.toLowerCase(),
+    });
+    if (error) {
+      console.error('[auth] getOAuthProvider RPC error:', error);
+      return null;
+    }
+    if (data && typeof data === 'string') return data;
     return null;
   } catch (_) {
     return null;
