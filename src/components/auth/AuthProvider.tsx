@@ -6,6 +6,7 @@ import React, {
   useCallback,
 } from "react";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
 
 interface User {
   id: string;
@@ -72,13 +73,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const demoUser = getDemoUserFromSession();
         setUser(demoUser);
       } else {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
+        // Use getCurrentUser() for synchronous detection (same logic as UserMenu)
+        // to avoid race conditions between async init and sync dropdown detection.
+        // This reads localStorage synchronously and handles demo-session fallback.
+        const demoUser = getCurrentUser();
+        if (demoUser) {
           setUser({
-            id: session.user.id,
-            email: session.user.email || '',
-            name: session.user.user_metadata?.name,
-            avatar_url: session.user.user_metadata?.avatar_url,
+            id: demoUser.id,
+            email: demoUser.email || '',
+            name: demoUser.name,
+            avatar_url: demoUser.avatar,
           });
         }
       }
