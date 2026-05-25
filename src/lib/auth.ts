@@ -1,16 +1,15 @@
 /**
- * Supabase Authentication Module
+ * Authentication module — unified wrapper around Supabase JS client.
  *
- * This module provides authentication functionality using Supabase.
- * It replaces the previous demo/localStorage-based auth system.
- * Falls back to sessionStorage-based demo auth when Supabase is not configured OR
- * when Supabase is configured but user is not logged in.
+ * Single source of truth: supabase-js handles all session storage and token refresh.
+ * No manual localStorage/sessionStorage manipulation for Supabase sessions.
+ *
+ * Demo session (sessionStorage) is kept as fallback only when Supabase is NOT configured.
  */
 
-import { supabase, isSupabaseConfigured, supabaseUrl } from './supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
-// Re-export User type as DemoUser for backwards compatibility
 export type DemoUser = {
   id: string;
   email: string;
@@ -30,6 +29,7 @@ export interface AuthResult {
   error?: string;
   verificationRequired?: boolean;
   message?: string;
+  oauthProvider?: string;
 }
 
 export interface OAuthResult {
@@ -41,10 +41,116 @@ export interface MagicLinkResult {
   error?: string;
 }
 
-// Demo session storage key
+// ─── OAuth account detection ────────────────────────────────────────────────────
+
+/**
+ * Check if an email has an OAuth-linked account (Google/GitHub) in Supabase.
+ * Calls the /api/auth/check-user server-side endpoint which uses a
+ * SECURITY DEFINER RPC function, keeping the service role key off the client.
+ * Returns the provider name ('google' | 'github') if found, null otherwise.
+ */
+async function getOAuthProviderForEmail(email: string): Promise<string | null> {
+  if (!isSupabaseConfigured || !email) return null;
+  try {
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const res = await fetch(`${origin}/api/auth/check-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.toLowerCase() }),
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.exists && json.provider) return json.provider as string;
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
+
 const DEMO_SESSION_KEY = 'demo_session';
 
-// Convert Supabase User to DemoUser format
+function getDemoUserFromSession(): DemoUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const sessionData = sessionStorage.getItem(DEMO_SESSION_KEY);
+    if (sessionData) return JSON.parse(sessionData);
+  } catch (e) {
+    console.error('[auth] Failed to parse demo session:', e);
+  }
+  return null;
+}
+
+export function saveDemoSession(user: DemoUser): void {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(user));
+  } catch (e) {
+    console.error('[auth] Failed to save demo session:', e);
+  }
+}
+
+export function clearDemoSession(): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(DEMO_SESSION_KEY);
+}
+
+// ─── Internal state ───────────────────────────────────────────────────────────
+
+let currentUser: DemoUser | null = null;
+let isInitialized = false;
+
+type AuthChangeCallback = (user: DemoUser | null) => void;
+const authChangeListeners = new Set<AuthChangeCallback>();
+
+let demoStorageListenerSetUp = false;
+
+/**
+ * Synchronously read Supabase session from localStorage.
+ * Used by getCurrentUser() for instant session detection (before async init).
+ * Supports both current and legacy Supabase localStorage key formats.
+ */
+function readSupabaseSessionFromStorage(): DemoUser | null {
+  if (typeof window === 'undefined') return null;
+
+  // Find the Supabase auth token key (sb- prefix or supabase key)
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key) continue;
+    // Match: sb-{ref}-auth-token OR keys containing 'supabase' + 'auth'
+    if (!key.startsWith('sb-')) continue;
+    if (!key.includes('auth') && !key.includes('token')) continue;
+
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      const parsed = JSON.parse(raw);
+      const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
+      if (!accessToken) continue;
+
+      // Validate: must be a real Supabase RS256 JWT with sub claim
+      const parts = accessToken.split('.');
+      if (parts.length !== 3) continue;
+
+      const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+      if (header.alg !== 'RS256') continue; // Supabase always uses RS256
+
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (!payload.sub || typeof payload.sub !== 'string') continue;
+
+      const userData = parsed?.user || parsed?.tokens?.user;
+      if (userData) {
+        return toDemoUser(userData as User);
+      }
+    } catch (_) {
+      // Invalid entry — skip
+    }
+  }
+  return null;
+}
+
+// ─── Supabase User → DemoUser conversion ──────────────────────────────────────
+
 function toDemoUser(user: User | null): DemoUser | null {
   if (!user) return null;
   return {
@@ -59,188 +165,143 @@ function toDemoUser(user: User | null): DemoUser | null {
   };
 }
 
-// Read demo user from sessionStorage (for fallback when Supabase is not configured)
-function getDemoUserFromSession(): DemoUser | null {
-  if (typeof window === 'undefined') return null;
+/**
+ * Get Supabase access token for API authentication.
+ * Returns Bearer token to include in Authorization headers.
+ * Must be called in async context.
+ */
+export async function getAccessToken(): Promise<string | null> {
+  if (!isSupabaseConfigured) return null;
   try {
-    const sessionData = sessionStorage.getItem(DEMO_SESSION_KEY);
-    if (sessionData) {
-      return JSON.parse(sessionData);
-    }
-  } catch (e) {
-    console.error('Failed to parse demo session:', e);
-  }
-  return null;
-}
-
-// Save demo user to sessionStorage
-export function saveDemoSession(user: DemoUser): void {
-  if (typeof window === 'undefined') return;
-  try {
-    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(user));
-  } catch (e) {
-    console.error('Failed to save demo session:', e);
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.access_token ?? null;
+  } catch (_) {
+    return null;
   }
 }
 
-// Clear demo session
-export function clearDemoSession(): void {
-  if (typeof window === 'undefined') return;
-  sessionStorage.removeItem(DEMO_SESSION_KEY);
-}
-
-// Current user cache (synchronous access)
-let currentUser: DemoUser | null = null;
-let isInitialized = false;
-
-// Auth state change listeners
-type AuthChangeCallback = (user: DemoUser | null) => void;
-const authChangeListeners: Set<AuthChangeCallback> = new Set();
-
-// Track if demo storage listener is set up
-let demoStorageListenerSetUp = false;
+// ─── Auth init (async — use onAuthStateChange for synchronous reactive updates) ─
 
 /**
- * Initialize the auth module - fetches current session
- * Should be called on app startup
+ * Initialize auth and fetch current session.
+ * Reads from localStorage synchronously FIRST, then validates async with Supabase.
+ * Components should use onAuthStateChange for reactive updates.
  */
 export async function initAuth(): Promise<DemoUser | null> {
   if (typeof window === 'undefined') return null;
 
-  if (isInitialized) {
+  // Already initialized — return cached (don't re-fetch)
+  if (isInitialized) return currentUser;
+
+  // FIRST: Try to read synchronously from localStorage (fast path for OAuth)
+  const syncUser = getCurrentUser();
+  if (syncUser) {
+    currentUser = syncUser;
+    isInitialized = true;
+    notifyAuthChange(syncUser);
+    return syncUser;
+  }
+
+  if (!isSupabaseConfigured) {
+    currentUser = getDemoUserFromSession();
+    isInitialized = true;
+    notifyAuthChange(currentUser);
     return currentUser;
   }
 
-  if (isSupabaseConfigured) {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        currentUser = toDemoUser(session.user);
-        isInitialized = true;
-        return currentUser;
-      }
-      // No Supabase session - fall through to demo session check
-    } catch (error) {
-      console.error('Error initializing Supabase auth:', error);
-      // Fall through to demo auth on error
+  // Async validation via Supabase (validates token with server)
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      currentUser = toDemoUser(session.user);
+    } else {
+      currentUser = getDemoUserFromSession();
     }
+  } catch (error) {
+    console.error('[auth] initAuth error:', error);
+    currentUser = getDemoUserFromSession();
   }
 
-  // Fallback to demo session (either Supabase not configured or no Supabase user)
-  currentUser = getDemoUserFromSession();
   isInitialized = true;
+  notifyAuthChange(currentUser);
   return currentUser;
 }
 
-/**
- * Get the Supabase access token from localStorage for SSR API auth.
- * Returns the Bearer token to include in Authorization headers.
- */
-export function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
-
-  try {
-    // Supabase localStorage key format: sb-{project-ref}-auth-token
-    // project-ref is extracted from supabaseUrl (the domain part without https://)
-    const projectRef = supabaseUrl.replace(/^https?:\/\//, '').replace(/\.supabase\.co$/, '');
-    const storageKey = `sb-${projectRef}-auth-token`;
-    const raw = localStorage.getItem(storageKey);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return parsed?.tokens?.access_token || parsed?.access_token || null;
-    }
-  } catch (_) {}
-  return null;
-}
+// ─── Sync user getter ──────────────────────────────────────────────────────────
 
 /**
- * Get the current user from cache (synchronous)
- * For async initialization, call initAuth() first
- * Falls back to demo session if Supabase is not configured OR
- * if Supabase is configured but no Supabase user is logged in
+ * Get current user synchronously — reads from localStorage for instant detection.
+ * Use this for the FIRST render (before async initAuth completes).
+ * After first render, use onAuthStateChange for reactive updates.
  */
 export function getCurrentUser(): DemoUser | null {
-  if (typeof window === 'undefined') return null;
+  // Return cached if already loaded
+  if (currentUser !== null) return currentUser;
 
-  // If we have a cached user, return it
-  if (currentUser !== null) {
-    return currentUser;
+  // Try to detect from Supabase localStorage synchronously (OAuth session)
+  if (isSupabaseConfigured && typeof window !== 'undefined') {
+    const supabaseUser = readSupabaseSessionFromStorage();
+    if (supabaseUser) {
+      currentUser = supabaseUser;
+      return currentUser;
+    }
   }
 
-  // Try demo session first (fast, synchronous)
+  // Fallback to demo session
   const demoUser = getDemoUserFromSession();
   if (demoUser) {
     currentUser = demoUser;
     return currentUser;
   }
 
-  // Check Supabase localStorage session directly (synchronous)
-  // Supabase stores session in localStorage with key: sb-{project-ref}-auth-token
-  if (isSupabaseConfigured) {
-    try {
-      const storageKey = `sb-${supabaseUrl.replace(/^https?:\/\//, '')}-auth-token`;
-      const raw = localStorage.getItem(storageKey);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
-        if (accessToken) {
-          // Session exists - decode user from the stored session
-          // Supabase stores user in the 'user' field or decoded from access_token
-          const userData = parsed?.user || parsed?.tokens?.user;
-          if (userData) {
-            currentUser = toDemoUser(userData);
-            return currentUser;
-          }
-        }
-      }
-    } catch (e) {
-      console.error('[getCurrentUser] Failed to read Supabase session:', e);
-    }
-  }
-
   return null;
 }
 
+// ─── Auth state subscription ──────────────────────────────────────────────────
+
+let supabaseListenerSetUp = false;
+
 /**
- * Subscribe to auth state changes
- * Returns unsubscribe function
+ * Subscribe to auth state changes. Fires IMMEDIATELY with current user
+ * (synchronously from localStorage for existing OAuth sessions).
+ * This is the primary way components should get reactive auth updates.
  */
 export function onAuthStateChange(callback: AuthChangeCallback): () => void {
   authChangeListeners.add(callback);
 
-  // Immediately notify of current state if we have a cached user
-  if (currentUser) {
+  // Fire IMMEDIATELY — read from localStorage synchronously first.
+  // This ensures OAuth sessions are detected even before async initAuth completes.
+  const immediateUser = getCurrentUser();
+  if (immediateUser) {
+    // We found user from localStorage but currentUser might not be set yet
+    currentUser = immediateUser;
+    callback(immediateUser);
+  } else {
+    // No cached user — fire with null if we already know the auth state
     callback(currentUser);
   }
 
-  if (isSupabaseConfigured && typeof window !== 'undefined') {
-    // Initialize auth if not yet done
-    if (!isInitialized) {
-      initAuth().then(user => {
-        callback(user);
-      });
-    }
-
+  if (isSupabaseConfigured && typeof window !== 'undefined' && !supabaseListenerSetUp) {
+    supabaseListenerSetUp = true;
     supabase.auth.onAuthStateChange((event, session) => {
       const user = toDemoUser(session?.user ?? null);
       currentUser = user;
+      isInitialized = true;
       authChangeListeners.forEach(cb => cb(user));
     });
   }
 
-  // Always set up demo session storage listener for cross-tab sync
-  // This handles the case where Supabase is configured but no Supabase user
-  // is logged in (i.e., demo mode on a Supabase-enabled site)
-  if (typeof window !== 'undefined' && !demoStorageListenerSetUp) {
+  // Demo session cross-tab sync (only when Supabase not configured)
+  if (typeof window !== 'undefined' && !demoStorageListenerSetUp && !isSupabaseConfigured) {
     demoStorageListenerSetUp = true;
-    const handleStorageChange = (e: StorageEvent) => {
+    const handleStorage = (e: StorageEvent) => {
       if (e.key === DEMO_SESSION_KEY) {
         const newUser = e.newValue ? JSON.parse(e.newValue) : null;
         currentUser = newUser;
         authChangeListeners.forEach(cb => cb(newUser));
       }
     };
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('storage', handleStorage);
   }
 
   return () => {
@@ -248,22 +309,15 @@ export function onAuthStateChange(callback: AuthChangeCallback): () => void {
   };
 }
 
-/**
- * Notify all listeners of auth change
- */
 export function notifyAuthChange(user: DemoUser | null): void {
-  currentUser = user;
   authChangeListeners.forEach(cb => cb(user));
 }
 
-// Supabase Auth API wrapper
+// ─── Auth API (delegates to supabase-js) ─────────────────────────────────────
+
 export const demoAuthApi = {
-  /**
-   * Sign in with email and password
-   */
   async signIn(email: string, password: string): Promise<AuthResult> {
     if (!isSupabaseConfigured) {
-      // Demo mode: create/update demo session
       const demoUser: DemoUser = {
         id: 'demo-' + Math.random().toString(36).substring(2, 15),
         email,
@@ -278,22 +332,28 @@ export const demoAuthApi = {
     }
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+          // Check if this email has an OAuth account
+          const provider = await getOAuthProviderForEmail(email);
+          if (provider === 'google') {
+            return { success: false, error: '此账号使用 Google 登录，请点击上方"Google"按钮直接登录，无需密码', oauthProvider: 'google' };
+          }
+          if (provider === 'github') {
+            return { success: false, error: '此账号使用 GitHub 登录，请点击上方"GitHub"按钮直接登录，无需密码', oauthProvider: 'github' };
+          }
+          return { success: false, error: '邮箱或密码错误，请检查后重试', oauthProvider: provider || undefined };
+        }
+        if (msg.includes('email not confirmed')) {
+          return { success: false, error: '请先验证邮箱后再登录' };
+        }
         return { success: false, error: error.message };
       }
-
-      const user = toDemoUser(data.user);
-      currentUser = user;
-      notifyAuthChange(user);
-
       return { success: true };
     } catch (err: any) {
-      console.error('Sign in error:', err);
+      console.error('[auth] signIn error:', err);
       if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
         return { success: false, error: '请求超时，请重试' };
       }
@@ -301,12 +361,8 @@ export const demoAuthApi = {
     }
   },
 
-  /**
-   * Sign up with email and password
-   */
   async signUp(email: string, password: string, name: string): Promise<AuthResult> {
     if (!isSupabaseConfigured) {
-      // Demo mode: create demo session
       const demoUser: DemoUser = {
         id: 'demo-' + Math.random().toString(36).substring(2, 15),
         email,
@@ -324,29 +380,30 @@ export const demoAuthApi = {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: { name },
-        },
+        options: { data: { name } },
       });
-
       if (error) {
-        // Rate limit error - provide user-friendly message
         if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
           return { success: false, error: '操作过于频繁，请稍后再试（90秒后重试）' };
+        }
+        // Email already registered — check if it's an OAuth account
+        const msg = error.message.toLowerCase();
+        if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
+          const provider = await getOAuthProviderForEmail(email);
+          if (provider === 'google') {
+            return { success: false, error: '此邮箱已通过 Google 注册，请直接使用 Google 登录', oauthProvider: 'google' };
+          }
+          if (provider === 'github') {
+            return { success: false, error: '此邮箱已通过 GitHub 注册，请直接使用 GitHub 登录', oauthProvider: 'github' };
+          }
         }
         return { success: false, error: error.message };
       }
 
       if (data.user) {
-        // If session exists, user is confirmed and logged in
         if (data.session) {
-          const user = toDemoUser(data.user);
-          currentUser = user;
-          notifyAuthChange(user);
           return { success: true };
         }
-        // Has user object but no session = email confirmation required
-        currentUser = null;
         return {
           success: false,
           error: '请前往邮箱查收验证邮件，完成账号激活后再登录。验证邮件可能位于垃圾邮件文件夹。',
@@ -354,17 +411,13 @@ export const demoAuthApi = {
         };
       }
 
-      // No user in data (user === null) = email confirmation required
-      // Supabase returns { user: null, session: null } when signup succeeds
-      // but requires email confirmation
-      currentUser = null;
       return {
         success: false,
         error: '请前往邮箱查收验证邮件，完成账号激活后再登录。验证邮件可能位于垃圾邮件文件夹。',
         verificationRequired: true,
       };
     } catch (err: any) {
-      console.error('Sign up error:', err);
+      console.error('[auth] signUp error:', err);
       if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
         return { success: false, error: '请求超时，请重试' };
       }
@@ -372,107 +425,80 @@ export const demoAuthApi = {
     }
   },
 
-  /**
-   * Sign out
-   */
   async signOut(): Promise<void> {
+    if (typeof window !== 'undefined') {
+      // Clear ALL Supabase auth-related localStorage keys before nulling currentUser.
+      // readSupabaseSessionFromStorage() scans for sb-* keys, so we must remove all of them.
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if (key.startsWith('sb-') && (key.includes('auth') || key.includes('token'))) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+    clearDemoSession();
+    currentUser = null;
+    notifyAuthChange(null);
+
     if (isSupabaseConfigured) {
       try {
         await supabase.auth.signOut();
-        currentUser = null;
-        notifyAuthChange(null);
       } catch (err) {
-        console.error('Sign out error:', err);
+        console.error('[auth] signOut error:', err);
       }
-    } else {
-      // Demo mode: clear session
-      clearDemoSession();
-      currentUser = null;
-      notifyAuthChange(null);
     }
   },
 
-  /**
-   * Get current user (synchronous, returns cached value)
-   */
   async getUser(): Promise<DemoUser | null> {
-    return getCurrentUser();
+    return currentUser;
   },
 
-  /**
-   * Check if logged in
-   */
   isLoggedIn(): boolean {
-    return getCurrentUser() !== null;
+    return currentUser !== null;
   },
 
-  /**
-   * Sign in with OAuth provider
-   * @param returnTo - URL to redirect to after successful OAuth (defaults to /user)
-   */
   async signInWithOAuth(provider: 'google' | 'github', returnTo = '/user'): Promise<OAuthResult> {
     if (!isSupabaseConfigured) {
       return { error: 'Demo mode: OAuth not available' };
     }
-
     try {
-      // Store returnTo in sessionStorage so callback page can read it
       sessionStorage.setItem('oauth_return_to', returnTo);
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
+        options: { redirectTo: `${window.location.origin}/auth/callback` },
       });
-
       return { error: error?.message };
     } catch (err) {
-      console.error('OAuth sign in error:', err);
+      console.error('[auth] OAuth signIn error:', err);
       return { error: '发生未知错误' };
     }
   },
 
-  /**
-   * Sign in with magic link (email OTP)
-   * Sends a magic link to the email address
-   */
   async signInWithMagicLink(email: string): Promise<MagicLinkResult> {
     if (!isSupabaseConfigured) {
       return { success: false, error: 'Demo mode: Magic link not available' };
     }
-
     try {
-      // Send magic link - Supabase handles email sending
-      // Note: magic link is sent regardless of whether email exists
       const { error } = await supabase.auth.signInWithOtp({
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
       });
-
       if (error) {
-        // Handle specific error cases
         if (error.message.toLowerCase().includes('user not found') ||
             error.message.toLowerCase().includes('invalid')) {
           return { success: false, error: '该邮箱尚未注册，请先注册账号' };
         }
         return { success: false, error: error.message };
       }
-
       return { success: true };
     } catch (err) {
-      console.error('Magic link error:', err);
+      console.error('[auth] MagicLink error:', err);
       return { success: false, error: '发生未知错误' };
     }
   },
 
-  /**
-   * Verify and complete login (for OAuth or magic link)
-   */
-  async verifyAndLogin(email: string, code: string): Promise<AuthResult> {
-    // With Supabase, verification is handled automatically
-    // This is a no-op for backwards compatibility
+  async verifyAndLogin(_email: string, _code: string): Promise<AuthResult> {
     return { success: true };
   },
 };

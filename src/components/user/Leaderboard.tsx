@@ -157,11 +157,14 @@ export default function Leaderboard({
                 </div>
 
                 {/* Avatar */}
-                <img
-                  src={profile.avatar}
-                  alt={profile.name}
-                  className="w-12 h-12 rounded-full bg-gray-100 border-2 border-white"
-                />
+                <a href={`/user/${profile.id}`} onClick={(e) => e.stopPropagation()}>
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="w-12 h-12 rounded-full bg-gray-100 border-2 border-white hover:ring-2 hover:ring-primary-300 cursor-pointer transition-all"
+                    title={`查看 ${profile.name} 的主页`}
+                  />
+                </a>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">

@@ -5,7 +5,8 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, supabaseUrl } from "@/lib/supabase";
+import { getCurrentUser } from "@/lib/auth";
 
 interface User {
   id: string;
@@ -36,17 +37,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Demo session key - must match the key used in auth.ts
+// Demo session key — mirrors auth.ts
 const DEMO_SESSION_KEY = 'demo_session';
 
-// Read demo user from sessionStorage
 function getDemoUserFromSession(): User | null {
   if (typeof window === 'undefined') return null;
   try {
     const sessionData = sessionStorage.getItem(DEMO_SESSION_KEY);
     if (sessionData) {
       const demoUser = JSON.parse(sessionData);
-      // Convert DemoUser to User format
       return {
         id: demoUser.id,
         email: demoUser.email || '',
@@ -60,68 +59,23 @@ function getDemoUserFromSession(): User | null {
   return null;
 }
 
-// Set demo user to sessionStorage (called from auth.ts demo login)
-function setDemoUserToSession(demoUser: User) {
-  if (typeof window === 'undefined') return;
-  try {
-    sessionStorage.setItem(DEMO_SESSION_KEY, JSON.stringify(demoUser));
-  } catch (e) {
-    console.error('[AuthProvider] Failed to save demo session:', e);
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => getCurrentUser());
   const [loading, setLoading] = useState(true);
 
+  // Init auth and subscribe to changes — supabase-js is the single source of truth
   useEffect(() => {
     async function initAuth() {
-      console.log('[AuthProvider] Initializing auth...');
-      console.log('[AuthProvider] isSupabaseConfigured:', isSupabaseConfigured);
+      // 5s safety timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => setLoading(false), 5000);
 
-      // Set a timeout to prevent infinite loading - after 5s, proceed anyway
-      const timeoutId = setTimeout(() => {
-        console.warn('[AuthProvider] Init timeout, proceeding anyway');
+      if (!isSupabaseConfigured) {
+        // Already set from useState init, just confirm
+        clearTimeout(timeoutId);
         setLoading(false);
-      }, 5000);
-
-      try {
-        // First check demo session (for fallback/demo mode)
-        const demoUser = getDemoUserFromSession();
-        if (demoUser) {
-          console.log('[AuthProvider] Demo session found:', demoUser.email);
-          setUser(demoUser);
-          clearTimeout(timeoutId);
-          setLoading(false);
-          return;
-        }
-
-        console.log('[AuthProvider] No demo session, checking Supabase...');
-
-        // Then check Supabase if configured
-        if (isSupabaseConfigured) {
-          console.log('[AuthProvider] Supabase configured, getting session...');
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-
-          console.log('[AuthProvider] Supabase session:', session ? 'found' : 'none');
-
-          if (session?.user) {
-            setUser({
-              id: session.user.id,
-              email: session.user.email || "",
-              name: session.user.user_metadata?.name,
-              avatar_url: session.user.user_metadata?.avatar_url,
-            });
-            console.log('[AuthProvider] Set user from Supabase session');
-          }
-        } else {
-          console.log('[AuthProvider] Supabase not configured, using demo mode');
-        }
-      } catch (err) {
-        console.error("[AuthProvider] Init error:", err);
-      } finally {
+      } else {
+        // Initial state already set from getCurrentUser() in useState init.
+        // For Supabase, async validation is informational only (updates user metadata).
         clearTimeout(timeoutId);
         setLoading(false);
       }
@@ -130,93 +84,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     initAuth();
   }, []);
 
+  // Single auth listener — supabase-js owns session management
   useEffect(() => {
-    // Always set up storage event listener for demo session cross-tab sync
-    if (typeof window !== 'undefined') {
-      const handleStorageChange = (e: StorageEvent) => {
-        if (e.key === DEMO_SESSION_KEY) {
-          console.log('[AuthProvider] Storage event:', e.newValue ? 'set' : 'removed');
-          if (e.newValue) {
-            try {
-              const demoUser = JSON.parse(e.newValue);
-              setUser({
-                id: demoUser.id,
-                email: demoUser.email || '',
-                name: demoUser.name,
-                avatar_url: demoUser.avatar,
-              });
-            } catch (err) {
-              console.error('[AuthProvider] Failed to parse storage event:', err);
-              setUser(null);
-            }
-          } else {
-            setUser(null);
-          }
-        }
-      };
-      window.addEventListener('storage', handleStorageChange);
+    if (!isSupabaseConfigured || typeof window === 'undefined') return;
 
-      // Also poll for demo session changes (storage event doesn't fire in same tab)
-      const pollInterval = setInterval(() => {
-        const demoUser = getDemoUserFromSession();
-        setUser(prevUser => {
-          if (demoUser) {
-            if (!prevUser || prevUser.id !== demoUser.id) {
-              console.log('[AuthProvider] Polling detected demo user change');
-              return {
-                id: demoUser.id,
-                email: demoUser.email || '',
-                name: demoUser.name,
-                avatar_url: demoUser.avatar,
-              };
-            }
-          } else if (prevUser) {
-            // Check if there's still a sessionStorage entry
-            const currentDemo = sessionStorage.getItem(DEMO_SESSION_KEY);
-            if (!currentDemo) {
-              console.log('[AuthProvider] Polling detected logout');
-              return null;
-            }
-          }
-          return prevUser;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata?.name,
+          avatar_url: session.user.user_metadata?.avatar_url,
         });
-      }, 500);
+      } else {
+        // No Supabase session — check demo fallback
+        const demoUser = getDemoUserFromSession();
+        setUser(demoUser);
+      }
+    });
 
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        clearInterval(pollInterval);
-      };
-    }
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Also set up Supabase auth listener if configured
+  // Demo session cross-tab sync (only when Supabase not configured)
   useEffect(() => {
-    if (isSupabaseConfigured && typeof window !== 'undefined') {
-      console.log('[AuthProvider] Setting up Supabase auth listener');
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('[AuthProvider] Supabase auth event:', event);
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            email: session.user.email || "",
-            name: session.user.user_metadata?.name,
-            avatar_url: session.user.user_metadata?.avatar_url,
-          });
+    if (isSupabaseConfigured || typeof window === 'undefined') return;
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === DEMO_SESSION_KEY) {
+        if (e.newValue) {
+          const demoUser = JSON.parse(e.newValue);
+          setUser({ id: demoUser.id, email: demoUser.email || '', name: demoUser.name, avatar_url: demoUser.avatar });
         } else {
-          // Check if there's a demo session before setting to null
-          const demoUser = getDemoUserFromSession();
-          if (demoUser) {
-            setUser(demoUser);
-          } else {
-            setUser(null);
-          }
+          setUser(null);
         }
-      });
-
-      return () => subscription.unsubscribe();
-    }
+      }
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const signIn = useCallback(
@@ -255,12 +159,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const signOut = useCallback(async () => {
-    // Clear demo session if it exists
     sessionStorage.removeItem(DEMO_SESSION_KEY);
     setUser(null);
-
     if (isSupabaseConfigured) {
       await supabase.auth.signOut();
+      // Clear all Supabase auth-related localStorage keys
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if (key.startsWith('sb-') && (key.includes('auth') || key.includes('token'))) {
+          localStorage.removeItem(key);
+        }
+      }
     }
   }, []);
 

@@ -1,0 +1,32 @@
+name: Apply Database Migration
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Base64 encode SQL
+        id: sql
+        run: |
+          CONTENT=$(cat supabase/migrations/20260525_add_oauth_provider_function.sql | base64 -w0)
+          echo "content=$CONTENT" >> $GITHUB_OUTPUT
+
+      - name: Apply migration via Management API
+        run: |
+          echo "Applying migration to Supabase..."
+          SQL=$(echo "${{ steps.sql.outputs.content }}" | base64 -d)
+          RESPONSE=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": \"$SQL\"}")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -qi "error"; then
+            echo "Migration may have issues: $RESPONSE"
+          else
+            echo "Migration applied"
+          fi

@@ -31,7 +31,7 @@ function CreatePostContent() {
   }) => {
     setIsSubmitting(true);
     try {
-      const accessToken = getAccessToken();
+      const accessToken = await getAccessToken();
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 20000);
       const response = await fetch('/api/community', {

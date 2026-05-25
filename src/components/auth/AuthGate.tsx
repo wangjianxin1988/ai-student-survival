@@ -1,6 +1,6 @@
-import React from "react";
-import { useAuth } from "@/components/auth/AuthProvider";
+import React, { useState, useEffect } from "react";
 import { getLocaleHref } from "@/lib/i18n";
+import { initAuth, onAuthStateChange, type DemoUser } from "@/lib/auth";
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -11,9 +11,45 @@ interface AuthGateProps {
 /**
  * AuthGate - Client-side auth check component
  * Shows content only when user is logged in, otherwise shows fallback or redirects to login
+ * Directly uses initAuth() + onAuthStateChange() to ensure OAuth sessions stored in
+ * localStorage (sb-{project-ref}-auth-token) are properly detected — this is the same
+ * mechanism used by UserButton/UserMenu, guaranteeing consistency across the app.
  */
 export default function AuthGate({ children, locale = "zh", fallback }: AuthGateProps) {
-  const { user, loading } = useAuth();
+  const [user, setUser] = useState<DemoUser | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkAuth() {
+      const currentUser = await initAuth();
+      if (!cancelled) {
+        setUser(currentUser);
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+
+    const unsubscribe = onAuthStateChange((newUser) => {
+      if (!cancelled) {
+        setUser(newUser);
+        setLoading(false);
+      }
+    });
+
+    // Safety timeout: if still loading after 5s, proceed with current state
+    const timeout = setTimeout(() => {
+      if (!cancelled) setLoading(false);
+    }, 5000);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+      clearTimeout(timeout);
+    };
+  }, []);
 
   // Show loading state during auth initialization
   if (loading) {

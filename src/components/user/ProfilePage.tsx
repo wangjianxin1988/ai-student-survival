@@ -15,6 +15,7 @@ import FavoritesList from './FavoritesList';
 import OffersList from './OffersList';
 import RatingsList from './RatingsList';
 import EnhancedSettings from './EnhancedSettings';
+import { FollowingListTab } from './FollowingListTab';
 
 interface ProfilePageProps {
   locale?: 'zh' | 'en';
@@ -31,6 +32,7 @@ const translations = {
     reviews: '评论',
     followers: '粉丝',
     following: '关注',
+    followingList: '关注列表',
     points: '积分',
     level: '等级',
     rank: '排名',
@@ -50,6 +52,7 @@ const translations = {
     reviews: 'Reviews',
     followers: 'Followers',
     following: 'Following',
+    followingList: 'Following List',
     points: 'Points',
     level: 'Level',
     rank: 'Rank',
@@ -78,7 +81,7 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'offers' | 'ratings' | 'settings' | 'badges' | 'leaderboard' | 'history'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'offers' | 'ratings' | 'settings' | 'badges' | 'leaderboard' | 'history' | 'following'>('overview');
   const [pointsHistory, setPointsHistory] = useState<PointsHistoryEntry[]>([]);
   const t = translations[locale];
 
@@ -161,6 +164,7 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
     { id: 'favorites', label: t.favorites },
     { id: 'offers', label: locale === 'zh' ? 'Offer' : 'Offers' },
     { id: 'ratings', label: t.ratings },
+    { id: 'following', label: locale === 'zh' ? '关注' : 'Following' },
     { id: 'settings', label: locale === 'zh' ? '设置' : 'Settings' },
     { id: 'badges', label: locale === 'zh' ? '徽章' : 'Badges' },
     { id: 'leaderboard', label: t.leaderboard },
@@ -206,6 +210,10 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
 
         {activeTab === 'ratings' && (
           <RatingsList locale={locale} />
+        )}
+
+        {activeTab === 'following' && (
+          <FollowingListTab locale={locale} userId={user.id} />
         )}
 
         {activeTab === 'settings' && (

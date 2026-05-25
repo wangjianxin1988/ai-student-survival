@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { demoAuthApi } from "@/lib/auth";
+import { supabaseUrl } from "@/lib/supabase";
 import { TurnstileWidget } from "./TurnstileWidget";
 
 interface LoginFormProps {
@@ -74,6 +75,7 @@ export default function LoginForm({
   const [forgotToken, setForgotToken] = useState("");
   const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState<string | null>(null);
 
   const t = translations[locale];
 
@@ -99,32 +101,83 @@ export default function LoginForm({
     }
   };
 
-  // Guard: check auth state on mount using demoAuthApi directly
+  // Guard: check auth state on mount — sync check for demo session + async Supabase check
   useEffect(() => {
-    let fallbackTimeout: ReturnType<typeof setTimeout>;
+    let cancelled = false;
 
     const checkAuth = async () => {
+      // Step 1: Synchronous check — demo session from sessionStorage (fastest)
       try {
-        fallbackTimeout = setTimeout(() => {
-          setAuthChecked(true);
-          setIsLoggedIn(false);
-        }, 3000);
+        const demoKey = 'demo_session';
+        const demoRaw = sessionStorage.getItem(demoKey);
+        if (demoRaw && !cancelled) {
+          try {
+            const demoUser = JSON.parse(demoRaw);
+            setIsLoggedIn(true);
+            setAuthChecked(true);
+            return;
+          } catch {}
+        }
+      } catch {}
+
+      // Step 2: Synchronous check — Supabase session from localStorage
+      try {
+        const supabaseUrl2 = supabaseUrl;
+        const projectRef = supabaseUrl2.replace(/^https?:\/\//, '').replace(/\.supabase\.co$/, '');
+        const storageKey = `sb-${projectRef}-auth-token`;
+        const raw = localStorage.getItem(storageKey);
+        if (raw && !cancelled) {
+          try {
+            const parsed = JSON.parse(raw);
+            const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
+            const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
+            if (accessToken && refreshToken) {
+              // Validate JWT: must be 3-part base64url JWT. Supabase always uses RS256.
+              const parts = accessToken.split('.');
+              if (parts.length === 3) {
+                try {
+                  const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (header.alg === 'RS256' && payload.sub && typeof payload.sub === 'string') {
+                    setIsLoggedIn(true);
+                    setAuthChecked(true);
+                    return;
+                  }
+                } catch {}
+              }
+            }
+          } catch {}
+        }
+      } catch {}
+
+      // Step 3: Async check — verify with Supabase (only if not cancelled)
+      try {
         const user = await demoAuthApi.getUser();
-        clearTimeout(fallbackTimeout);
-        setIsLoggedIn(!!user);
+        if (!cancelled) {
+          setIsLoggedIn(!!user);
+        }
       } catch {
-        clearTimeout(fallbackTimeout);
-        setIsLoggedIn(false);
+        if (!cancelled) {
+          setIsLoggedIn(false);
+        }
       }
-      setAuthChecked(true);
+
+      if (!cancelled) {
+        setAuthChecked(true);
+      }
     };
 
     checkAuth();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setOauthProvider(null);
     setIsLoading(true);
 
     try {
@@ -133,6 +186,7 @@ export default function LoginForm({
         redirectAfterLogin();
       } else {
         setError(result.error || t.error);
+        if (result.oauthProvider) setOauthProvider(result.oauthProvider);
       }
     } catch {
       setError(t.error);
@@ -440,6 +494,21 @@ export default function LoginForm({
               {t.magicLink}
             </button>
           </div>
+
+          {/* OAuth Hint - shows when login fails and account is OAuth (google/github) */}
+          {oauthProvider && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+              {locale === "zh" ? (
+                <>
+                  💡 此账号使用 {oauthProvider === 'google' ? 'Google' : 'GitHub'} 注册，请点击上方「{oauthProvider === 'google' ? 'Google' : 'GitHub'}」按钮直接登录，无需密码。
+                </>
+              ) : (
+                <>
+                  💡 This account uses {oauthProvider}, click the "{oauthProvider}" button above to sign in — no password needed.
+                </>
+              )}
+            </div>
+          )}
 
           {/* OAuth Buttons */}
           <div className="mt-6">

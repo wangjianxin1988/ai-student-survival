@@ -1,10 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  demoAuthApi,
-  getCurrentUser,
-  onAuthStateChange,
-  type DemoUser,
-} from "@/lib/auth";
+import { demoAuthApi } from "@/lib/auth";
+import { useAuth } from "./AuthProvider";
 
 interface UserMenuProps {
   locale?: "zh" | "en";
@@ -49,32 +45,10 @@ const translations = {
 };
 
 export default function UserMenu({ locale = "zh" }: UserMenuProps) {
-  // Initialize as null to avoid hydration mismatch - user will be fetched in useEffect
-  const [user, setUser] = useState<DemoUser | null>(null);
+  const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const t = translations[locale];
-
-  // Mark as hydrated after first render to prevent hydration flash
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
-
-  useEffect(() => {
-    // Subscribe to auth state changes
-    const unsubscribe = onAuthStateChange((newUser) => {
-      setUser(newUser);
-    });
-
-    // Also check for existing user after mount (handles page refresh scenario)
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
-
-    return unsubscribe;
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -87,19 +61,10 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
   }, []);
 
   const handleSignOut = async () => {
-    await demoAuthApi.signOut();
+    await signOut();
     setIsOpen(false);
     window.location.href = "/";
   };
-
-  // Prevent flash during hydration - show loading state until hydrated
-  if (!isHydrated) {
-    return (
-      <div className="flex items-center gap-2">
-        <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
-      </div>
-    );
-  }
 
   if (!user) {
     return (
@@ -120,6 +85,15 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
     );
   }
 
+  // Convert AuthProvider's {id, email, name?, avatar_url?} to UserMenu's DemoUser fields
+  const menuUser = {
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    avatar: user.avatar_url,
+    created_at: "",
+  };
+
   return (
     <div className="relative" ref={menuRef}>
       {/* User Avatar Button - 点击打开下拉菜单 */}
@@ -128,15 +102,15 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
         className="flex items-center gap-2 w-10 h-10 rounded-full bg-primary-100 text-primary-700 font-medium overflow-hidden hover:ring-2 hover:ring-primary-300 transition-all"
         aria-label="User menu"
       >
-        {user.avatar ? (
+        {menuUser.avatar ? (
           <img
-            src={user.avatar}
-            alt={user.name || "User"}
+            src={menuUser.avatar}
+            alt={menuUser.name || "User"}
             className="w-full h-full object-cover"
           />
         ) : (
           <span className="w-full h-full flex items-center justify-center text-sm font-semibold">
-            {(user.name || user.email).charAt(0).toUpperCase()}
+            {(menuUser.name || menuUser.email).charAt(0).toUpperCase()}
           </span>
         )}
       </button>
@@ -150,23 +124,23 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
               onClick={() => setIsOpen(false)}
             >
               <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-700 font-medium flex items-center justify-center overflow-hidden">
-                {user.avatar ? (
+                {menuUser.avatar ? (
                   <img
-                    src={user.avatar}
-                    alt={user.name || "User"}
+                    src={menuUser.avatar}
+                    alt={menuUser.name || "User"}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <span className="text-sm font-semibold">
-                    {(user.name || user.email).charAt(0).toUpperCase()}
+                    {(menuUser.name || menuUser.email).charAt(0).toUpperCase()}
                   </span>
                 )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.name || "User"}
+                  {menuUser.name || "User"}
                 </p>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                <p className="text-xs text-gray-500 truncate">{menuUser.email}</p>
               </div>
               <svg
                 className="w-4 h-4 text-gray-400"

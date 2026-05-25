@@ -31,6 +31,45 @@ jobs:
             echo "RLS migration executed successfully"
           fi
 
+      - name: Execute OAuth provider function migration
+        run: |
+          echo "Executing OAuth provider function migration..."
+          SQL="
+            CREATE OR REPLACE FUNCTION get_oauth_provider_v2(p_email text)
+            RETURNS text
+            LANGUAGE plpgsql
+            SECURITY DEFINER
+            SET search_path = auth
+            AS \$\$
+            DECLARE
+              v_provider text;
+            BEGIN
+              SELECT (u.raw_app_meta_data->>'provider')::text
+              INTO v_provider
+              FROM auth.users u
+              WHERE u.email = p_email
+                AND u.raw_app_meta_data ? 'provider'
+              LIMIT 1;
+              RETURN v_provider;
+            END;
+            \$\$;
+            GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO anon;
+            GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO authenticated;
+            GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO service_role;
+          "
+          SQL_ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESPONSE=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$SQL_ESCAPED")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -qi '"error"'; then
+            echo "WARNING: OAuth provider function creation may have issues"
+          else
+            echo "OAuth provider function created/updated successfully"
+          fi
+
       - name: Configure Cloudflare Turnstile
         id: cfstep
         run: |

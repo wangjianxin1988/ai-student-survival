@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { getCurrentUser, onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
 import { toolsData } from '@/data/toolsData';
 import { paymentSolutionsData } from '@/data/paymentSolutions';
@@ -109,8 +109,10 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
   const t = translations[locale];
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    // Initialize auth first so OAuth sessions are detected synchronously
+    initAuth().then(user => {
+      setUser(user);
+    });
 
     const unsubscribe = onAuthStateChange((newUser) => {
       setUser(newUser);

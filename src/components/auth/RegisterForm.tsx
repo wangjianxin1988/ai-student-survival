@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { demoAuthApi } from "@/lib/auth";
+import { supabase, supabaseUrl } from "@/lib/supabase";
 import { TurnstileWidget } from "./TurnstileWidget";
-import { supabase } from "@/lib/supabase";
 
 interface RegisterFormProps {
   locale?: "zh" | "en";
@@ -67,6 +67,8 @@ export default function RegisterForm({
   const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [showOAuthHint, setShowOAuthHint] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState<string | null>(null);
 
   const t = translations[locale];
 
@@ -98,30 +100,97 @@ export default function RegisterForm({
     }
   };
 
-  // Guard: check auth state on mount — use direct API call with timeout fallback
+  // Guard: check auth state on mount — sync check for demo + Supabase session (fast, no 3s delay)
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
+    let cancelled = false;
 
     const checkAuth = async () => {
+      // Step 1: Synchronous check — demo session from sessionStorage
       try {
-        timeout = setTimeout(() => {
-          console.warn('[RegisterForm] Auth check timeout, rendering form');
-          setAuthChecked(true);
-          setIsLoggedIn(false);
-        }, 3000);
+        const demoKey = 'demo_session';
+        const demoRaw = sessionStorage.getItem(demoKey);
+        if (demoRaw && !cancelled) {
+          try {
+            const demoUser = JSON.parse(demoRaw);
+            setIsLoggedIn(true);
+            setAuthChecked(true);
+            return;
+          } catch {}
+        }
+      } catch {}
 
-        const user = await demoAuthApi.getUser();
-        clearTimeout(timeout);
-        setIsLoggedIn(!!user);
-      } catch (err) {
-        console.error('[RegisterForm] Auth check error:', err);
-        clearTimeout(timeout);
-        setIsLoggedIn(false);
+      // Step 2: Synchronous check — Supabase session from localStorage
+      try {
+        const projectRef = supabaseUrl.replace(/^https?:\/\//, '').replace(/\.supabase\.co$/, '');
+        const storageKey = `sb-${projectRef}-auth-token`;
+        const raw = localStorage.getItem(storageKey);
+        if (raw && !cancelled) {
+          try {
+            const parsed = JSON.parse(raw);
+            const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
+            const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
+            if (accessToken && refreshToken) {
+              // Validate JWT: must be 3-part base64url JWT. Supabase always uses RS256.
+              const parts = accessToken.split('.');
+              if (parts.length === 3) {
+                try {
+                  const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (header.alg === 'RS256' && payload.sub && typeof payload.sub === 'string') {
+                    setIsLoggedIn(true);
+                    setAuthChecked(true);
+                    return;
+                  }
+                } catch {}
+              }
+            }
+          } catch {}
+        }
+      } catch {}
+
+      // Step 3: Async Supabase verification via supabase.auth.getSession()
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (!cancelled) {
+          const hasSession = !!(data?.session?.user);
+          setIsLoggedIn(hasSession);
+          // Check if the logged-in user is an OAuth account
+          if (hasSession && data.session.user) {
+            const userEmail = data.session.user.email;
+            if (userEmail) {
+              try {
+                const res = await fetch(`/api/auth/check-user`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: userEmail }),
+                });
+                if (res.ok) {
+                  const json = await res.json();
+                  if (json.exists && json.provider && json.provider !== 'email') {
+                    setOauthProvider(json.provider);
+                    setShowOAuthHint(true);
+                  }
+                }
+              } catch { /* ignore */ }
+            }
+          }
+        }
+      } catch {
+        if (!cancelled) {
+          setIsLoggedIn(false);
+        }
       }
-      setAuthChecked(true);
+
+      if (!cancelled) {
+        setAuthChecked(true);
+      }
     };
 
     checkAuth();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -147,7 +216,12 @@ export default function RegisterForm({
       } else if (result.verificationRequired) {
         setEmailVerified(true);
       } else {
-        setError(result.error || t.error);
+        const errMsg = result.error || t.error;
+        setError(errMsg);
+        if (result.oauthProvider) {
+          setOauthProvider(result.oauthProvider);
+          setShowOAuthHint(true);
+        }
       }
     } catch {
       setError(t.error);
@@ -239,6 +313,17 @@ export default function RegisterForm({
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
           {error}
+        </div>
+      )}
+
+      {/* OAuth Hint - shows when account is registered via OAuth (google/github) */}
+      {showOAuthHint && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+          {locale === "zh" ? (
+            <>💡 此邮箱已通过 {oauthProvider === 'google' ? 'Google' : 'GitHub'} 注册，请直接使用「{oauthProvider === 'google' ? 'Google' : 'GitHub'}」按钮登录，无需密码。</>
+          ) : (
+            <>💡 This email is registered via {oauthProvider}. Click the "{oauthProvider}" button below to sign in.</>
+          )}
         </div>
       )}
 

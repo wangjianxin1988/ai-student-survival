@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getCurrentUser, type DemoUser } from "@/lib/auth";
+import { getCurrentUser, initAuth, type DemoUser } from "@/lib/auth";
 import { defaultLocale } from "@/i18n";
 
 const ONBOARDING_KEY = "demo_onboarding_complete";
@@ -194,17 +194,19 @@ export default function OnboardingGuide({
   ];
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    // Initialize auth first so OAuth sessions are detected synchronously
+    initAuth().then(currentUser => {
+      setUser(currentUser);
 
-    // Check if onboarding has been completed
-    if (typeof window !== "undefined") {
-      const completed = localStorage.getItem(ONBOARDING_KEY);
-      if (!completed && currentUser) {
-        // Small delay to show after page load
-        setTimeout(() => setIsVisible(true), 1000);
+      // Check if onboarding has been completed
+      if (typeof window !== "undefined") {
+        const completed = localStorage.getItem(ONBOARDING_KEY);
+        if (!completed && currentUser) {
+          // Small delay to show after page load
+          setTimeout(() => setIsVisible(true), 1000);
+        }
       }
-    }
+    });
   }, []);
 
   const handleSkip = () => {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { initAuth, getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
 import {
   userStatsApi,
   getLevelProgress,
@@ -78,13 +78,13 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
   const t = translations[locale];
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-
-    if (currentUser) {
-      const userProfile = userStatsApi.getOrCreateProfile(currentUser);
-      setProfile(userProfile);
-    }
+    initAuth().then((currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const userProfile = userStatsApi.getOrCreateProfile(currentUser);
+        setProfile(userProfile);
+      }
+    });
 
     const unsubscribe = onAuthStateChange((newUser) => {
       setUser(newUser);
