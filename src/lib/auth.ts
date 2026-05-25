@@ -123,15 +123,24 @@ export async function initAuth(): Promise<DemoUser | null> {
   if (isSupabaseConfigured) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const newUser = toDemoUser(session.user);
-        currentUser = newUser;
-        isInitialized = true;
-        // Notify all listeners so components (UserMenu, etc.) update
-        notifyAuthChange(newUser);
-        return newUser;
+      if (session?.user && session?.access_token) {
+        // Validate JWT before accepting session
+        const parts = session.access_token.split('.');
+        if (parts.length === 3) {
+          try {
+            const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (header.alg === 'RS256' && payload.sub && typeof payload.sub === 'string') {
+              const newUser = toDemoUser(session.user);
+              currentUser = newUser;
+              isInitialized = true;
+              notifyAuthChange(newUser);
+              return newUser;
+            }
+          } catch (_) {}
+        }
       }
-      // No Supabase session - fall through to demo session check
+      // No valid Supabase session - fall through to demo session check
     } catch (error) {
       console.error('Error initializing Supabase auth:', error);
       // Fall through to demo auth on error
@@ -251,7 +260,27 @@ export function onAuthStateChange(callback: AuthChangeCallback): () => void {
     // Always set up Supabase auth listener regardless of init state
     // This ensures components get notified of auth changes after initial mount
     supabase.auth.onAuthStateChange((event, session) => {
-      const user = toDemoUser(session?.user ?? null);
+      // Validate the JWT token before accepting the session
+      // This filters out fake/test tokens stored in localStorage
+      let user: DemoUser | null = null;
+      if (session?.access_token) {
+        const parts = session.access_token.split('.');
+        if (parts.length === 3) {
+          try {
+            const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (header.alg === 'RS256' && payload.sub && typeof payload.sub === 'string') {
+              user = toDemoUser(session.user ?? null);
+            } else {
+              console.warn('[onAuthStateChange] Token rejected: not RS256 or no sub claim');
+            }
+          } catch (e) {
+            console.warn('[onAuthStateChange] Token rejected: invalid JWT structure');
+          }
+        } else {
+          console.warn('[onAuthStateChange] Token rejected: not 3-part JWT');
+        }
+      }
       currentUser = user;
       isInitialized = true;
       authChangeListeners.forEach(cb => cb(user));
