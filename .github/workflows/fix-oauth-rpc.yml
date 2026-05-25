@@ -1,0 +1,108 @@
+name: Fix OAuth RPC Function
+
+on:
+  workflow_dispatch:
+
+env:
+  SUPABASE_REF: giynvpfnzzelzwpmsgtf
+
+jobs:
+  apply-rpc-fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply improved OAuth provider RPC function
+        run: |
+          SQL=$(cat << 'EOFSQL'
+          CREATE OR REPLACE FUNCTION get_oauth_provider_v2(p_email text)
+          RETURNS text
+          LANGUAGE plpgsql
+          SECURITY DEFINER
+          SET search_path = auth
+          AS $$
+          DECLARE
+            v_provider text;
+            v_provider_id text;
+            v_raw_app_meta jsonb;
+            v_raw_user_meta jsonb;
+          BEGIN
+            SELECT i.provider, i.id
+            INTO v_provider, v_provider_id
+            FROM auth.identities i
+            WHERE i.identity_data->>'email' = p_email
+              AND i.provider != 'email'
+            LIMIT 1;
+
+            IF v_provider IS NOT NULL THEN
+              RETURN v_provider;
+            END IF;
+
+            SELECT i.provider
+            INTO v_provider
+            FROM auth.identities i
+            JOIN auth.users u ON i.user_id = u.id
+            WHERE u.email = p_email
+              AND i.provider != 'email'
+            LIMIT 1;
+
+            IF v_provider IS NOT NULL THEN
+              RETURN v_provider;
+            END IF;
+
+            SELECT u.raw_app_meta_data
+            INTO v_raw_app_meta
+            FROM auth.users u
+            WHERE u.email = p_email;
+
+            IF v_raw_app_meta ? 'provider' THEN
+              RETURN (v_raw_app_meta->>'provider')::text;
+            END IF;
+
+            SELECT u.raw_user_meta_data
+            INTO v_raw_user_meta
+            FROM auth.users u
+            WHERE u.email = p_email;
+
+            IF v_raw_user_meta ? 'provider' THEN
+              RETURN (v_raw_user_meta->>'provider')::text;
+            END IF;
+
+            SELECT i.provider
+            INTO v_provider
+            FROM auth.identities i
+            WHERE LOWER(i.identity_data->>'email') = LOWER(p_email)
+              AND i.provider != 'email'
+            LIMIT 1;
+
+            RETURN v_provider;
+          END;
+          $$;
+          EOFSQL
+          )
+          SQL_ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          echo "SQL_ESCAPED length: ${#SQL_ESCAPED}"
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$SQL_ESCAPED")
+          echo "Response: $RESP"
+
+      - name: Grant execute permissions
+        run: |
+          GRANT_RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query": "GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO anon; GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO authenticated; GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO service_role;"}')
+          echo "Grant response: $GRANT_RESP"
+
+      - name: Test the fix
+        run: |
+          TEST_RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query": "SELECT get_oauth_provider_v2 ('\''"18801400211@163.com"'\'');"}')
+          echo "Test result for 18801400211@163.com: $TEST_RESP"
