@@ -1,15 +1,21 @@
 /**
- * Check what auth methods are available for an email (OAuth vs password)
- * Returns list of provider/method names
+ * Check if a user exists in Supabase by email
+ * Calls server-side API endpoint to check user auth type (OAuth vs password)
+ * Returns: 'oauth' | 'password' | null
  */
-export async function getAuthMethodsForEmail(email: string): Promise<string[]> {
-  if (!isSupabaseConfigured) return [];
+export async function checkUserExists(email: string): Promise<'oauth' | 'password' | null> {
+  if (!isSupabaseConfigured) return null;
   try {
-    const { data, error } = await supabase.auth.authMethodTypes({ email });
-    if (error) return [];
-    return data || [];
+    const response = await fetch('/api/auth/check-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.type || null;
   } catch {
-    return [];
+    return null;
   }
 }
 
@@ -296,7 +302,6 @@ export function notifyAuthChange(user: DemoUser | null): void {
 export const demoAuthApi = {
   /**
    * Sign in with email and password
-   * Checks auth methods first to detect OAuth-only accounts
    */
   async signIn(email: string, password: string): Promise<AuthResult> {
     if (!isSupabaseConfigured) {
@@ -315,29 +320,26 @@ export const demoAuthApi = {
     }
 
     try {
-      // Check available auth methods first to detect OAuth-only accounts
-      const authMethods = await getAuthMethodsForEmail(email);
-      const hasPasswordMethod = authMethods.includes('password');
-
-      if (authMethods.length > 0 && !hasPasswordMethod) {
-        // Account exists but uses OAuth only (Google/GitHub/etc.)
-        const provider = authMethods[0] || 'oauth';
-        return {
-          success: false,
-          error: `此账号使用 ${provider === 'google' ? 'Google' : provider === 'github' ? 'GitHub' : provider} 第三方登录，请点击上方"${provider === 'google' ? 'Google' : 'GitHub'}"按钮登录`,
-        };
-      }
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        // Provide more specific error messages
         const msg = error.message.toLowerCase();
         if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-          return { success: false, error: '邮箱或密码错误，请检查后重试' };
+          // Distinguish OAuth-only accounts from wrong password
+          const userType = await checkUserExists(email);
+          if (userType === 'oauth') {
+            return {
+              success: false,
+              error: '此账号使用第三方登录（Google/GitHub），请使用上方第三方登录按钮',
+            };
+          } else if (userType === 'password') {
+            return { success: false, error: '邮箱或密码错误，请检查后重试' };
+          } else {
+            return { success: false, error: '邮箱或密码错误，请检查后重试' };
+          }
         }
         if (msg.includes('email not confirmed')) {
           return { success: false, error: '请先验证邮箱后再登录' };
