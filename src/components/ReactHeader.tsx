@@ -4,10 +4,18 @@ import NotificationCenter from '@/components/common/NotificationCenter';
 import OnboardingGuide from '@/components/common/OnboardingGuide';
 import { defaultLocale } from '@/i18n';
 
+interface LanguageSwitcherItem {
+  locale: 'zh' | 'en';
+  label: string;
+  current: boolean;
+}
+
 interface ReactHeaderProps {
   locale?: 'zh' | 'en';
   currentPath?: string;
   siteName?: string;
+  languageSwitcher?: LanguageSwitcherItem[];
+  getAlternateUrl?: (locale: 'zh' | 'en') => string;
 }
 
 // Generate locale-aware href
@@ -75,8 +83,29 @@ export default function ReactHeader({ locale = 'zh', currentPath = '/', siteName
                 <span className="font-semibold text-base text-gray-900">{siteName || (locale === 'en' ? 'AI Student Survival Guide' : 'MI TO AI留学生存指南')}</span>
               </a>
 
-              {/* Right: Search, Notifications & User Menu */}
+              {/* Right: Language Switcher, Search, Notifications & User Menu */}
               <div className="flex items-center gap-1">
+                {/* Language Switcher — integrated into header top bar */}
+                {languageSwitcher && languageSwitcher.length > 0 && (
+                  <div className="flex items-center gap-0.5 mr-1">
+                    {languageSwitcher.map(item => (
+                      <a
+                        key={item.locale}
+                        href={getAlternateUrl ? getAlternateUrl(item.locale) : (item.locale === 'zh' ? '/' : '/en/')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-colors ${
+                          item.current
+                            ? 'bg-primary-100 text-primary-700'
+                            : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                        }`}
+                        aria-label={`Switch to ${item.label}`}
+                        aria-current={item.current ? 'true' : undefined}
+                      >
+                        {item.label}
+                      </a>
+                    ))}
+                  </div>
+                )}
+
                 {/* Search */}
                 <button
                   data-search-trigger
