@@ -274,7 +274,47 @@ TEMPLATE_EOF
             -d "$SQL_ESCAPED")
           echo "DB response: $DB_RESP"
 
-      # ── 7. Summary ────────────────────────────────────────────────────────
+      # ── 7. Create get_oauth_provider_v2 function ─────────────────────────
+      - name: Create get_oauth_provider_v2 RPC function
+        run: |
+          echo "=== Create get_oauth_provider_v2 function ==="
+          SQL="
+            CREATE OR REPLACE FUNCTION get_oauth_provider_v2(p_email text)
+            RETURNS text
+            LANGUAGE plpgsql
+            SECURITY DEFINER
+            SET search_path = auth
+            AS \$\$
+            DECLARE
+              v_provider text;
+            BEGIN
+              SELECT (u.raw_app_meta_data->>'provider')::text
+              INTO v_provider
+              FROM auth.users u
+              WHERE u.email = p_email
+                AND u.raw_app_meta_data ? 'provider'
+              LIMIT 1;
+              RETURN v_provider;
+            END;
+            \$\$;
+            GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO anon;
+            GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO authenticated;
+            GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO service_role;
+          "
+          SQL_ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          DB_RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/$SUPABASE_REF/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$SQL_ESCAPED")
+          echo "DB response: $DB_RESP"
+          if echo "$DB_RESP" | grep -qi "error"; then
+            echo "WARNING: Function creation may have failed: $DB_RESP"
+          else
+            echo "Function get_oauth_provider_v2 created/updated successfully"
+          fi
+
+      # ── 8. Summary ────────────────────────────────────────────────────────
       - name: Summary
         run: |
           echo ""
@@ -295,3 +335,4 @@ TEMPLATE_EOF
           echo "2. Verify SMTP in: Dashboard -> Authentication -> SMTP Settings"
           echo "3. Test login: https://mi-to-ai.com/auth/login"
           echo "4. Test email: Register a new account and check inbox"
+          echo "5. Verify get_oauth_provider_v2 function in: Dashboard -> Database -> Functions"
