@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { demoAuthApi } from "@/lib/auth";
+import { supabase, supabaseUrl } from "@/lib/supabase";
 import { TurnstileWidget } from "./TurnstileWidget";
-import { supabase } from "@/lib/supabase";
 
 interface RegisterFormProps {
   locale?: "zh" | "en";
@@ -98,30 +98,66 @@ export default function RegisterForm({
     }
   };
 
-  // Guard: check auth state on mount — use direct API call with timeout fallback
+  // Guard: check auth state on mount — sync check for demo + Supabase session (fast, no 3s delay)
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
+    let cancelled = false;
 
     const checkAuth = async () => {
+      // Step 1: Synchronous check — demo session from sessionStorage
       try {
-        timeout = setTimeout(() => {
-          console.warn('[RegisterForm] Auth check timeout, rendering form');
-          setAuthChecked(true);
-          setIsLoggedIn(false);
-        }, 3000);
+        const demoKey = 'demo_session';
+        const demoRaw = sessionStorage.getItem(demoKey);
+        if (demoRaw && !cancelled) {
+          try {
+            const demoUser = JSON.parse(demoRaw);
+            setIsLoggedIn(true);
+            setAuthChecked(true);
+            return;
+          } catch {}
+        }
+      } catch {}
 
+      // Step 2: Synchronous check — Supabase session from localStorage
+      try {
+        const projectRef = supabaseUrl.replace(/^https?:\/\//, '').replace(/\.supabase\.co$/, '');
+        const storageKey = `sb-${projectRef}-auth-token`;
+        const raw = localStorage.getItem(storageKey);
+        if (raw && !cancelled) {
+          try {
+            const parsed = JSON.parse(raw);
+            const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
+            const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
+            if (accessToken && refreshToken) {
+              setIsLoggedIn(true);
+              setAuthChecked(true);
+              return;
+            }
+          } catch {}
+        }
+      } catch {}
+
+      // Step 3: Async Supabase verification (only if not cancelled)
+      try {
         const user = await demoAuthApi.getUser();
-        clearTimeout(timeout);
-        setIsLoggedIn(!!user);
-      } catch (err) {
-        console.error('[RegisterForm] Auth check error:', err);
-        clearTimeout(timeout);
-        setIsLoggedIn(false);
+        if (!cancelled) {
+          setIsLoggedIn(!!user);
+        }
+      } catch {
+        if (!cancelled) {
+          setIsLoggedIn(false);
+        }
       }
-      setAuthChecked(true);
+
+      if (!cancelled) {
+        setAuthChecked(true);
+      }
     };
 
     checkAuth();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

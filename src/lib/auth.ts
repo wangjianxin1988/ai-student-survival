@@ -401,22 +401,44 @@ export const demoAuthApi = {
   },
 
   /**
-   * Sign out
+   * Sign out — clears ALL session sources synchronously before Supabase call.
+   * This prevents any race condition where getCurrentUser() reads stale data.
    */
   async signOut(): Promise<void> {
+    // Step 1: Clear ALL session state IMMEDIATELY (before any async call)
+    currentUser = null;
+
+    // Clear demo session
+    clearDemoSession();
+    sessionStorage.removeItem('oauth_return_to');
+
+    // Clear ALL possible Supabase localStorage keys (handles different SDK versions)
+    if (typeof window !== 'undefined') {
+      try {
+        // Primary key format: sb-{project-ref}-auth-token
+        const projectRef = supabaseUrl.replace(/^https?:\/\//, '').replace(/\.supabase\.co$/, '');
+        const primaryKey = `sb-${projectRef}-auth-token`;
+        localStorage.removeItem(primaryKey);
+        // Also clear any prefixed variants
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith('sb-') || key.includes('supabase') || key.includes('auth'))) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Step 2: Notify listeners immediately so components update synchronously
+    notifyAuthChange(null);
+
+    // Step 3: Then call Supabase signOut (fire-and-forget, already cleared locally)
     if (isSupabaseConfigured) {
       try {
         await supabase.auth.signOut();
-        currentUser = null;
-        notifyAuthChange(null);
       } catch (err) {
         console.error('Sign out error:', err);
       }
-    } else {
-      // Demo mode: clear session
-      clearDemoSession();
-      currentUser = null;
-      notifyAuthChange(null);
     }
   },
 
