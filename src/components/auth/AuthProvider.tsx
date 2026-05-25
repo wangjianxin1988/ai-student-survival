@@ -5,8 +5,13 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { supabase, isSupabaseConfigured, supabaseUrl } from "@/lib/supabase";
-import { getCurrentUser } from "@/lib/auth";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import {
+  getCurrentUser,
+  onAuthStateChange,
+  demoAuthApi,
+  type DemoUser,
+} from "@/lib/auth";
 
 interface User {
   id: string;
@@ -21,12 +26,12 @@ interface AuthContextType {
   signIn: (
     email: string,
     password: string,
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{ success: boolean; error?: string; oauthProvider?: string }>;
   signUp: (
     email: string,
     password: string,
     name: string,
-  ) => Promise<{ success: boolean; error?: string }>;
+  ) => Promise<{ success: boolean; error?: string; verificationRequired?: boolean; oauthProvider?: string }>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<{ error?: string }>;
   signInWithGithub: () => Promise<{ error?: string }>;
@@ -59,51 +64,42 @@ function getDemoUserFromSession(): User | null {
   return null;
 }
 
+function toUser(demoUser: DemoUser | null): User | null {
+  if (!demoUser) return null;
+  return {
+    id: demoUser.id,
+    email: demoUser.email,
+    name: demoUser.name,
+    avatar_url: demoUser.avatar,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => getCurrentUser());
+  const [user, setUser] = useState<User | null>(() => toUser(getCurrentUser()));
   const [loading, setLoading] = useState(true);
 
-  // Init auth and subscribe to changes — supabase-js is the single source of truth
+  // Subscribe to auth.ts's single onAuthStateChange — this is the ONE listener
+  // that all components (LoginForm, RegisterForm, UserMenu) share.
+  // auth.ts fires notifyAuthChange whenever currentUser changes (from any flow:
+  // email/password, OAuth, magic link, signOut).
   useEffect(() => {
-    async function initAuth() {
-      // 5s safety timeout to prevent infinite loading
-      const timeoutId = setTimeout(() => setLoading(false), 5000);
+    if (typeof window === 'undefined') return;
 
-      if (!isSupabaseConfigured) {
-        // Already set from useState init, just confirm
-        clearTimeout(timeoutId);
-        setLoading(false);
-      } else {
-        // Initial state already set from getCurrentUser() in useState init.
-        // For Supabase, async validation is informational only (updates user metadata).
-        clearTimeout(timeoutId);
-        setLoading(false);
-      }
-    }
-
-    initAuth();
-  }, []);
-
-  // Single auth listener — supabase-js owns session management
-  useEffect(() => {
-    if (!isSupabaseConfigured || typeof window === 'undefined') return;
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || '',
-          name: session.user.user_metadata?.name,
-          avatar_url: session.user.user_metadata?.avatar_url,
-        });
-      } else {
-        // No Supabase session — check demo fallback
-        const demoUser = getDemoUserFromSession();
-        setUser(demoUser);
-      }
+    // Subscribe to auth.ts's unified auth state
+    const unsubscribe = onAuthStateChange((demoUser) => {
+      setUser(toUser(demoUser));
     });
 
-    return () => subscription.unsubscribe();
+    // Safety timeout — don't leave loading=true forever
+    const timeoutId = setTimeout(() => setLoading(false), 3000);
+
+    // Fire once immediately (getCurrentUser already set initial state)
+    setLoading(false);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Demo session cross-tab sync (only when Supabase not configured)
@@ -125,102 +121,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = useCallback(
     async (email: string, password: string) => {
-      try {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) return { success: false, error: error.message };
+      // Delegate to demoAuthApi so auth.ts's onAuthStateChange fires
+      const result = await demoAuthApi.signIn(email, password);
+      if (result.success) {
+        // Auth state update is handled by onAuthStateChange subscription above
         return { success: true };
-      } catch {
-        return { success: false, error: "发生未知错误" };
       }
+      return { success: false, error: result.error, oauthProvider: result.oauthProvider };
     },
     [],
   );
 
   const signUp = useCallback(
     async (email: string, password: string, name: string) => {
-      try {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { name },
-          },
-        });
-        if (error) return { success: false, error: error.message };
+      // Delegate to demoAuthApi so auth.ts's onAuthStateChange fires
+      const result = await demoAuthApi.signUp(email, password, name);
+      if (result.success) {
         return { success: true };
-      } catch {
-        return { success: false, error: "发生未知错误" };
       }
+      return {
+        success: false,
+        error: result.error,
+        verificationRequired: result.verificationRequired,
+        oauthProvider: result.oauthProvider,
+      };
     },
     [],
   );
 
   const signOut = useCallback(async () => {
-    sessionStorage.removeItem(DEMO_SESSION_KEY);
-    setUser(null);
-    if (isSupabaseConfigured) {
-      await supabase.auth.signOut();
-      // Clear all Supabase auth-related localStorage keys
-      for (let i = localStorage.length - 1; i >= 0; i--) {
-        const key = localStorage.key(i);
-        if (!key) continue;
-        if (key.startsWith('sb-') && (key.includes('auth') || key.includes('token'))) {
-          localStorage.removeItem(key);
-        }
-      }
-    }
+    // Use demoAuthApi.signOut — it clears localStorage and calls notifyAuthChange(null)
+    // Our onAuthStateChange subscription above will catch this and update state
+    await demoAuthApi.signOut();
   }, []);
 
   const signInWithGoogle = useCallback(async () => {
-    if (!isSupabaseConfigured) {
-      return { error: "Demo mode: OAuth not available" };
-    }
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    return { error: error?.message };
+    // Delegate to demoAuthApi
+    const result = await demoAuthApi.signInWithOAuth('google');
+    return { error: result.error };
   }, []);
 
   const signInWithGithub = useCallback(async () => {
-    if (!isSupabaseConfigured) {
-      return { error: "Demo mode: OAuth not available" };
-    }
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    return { error: error?.message };
+    // Delegate to demoAuthApi
+    const result = await demoAuthApi.signInWithOAuth('github');
+    return { error: result.error };
   }, []);
 
   const signInWithMagicLink = useCallback(
     async (email: string) => {
-      if (!isSupabaseConfigured) {
-        return { success: false, error: "Demo mode: Magic link not available" };
-      }
-      try {
-        // Supabase sends magic link regardless of whether the email exists
-        // (for security - don't reveal whether an account exists)
-        const { error } = await supabase.auth.signInWithOtp({
-          email,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        });
-        if (error) {
-          return { success: false, error: error.message };
-        }
-        return { success: true };
-      } catch {
-        return { success: false, error: "发生未知错误" };
-      }
+      // Delegate to demoAuthApi
+      const result = await demoAuthApi.signInWithMagicLink(email);
+      return { success: result.success, error: result.error };
     },
     [],
   );

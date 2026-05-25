@@ -30,49 +30,65 @@ if (error || errorDescription) {
 
 <script>
   import { supabase } from '@/lib/supabase';
+  import { onAuthStateChange } from '@/lib/auth';
 
-  // Handle OAuth code exchange and magic link / OTP token client-side
+  // Handle OAuth code exchange and magic link / OTP token client-side.
+  // IMPORTANT: Wait for auth.ts's onAuthStateChange to fire before redirecting,
+  // so that AuthProvider (which subscribes to auth.ts) is guaranteed to receive
+  // the session update before the user lands on the next page.
   async function handleCallback() {
     const params = new URLSearchParams(window.location.search);
-    const code = params.get('code');
-    const token = params.get('token');
-    const type = params.get('type');
-    const email = params.get('email');
     const locale = params.get('locale') || 'zh';
     const langPrefix = locale === 'en' ? '/en' : '';
     const loginUrl = `${langPrefix}/auth/login`;
 
+    // Get returnTo from sessionStorage (set before OAuth redirect)
+    const returnTo = sessionStorage.getItem('oauth_return_to') || `${langPrefix}/user`;
+    sessionStorage.removeItem('oauth_return_to');
+
+    const updateStatus = (text: string) => {
+      const el = document.getElementById('status-text');
+      if (el) el.textContent = text;
+    };
+
     try {
-      const error = params.get('error');
-      if (error) {
-        window.location.href = `${loginUrl}?error=${encodeURIComponent(error)}`;
+      const oauthError = params.get('error');
+      if (oauthError) {
+        window.location.href = `${loginUrl}?error=${encodeURIComponent(oauthError)}`;
         return;
       }
 
       // Handle magic link / OTP token (token param + type=email)
+      const token = params.get('token');
+      const type = params.get('type');
+      const email = params.get('email');
       if (token && type === 'email' && email) {
+        updateStatus(locale === 'zh' ? '正在验证邮箱...' : 'Verifying email...');
         const { error: otpError } = await supabase.auth.verifyOtp({
           type: 'email',
           email: decodeURIComponent(email),
           token: token,
         });
         if (otpError) {
-          console.error('OTP verify error:', otpError);
           window.location.href = `${loginUrl}?error=${encodeURIComponent(otpError.message)}`;
           return;
         }
-        // OTP verified, session should now be set
       }
+
       // Exchange code for session (OAuth)
-      else if (code) {
+      const code = params.get('code');
+      if (code) {
+        updateStatus(locale === 'zh' ? '正在完成登录...' : 'Completing sign in...');
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
           console.error('Code exchange error:', exchangeError);
           window.location.href = `${loginUrl}?error=${encodeURIComponent(exchangeError.message)}`;
           return;
         }
-      } else {
-        // No token/code - try to get existing session
+      }
+
+      // No code/token — try to use existing session
+      if (!code && !token) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !session) {
           window.location.href = loginUrl;
@@ -80,20 +96,34 @@ if (error || errorDescription) {
         }
       }
 
-      // Get returnTo from sessionStorage (set before OAuth redirect)
-      const returnTo = sessionStorage.getItem('oauth_return_to') || `${langPrefix}/user`;
-      sessionStorage.removeItem('oauth_return_to');
+      // Subscribe to auth.ts's onAuthStateChange to ensure AuthProvider receives
+      // the session update before we redirect. This guarantees UserMenu shows
+      // the logged-in avatar on the next page.
+      updateStatus(locale === 'zh' ? '登录成功，正在跳转...' : 'Signed in! Redirecting...');
 
-      // Update status text
-      const statusEl = document.getElementById('status-text');
-      if (statusEl) {
-        statusEl.textContent = locale === 'zh' ? '登录成功，正在跳转...' : 'Signed in! Redirecting...';
-      }
-
-      // Small delay for better UX, then redirect
-      setTimeout(() => {
+      // Wait for auth.ts's listener to fire (AuthProvider subscribes to it)
+      // Use a short timeout as safety net (in case listener already fired before we subscribed)
+      const redirectAfterAuth = () => {
         window.location.href = returnTo;
-      }, 500);
+      };
+
+      let redirected = false;
+      const unsubscribe = onAuthStateChange((user) => {
+        if (user && !redirected) {
+          redirected = true;
+          unsubscribe();
+          redirectAfterAuth();
+        }
+      });
+
+      // Safety: redirect after 2s even if listener didn't fire (edge case)
+      setTimeout(() => {
+        if (!redirected) {
+          redirected = true;
+          unsubscribe();
+          redirectAfterAuth();
+        }
+      }, 2000);
 
     } catch (err) {
       console.error('Callback error:', err);
