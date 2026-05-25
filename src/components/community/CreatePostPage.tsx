@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AuthGate from '@/components/auth/AuthGate';
 import { PostEditor } from './PostEditor';
-import { getAuthHeaders } from '@/lib/auth';
+import { getAuthHeaders, getAccessToken } from '@/lib/auth';
 
 interface CreatePostPageProps {
   userId: string;
