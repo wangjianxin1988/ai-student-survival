@@ -33,20 +33,34 @@ AS $func$
 DECLARE
   v_provider text;
 BEGIN
-  -- First: check auth.identities (most reliable for OAuth users)
-  SELECT i.provider INTO v_provider
+  -- First: check auth.identities identity_data JSON for explicit provider field
+  -- This is the most reliable check as it looks inside the JSON for provider
+  SELECT (i.identity_data->>'provider')::text INTO v_provider
   FROM auth.identities i
   WHERE LOWER(i.identity_data->>'email') = LOWER(p_email)
-    AND i.provider != 'email'
+    AND (i.identity_data->>'provider') IS NOT NULL
+    AND (i.identity_data->>'provider') != 'email'
   LIMIT 1;
   IF v_provider IS NOT NULL THEN
     RETURN v_provider;
   END IF;
-  -- Second: check raw_app_meta_data
+
+  -- Second: check raw_app_meta_data (where Supabase sometimes stores provider)
   SELECT (u.raw_app_meta_data->>'provider')::text INTO v_provider
   FROM auth.users u
   WHERE u.email = p_email
     AND u.raw_app_meta_data ? 'provider'
+    AND (u.raw_app_meta_data->>'provider') != 'email'
+  LIMIT 1;
+  IF v_provider IS NOT NULL THEN
+    RETURN v_provider;
+  END IF;
+
+  -- Third: check auth.identities provider column as fallback
+  SELECT i.provider INTO v_provider
+  FROM auth.identities i
+  WHERE LOWER(i.identity_data->>'email') = LOWER(p_email)
+    AND i.provider != 'email'
   LIMIT 1;
   RETURN v_provider;
 END;
