@@ -131,27 +131,18 @@ export default function LoginForm({
             const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
             const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
             if (accessToken && refreshToken) {
-              // Validate JWT structure: real Supabase tokens are base64url-encoded 3-part JWTs
-              // Test/fake tokens often fail basic structure checks
+              // Validate JWT: must be 3-part base64url JWT. Supabase always uses RS256.
               const parts = accessToken.split('.');
-              if (parts.length !== 3) {
-                // Not a valid JWT format — likely a test/fake token
-                console.warn('[LoginForm] Token not valid JWT format, treating as not logged in');
-              } else {
-                // Validate payload is valid JSON and has expected Supabase claims
+              if (parts.length === 3) {
                 try {
+                  const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
                   const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                  if (!payload.sub || typeof payload.sub !== 'string') {
-                    console.warn('[LoginForm] Token payload missing sub claim, treating as not logged in');
-                  } else {
-                    // Valid JWT with sub claim
+                  if (header.alg === 'RS256' && payload.sub && typeof payload.sub === 'string') {
                     setIsLoggedIn(true);
                     setAuthChecked(true);
                     return;
                   }
-                } catch {
-                  console.warn('[LoginForm] Token payload not valid JSON, treating as not logged in');
-                }
+                } catch {}
               }
             }
           } catch {}

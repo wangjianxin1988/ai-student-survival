@@ -128,23 +128,18 @@ export default function RegisterForm({
             const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
             const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
             if (accessToken && refreshToken) {
-              // Validate JWT structure: real Supabase tokens are base64url-encoded 3-part JWTs
+              // Validate JWT: must be 3-part base64url JWT. Supabase always uses RS256.
               const parts = accessToken.split('.');
-              if (parts.length !== 3) {
-                console.warn('[RegisterForm] Token not valid JWT format, treating as not logged in');
-              } else {
+              if (parts.length === 3) {
                 try {
+                  const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
                   const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                  if (!payload.sub || typeof payload.sub !== 'string') {
-                    console.warn('[RegisterForm] Token payload missing sub claim');
-                  } else {
+                  if (header.alg === 'RS256' && payload.sub && typeof payload.sub === 'string') {
                     setIsLoggedIn(true);
                     setAuthChecked(true);
                     return;
                   }
-                } catch {
-                  console.warn('[RegisterForm] Token payload not valid JSON');
-                }
+                } catch {}
               }
             }
           } catch {}

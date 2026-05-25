@@ -194,21 +194,27 @@ export function getCurrentUser(): DemoUser | null {
         const parsed = JSON.parse(raw);
         const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
         if (accessToken) {
-          // Validate JWT structure: must be 3 parts with a valid sub claim
-          // This filters out test/fake tokens that may be left in localStorage
+          // Validate JWT structure and algorithm: must be 3 parts with sub claim
+          // Supabase always uses RS256 — HS256 tokens are definitely fake
           const parts = accessToken.split('.');
           if (parts.length === 3) {
             try {
-              const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-              if (payload.sub && typeof payload.sub === 'string') {
-                const userData = parsed?.user || parsed?.tokens?.user;
-                if (userData) {
-                  currentUser = toDemoUser(userData);
-                  return currentUser;
+              const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+              if (header.alg !== 'RS256') {
+                // Not RS256 = not a real Supabase JWT
+                console.warn('[getCurrentUser] Token not RS256, rejecting as fake');
+              } else {
+                const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                if (payload.sub && typeof payload.sub === 'string') {
+                  const userData = parsed?.user || parsed?.tokens?.user;
+                  if (userData) {
+                    currentUser = toDemoUser(userData);
+                    return currentUser;
+                  }
                 }
               }
             } catch (_) {
-              // Invalid JWT payload — treat as not logged in
+              // Invalid JWT structure — treat as not logged in
             }
           }
         }
