@@ -21,6 +21,7 @@ interface Props {
   faqItems?: Array<{ question: string; answer: string }>;
   locale?: Locale;
   breadcrumbs?: BreadcrumbItem[];
+  isAuthPage?: boolean;
 }
 
 const {
@@ -33,6 +34,7 @@ const {
   faqItems,
   locale = defaultLocale,
   breadcrumbs = [],
+  isAuthPage = false,
 } = Astro.props;
 
 const siteName = translate(locale, 'site.name');
@@ -242,7 +244,8 @@ function getAlternatePath(loc: Locale): string {
   </head>
   <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
 
-    <!-- Language Switcher (Floating) -->
+    <!-- Language Switcher (Floating) — hidden on auth pages, auth pages render it inside the card instead -->
+    {!isAuthPage && (
     <div class="lang-switcher">
       {languageSwitcher.map(item => (
         <a
@@ -258,6 +261,7 @@ function getAlternatePath(loc: Locale): string {
         </a>
       ))}
     </div>
+    )}
 
     <!-- AuthProvider wraps ALL components that need auth context. client:only skips SSR to avoid hydration mismatch. -->
     <!-- NOTE: ReactHeader has NO client directive so it renders inline within AuthProvider's island, -->
