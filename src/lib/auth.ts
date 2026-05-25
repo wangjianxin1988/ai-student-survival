@@ -128,12 +128,13 @@ function readSupabaseSessionFromStorage(): DemoUser | null {
       const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
       if (!accessToken) continue;
 
-      // Validate: must be a real Supabase RS256 JWT with sub claim
+      // Validate: must be a real Supabase JWT (ES256 or RS256) with sub claim
       const parts = accessToken.split('.');
       if (parts.length !== 3) continue;
 
       const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
-      if (header.alg !== 'RS256') continue; // Supabase always uses RS256
+      // Supabase uses ES256 (ECDSA) for JWTs — also accept RS256 for backward compatibility
+      if (!['ES256', 'RS256'].includes(header.alg)) continue;
 
       const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
       if (!payload.sub || typeof payload.sub !== 'string') continue;
@@ -238,7 +239,25 @@ export function getCurrentUser(): DemoUser | null {
   // Return cached if already loaded
   if (currentUser !== null) return currentUser;
 
-  // Try to detect from Supabase localStorage synchronously (OAuth session)
+  // PRIMARY: Use window global set by Layout.astro inline script (most reliable)
+  if (typeof window !== 'undefined') {
+    const w = (window as any).__INITIAL_AUTH_USER__;
+    if (w) {
+      currentUser = {
+        id: w.id,
+        email: w.email || '',
+        name: w.name || '',
+        avatar: w.avatar_url || '',
+        created_at: w.created_at || new Date().toISOString(),
+        role: w.role || 'member',
+        isVerified: w.isVerified,
+        isVerifiedOffer: w.isVerifiedOffer,
+      };
+      return currentUser;
+    }
+  }
+
+  // SECONDARY: Try to detect from Supabase localStorage synchronously (OAuth session)
   if (isSupabaseConfigured && typeof window !== 'undefined') {
     const supabaseUser = readSupabaseSessionFromStorage();
     if (supabaseUser) {
@@ -251,7 +270,7 @@ export function getCurrentUser(): DemoUser | null {
   const demoUser = getDemoUserFromSession();
   if (demoUser) {
     currentUser = demoUser;
-    return currentUser;
+    return demoUser;
   }
 
   return null;
@@ -344,7 +363,7 @@ export const demoAuthApi = {
           if (provider === 'github') {
             return { success: false, error: '此账号使用 GitHub 登录，请点击上方"GitHub"按钮直接登录，无需密码', oauthProvider: 'github' };
           }
-          return { success: false, error: '邮箱或密码错误，请检查后重试', oauthProvider: provider || undefined };
+          return { success: false, error: '邮箱或密码错误，请检查后重试', oauthProvider: (provider && provider !== 'email') ? provider : undefined };
         }
         if (msg.includes('email not confirmed')) {
           return { success: false, error: '请先验证邮箱后再登录' };

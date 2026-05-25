@@ -132,13 +132,13 @@ export default function RegisterForm({
             const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
             const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
             if (accessToken && refreshToken) {
-              // Validate JWT: must be 3-part base64url JWT. Supabase always uses RS256.
+              // Validate JWT: must be 3-part base64url JWT. Supabase uses ES256 (also RS256 for backward compat).
               const parts = accessToken.split('.');
               if (parts.length === 3) {
                 try {
                   const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
                   const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-                  if (header.alg === 'RS256' && payload.sub && typeof payload.sub === 'string') {
+                  if (['ES256', 'RS256'].includes(header.alg) && payload.sub && typeof payload.sub === 'string') {
                     setIsLoggedIn(true);
                     setAuthChecked(true);
                     return;
@@ -220,7 +220,7 @@ export default function RegisterForm({
       } else {
         const errMsg = result.error || t.error;
         setError(errMsg);
-        if (result.oauthProvider) {
+        if (result.oauthProvider && result.oauthProvider !== 'email') {
           setOauthProvider(result.oauthProvider);
           setShowOAuthHint(true);
         }
