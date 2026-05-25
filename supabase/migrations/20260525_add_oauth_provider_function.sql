@@ -23,12 +23,13 @@ END;
 $$;
 
 -- Also try a simpler approach using the users table directly
+-- Note: uses $func$ instead of $$ to avoid bash PID expansion in CI workflows
 CREATE OR REPLACE FUNCTION get_oauth_provider_v2(p_email text)
 RETURNS text
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = auth
-AS $$
+AS $func$
 DECLARE
   v_provider text;
 BEGIN
@@ -49,7 +50,7 @@ BEGIN
   LIMIT 1;
   RETURN v_provider;
 END;
-$$;
+$func$;
 
 -- Drop the first version, keep v2
 DROP FUNCTION IF EXISTS get_oauth_provider(text);

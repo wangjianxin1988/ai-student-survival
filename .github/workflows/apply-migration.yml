@@ -9,21 +9,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Base64 encode SQL
-        id: sql
-        run: |
-          CONTENT=$(cat supabase/migrations/20260525_add_oauth_provider_function.sql | base64 -w0)
-          echo "content=$CONTENT" >> $GITHUB_OUTPUT
-
       - name: Apply migration via Management API
         run: |
           echo "Applying migration to Supabase..."
-          SQL=$(echo "${{ steps.sql.outputs.content }}" | base64 -d)
+          # Read the migration file and convert to properly escaped JSON string
+          SQL_RAW=$(cat supabase/migrations/20260525_add_oauth_provider_function.sql)
+          # Use jq to create a properly escaped JSON string from the SQL
+          SQL_JSON=$(printf '%s' "$SQL_RAW" | jq -Rs .)
+          # Build and send the JSON payload
           RESPONSE=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
-            -d "{\"query\": \"$SQL\"}")
+            -d "{\"query\": $SQL_JSON}")
           echo "Response: $RESPONSE"
           if echo "$RESPONSE" | grep -qi "error"; then
             echo "Migration may have issues: $RESPONSE"
@@ -39,4 +37,4 @@ jobs:
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
             -d '{"query":"SELECT get_oauth_provider_v2('\''18801400211@163.com'\'');"}')
-          echo "Function test result: $RESULT"
+          echo "Function test result for test email: $RESULT"
