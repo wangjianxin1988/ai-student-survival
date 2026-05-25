@@ -144,7 +144,7 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   const handleLike = async (postId: string) => {
     if (!currentUserId) return;
     try {
-      const accessToken = getAccessToken();
+      const accessToken = await getAccessToken();
       await fetch(`/api/community/${postId}/like`, {
         method: "POST",
         headers: {
@@ -159,7 +159,7 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   const handleFavorite = async (postId: string) => {
     if (!currentUserId) return;
     try {
-      const accessToken = getAccessToken();
+      const accessToken = await getAccessToken();
       await fetch(`/api/community/${postId}/favorite`, {
         method: "POST",
         headers: {

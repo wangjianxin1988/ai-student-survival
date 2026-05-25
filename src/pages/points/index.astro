@@ -74,8 +74,8 @@ export const prerender = false;
       loginPrompt.classList.add('hidden');
 
       try {
-        const { getAccessToken } = await import('/src/lib/auth.ts');
-        const accessToken = getAccessToken();
+        const { getAccessToken } = await import('@/lib/auth');
+        const accessToken = await getAccessToken();
         const res = await fetch(`/api/points?userId=${user.id}`, {
           headers: {
             ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),

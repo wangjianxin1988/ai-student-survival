@@ -55,7 +55,7 @@ export function PointsHistory({ userId }: PointsHistoryProps) {
         limit: limit.toString(),
         offset: (page * limit).toString(),
       });
-      const accessToken = getAccessToken();
+      const accessToken = await getAccessToken();
       const response = await fetch(`/api/points/transactions?${params}`, {
         headers: {
           ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),

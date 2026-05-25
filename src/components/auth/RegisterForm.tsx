@@ -67,6 +67,7 @@ export default function RegisterForm({
   const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [showOAuthHint, setShowOAuthHint] = useState(false);
 
   const t = translations[locale];
 
@@ -146,11 +147,13 @@ export default function RegisterForm({
         }
       } catch {}
 
-      // Step 3: Async Supabase verification (only if not cancelled)
+      // Step 3: Async Supabase verification via supabase.auth.getSession()
       try {
-        const user = await demoAuthApi.getUser();
+        const { data } = await supabase.auth.getSession();
         if (!cancelled) {
-          setIsLoggedIn(!!user);
+          const hasSession = !!(data?.session?.user);
+          setIsLoggedIn(hasSession);
+          if (hasSession) setShowOAuthHint(true);
         }
       } catch {
         if (!cancelled) {
@@ -193,7 +196,11 @@ export default function RegisterForm({
       } else if (result.verificationRequired) {
         setEmailVerified(true);
       } else {
-        setError(result.error || t.error);
+        const errMsg = result.error || t.error;
+        setError(errMsg);
+        if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exists')) {
+          setShowOAuthHint(true);
+        }
       }
     } catch {
       setError(t.error);
@@ -283,19 +290,20 @@ export default function RegisterForm({
       <h2 className="text-2xl font-bold text-center mb-6">{t.title}</h2>
 
       {error && (
-        <>
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-            {error}
-          </div>
-          {/* OAuth Hint - helps users who registered via Google/GitHub */}
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
-            {locale === "zh" ? (
-              <>💡 如果您之前使用 Google 或 GitHub 注册过账号，请直接点击下方"Google"或"GitHub"按钮登录，无需密码。</>
-            ) : (
-              <>💡 If you registered with Google or GitHub, click the "Google" or "GitHub" button below to sign in — no password needed.</>
-            )}
-          </div>
-        </>
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+          {error}
+        </div>
+      )}
+
+      {/* OAuth Hint - proactive when Supabase session detected, or after registration error */}
+      {showOAuthHint && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+          {locale === "zh" ? (
+            <>💡 如果您之前使用 Google 或 GitHub 注册过账号，请直接点击下方"Google"或"GitHub"按钮登录，无需密码。</>
+          ) : (
+            <>💡 If you registered with Google or GitHub, click the "Google" or "GitHub" button below to sign in — no password needed.</>
+          )}
+        </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">

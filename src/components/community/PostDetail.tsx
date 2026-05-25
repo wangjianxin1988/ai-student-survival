@@ -318,7 +318,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId) return;
 
     try {
-      const accessToken = getAccessToken();
+      const accessToken = await getAccessToken();
       const response = await fetch(`/api/community/${postId}/like`, {
         method: "POST",
         headers: {
@@ -339,7 +339,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId) return;
 
     try {
-      const accessToken = getAccessToken();
+      const accessToken = await getAccessToken();
       const response = await fetch(`/api/community/${postId}/favorite`, {
         method: "POST",
         headers: {
@@ -361,7 +361,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
     if (!currentUserId || !commentContent.trim()) return;
 
     try {
-      const accessToken = getAccessToken();
+      const accessToken = await getAccessToken();
       const response = await fetch(`/api/community/${postId}/comments`, {
         method: "POST",
         headers: {
