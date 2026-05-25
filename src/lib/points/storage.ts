@@ -1,5 +1,6 @@
 // 积分存储操作
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 
 export interface PointsTransaction {
   id: string;
@@ -124,22 +125,34 @@ export async function recordTransaction(
 }
 
 // 确保用户有积分余额记录
-export async function ensureUserBalance(userId: string): Promise<void> {
-  const { data } = await supabase
+export async function ensureUserBalance(userId: string, accessToken?: string): Promise<void> {
+  // Create a client with the user's access token so RLS allows the upsert.
+  // The users table INSERT policy requires auth.uid() = id.
+  let client = supabase;
+  if (accessToken) {
+    client = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+  }
+
+  // Ensure the user has a row in public.users (needed for FK constraints on points_transactions)
+  await client.from('users').upsert({ id: userId }, { onConflict: 'id', ignoreDuplicates: true });
+
+  const { data } = await client
     .from('user_points_balance')
     .select('user_id')
     .eq('user_id', userId)
     .single();
 
   if (!data) {
-    // 创建初始余额记录
-    await supabase
-      .from('user_points_balance')
-      .insert({
-        user_id: userId,
-        balance: 0,
-        total_earned: 0,
-        total_spent: 0,
-      });
+    await client.from('user_points_balance').insert({
+      user_id: userId,
+      balance: 0,
+      total_earned: 0,
+      total_spent: 0,
+    });
   }
 }

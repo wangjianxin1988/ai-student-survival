@@ -75,6 +75,37 @@ if (error || errorDescription) {
         }
       }
 
+      // Subscribe to auth.ts's onAuthStateChange BEFORE any async auth operations.
+      // This prevents the race where auth event fires before we register our listener,
+      // causing AuthProvider to miss the session update and the header to not show avatar.
+      updateStatus(locale === 'zh' ? '登录成功，正在跳转...' : 'Signed in! Redirecting...');
+
+      const redirectAfterAuth = () => {
+        window.location.href = returnTo;
+      };
+
+      // Subscribe FIRST — before exchange — to catch the auth event reliably.
+      // auth.ts's onAuthStateChange fires synchronously if currentUser is already set,
+      // so we check currentUser immediately after subscribing.
+      let redirected = false;
+      const unsubscribe = onAuthStateChange((user) => {
+        if (user && !redirected) {
+          redirected = true;
+          unsubscribe();
+          // Small delay to let AuthProvider's listener register and receive the event
+          setTimeout(redirectAfterAuth, 100);
+        }
+      });
+
+      // If currentUser is already set (session existed), fire redirect immediately
+      const { getCurrentUser } = await import('@/lib/auth');
+      if (getCurrentUser() && !redirected) {
+        redirected = true;
+        unsubscribe();
+        setTimeout(redirectAfterAuth, 100);
+        return;
+      }
+
       // Exchange code for session (OAuth)
       const code = params.get('code');
       if (code) {
@@ -82,48 +113,55 @@ if (error || errorDescription) {
         const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
         if (exchangeError) {
           console.error('Code exchange error:', exchangeError);
+          unsubscribe();
           window.location.href = `${loginUrl}?error=${encodeURIComponent(exchangeError.message)}`;
           return;
         }
       }
 
-      // No code/token — try to use existing session
+      // No code/token — verify existing session
       if (!code && !token) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !session) {
+          unsubscribe();
           window.location.href = loginUrl;
           return;
         }
       }
 
-      // Subscribe to auth.ts's onAuthStateChange to ensure AuthProvider receives
-      // the session update before we redirect. This guarantees UserMenu shows
-      // the logged-in avatar on the next page.
-      updateStatus(locale === 'zh' ? '登录成功，正在跳转...' : 'Signed in! Redirecting...');
-
-      // Wait for auth.ts's listener to fire (AuthProvider subscribes to it)
-      // Use a short timeout as safety net (in case listener already fired before we subscribed)
-      const redirectAfterAuth = () => {
-        window.location.href = returnTo;
-      };
-
-      let redirected = false;
-      const unsubscribe = onAuthStateChange((user) => {
-        if (user && !redirected) {
-          redirected = true;
-          unsubscribe();
-          redirectAfterAuth();
+      // Ensure public.users row exists for this user (needed for points, favorites, ratings).
+      // Use fetch with Authorization header to bypass RLS on users table.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData?.user) {
+        const userData = {
+          id: sessionData.user.id,
+          email: sessionData.user.email || '',
+          name: (sessionData.user.user_metadata as Record<string, unknown>)?.name || null,
+          avatar_url: (sessionData.user.user_metadata as Record<string, unknown>)?.avatar_url || null,
+        };
+        const origin = window.location.origin;
+        try {
+          await fetch(`${origin}/api/auth/upsert-user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionData.session?.access_token || ''}`,
+            },
+            body: JSON.stringify(userData),
+          });
+        } catch (_) {
+          // Non-blocking — user creation can be retried later
         }
-      });
+      }
 
-      // Safety: redirect after 2s even if listener didn't fire (edge case)
+      // Safety: if not redirected within 3s, force redirect
       setTimeout(() => {
         if (!redirected) {
           redirected = true;
           unsubscribe();
           redirectAfterAuth();
         }
-      }, 2000);
+      }, 3000);
 
     } catch (err) {
       console.error('Callback error:', err);

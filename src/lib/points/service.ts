@@ -15,12 +15,13 @@ export interface EarnPointsOptions {
 export async function earnPoints(
   supabase: SupabaseClient,
   userId: string,
-  options: EarnPointsOptions
+  options: EarnPointsOptions,
+  accessToken?: string
 ): Promise<{ success: boolean; transaction?: PointsTransaction; newBalance?: number }> {
   const { amount, type, description, referenceId } = options;
 
   // 确保用户有积分余额记录
-  await storage.ensureUserBalance(userId);
+  await storage.ensureUserBalance(userId, accessToken);
 
   // 记录积分变动
   const transaction = await storage.recordTransaction(userId, amount, type, description, referenceId);
