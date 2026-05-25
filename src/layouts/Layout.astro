@@ -244,8 +244,7 @@ function getAlternatePath(loc: Locale): string {
   </head>
   <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
 
-    <!-- Language Switcher (Floating) — hidden on auth pages, auth pages render it inside the card instead -->
-    {!isAuthPage && (
+    <!-- Language Switcher (Floating) — always visible on non-auth pages; auth pages also render it inside the card -->
     <div class="lang-switcher">
       {languageSwitcher.map(item => (
         <a
@@ -261,7 +260,6 @@ function getAlternatePath(loc: Locale): string {
         </a>
       ))}
     </div>
-    )}
 
     <!-- AuthProvider wraps ALL components that need auth context. client:only skips SSR to avoid hydration mismatch. -->
     <!-- NOTE: ReactHeader has NO client directive so it renders inline within AuthProvider's island, -->
