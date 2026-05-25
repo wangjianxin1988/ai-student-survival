@@ -68,6 +68,7 @@ export default function RegisterForm({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
   const [showOAuthHint, setShowOAuthHint] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState<string | null>(null);
 
   const t = translations[locale];
 
@@ -153,7 +154,26 @@ export default function RegisterForm({
         if (!cancelled) {
           const hasSession = !!(data?.session?.user);
           setIsLoggedIn(hasSession);
-          if (hasSession) setShowOAuthHint(true);
+          // Check if the logged-in user is an OAuth account
+          if (hasSession && data.session.user) {
+            const userEmail = data.session.user.email;
+            if (userEmail) {
+              try {
+                const res = await fetch(`/api/auth/check-user`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ email: userEmail }),
+                });
+                if (res.ok) {
+                  const json = await res.json();
+                  if (json.exists && json.provider && json.provider !== 'email') {
+                    setOauthProvider(json.provider);
+                    setShowOAuthHint(true);
+                  }
+                }
+              } catch { /* ignore */ }
+            }
+          }
         }
       } catch {
         if (!cancelled) {
@@ -198,8 +218,8 @@ export default function RegisterForm({
       } else {
         const errMsg = result.error || t.error;
         setError(errMsg);
-        const errLower = errMsg.toLowerCase();
-        if (errLower.includes('already registered') || errLower.includes('already exists') || errLower.includes('google 注册') || errLower.includes('github 注册')) {
+        if (result.oauthProvider) {
+          setOauthProvider(result.oauthProvider);
           setShowOAuthHint(true);
         }
       }
@@ -296,13 +316,13 @@ export default function RegisterForm({
         </div>
       )}
 
-      {/* OAuth Hint - proactive when Supabase session detected, or after registration error */}
+      {/* OAuth Hint - shows when account is registered via OAuth (google/github) */}
       {showOAuthHint && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
           {locale === "zh" ? (
-            <>💡 如果您之前使用 Google 或 GitHub 注册过账号，请直接点击下方"Google"或"GitHub"按钮登录，无需密码。</>
+            <>💡 此邮箱已通过 {oauthProvider === 'google' ? 'Google' : 'GitHub'} 注册，请直接使用「{oauthProvider === 'google' ? 'Google' : 'GitHub'}」按钮登录，无需密码。</>
           ) : (
-            <>💡 If you registered with Google or GitHub, click the "Google" or "GitHub" button below to sign in — no password needed.</>
+            <>💡 This email is registered via {oauthProvider}. Click the "{oauthProvider}" button below to sign in.</>
           )}
         </div>
       )}

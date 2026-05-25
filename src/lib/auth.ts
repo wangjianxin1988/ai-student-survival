@@ -29,6 +29,7 @@ export interface AuthResult {
   error?: string;
   verificationRequired?: boolean;
   message?: string;
+  oauthProvider?: string;
 }
 
 export interface OAuthResult {
@@ -338,12 +339,12 @@ export const demoAuthApi = {
           // Check if this email has an OAuth account
           const provider = await getOAuthProviderForEmail(email);
           if (provider === 'google') {
-            return { success: false, error: '此账号使用 Google 登录，请点击上方"Google"按钮直接登录，无需密码' };
+            return { success: false, error: '此账号使用 Google 登录，请点击上方"Google"按钮直接登录，无需密码', oauthProvider: 'google' };
           }
           if (provider === 'github') {
-            return { success: false, error: '此账号使用 GitHub 登录，请点击上方"GitHub"按钮直接登录，无需密码' };
+            return { success: false, error: '此账号使用 GitHub 登录，请点击上方"GitHub"按钮直接登录，无需密码', oauthProvider: 'github' };
           }
-          return { success: false, error: '邮箱或密码错误，请检查后重试' };
+          return { success: false, error: '邮箱或密码错误，请检查后重试', oauthProvider: provider || undefined };
         }
         if (msg.includes('email not confirmed')) {
           return { success: false, error: '请先验证邮箱后再登录' };
@@ -390,10 +391,10 @@ export const demoAuthApi = {
         if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
           const provider = await getOAuthProviderForEmail(email);
           if (provider === 'google') {
-            return { success: false, error: '此邮箱已通过 Google 注册，请直接使用 Google 登录' };
+            return { success: false, error: '此邮箱已通过 Google 注册，请直接使用 Google 登录', oauthProvider: 'google' };
           }
           if (provider === 'github') {
-            return { success: false, error: '此邮箱已通过 GitHub 注册，请直接使用 GitHub 登录' };
+            return { success: false, error: '此邮箱已通过 GitHub 注册，请直接使用 GitHub 登录', oauthProvider: 'github' };
           }
         }
         return { success: false, error: error.message };

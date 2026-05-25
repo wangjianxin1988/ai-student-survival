@@ -75,6 +75,7 @@ export default function LoginForm({
   const [forgotToken, setForgotToken] = useState("");
   const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [oauthProvider, setOauthProvider] = useState<string | null>(null);
 
   const t = translations[locale];
 
@@ -176,6 +177,7 @@ export default function LoginForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setOauthProvider(null);
     setIsLoading(true);
 
     try {
@@ -184,6 +186,7 @@ export default function LoginForm({
         redirectAfterLogin();
       } else {
         setError(result.error || t.error);
+        if (result.oauthProvider) setOauthProvider(result.oauthProvider);
       }
     } catch {
       setError(t.error);
@@ -492,16 +495,16 @@ export default function LoginForm({
             </button>
           </div>
 
-          {/* OAuth Hint - shows when login fails with OAuth account */}
-          {error && (
+          {/* OAuth Hint - shows when login fails and account is OAuth (google/github) */}
+          {oauthProvider && (
             <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
               {locale === "zh" ? (
                 <>
-                  💡 如果您之前使用 Google 或 GitHub 注册过账号，请直接点击上方"Google"或"GitHub"按钮登录，无需密码。
+                  💡 此账号使用 {oauthProvider === 'google' ? 'Google' : 'GitHub'} 注册，请点击上方「{oauthProvider === 'google' ? 'Google' : 'GitHub'}」按钮直接登录，无需密码。
                 </>
               ) : (
                 <>
-                  💡 If you registered with Google or GitHub, click the "Google" or "GitHub" button above to sign in — no password needed.
+                  💡 This account uses {oauthProvider}, click the "{oauthProvider}" button above to sign in — no password needed.
                 </>
               )}
             </div>
