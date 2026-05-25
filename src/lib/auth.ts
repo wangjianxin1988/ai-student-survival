@@ -1,5 +1,19 @@
 /**
- * Supabase Authentication Module
+ * Check what auth methods are available for an email (OAuth vs password)
+ * Returns list of provider/method names
+ */
+export async function getAuthMethodsForEmail(email: string): Promise<string[]> {
+  if (!isSupabaseConfigured) return [];
+  try {
+    const { data, error } = await supabase.auth.authMethodTypes({ email });
+    if (error) return [];
+    return data || [];
+  } catch {
+    return [];
+  }
+}
+
+/**
  *
  * This module provides authentication functionality using Supabase.
  * It replaces the previous demo/localStorage-based auth system.
@@ -92,6 +106,8 @@ export function clearDemoSession(): void {
 // Current user cache (synchronous access)
 let currentUser: DemoUser | null = null;
 let isInitialized = false;
+// Track whether initAuth has been triggered at least once
+let initAuthTriggered = false;
 
 // Auth state change listeners
 type AuthChangeCallback = (user: DemoUser | null) => void;
@@ -107,17 +123,28 @@ let demoStorageListenerSetUp = false;
 export async function initAuth(): Promise<DemoUser | null> {
   if (typeof window === 'undefined') return null;
 
-  if (isInitialized) {
+  // If already initialized, return cached user
+  if (isInitialized && currentUser !== null) {
     return currentUser;
   }
+
+  // If already triggered, return current state without re-fetching
+  if (initAuthTriggered) {
+    return currentUser;
+  }
+
+  initAuthTriggered = true;
 
   if (isSupabaseConfigured) {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        currentUser = toDemoUser(session.user);
+        const newUser = toDemoUser(session.user);
+        currentUser = newUser;
         isInitialized = true;
-        return currentUser;
+        // Notify all listeners so components (UserMenu, etc.) update
+        notifyAuthChange(newUser);
+        return newUser;
       }
       // No Supabase session - fall through to demo session check
     } catch (error) {
@@ -127,8 +154,11 @@ export async function initAuth(): Promise<DemoUser | null> {
   }
 
   // Fallback to demo session (either Supabase not configured or no Supabase user)
-  currentUser = getDemoUserFromSession();
+  const demoUser = getDemoUserFromSession();
+  currentUser = demoUser;
   isInitialized = true;
+  // Notify listeners of demo session state
+  notifyAuthChange(demoUser);
   return currentUser;
 }
 
@@ -156,8 +186,9 @@ export function getAccessToken(): string | null {
 /**
  * Get the current user from cache (synchronous)
  * For async initialization, call initAuth() first
- * Falls back to demo session if Supabase is not configured OR
- * if Supabase is configured but no Supabase user is logged in
+ * Priority: in-memory cache > Supabase localStorage > demo sessionStorage
+ * This ensures OAuth sessions (stored in Supabase localStorage) are detected
+ * even before async initAuth() completes
  */
 export function getCurrentUser(): DemoUser | null {
   if (typeof window === 'undefined') return null;
@@ -167,25 +198,17 @@ export function getCurrentUser(): DemoUser | null {
     return currentUser;
   }
 
-  // Try demo session first (fast, synchronous)
-  const demoUser = getDemoUserFromSession();
-  if (demoUser) {
-    currentUser = demoUser;
-    return currentUser;
-  }
-
-  // Check Supabase localStorage session directly (synchronous)
+  // Check Supabase localStorage session FIRST (synchronous) - for OAuth users
   // Supabase stores session in localStorage with key: sb-{project-ref}-auth-token
   if (isSupabaseConfigured) {
     try {
-      const storageKey = `sb-${supabaseUrl.replace(/^https?:\/\//, '')}-auth-token`;
+      const projectRef = supabaseUrl.replace(/^https?:\/\//, '').replace(/\.supabase\.co$/, '');
+      const storageKey = `sb-${projectRef}-auth-token`;
       const raw = localStorage.getItem(storageKey);
       if (raw) {
         const parsed = JSON.parse(raw);
         const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
         if (accessToken) {
-          // Session exists - decode user from the stored session
-          // Supabase stores user in the 'user' field or decoded from access_token
           const userData = parsed?.user || parsed?.tokens?.user;
           if (userData) {
             currentUser = toDemoUser(userData);
@@ -198,12 +221,20 @@ export function getCurrentUser(): DemoUser | null {
     }
   }
 
+  // Fallback: try demo session (fast, synchronous)
+  const demoUser = getDemoUserFromSession();
+  if (demoUser) {
+    currentUser = demoUser;
+    return currentUser;
+  }
+
   return null;
 }
 
 /**
  * Subscribe to auth state changes
  * Returns unsubscribe function
+ * Always notifies of current state after initAuth completes
  */
 export function onAuthStateChange(callback: AuthChangeCallback): () => void {
   authChangeListeners.add(callback);
@@ -214,23 +245,28 @@ export function onAuthStateChange(callback: AuthChangeCallback): () => void {
   }
 
   if (isSupabaseConfigured && typeof window !== 'undefined') {
-    // Initialize auth if not yet done
-    if (!isInitialized) {
-      initAuth().then(user => {
-        callback(user);
-      });
-    }
-
+    // Always set up Supabase auth listener regardless of init state
+    // This ensures components get notified of auth changes after initial mount
     supabase.auth.onAuthStateChange((event, session) => {
       const user = toDemoUser(session?.user ?? null);
       currentUser = user;
+      isInitialized = true;
       authChangeListeners.forEach(cb => cb(user));
     });
+
+    // Initialize auth if not yet triggered
+    if (!initAuthTriggered) {
+      initAuth().then(user => {
+        // After initAuth completes, notify with the user (handles race condition)
+        if (user !== currentUser) {
+          currentUser = user;
+          callback(user);
+        }
+      });
+    }
   }
 
   // Always set up demo session storage listener for cross-tab sync
-  // This handles the case where Supabase is configured but no Supabase user
-  // is logged in (i.e., demo mode on a Supabase-enabled site)
   if (typeof window !== 'undefined' && !demoStorageListenerSetUp) {
     demoStorageListenerSetUp = true;
     const handleStorageChange = (e: StorageEvent) => {
@@ -260,6 +296,7 @@ export function notifyAuthChange(user: DemoUser | null): void {
 export const demoAuthApi = {
   /**
    * Sign in with email and password
+   * Checks auth methods first to detect OAuth-only accounts
    */
   async signIn(email: string, password: string): Promise<AuthResult> {
     if (!isSupabaseConfigured) {
@@ -278,12 +315,33 @@ export const demoAuthApi = {
     }
 
     try {
+      // Check available auth methods first to detect OAuth-only accounts
+      const authMethods = await getAuthMethodsForEmail(email);
+      const hasPasswordMethod = authMethods.includes('password');
+
+      if (authMethods.length > 0 && !hasPasswordMethod) {
+        // Account exists but uses OAuth only (Google/GitHub/etc.)
+        const provider = authMethods[0] || 'oauth';
+        return {
+          success: false,
+          error: `此账号使用 ${provider === 'google' ? 'Google' : provider === 'github' ? 'GitHub' : provider} 第三方登录，请点击上方"${provider === 'google' ? 'Google' : 'GitHub'}"按钮登录`,
+        };
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        // Provide more specific error messages
+        const msg = error.message.toLowerCase();
+        if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+          return { success: false, error: '邮箱或密码错误，请检查后重试' };
+        }
+        if (msg.includes('email not confirmed')) {
+          return { success: false, error: '请先验证邮箱后再登录' };
+        }
         return { success: false, error: error.message };
       }
 

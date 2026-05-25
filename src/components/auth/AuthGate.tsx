@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { getLocaleHref } from "@/lib/i18n";
+import { initAuth } from "@/lib/auth";
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -11,12 +12,29 @@ interface AuthGateProps {
 /**
  * AuthGate - Client-side auth check component
  * Shows content only when user is logged in, otherwise shows fallback or redirects to login
+ * Uses initAuth() to ensure OAuth sessions are detected synchronously
  */
 export default function AuthGate({ children, locale = "zh", fallback }: AuthGateProps) {
   const { user, loading } = useAuth();
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Ensure auth is initialized with Supabase session detection
+  useEffect(() => {
+    initAuth().then(() => {
+      setAuthChecked(true);
+    });
+  }, []);
+
+  // Safety timeout: if still loading after 5s, proceed with current state
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setAuthChecked(true);
+    }, 5000);
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Show loading state during auth initialization
-  if (loading) {
+  if (loading || !authChecked) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>

@@ -3,6 +3,7 @@ import {
   demoAuthApi,
   getCurrentUser,
   onAuthStateChange,
+  initAuth,
   type DemoUser,
 } from "@/lib/auth";
 
@@ -62,16 +63,15 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
   }, []);
 
   useEffect(() => {
-    // Subscribe to auth state changes
+    // Initialize auth first (reads Supabase session synchronously + async refresh)
+    initAuth().then(user => {
+      setUser(user);
+    });
+
+    // Subscribe to auth state changes for future updates
     const unsubscribe = onAuthStateChange((newUser) => {
       setUser(newUser);
     });
-
-    // Also check for existing user after mount (handles page refresh scenario)
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      setUser(currentUser);
-    }
 
     return unsubscribe;
   }, []);
