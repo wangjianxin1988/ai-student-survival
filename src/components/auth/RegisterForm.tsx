@@ -128,9 +128,24 @@ export default function RegisterForm({
             const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
             const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
             if (accessToken && refreshToken) {
-              setIsLoggedIn(true);
-              setAuthChecked(true);
-              return;
+              // Validate JWT structure: real Supabase tokens are base64url-encoded 3-part JWTs
+              const parts = accessToken.split('.');
+              if (parts.length !== 3) {
+                console.warn('[RegisterForm] Token not valid JWT format, treating as not logged in');
+              } else {
+                try {
+                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (!payload.sub || typeof payload.sub !== 'string') {
+                    console.warn('[RegisterForm] Token payload missing sub claim');
+                  } else {
+                    setIsLoggedIn(true);
+                    setAuthChecked(true);
+                    return;
+                  }
+                } catch {
+                  console.warn('[RegisterForm] Token payload not valid JSON');
+                }
+              }
             }
           } catch {}
         }

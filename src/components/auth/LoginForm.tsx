@@ -131,9 +131,28 @@ export default function LoginForm({
             const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
             const refreshToken = parsed?.tokens?.refresh_token || parsed?.refresh_token;
             if (accessToken && refreshToken) {
-              setIsLoggedIn(true);
-              setAuthChecked(true);
-              return;
+              // Validate JWT structure: real Supabase tokens are base64url-encoded 3-part JWTs
+              // Test/fake tokens often fail basic structure checks
+              const parts = accessToken.split('.');
+              if (parts.length !== 3) {
+                // Not a valid JWT format — likely a test/fake token
+                console.warn('[LoginForm] Token not valid JWT format, treating as not logged in');
+              } else {
+                // Validate payload is valid JSON and has expected Supabase claims
+                try {
+                  const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (!payload.sub || typeof payload.sub !== 'string') {
+                    console.warn('[LoginForm] Token payload missing sub claim, treating as not logged in');
+                  } else {
+                    // Valid JWT with sub claim
+                    setIsLoggedIn(true);
+                    setAuthChecked(true);
+                    return;
+                  }
+                } catch {
+                  console.warn('[LoginForm] Token payload not valid JSON, treating as not logged in');
+                }
+              }
             }
           } catch {}
         }
