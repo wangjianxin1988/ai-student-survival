@@ -7,7 +7,7 @@
  * Demo session (sessionStorage) is kept as fallback only when Supabase is NOT configured.
  */
 
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, supabaseAdmin, isSupabaseConfigured } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
 export type DemoUser = {
@@ -40,7 +40,29 @@ export interface MagicLinkResult {
   error?: string;
 }
 
-// ─── Demo session (only used when Supabase is not configured) ───────────────────
+// ─── OAuth account detection ────────────────────────────────────────────────────
+
+/**
+ * Check if an email has an OAuth-linked account (Google/GitHub) in Supabase.
+ * Uses admin client to query auth.users (server-side, bypasses RLS).
+ * Returns the provider name ('google' | 'github') if found, null otherwise.
+ */
+async function getOAuthProviderForEmail(email: string): Promise<string | null> {
+  if (!isSupabaseConfigured || !email) return null;
+  try {
+    const { data, error } = await supabaseAdmin.auth.admin.listUsers();
+    if (error) return null;
+    const user = data?.users?.find(
+      (u) => u.email?.toLowerCase() === email.toLowerCase()
+    );
+    if (!user) return null;
+    const provider = user.app_metadata?.provider;
+    if (provider && typeof provider === 'string') return provider;
+    return null;
+  } catch (_) {
+    return null;
+  }
+}
 
 const DEMO_SESSION_KEY = 'demo_session';
 
@@ -311,6 +333,14 @@ export const demoAuthApi = {
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+          // Check if this email has an OAuth account
+          const provider = await getOAuthProviderForEmail(email);
+          if (provider === 'google') {
+            return { success: false, error: '此账号使用 Google 登录，请点击上方"Google"按钮直接登录，无需密码' };
+          }
+          if (provider === 'github') {
+            return { success: false, error: '此账号使用 GitHub 登录，请点击上方"GitHub"按钮直接登录，无需密码' };
+          }
           return { success: false, error: '邮箱或密码错误，请检查后重试' };
         }
         if (msg.includes('email not confirmed')) {
@@ -353,6 +383,17 @@ export const demoAuthApi = {
         if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
           return { success: false, error: '操作过于频繁，请稍后再试（90秒后重试）' };
         }
+        // Email already registered — check if it's an OAuth account
+        const msg = error.message.toLowerCase();
+        if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
+          const provider = await getOAuthProviderForEmail(email);
+          if (provider === 'google') {
+            return { success: false, error: '此邮箱已通过 Google 注册，请直接使用 Google 登录' };
+          }
+          if (provider === 'github') {
+            return { success: false, error: '此邮箱已通过 GitHub 注册，请直接使用 GitHub 登录' };
+          }
+        }
         return { success: false, error: error.message };
       }
 
@@ -382,8 +423,19 @@ export const demoAuthApi = {
   },
 
   async signOut(): Promise<void> {
-    currentUser = null;
+    if (typeof window !== 'undefined') {
+      // Clear ALL Supabase auth-related localStorage keys before nulling currentUser.
+      // readSupabaseSessionFromStorage() scans for sb-* keys, so we must remove all of them.
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if (key.startsWith('sb-') && (key.includes('auth') || key.includes('token'))) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
     clearDemoSession();
+    currentUser = null;
     notifyAuthChange(null);
 
     if (isSupabaseConfigured) {

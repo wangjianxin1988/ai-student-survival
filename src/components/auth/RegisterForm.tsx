@@ -198,7 +198,8 @@ export default function RegisterForm({
       } else {
         const errMsg = result.error || t.error;
         setError(errMsg);
-        if (errMsg.toLowerCase().includes('already registered') || errMsg.toLowerCase().includes('already exists')) {
+        const errLower = errMsg.toLowerCase();
+        if (errLower.includes('already registered') || errLower.includes('already exists') || errLower.includes('google 注册') || errLower.includes('github 注册')) {
           setShowOAuthHint(true);
         }
       }

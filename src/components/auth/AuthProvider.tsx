@@ -5,7 +5,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, supabaseUrl } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 
 interface User {
@@ -163,6 +163,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     if (isSupabaseConfigured) {
       await supabase.auth.signOut();
+      // Clear all Supabase auth-related localStorage keys
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        if (key.startsWith('sb-') && (key.includes('auth') || key.includes('token'))) {
+          localStorage.removeItem(key);
+        }
+      }
     }
   }, []);
 
