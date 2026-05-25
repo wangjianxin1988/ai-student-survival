@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { initAuth, getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
 import { userStatsApi, type UserProfile } from '@/lib/userProfile';
 import { getAuthLoginHref } from '@/lib/i18n';
 
@@ -44,8 +44,9 @@ export default function FollowButton({
   const t = translations[locale];
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    initAuth().then((currentUser) => {
+      setUser(currentUser);
+    });
 
     const unsubscribe = onAuthStateChange((newUser) => {
       setUser(newUser);
