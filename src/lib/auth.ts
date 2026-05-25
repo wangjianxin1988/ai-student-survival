@@ -1,25 +1,4 @@
 /**
- * Check if a user exists in Supabase by email
- * Calls server-side API endpoint to check user auth type (OAuth vs password)
- * Returns: 'oauth' | 'password' | null
- */
-export async function checkUserExists(email: string): Promise<'oauth' | 'password' | null> {
-  if (!isSupabaseConfigured) return null;
-  try {
-    const response = await fetch('/api/auth/check-user', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    return data.type || null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  *
  * This module provides authentication functionality using Supabase.
  * It replaces the previous demo/localStorage-based auth system.
@@ -328,18 +307,7 @@ export const demoAuthApi = {
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-          // Distinguish OAuth-only accounts from wrong password
-          const userType = await checkUserExists(email);
-          if (userType === 'oauth') {
-            return {
-              success: false,
-              error: '此账号使用第三方登录（Google/GitHub），请使用上方第三方登录按钮',
-            };
-          } else if (userType === 'password') {
-            return { success: false, error: '邮箱或密码错误，请检查后重试' };
-          } else {
-            return { success: false, error: '邮箱或密码错误，请检查后重试' };
-          }
+          return { success: false, error: '邮箱或密码错误，请检查后重试' };
         }
         if (msg.includes('email not confirmed')) {
           return { success: false, error: '请先验证邮箱后再登录' };

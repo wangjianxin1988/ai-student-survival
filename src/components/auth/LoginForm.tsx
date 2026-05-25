@@ -441,6 +441,21 @@ export default function LoginForm({
             </button>
           </div>
 
+          {/* OAuth Hint - shows when login fails with OAuth account */}
+          {error && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+              {locale === "zh" ? (
+                <>
+                  💡 如果您之前使用 Google 或 GitHub 注册过账号，请直接点击上方"Google"或"GitHub"按钮登录，无需密码。
+                </>
+              ) : (
+                <>
+                  💡 If you registered with Google or GitHub, click the "Google" or "GitHub" button above to sign in — no password needed.
+                </>
+              )}
+            </div>
+          )}
+
           {/* OAuth Buttons */}
           <div className="mt-6">
             <div className="relative">

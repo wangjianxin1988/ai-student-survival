@@ -8,41 +8,33 @@ export const POST: APIRoute = async ({ request }) => {
     const { email } = await request.json();
 
     if (!email || typeof email !== 'string') {
-      return new Response(JSON.stringify({
-        exists: false,
-        type: null,
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ exists: false, type: null }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
     if (!isSupabaseConfigured) {
-      return new Response(JSON.stringify({
-        exists: false,
-        type: null,
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ exists: false, type: null }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Use Supabase admin client to find user by email
+    // List users (paginated, get first page - typically 50 users)
     const { data, error } = await supabaseAdmin.auth.admin.listUsers();
 
     if (error) {
-      console.error('Check user error:', error.message);
-      return new Response(JSON.stringify({
-        exists: false,
-        type: null,
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      // Service role key not available at runtime on Cloudflare Pages
+      // Fall back to showing helpful generic message
+      return new Response(JSON.stringify({ exists: false, type: null, fallback: true }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
     const users = data?.users || [];
     const user = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
 
     if (!user) {
-      return new Response(JSON.stringify({
-        exists: false,
-        type: null,
-      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ exists: false, type: null }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Check if user has OAuth identities (registered via Google/GitHub)
     const identities = user.identities || [];
     const hasOAuth = identities.length > 0;
 
@@ -52,10 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
     }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (e) {
-    console.error('Check user error:', e);
-    return new Response(JSON.stringify({
-      exists: false,
-      type: null,
-    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ exists: false, type: null, fallback: true }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
 };
