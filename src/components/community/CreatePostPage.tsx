@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AuthGate from '@/components/auth/AuthGate';
 import { PostEditor } from './PostEditor';
-import { getAccessToken } from '@/lib/auth';
+import { getAuthHeaders } from '@/lib/auth';
 
 interface CreatePostPageProps {
   userId: string;
@@ -32,13 +32,14 @@ function CreatePostContent() {
     setIsSubmitting(true);
     try {
       const accessToken = await getAccessToken();
+      const headers = await getAuthHeaders();
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 20000);
       const response = await fetch('/api/community', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+          ...headers,
         },
         body: JSON.stringify(data),
         signal: controller.signal,
@@ -50,16 +51,22 @@ function CreatePostContent() {
         // Detect locale from current path and redirect to correct community page
         const pathParts = window.location.pathname.split('/');
         const isEn = pathParts[1] === 'en';
-        window.location.href = `${isEn ? '/en/community' : '/community'}?fresh=1`;
+        window.location.href = `${isEn ? '/en/questions' : '/questions'}?fresh=1`;
       } else {
-        alert(result.error?.message || '发布失败，请重试');
+        const errMsg = result.error?.message || '发布失败，请重试';
+        if (result.error?.code === 'UNAUTHORIZED') {
+          window.location.href = '/auth/login?redirect=/questions/ask';
+        } else {
+          alert(errMsg);
+        }
       }
     } catch (error: unknown) {
       console.error('Failed to create post:', error);
       if (error instanceof Error && error.name === 'AbortError') {
         alert('请求超时，请检查网络后重试');
       } else {
-        alert('网络错误，请重试');
+        // Show more specific error message instead of generic "网络错误"
+        alert('网络错误，请检查网络后重试。如果问题持续，请刷新页面后重试。');
       }
     } finally {
       setIsSubmitting(false);

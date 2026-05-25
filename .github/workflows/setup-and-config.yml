@@ -34,25 +34,48 @@ jobs:
       - name: Execute OAuth provider function migration
         run: |
           echo "Executing OAuth provider function migration..."
+          # Use the comprehensive version that checks auth.identities first (same as migration file)
           SQL="
             CREATE OR REPLACE FUNCTION get_oauth_provider_v2(p_email text)
             RETURNS text
             LANGUAGE plpgsql
             SECURITY DEFINER
             SET search_path = auth
-            AS \$\$
+            AS \$func\$
             DECLARE
               v_provider text;
             BEGIN
-              SELECT (u.raw_app_meta_data->>'provider')::text
-              INTO v_provider
+              -- First: check auth.identities identity_data JSON for explicit provider field
+              SELECT (i.identity_data->>'provider')::text INTO v_provider
+              FROM auth.identities i
+              WHERE LOWER(i.identity_data->>'email') = LOWER(p_email)
+                AND (i.identity_data->>'provider') IS NOT NULL
+                AND (i.identity_data->>'provider') != 'email'
+              LIMIT 1;
+              IF v_provider IS NOT NULL THEN
+                RETURN v_provider;
+              END IF;
+
+              -- Second: check raw_app_meta_data (where Supabase stores provider)
+              SELECT (u.raw_app_meta_data->>'provider')::text INTO v_provider
               FROM auth.users u
               WHERE u.email = p_email
                 AND u.raw_app_meta_data ? 'provider'
+                AND (u.raw_app_meta_data->>'provider') != 'email'
+              LIMIT 1;
+              IF v_provider IS NOT NULL THEN
+                RETURN v_provider;
+              END IF;
+
+              -- Third: check auth.identities provider column as fallback
+              SELECT i.provider INTO v_provider
+              FROM auth.identities i
+              WHERE LOWER(i.identity_data->>'email') = LOWER(p_email)
+                AND i.provider != 'email'
               LIMIT 1;
               RETURN v_provider;
             END;
-            \$\$;
+            \$func\$;
             GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO anon;
             GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO authenticated;
             GRANT EXECUTE ON FUNCTION get_oauth_provider_v2(text) TO service_role;

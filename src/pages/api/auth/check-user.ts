@@ -24,7 +24,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     if (error) {
-      console.error('[check-user] RPC error:', error);
+      console.error('[check-user] RPC error:', JSON.stringify(error), 'email:', email);
       // Fall back to generic message
       return new Response(JSON.stringify({ exists: false, provider: null, fallback: true }),
         { status: 200, headers: { 'Content-Type': 'application/json' } });

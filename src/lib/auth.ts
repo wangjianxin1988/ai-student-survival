@@ -4,10 +4,11 @@
  * Single source of truth: supabase-js handles all session storage and token refresh.
  * No manual localStorage/sessionStorage manipulation for Supabase sessions.
  *
- * Demo session (sessionStorage) is kept as fallback only when Supabase is NOT configured.
+ * Demo mode: activated via isDemoMode() (checks ?demo=1 URL param or localStorage flag).
+ * When demo mode is active, any credentials work without calling Supabase.
  */
 
-import { supabase, isSupabaseConfigured } from './supabase';
+import { supabase, isSupabaseConfigured, isDemoMode } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
 export type DemoUser = {
@@ -49,7 +50,7 @@ export interface MagicLinkResult {
  * SECURITY DEFINER RPC function, keeping the service role key off the client.
  * Returns the provider name ('google' | 'github') if found, null otherwise.
  */
-async function getOAuthProviderForEmail(email: string): Promise<string | null> {
+async function getOAuthProviderForEmail(email: string): Promise<string | null | 'fallback'> {
   if (!isSupabaseConfigured || !email) return null;
   try {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -61,6 +62,7 @@ async function getOAuthProviderForEmail(email: string): Promise<string | null> {
     if (!res.ok) return null;
     const json = await res.json();
     if (json.exists && json.provider) return json.provider as string;
+    if (json.fallback) return 'fallback'; // RPC failed but user exists
     return null;
   } catch (_) {
     return null;
@@ -150,6 +152,14 @@ function readSupabaseSessionFromStorage(): DemoUser | null {
   return null;
 }
 
+/**
+ * Check if we're in demo mode at runtime.
+ * Demo mode is active when isSupabaseConfigured is false OR isDemoMode() returns true.
+ */
+function isInDemoMode(): boolean {
+  return !isSupabaseConfigured || isDemoMode();
+}
+
 // ─── Supabase User → DemoUser conversion ──────────────────────────────────────
 
 function toDemoUser(user: User | null): DemoUser | null {
@@ -170,15 +180,40 @@ function toDemoUser(user: User | null): DemoUser | null {
  * Get Supabase access token for API authentication.
  * Returns Bearer token to include in Authorization headers.
  * Must be called in async context.
+ * In demo mode, returns the demo user ID for server-side auth.
  */
 export async function getAccessToken(): Promise<string | null> {
   if (!isSupabaseConfigured) return null;
+  if (isInDemoMode()) {
+    // Return demo user ID for server-side demo auth
+    return currentUser?.id ?? null;
+  }
   try {
     const { data: { session } } = await supabase.auth.getSession();
     return session?.access_token ?? null;
   } catch (_) {
     return null;
   }
+}
+
+/**
+ * Get auth headers for API calls.
+ * Handles both Supabase Bearer token and demo mode headers.
+ */
+export async function getAuthHeaders(): Promise<Record<string, string>> {
+  const token = await getAccessToken();
+  if (!token) return {};
+
+  if (isInDemoMode()) {
+    // Demo mode: send user info via special headers
+    return {
+      'X-Demo-User-Id': token,
+      'X-Demo-User-Email': currentUser?.email || '',
+      'X-Demo-User-Name': currentUser?.name || '',
+    };
+  }
+
+  return { 'Authorization': `Bearer ${token}` };
 }
 
 // ─── Auth init (async — use onAuthStateChange for synchronous reactive updates) ─
@@ -203,7 +238,7 @@ export async function initAuth(): Promise<DemoUser | null> {
     return syncUser;
   }
 
-  if (!isSupabaseConfigured) {
+  if (!isSupabaseConfigured || isInDemoMode()) {
     currentUser = getDemoUserFromSession();
     isInitialized = true;
     notifyAuthChange(currentUser);
@@ -336,7 +371,8 @@ export function notifyAuthChange(user: DemoUser | null): void {
 
 export const demoAuthApi = {
   async signIn(email: string, password: string): Promise<AuthResult> {
-    if (!isSupabaseConfigured) {
+    // Demo mode: activated via ?demo=1 URL param or localStorage flag
+    if (!isSupabaseConfigured || isDemoMode()) {
       const demoUser: DemoUser = {
         id: 'demo-' + Math.random().toString(36).substring(2, 15),
         email,
@@ -363,7 +399,11 @@ export const demoAuthApi = {
           if (provider === 'github') {
             return { success: false, error: '此账号使用 GitHub 登录，请点击上方"GitHub"按钮直接登录，无需密码', oauthProvider: 'github' };
           }
-          return { success: false, error: '邮箱或密码错误，请检查后重试', oauthProvider: (provider && provider !== 'email') ? provider : undefined };
+          if (provider === 'fallback') {
+            // RPC failed but user likely exists via OAuth — show generic hint
+            return { success: false, error: '该邮箱已通过第三方账号注册，请使用对应的登录方式', oauthProvider: 'oauth' };
+          }
+          return { success: false, error: '邮箱或密码错误，请检查后重试' };
         }
         if (msg.includes('email not confirmed')) {
           return { success: false, error: '请先验证邮箱后再登录' };
@@ -381,7 +421,7 @@ export const demoAuthApi = {
   },
 
   async signUp(email: string, password: string, name: string): Promise<AuthResult> {
-    if (!isSupabaseConfigured) {
+    if (!isSupabaseConfigured || isDemoMode()) {
       const demoUser: DemoUser = {
         id: 'demo-' + Math.random().toString(36).substring(2, 15),
         email,
