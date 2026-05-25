@@ -60,7 +60,7 @@ function getDemoUserFromSession(): User | null {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => getCurrentUser());
   const [loading, setLoading] = useState(true);
 
   // Init auth and subscribe to changes — supabase-js is the single source of truth
@@ -70,25 +70,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const timeoutId = setTimeout(() => setLoading(false), 5000);
 
       if (!isSupabaseConfigured) {
-        const demoUser = getDemoUserFromSession();
-        setUser(demoUser);
+        // Already set from useState init, just confirm
+        clearTimeout(timeoutId);
+        setLoading(false);
       } else {
-        // Use getCurrentUser() for synchronous detection (same logic as UserMenu)
-        // to avoid race conditions between async init and sync dropdown detection.
-        // This reads localStorage synchronously and handles demo-session fallback.
-        const demoUser = getCurrentUser();
-        if (demoUser) {
-          setUser({
-            id: demoUser.id,
-            email: demoUser.email || '',
-            name: demoUser.name,
-            avatar_url: demoUser.avatar,
-          });
-        }
+        // Initial state already set from getCurrentUser() in useState init.
+        // For Supabase, async validation is informational only (updates user metadata).
+        clearTimeout(timeoutId);
+        setLoading(false);
       }
-
-      clearTimeout(timeoutId);
-      setLoading(false);
     }
 
     initAuth();
