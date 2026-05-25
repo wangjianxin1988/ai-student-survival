@@ -75,8 +75,14 @@ function toUser(demoUser: DemoUser | null): User | null {
 }
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => toUser(getCurrentUser()));
+  // Start with null (SSR-safe), then read from window global in useEffect (client-only).
+  // The inline <script> in Layout.astro populates window.__INITIAL_AUTH_USER__ before React hydrates.
+  const [user, setUser] = useState<User | null>(null);
+  const [isHydrated, setIsHydrated] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Store the initial user from the inline script — never let it be overwritten by null
+  // from the first onAuthStateChange fire (which happens before the initial user is set).
+  const initialUser = React.useRef<User | null>(null);
 
   // Subscribe to auth.ts's single onAuthStateChange — this is the ONE listener
   // that all components (LoginForm, RegisterForm, UserMenu) share.
@@ -85,9 +91,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Read from the pre-populated window global (set by Layout.astro inline script).
+    const w = (window as any).__INITIAL_AUTH_USER__;
+    if (w) {
+      const u: User = {
+        id: w.id,
+        email: w.email || '',
+        name: w.name || '',
+        avatar_url: w.avatar_url || '',
+      };
+      initialUser.current = u;
+      setUser(u);
+    }
+
     // Subscribe to auth.ts's unified auth state
     const unsubscribe = onAuthStateChange((demoUser) => {
-      setUser(toUser(demoUser));
+      const newUser = toUser(demoUser);
+      if (initialUser.current && newUser === null) {
+        return; // Guard: don't overwrite initial user with null from early onAuthStateChange
+      }
+      if (newUser) {
+        initialUser.current = newUser;
+      }
+      setUser(newUser);
     });
 
     // Safety timeout — don't leave loading=true forever
@@ -95,6 +121,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Fire once immediately (getCurrentUser already set initial state)
     setLoading(false);
+    setIsHydrated(true);
 
     return () => {
       unsubscribe();

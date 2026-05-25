@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { demoAuthApi } from "@/lib/auth";
-import { useAuth } from "./AuthProvider";
+import { demoAuthApi, onAuthStateChange, type DemoUser } from "@/lib/auth";
 
 interface UserMenuProps {
   locale?: "zh" | "en";
@@ -45,23 +44,48 @@ const translations = {
 };
 
 export default function UserMenu({ locale = "zh" }: UserMenuProps) {
-  const { user, signOut } = useAuth();
+  // Read user directly from window global (set by Layout.astro inline script).
+  // This bypasses the React context island boundary issue.
+  const [user, setUser] = useState<DemoUser | null>(() => {
+    if (typeof window === "undefined") return null;
+    const w = (window as any).__INITIAL_AUTH_USER__;
+    if (!w) return null;
+    return {
+      id: w.id,
+      email: w.email || "",
+      name: w.name || "",
+      avatar: w.avatar_url || "",
+      created_at: "",
+    };
+  });
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const t = translations[locale];
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    // Subscribe to auth state changes for cross-tab sync
+    const unsubscribe = onAuthStateChange((demoUser) => {
+      setUser(demoUser);
+    });
+
+    // Click outside to close menu
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      unsubscribe();
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleSignOut = async () => {
-    await signOut();
+    await demoAuthApi.signOut();
     setIsOpen(false);
     window.location.href = "/";
   };
@@ -85,14 +109,8 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
     );
   }
 
-  // Convert AuthProvider's {id, email, name?, avatar_url?} to UserMenu's DemoUser fields
-  const menuUser = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-    avatar: user.avatar_url,
-    created_at: "",
-  };
+  // user is already DemoUser type (set from window.__INITIAL_AUTH_USER__ in useState initializer)
+  const menuUser = user;
 
   return (
     <div className="relative" ref={menuRef}>
