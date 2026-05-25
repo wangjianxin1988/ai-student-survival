@@ -464,9 +464,12 @@ export const demoAuthApi = {
     }
     try {
       sessionStorage.setItem('oauth_return_to', returnTo);
+      // Include locale in redirectTo so callback page knows which language to use
+      const locale = window.location.pathname.startsWith('/en') ? 'en' : 'zh';
+      const localeParam = `?locale=${locale}`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: `${window.location.origin}/auth/callback` },
+        options: { redirectTo: `${window.location.origin}/auth/callback${localeParam}` },
       });
       return { error: error?.message };
     } catch (err) {

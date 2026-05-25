@@ -47,7 +47,10 @@ function CreatePostContent() {
       const result = await response.json();
 
       if (result.success) {
-        window.location.href = '/community';
+        // Detect locale from current path and redirect to correct community page
+        const pathParts = window.location.pathname.split('/');
+        const isEn = pathParts[1] === 'en';
+        window.location.href = `${isEn ? '/en/community' : '/community'}?fresh=1`;
       } else {
         alert(result.error?.message || '发布失败，请重试');
       }

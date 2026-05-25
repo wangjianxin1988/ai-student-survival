@@ -69,6 +69,8 @@ export default function RegisterForm({
   const [emailVerified, setEmailVerified] = useState(false);
   const [showOAuthHint, setShowOAuthHint] = useState(false);
   const [oauthProvider, setOauthProvider] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
 
   const t = translations[locale];
 
@@ -230,6 +232,28 @@ export default function RegisterForm({
     setIsLoading(false);
   };
 
+  const handleResendVerification = async () => {
+    setResending(true);
+    setResendSent(false);
+    try {
+      const origin = window.location.origin;
+      const res = await fetch(`${origin}/api/auth/resend-confirmation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json();
+      if (json.success) {
+        setResendSent(true);
+      } else {
+        alert(json.error || (locale === 'zh' ? '重发失败，请稍后重试' : 'Resend failed, please try again later'));
+      }
+    } catch {
+      alert(locale === 'zh' ? '网络错误，请稍后重试' : 'Network error, please try again');
+    }
+    setResending(false);
+  };
+
   const handleGoogleSignIn = async () => {
     sessionStorage.setItem('oauth_return_to', `/${locale === 'en' ? 'en/' : ''}user`);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -273,15 +297,34 @@ export default function RegisterForm({
             ? `验证邮件已发送至 ${email}，请查收并点击邮件中的链接完成激活。`
             : `A verification email has been sent to ${email}. Please check your inbox and click the link to activate your account.`}
         </p>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 mb-2">
           {locale === "zh" ? "邮件可能在垃圾邮件文件夹中" : "Check your spam folder if you don't see it"}
         </p>
-        <a
-          href={locale === "zh" ? "/auth/login" : "/en/auth/login"}
-          className="inline-block px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors"
-        >
-          {locale === "zh" ? "前往登录" : "Go to Login"}
-        </a>
+
+        {resendSent ? (
+          <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm mb-4">
+            {locale === "zh" ? "✅ 验证邮件已重新发送，请查收" : "✅ Verification email resent, please check your inbox"}
+          </div>
+        ) : (
+          <button
+            onClick={handleResendVerification}
+            disabled={resending}
+            className="text-sm text-primary-600 hover:text-primary-700 underline mb-4 disabled:opacity-50"
+          >
+            {resending
+              ? (locale === "zh" ? "发送中..." : "Sending...")
+              : (locale === "zh" ? "没收到邮件？重新发送" : "Didn't receive it? Resend email")}
+          </button>
+        )}
+
+        <div className="mt-2">
+          <a
+            href={locale === "zh" ? "/auth/login" : "/en/auth/login"}
+            className="inline-block px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors"
+          >
+            {locale === "zh" ? "前往登录" : "Go to Login"}
+          </a>
+        </div>
       </div>
     );
   }

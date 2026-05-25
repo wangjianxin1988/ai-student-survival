@@ -96,8 +96,18 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   const currentUserId = clientUserId || serverUserId || undefined;
   const isLoggedIn = Boolean(currentUserId);
 
+  // Refetch when navigating back from create post (?fresh=1)
   useEffect(() => {
-    fetchPosts();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('fresh') === '1') {
+      // Remove fresh param from URL without page reload
+      params.delete('fresh');
+      const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+      window.history.replaceState({}, '', newUrl);
+      fetchPosts();
+    } else {
+      fetchPosts();
+    }
   }, [category, sort, page]);
 
   useEffect(() => {
