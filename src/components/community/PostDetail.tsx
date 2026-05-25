@@ -1,10 +1,50 @@
 import React, { useState, useEffect } from "react";
 import type { CommunityPost, PostComment } from "@/lib/community/types";
-import { getAccessToken } from "@/lib/auth";
+import { getAuthHeaders } from "@/lib/auth";
+import { isDemoMode } from "@/lib/supabase";
 
 interface PostDetailProps {
   postId: string;
   currentUserId?: string;
+}
+
+// Unified user detection: demo session + Supabase localStorage session
+function getCurrentClientUser(): { id: string; email: string; name?: string; avatar?: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    // Check demo session first
+    const demoRaw = sessionStorage.getItem('demo_session');
+    if (demoRaw) {
+      const d = JSON.parse(demoRaw);
+      if (d && d.id) return { id: d.id, email: d.email || '', name: d.name, avatar: d.avatar };
+    }
+    // Check Supabase localStorage sessions
+    const keys = Object.keys(localStorage);
+    for (const k of keys) {
+      if (!k.startsWith('sb-')) continue;
+      if (k.indexOf('auth') === -1 && k.indexOf('token') === -1) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      try {
+        const p = JSON.parse(raw);
+        const accessToken = p?.tokens?.access_token || p?.access_token;
+        const refreshToken = p?.tokens?.refresh_token || p?.refresh_token;
+        if (!accessToken || !refreshToken) continue;
+        const parts = accessToken.split('.');
+        if (parts.length !== 3) continue;
+        const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+        if (!['ES256', 'RS256'].includes(header.alg)) continue;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (!payload.sub || typeof payload.sub !== 'string') continue;
+        const user = p?.user || (p?.tokens?.user);
+        if (user) {
+          return { id: user.id || payload.sub, email: user.email || '', name: user.user_metadata?.name || '', avatar: user.user_metadata?.avatar_url || '' };
+        }
+        return { id: payload.sub, email: '', name: '', avatar: '' };
+      } catch { /* skip */ }
+    }
+  } catch {}
+  return null;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -269,7 +309,7 @@ function calculateScore(post: CommunityPost): number {
   );
 }
 
-export function PostDetail({ postId, currentUserId }: PostDetailProps) {
+export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailProps) {
   const [post, setPost] = useState<CommunityPost | null>(null);
   const [comments, setComments] = useState<PostComment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -278,6 +318,23 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
   const [likesCount, setLikesCount] = useState(0);
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [commentContent, setCommentContent] = useState("");
+  // Client-side user detection: starts with server prop, updates on client
+  const [clientUserId, setClientUserId] = useState<string | undefined>(serverUserId);
+
+  // Poll for session changes (same tab won't fire storage event)
+  useEffect(() => {
+    const checkSession = () => {
+      const user = getCurrentClientUser();
+      if (user) {
+        setClientUserId(prev => { if (!prev || prev !== user.id) return user.id; return prev; });
+      } else {
+        setClientUserId(prev => { if (prev !== undefined) return undefined; return prev; });
+      }
+    };
+    checkSession();
+    const interval = setInterval(checkSession, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     fetchPost();
@@ -315,20 +372,25 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
   };
 
   const handleLike = async () => {
-    if (!currentUserId) return;
+    if (!clientUserId) return;
+
+    // Optimistic update
+    setLiked(!liked);
+    setLikesCount(liked ? likesCount - 1 : likesCount + 1);
+
+    // In demo mode, skip API
+    if (isDemoMode()) return;
 
     try {
-      const accessToken = await getAccessToken();
+      const headers = await getAuthHeaders();
       const response = await fetch(`/api/community/${postId}/like`, {
         method: "POST",
-        headers: {
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json', ...headers },
       });
       const data = await response.json();
       if (data.success) {
         setLiked(data.data.liked);
-        setLikesCount(data.data.likesCount);
+        setLikesCount(data.data.likesCount ?? likesCount);
       }
     } catch (error) {
       console.error("Failed to like:", error);
@@ -336,20 +398,25 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
   };
 
   const handleFavorite = async () => {
-    if (!currentUserId) return;
+    if (!clientUserId) return;
+
+    // Optimistic update
+    setFavorited(!favorited);
+    setFavoritesCount(favorited ? favoritesCount - 1 : favoritesCount + 1);
+
+    // In demo mode, skip API
+    if (isDemoMode()) return;
 
     try {
-      const accessToken = await getAccessToken();
+      const headers = await getAuthHeaders();
       const response = await fetch(`/api/community/${postId}/favorite`, {
         method: "POST",
-        headers: {
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json', ...headers },
       });
       const data = await response.json();
       if (data.success) {
         setFavorited(data.data.favorited);
-        setFavoritesCount(data.data.favoritesCount);
+        setFavoritesCount(data.data.favoritesCount ?? favoritesCount);
       }
     } catch (error) {
       console.error("Failed to favorite:", error);
@@ -358,22 +425,37 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
 
   const handleComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentUserId || !commentContent.trim()) return;
+    if (!clientUserId || !commentContent.trim()) return;
+
+    const newComment = {
+      id: 'temp-' + Date.now(),
+      content: commentContent,
+      userId: clientUserId,
+      userName: '匿名用户',
+      createdAt: new Date().toISOString(),
+    };
+
+    // Optimistic update
+    setComments([...comments, newComment]);
+    setCommentContent("");
+
+    // In demo mode, skip API
+    if (isDemoMode()) return;
 
     try {
-      const accessToken = await getAccessToken();
+      const headers = await getAuthHeaders();
       const response = await fetch(`/api/community/${postId}/comments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
+          ...headers,
         },
         body: JSON.stringify({ content: commentContent }),
       });
       const data = await response.json();
       if (data.success) {
-        setComments([...comments, data.data]);
-        setCommentContent("");
+        // Replace temp comment with real one
+        setComments(prev => [...prev.slice(0, -1), data.data]);
         // Update comments count
         if (post) {
           setPost({ ...post, commentsCount: (post.commentsCount || 0) + 1 });
@@ -509,7 +591,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
         <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
           <button
             onClick={handleLike}
-            disabled={!currentUserId}
+            disabled={!clientUserId}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
               liked
                 ? "bg-red-50 text-red-500"
@@ -534,7 +616,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
 
           <button
             onClick={handleFavorite}
-            disabled={!currentUserId}
+            disabled={!clientUserId}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
               favorited
                 ? "bg-yellow-50 text-yellow-500"
@@ -564,7 +646,7 @@ export function PostDetail({ postId, currentUserId }: PostDetailProps) {
           评论 ({comments.length})
         </h3>
 
-        {currentUserId ? (
+        {clientUserId ? (
           <form onSubmit={handleComment} className="mb-6">
             <textarea
               value={commentContent}

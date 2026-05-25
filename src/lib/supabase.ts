@@ -14,11 +14,31 @@ const supabaseServiceKey = (import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string 
   || '';
 
 // Check if Supabase is properly configured
+// FORCE_DEMO_AUTH env var: when true, bypasses Supabase even when configured (for demo/testing)
+// Note: Only available during SSR/build; for runtime check, use isDemoMode()
 export const isSupabaseConfigured = Boolean(
   supabaseUrl && supabaseAnonKey &&
   !supabaseUrl.includes('your-project') &&
   !supabaseAnonKey.includes('your-anon-key')
 );
+
+// Runtime demo mode check: checks for a cookie or localStorage flag
+// Set by: document.cookie = 'demo_auth=1' or localStorage.setItem('demo_auth', '1')
+export function isDemoMode(): boolean {
+  if (typeof document === 'undefined') return false;
+  // Check URL param for demo mode (dev/testing)
+  if (typeof window !== 'undefined') {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('demo') === '1') return true;
+    } catch { /* ignore */ }
+    // Check localStorage flag
+    try {
+      if (localStorage.getItem('__demo_auth__') === '1') return true;
+    } catch { /* ignore */ }
+  }
+  return false;
+}
 
 // Lazy-loaded Supabase client to avoid WebSocket initialization during build
 let _supabase: SupabaseClient | null = null;

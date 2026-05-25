@@ -9,4 +9,5 @@ pages_build_output_dir = "dist"
 # GitHub Actions 构建时通过 PUBLIC_SUPABASE_* 前缀传入 (Vite 会自动暴露为 import.meta.env.PUBLIC_*)
 [vars]
 SUPABASE_URL = "https://giynvpfnzzelzwpmsgtf.supabase.co"
+# FORCE_DEMO_AUTH: set to "true" in Cloudflare Dashboard to enable demo auth for testing
 # SUPABASE_ANON_KEY 在 Cloudflare Dashboard 环境变量中配置，不在此文件中硬编码

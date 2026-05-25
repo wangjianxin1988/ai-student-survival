@@ -15,6 +15,18 @@ export interface ServerUser {
 }
 
 export async function getServerUser(request: Request): Promise<ServerUser | null> {
+  // Check for demo mode: client sends demo user ID in special header
+  const demoUserId = request.headers.get('X-Demo-User-Id');
+  const demoEmail = request.headers.get('X-Demo-User-Email');
+  const demoName = request.headers.get('X-Demo-User-Name');
+  if (demoUserId) {
+    return {
+      id: demoUserId,
+      email: demoEmail || 'demo@example.com',
+      name: demoName || undefined,
+    };
+  }
+
   if (!isSupabaseConfigured) {
     return null;
   }

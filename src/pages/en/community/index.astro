@@ -1,15 +1,5 @@
 ---
-import { CommunityFeed } from '@/components/community';
-import Layout from '@/layouts/Layout.astro';
-import { getCurrentUser } from '@/lib/auth';
-
-const user = getCurrentUser();
+// Redirect /en/community/ to /en/questions/ (unified Q&A + community page)
+export const prerender = false;
+return Astro.redirect('/en/questions');
 ---
-
-<Layout title="Community - AI Student Survival Guide">
-  <div class="min-h-screen bg-gray-50 py-8">
-    <div class="max-w-5xl mx-auto px-4">
-      <CommunityFeed client:load currentUserId={user?.id} locale="en" />
-    </div>
-  </div>
-</Layout>

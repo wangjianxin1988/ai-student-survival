@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import type { CommunityPost } from "@/lib/community/types";
 
 interface PostCardProps {
@@ -69,28 +69,20 @@ export function PostCard({
   onClick,
   currentUserId,
 }: PostCardProps) {
-  const [liked, setLiked] = useState(post.isLiked || false);
-  const [favorited, setFavorited] = useState(post.isFavorited || false);
-  const [likesCount, setLikesCount] = useState(post.likesCount || 0);
-  const [favoritesCount, setFavoritesCount] = useState(
-    post.favoritesCount || 0,
-  );
+  const liked = post.isLiked || false;
+  const favorited = post.isFavorited || false;
+  const likesCount = post.likesCount || 0;
+  const favoritesCount = post.favoritesCount || 0;
 
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!currentUserId) return;
-
-    setLiked(!liked);
-    setLikesCount(liked ? likesCount - 1 : likesCount + 1);
     onLike?.(post.id);
   };
 
   const handleFavorite = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!currentUserId) return;
-
-    setFavorited(!favorited);
-    setFavoritesCount(favorited ? favoritesCount - 1 : favoritesCount + 1);
     onFavorite?.(post.id);
   };
 

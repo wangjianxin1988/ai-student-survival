@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import QuestionCard from './QuestionCard';
 import {
   questionsData,
@@ -10,6 +10,7 @@ import {
   type QuestionCategory,
   QUESTION_CATEGORIES,
 } from '@/data/questions';
+import { CommunityFeed } from '@/components/community';
 
 interface QuestionsClientProps {
   locale?: 'zh' | 'en';
@@ -29,6 +30,7 @@ const translations = {
     hotQuestions: '热门问题',
     unresolvedQuestions: '待解决问题',
     allQuestions: '全部问题',
+    communityPosts: '社区动态',
     noResults: '没有找到相关问题',
     askQuestion: '提问',
     results: '显示 {count} 个问题',
@@ -58,6 +60,7 @@ const translations = {
     hotQuestions: 'Hot Questions',
     unresolvedQuestions: 'Unresolved Questions',
     allQuestions: 'All Questions',
+    communityPosts: 'Community Posts',
     noResults: 'No questions found',
     askQuestion: 'Ask Question',
     results: 'Showing {count} questions',
@@ -81,7 +84,7 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
   const [selectedCategory, setSelectedCategory] = useState<QuestionCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'hottest' | 'unanswered'>('newest');
-  const [activeTab, setActiveTab] = useState<'all' | 'hot' | 'unanswered'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'hot' | 'unanswered' | 'community'>('all');
 
   // Filter and sort questions
   const filteredQuestions = useMemo(() => {
@@ -116,26 +119,28 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
             <p className="text-gray-600">{t.subtitle}</p>
           </div>
 
-          {/* Search bar */}
-          <div className="max-w-2xl mx-auto mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder={t.searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-              />
-              <svg
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
+          {/* Search bar — hidden in community tab */}
+          {activeTab !== 'community' && (
+            <div className="max-w-2xl mx-auto mb-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder={t.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                />
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Ask button */}
           <div className="flex justify-center">
@@ -196,39 +201,51 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                     {unresolvedQuestions.length}
                   </span>
                 </button>
-              </nav>
-            </div>
-
-            {/* Categories */}
-            <div className="bg-white rounded-lg border border-gray-200 p-4">
-              <h3 className="text-sm font-semibold text-gray-900 mb-3">{t.filters}</h3>
-              <div className="space-y-1">
                 <button
-                  onClick={() => setSelectedCategory(null)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                    selectedCategory === null
+                  onClick={() => setActiveTab('community')}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    activeTab === 'community'
                       ? 'bg-primary-100 text-primary-700'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  {t.allCategories}
+                  {t.communityPosts}
                 </button>
-                {categories.map(([key, cat]) => (
+              </nav>
+            </div>
+
+            {/* Categories — hidden in community tab (CommunityFeed has its own filter) */}
+            {activeTab !== 'community' && (
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t.filters}</h3>
+                <div className="space-y-1">
                   <button
-                    key={key}
-                    onClick={() => setSelectedCategory(key)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
-                      selectedCategory === key
+                    onClick={() => setSelectedCategory(null)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                      selectedCategory === null
                         ? 'bg-primary-100 text-primary-700'
                         : 'text-gray-700 hover:bg-gray-100'
                     }`}
                   >
-                    <span>{cat.icon}</span>
-                    <span>{locale === 'zh' ? cat.label : cat.labelEn}</span>
+                    {t.allCategories}
                   </button>
-                ))}
+                  {categories.map(([key, cat]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSelectedCategory(key)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors flex items-center gap-2 ${
+                        selectedCategory === key
+                          ? 'bg-primary-100 text-primary-700'
+                          : 'text-gray-700 hover:bg-gray-100'
+                      }`}
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{locale === 'zh' ? cat.label : cat.labelEn}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Browse More Links */}
             <div className="bg-white rounded-lg border border-gray-200 p-4">
@@ -260,8 +277,8 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
 
           {/* Questions list */}
           <div className="flex-1">
-            {/* Sort controls */}
-            {activeTab === 'all' && (
+            {/* Sort controls — only show for Q&A tabs */}
+            {activeTab !== 'community' && activeTab === 'all' && (
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-600">
                   {t.results.replace('{count}', String(filteredQuestions.length))}
@@ -281,9 +298,11 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
               </div>
             )}
 
-            {/* Questions */}
+            {/* Questions or Community Feed */}
             <div className="space-y-4">
-              {filteredQuestions.length > 0 ? (
+              {activeTab === 'community' ? (
+                <CommunityFeed locale={locale} />
+              ) : filteredQuestions.length > 0 ? (
                 filteredQuestions.map((question) => (
                   <QuestionCard key={question.id} question={question} locale={locale} />
                 ))

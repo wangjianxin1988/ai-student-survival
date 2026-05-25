@@ -3,7 +3,8 @@ import type { CommunityPost } from "@/lib/community/types";
 import { PostCard } from "./PostCard";
 import { CategoryFilter, type CommunityCategory } from "./CategoryFilter";
 import { getCurrentLocale, getLocaleHref } from "@/lib/i18n";
-import { getAccessToken } from "@/lib/auth";
+import { getAuthHeaders } from "@/lib/auth";
+import { isDemoMode } from "@/lib/supabase";
 
 const translations = {
   zh: {
@@ -56,6 +57,51 @@ function getDemoUserFromSession(): { id: string; email: string; name?: string; a
   return null;
 }
 
+// Read Supabase user from localStorage — same logic as LoginForm and Layout.astro
+// Scans all sb-* keys for valid JWT tokens (ES256/RS256 with sub claim)
+function getSupabaseUserFromLocalStorage(): { id: string; email: string; name?: string; avatar?: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const keys = Object.keys(localStorage);
+    for (const k of keys) {
+      if (!k.startsWith('sb-')) continue;
+      if (k.indexOf('auth') === -1 && k.indexOf('token') === -1) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      try {
+        const p = JSON.parse(raw);
+        const accessToken = p?.tokens?.access_token || p?.access_token;
+        const refreshToken = p?.tokens?.refresh_token || p?.refresh_token;
+        if (!accessToken || !refreshToken) continue;
+        const parts = accessToken.split('.');
+        if (parts.length !== 3) continue;
+        const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+        if (!['ES256', 'RS256'].includes(header.alg)) continue;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (!payload.sub || typeof payload.sub !== 'string') continue;
+        const user = p?.user || (p?.tokens?.user);
+        if (user) {
+          return {
+            id: user.id || payload.sub,
+            email: user.email || '',
+            name: user.user_metadata?.name || user.user_metadata?.full_name || '',
+            avatar: user.user_metadata?.avatar_url || user.user_metadata?.picture || '',
+          };
+        }
+        return { id: payload.sub, email: '', name: '', avatar: '' };
+      } catch { /* skip invalid entry */ }
+    }
+  } catch {}
+  return null;
+}
+
+// Unified user detection: demo session OR Supabase localStorage session
+function getCurrentClientUser(): { id: string; email: string; name?: string; avatar?: string } | null {
+  const demo = getDemoUserFromSession();
+  if (demo) return demo;
+  return getSupabaseUserFromLocalStorage();
+}
+
 export function CommunityFeed({ currentUserId: serverUserId, locale }: CommunityFeedProps) {
   const currentLocale = locale || getCurrentLocale();
   const t = translations[currentLocale];
@@ -70,25 +116,33 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   const [clientUserId, setClientUserId] = useState<string | undefined>(serverUserId);
   const limit = 20;
 
-  // Poll sessionStorage for demo session changes (same tab doesn't fire storage event)
+  // Poll for auth session changes (both demo and Supabase sessions).
+  // Checks: demo_session (sessionStorage) + Supabase localStorage.
+  // Same tab doesn't fire storage event, so we poll every 500ms.
   useEffect(() => {
-    const checkDemoSession = () => {
-      const demoUser = getDemoUserFromSession();
-      if (demoUser) {
+    const checkSession = () => {
+      const user = getCurrentClientUser();
+      if (user) {
         setClientUserId(prev => {
-          if (!prev || prev !== demoUser.id) {
-            return demoUser.id;
+          if (!prev || prev !== user.id) {
+            return user.id;
           }
+          return prev;
+        });
+      } else {
+        // User logged out — clear clientUserId
+        setClientUserId(prev => {
+          if (prev !== undefined) return undefined;
           return prev;
         });
       }
     };
 
-    // Check immediately
-    checkDemoSession();
+    // Check immediately on mount
+    checkSession();
 
-    // Poll every 500ms
-    const interval = setInterval(checkDemoSession, 500);
+    // Poll every 500ms to catch session changes within the same tab
+    const interval = setInterval(checkSession, 500);
     return () => clearInterval(interval);
   }, []);
 
@@ -153,36 +207,67 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
 
   const handleLike = async (postId: string) => {
     if (!currentUserId) return;
+
+    // Optimistic update: toggle like in local posts state immediately
+    setPosts(prev => prev.map(post => {
+      if (post.id !== postId) return post;
+      const isCurrentlyLiked = post.isLiked;
+      return {
+        ...post,
+        isLiked: !isCurrentlyLiked,
+        likesCount: (post.likesCount || 0) + (isCurrentlyLiked ? -1 : 1),
+      };
+    }));
+
+    // In demo mode, skip API call
+    if (isDemoMode()) return;
+
     try {
-      const accessToken = await getAccessToken();
+      const headers = await getAuthHeaders();
       await fetch(`/api/community/${postId}/like`, {
         method: "POST",
-        headers: {
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json', ...headers },
       });
+      fetchPosts();
     } catch (error) {
       console.error("Failed to like:", error);
+      // Revert optimistic update on error
+      fetchPosts();
     }
   };
 
   const handleFavorite = async (postId: string) => {
     if (!currentUserId) return;
+
+    // Optimistic update: toggle favorite in local posts state immediately
+    setPosts(prev => prev.map(post => {
+      if (post.id !== postId) return post;
+      const isCurrentlyFavorited = post.isFavorited;
+      return {
+        ...post,
+        isFavorited: !isCurrentlyFavorited,
+        favoritesCount: (post.favoritesCount || 0) + (isCurrentlyFavorited ? -1 : 1),
+      };
+    }));
+
+    // In demo mode, skip API call
+    if (isDemoMode()) return;
+
     try {
-      const accessToken = await getAccessToken();
+      const headers = await getAuthHeaders();
       await fetch(`/api/community/${postId}/favorite`, {
         method: "POST",
-        headers: {
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json', ...headers },
       });
+      fetchPosts();
     } catch (error) {
       console.error("Failed to favorite:", error);
+      fetchPosts();
     }
   };
 
   const handlePostClick = (postId: string) => {
-    window.location.href = getLocaleHref(`/community/${postId}`, currentLocale);
+    window.location.href = getLocaleHref(`/questions`, currentLocale);
   };
 
   const totalPages = Math.ceil(total / limit);
