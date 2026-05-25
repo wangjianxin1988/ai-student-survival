@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { getLocaleHref } from "@/lib/i18n";
-import { initAuth } from "@/lib/auth";
+import { initAuth, onAuthStateChange, type DemoUser } from "@/lib/auth";
 
 interface AuthGateProps {
   children: React.ReactNode;
@@ -12,29 +11,48 @@ interface AuthGateProps {
 /**
  * AuthGate - Client-side auth check component
  * Shows content only when user is logged in, otherwise shows fallback or redirects to login
- * Uses initAuth() to ensure OAuth sessions are detected synchronously
+ * Directly uses initAuth() + onAuthStateChange() to ensure OAuth sessions stored in
+ * localStorage (sb-{project-ref}-auth-token) are properly detected — this is the same
+ * mechanism used by UserButton/UserMenu, guaranteeing consistency across the app.
  */
 export default function AuthGate({ children, locale = "zh", fallback }: AuthGateProps) {
-  const { user, loading } = useAuth();
-  const [authChecked, setAuthChecked] = useState(false);
+  const [user, setUser] = useState<DemoUser | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Ensure auth is initialized with Supabase session detection
   useEffect(() => {
-    initAuth().then(() => {
-      setAuthChecked(true);
+    let cancelled = false;
+
+    async function checkAuth() {
+      const currentUser = await initAuth();
+      if (!cancelled) {
+        setUser(currentUser);
+        setLoading(false);
+      }
+    }
+
+    checkAuth();
+
+    const unsubscribe = onAuthStateChange((newUser) => {
+      if (!cancelled) {
+        setUser(newUser);
+        setLoading(false);
+      }
     });
-  }, []);
 
-  // Safety timeout: if still loading after 5s, proceed with current state
-  useEffect(() => {
+    // Safety timeout: if still loading after 5s, proceed with current state
     const timeout = setTimeout(() => {
-      setAuthChecked(true);
+      if (!cancelled) setLoading(false);
     }, 5000);
-    return () => clearTimeout(timeout);
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   // Show loading state during auth initialization
-  if (loading || !authChecked) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
