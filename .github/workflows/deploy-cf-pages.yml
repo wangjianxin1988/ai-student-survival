@@ -48,6 +48,7 @@ jobs:
           projectName: ${{ env.CLOUDFLARE_PROJECT_NAME }}
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          commitMessage: "Deploy ${{ github.sha }}"
 
   test:
     runs-on: ubuntu-latest
