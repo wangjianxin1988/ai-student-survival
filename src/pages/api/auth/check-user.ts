@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export const prerender = false;
 
@@ -8,43 +8,42 @@ export const POST: APIRoute = async ({ request }) => {
     const { email } = await request.json();
 
     if (!email || typeof email !== 'string') {
-      return new Response(JSON.stringify({ exists: false, type: null }),
+      return new Response(JSON.stringify({ exists: false, provider: null }),
         { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
     if (!isSupabaseConfigured) {
-      return new Response(JSON.stringify({ exists: false, type: null }),
+      return new Response(JSON.stringify({ exists: false, provider: null }),
         { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // List users (paginated, get first page - typically 50 users)
-    const { data, error } = await supabaseAdmin.auth.admin.listUsers();
+    // Use the SECURITY DEFINER RPC function to check OAuth provider
+    // This works without needing the service role key in the browser bundle
+    const { data, error } = await supabase.rpc('get_oauth_provider_v2', {
+      p_email: email.toLowerCase(),
+    });
 
     if (error) {
-      // Service role key not available at runtime on Cloudflare Pages
-      // Fall back to showing helpful generic message
-      return new Response(JSON.stringify({ exists: false, type: null, fallback: true }),
+      console.error('[check-user] RPC error:', error);
+      // Fall back to generic message
+      return new Response(JSON.stringify({ exists: false, provider: null, fallback: true }),
         { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const users = data?.users || [];
-    const user = users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-
-    if (!user) {
-      return new Response(JSON.stringify({ exists: false, type: null }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } });
+    if (data && typeof data === 'string') {
+      return new Response(JSON.stringify({
+        exists: true,
+        provider: data,
+      }), { status: 200, headers: { 'Content-Type': 'application/json' } });
     }
 
-    const identities = user.identities || [];
-    const hasOAuth = identities.length > 0;
-
-    return new Response(JSON.stringify({
-      exists: true,
-      type: hasOAuth ? 'oauth' : 'password',
-    }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    // No OAuth account found
+    return new Response(JSON.stringify({ exists: false, provider: null }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (e) {
-    return new Response(JSON.stringify({ exists: false, type: null, fallback: true }),
+    console.error('[check-user] Unexpected error:', e);
+    return new Response(JSON.stringify({ exists: false, provider: null, fallback: true }),
       { status: 200, headers: { 'Content-Type': 'application/json' } });
   }
 };

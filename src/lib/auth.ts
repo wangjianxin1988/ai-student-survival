@@ -7,7 +7,7 @@
  * Demo session (sessionStorage) is kept as fallback only when Supabase is NOT configured.
  */
 
-import { supabase, supabaseAdmin, isSupabaseConfigured } from './supabase';
+import { supabase, isSupabaseConfigured } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
 export type DemoUser = {
@@ -44,23 +44,22 @@ export interface MagicLinkResult {
 
 /**
  * Check if an email has an OAuth-linked account (Google/GitHub) in Supabase.
- * Uses a SECURITY DEFINER RPC function that runs with service role privileges,
- * bypassing RLS without needing admin API access.
+ * Calls the /api/auth/check-user server-side endpoint which uses a
+ * SECURITY DEFINER RPC function, keeping the service role key off the client.
  * Returns the provider name ('google' | 'github') if found, null otherwise.
  */
 async function getOAuthProviderForEmail(email: string): Promise<string | null> {
   if (!isSupabaseConfigured || !email) return null;
   try {
-    // Use supabaseAdmin (service role key) — SECURITY DEFINER function runs
-    // with service role privileges, allowing access to auth.users
-    const { data, error } = await supabaseAdmin.rpc('get_oauth_provider_v2', {
-      p_email: email.toLowerCase(),
+    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    const res = await fetch(`${origin}/api/auth/check-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email.toLowerCase() }),
     });
-    if (error) {
-      console.error('[auth] getOAuthProvider RPC error:', error);
-      return null;
-    }
-    if (data && typeof data === 'string') return data;
+    if (!res.ok) return null;
+    const json = await res.json();
+    if (json.exists && json.provider) return json.provider as string;
     return null;
   } catch (_) {
     return null;
