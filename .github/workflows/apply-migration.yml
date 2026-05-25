@@ -28,5 +28,15 @@ jobs:
           if echo "$RESPONSE" | grep -qi "error"; then
             echo "Migration may have issues: $RESPONSE"
           else
-            echo "Migration applied"
+            echo "Migration applied successfully"
           fi
+
+      - name: Verify get_oauth_provider_v2 function works
+        run: |
+          echo "=== Verify function ==="
+          RESULT=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"SELECT get_oauth_provider_v2('\''18801400211@163.com'\'');"}')
+          echo "Function test result: $RESULT"

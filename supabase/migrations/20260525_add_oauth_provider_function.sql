@@ -31,63 +31,22 @@ SET search_path = auth
 AS $$
 DECLARE
   v_provider text;
-  v_provider_id text;
-  v_raw_app_meta jsonb;
-  v_raw_user_meta jsonb;
 BEGIN
-  -- First: check auth.identities table (most reliable for OAuth users)
-  SELECT i.provider, i.id
-  INTO v_provider, v_provider_id
-  FROM auth.identities i
-  WHERE i.identity_data->>'email' = p_email
-    AND i.provider != 'email'
-  LIMIT 1;
-
-  IF v_provider IS NOT NULL THEN
-    RETURN v_provider;
-  END IF;
-
-  -- Also try matching by user_id -> email in identities
-  SELECT i.provider
-  INTO v_provider
-  FROM auth.identities i
-  JOIN auth.users u ON i.user_id = u.id
-  WHERE u.email = p_email
-    AND i.provider != 'email'
-  LIMIT 1;
-
-  IF v_provider IS NOT NULL THEN
-    RETURN v_provider;
-  END IF;
-
-  -- Second: check raw_app_meta_data
-  SELECT u.raw_app_meta_data
-  INTO v_raw_app_meta
-  FROM auth.users u
-  WHERE u.email = p_email;
-
-  IF v_raw_app_meta ? 'provider' THEN
-    RETURN (v_raw_app_meta->>'provider')::text;
-  END IF;
-
-  -- Third: check raw_user_meta_data
-  SELECT u.raw_user_meta_data
-  INTO v_raw_user_meta
-  FROM auth.users u
-  WHERE u.email = p_email;
-
-  IF v_raw_user_meta ? 'provider' THEN
-    RETURN (v_raw_user_meta->>'provider')::text;
-  END IF;
-
-  -- Fourth: try identities with case-insensitive email match
-  SELECT i.provider
-  INTO v_provider
+  -- First: check auth.identities (most reliable for OAuth users)
+  SELECT i.provider INTO v_provider
   FROM auth.identities i
   WHERE LOWER(i.identity_data->>'email') = LOWER(p_email)
     AND i.provider != 'email'
   LIMIT 1;
-
+  IF v_provider IS NOT NULL THEN
+    RETURN v_provider;
+  END IF;
+  -- Second: check raw_app_meta_data
+  SELECT (u.raw_app_meta_data->>'provider')::text INTO v_provider
+  FROM auth.users u
+  WHERE u.email = p_email
+    AND u.raw_app_meta_data ? 'provider'
+  LIMIT 1;
   RETURN v_provider;
 END;
 $$;

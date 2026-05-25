@@ -288,8 +288,17 @@ TEMPLATE_EOF
             DECLARE
               v_provider text;
             BEGIN
-              SELECT (u.raw_app_meta_data->>'provider')::text
-              INTO v_provider
+              -- First: check auth.identities (most reliable for OAuth users)
+              SELECT i.provider INTO v_provider
+              FROM auth.identities i
+              WHERE LOWER(i.identity_data->>'email') = LOWER(p_email)
+                AND i.provider != 'email'
+              LIMIT 1;
+              IF v_provider IS NOT NULL THEN
+                RETURN v_provider;
+              END IF;
+              -- Second: check raw_app_meta_data
+              SELECT (u.raw_app_meta_data->>'provider')::text INTO v_provider
               FROM auth.users u
               WHERE u.email = p_email
                 AND u.raw_app_meta_data ? 'provider'
