@@ -194,10 +194,22 @@ export function getCurrentUser(): DemoUser | null {
         const parsed = JSON.parse(raw);
         const accessToken = parsed?.tokens?.access_token || parsed?.access_token;
         if (accessToken) {
-          const userData = parsed?.user || parsed?.tokens?.user;
-          if (userData) {
-            currentUser = toDemoUser(userData);
-            return currentUser;
+          // Validate JWT structure: must be 3 parts with a valid sub claim
+          // This filters out test/fake tokens that may be left in localStorage
+          const parts = accessToken.split('.');
+          if (parts.length === 3) {
+            try {
+              const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+              if (payload.sub && typeof payload.sub === 'string') {
+                const userData = parsed?.user || parsed?.tokens?.user;
+                if (userData) {
+                  currentUser = toDemoUser(userData);
+                  return currentUser;
+                }
+              }
+            } catch (_) {
+              // Invalid JWT payload — treat as not logged in
+            }
           }
         }
       }
