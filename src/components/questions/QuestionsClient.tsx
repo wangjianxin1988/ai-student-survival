@@ -173,6 +173,23 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
     return communityPosts.slice(0, 5);
   }, [communityPosts, activeTab, selectedCategory]);
 
+  // Filter and sort static questions
+  const filteredQuestions = useMemo(() => {
+    if (activeTab === 'hot') {
+      return getHotQuestions(5);
+    }
+    if (activeTab === 'unanswered') {
+      return getUnansweredQuestions();
+    }
+
+    let questions = filterQuestions({
+      category: selectedCategory || undefined,
+      search: searchQuery || undefined,
+    });
+
+    return sortQuestions(questions, sortBy);
+  }, [selectedCategory, searchQuery, sortBy, activeTab]);
+
   // Merge static questions with real community posts for display
   const mergedQuestions = useMemo(() => {
     if (activeTab === 'community') return [];
@@ -198,39 +215,18 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
         _post: post,
       }));
 
-    // For 'all' tab: show real posts first, then static questions
-    // For 'hot'/'unanswered': show real posts mixed with static
-    const staticQuestions = filteredQuestions;
-
     if (activeTab === 'all') {
-      return [...communityAsQuestions, ...staticQuestions];
+      return [...communityAsQuestions, ...filteredQuestions];
     }
     // For hot/unanswered: interleave
     const result: (typeof communityAsQuestions[0] | Question)[] = [];
-    const maxLen = Math.max(communityAsQuestions.length, staticQuestions.length);
+    const maxLen = Math.max(communityAsQuestions.length, filteredQuestions.length);
     for (let i = 0; i < maxLen; i++) {
       if (communityAsQuestions[i]) result.push(communityAsQuestions[i]);
-      if (staticQuestions[i]) result.push(staticQuestions[i]);
+      if (filteredQuestions[i]) result.push(filteredQuestions[i]);
     }
     return result;
   }, [activeTab, filteredQuestions, filteredCommunityPosts]);
-
-  // Filter and sort questions
-  const filteredQuestions = useMemo(() => {
-    if (activeTab === 'hot') {
-      return getHotQuestions(5);
-    }
-    if (activeTab === 'unanswered') {
-      return getUnansweredQuestions();
-    }
-
-    let questions = filterQuestions({
-      category: selectedCategory || undefined,
-      search: searchQuery || undefined,
-    });
-
-    return sortQuestions(questions, sortBy);
-  }, [selectedCategory, searchQuery, sortBy, activeTab]);
 
   // Get hot and unanswered counts
   const hotQuestions = useMemo(() => getHotQuestions(5), []);
