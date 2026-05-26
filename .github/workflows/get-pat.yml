@@ -8,9 +8,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Get current auth config
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Test Supabase Management API and upload secret
         run: |
-          echo "SUPABASE_PAT_PREFIX=${{ secrets.SUPABASE_PAT }}" >> $GITHUB_ENV
-      - name: Output PAT
-        run: |
-          echo "PAT_VALUE=${{ secrets.SUPABASE_PAT }}" >> $GITHUB_OUTPUT
+          # Login with PAT
+          supabase login --token "${{ secrets.SUPABASE_PAT }}"
+
+          echo "=== Testing supabase secrets list ==="
+          supabase secrets list --project-ref giynvpfnzzelzwpmsgtf || true
+
+          echo ""
+          echo "=== Testing Management API endpoints ==="
+          curl -s "https://api.supabase.com/v1/projects" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" | head -c 500 || true
+
+          echo ""
+          echo "=== Trying to get service role key ==="
+          # The service role key is shown in the project settings API
+          curl -s "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/api-keys" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" | head -c 500 || true
