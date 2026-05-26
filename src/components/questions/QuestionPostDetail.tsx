@@ -281,6 +281,12 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
       navigator.share({ title: post?.title, text: post?.content?.substring(0, 100), url });
     } else {
       await navigator.clipboard.writeText(url);
+      // Show toast
+      const toast = document.createElement('div');
+      toast.textContent = '链接已复制到剪贴板';
+      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;opacity:1;transition:opacity 0.3s;';
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
     }
   };
 

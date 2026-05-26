@@ -296,7 +296,7 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
   };
 
   const handlePostClick = (postId: string) => {
-    window.location.href = getLocaleHref(`/questions`, currentLocale);
+    window.location.href = getLocaleHref(`/community/${postId}`, currentLocale);
   };
 
   const totalPages = Math.ceil(total / limit);
@@ -379,7 +379,6 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
                 currentUserId={currentUserId}
                 onLike={handleLike}
                 onFavorite={handleFavorite}
-                onClick={handlePostClick}
               />
             ))}
           </div>

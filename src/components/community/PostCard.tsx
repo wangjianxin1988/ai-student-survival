@@ -5,9 +5,9 @@ interface PostCardProps {
   post: CommunityPost;
   onLike?: (postId: string) => void;
   onFavorite?: (postId: string) => void;
-  onClick?: (postId: string) => void;
   currentUserId?: string;
   compact?: boolean;
+  path?: string;
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -80,9 +80,9 @@ export function PostCard({
   post,
   onLike,
   onFavorite,
-  onClick,
   currentUserId,
   compact = false,
+  path,
 }: PostCardProps) {
   const liked = post.isLiked || false;
   const favorited = post.isFavorited || false;
@@ -104,16 +104,31 @@ export function PostCard({
   };
 
   const handleClick = () => {
-    onClick?.(post.id);
+    if (path) {
+      window.location.href = path;
+      return;
+    }
+    const qaCategories = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other', 'qa']);
+    const targetPath = qaCategories.has(post.category)
+      ? `/questions/${post.id}`
+      : `/community/${post.id}`;
+    window.location.href = targetPath;
   };
 
   const handleShare = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const url = `${window.location.origin}/community/${post.id}`;
+    const qaCategories = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other', 'qa']);
+    const basePath = qaCategories.has(post.category) ? '/questions' : '/community';
+    const url = `${window.location.origin}${basePath}/${post.id}`;
     if (navigator.share) {
       navigator.share({ title: post.title, text: post.excerpt || post.content?.substring(0, 100), url });
     } else {
       navigator.clipboard.writeText(url);
+      const toast = document.createElement('div');
+      toast.textContent = '链接已复制到剪贴板';
+      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;opacity:1;transition:opacity 0.3s;';
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
     }
   };
 

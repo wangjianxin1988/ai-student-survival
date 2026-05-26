@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { PostCard } from '@/components/community';
+import { CommunityFeed } from '@/components/community/CommunityFeed';
 import type { CommunityPost } from '@/lib/community/types';
 import { QUESTION_CATEGORIES, type QuestionCategory } from '@/data/questions';
 import { getAuthHeaders } from '@/lib/auth';
@@ -533,9 +534,6 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                     key={post.id}
                     post={post}
                     currentUserId={currentUserId}
-                    onClick={(postId) => {
-                      window.location.href = `/questions/${postId}`;
-                    }}
                     onLike={handleLike}
                     onFavorite={handleFavorite}
                   />

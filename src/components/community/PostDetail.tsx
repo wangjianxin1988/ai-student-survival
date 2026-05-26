@@ -557,30 +557,28 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
           </div>
         )}
 
-        {/* Heat progress for non-promoted posts in target categories */}
-        {!post.autoPromoted &&
-          post.category !== "discussion" &&
-          post.category !== "qa" && (
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-600">热度进度</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {calculateScore(post)} / 10
-                </span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className="bg-blue-500 h-2 rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(100, (calculateScore(post) / 10) * 100)}%`,
-                  }}
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                点赞×1 + 评论×2 + 收藏×3 = 热度评分，≥10分自动推送
-              </p>
+        {/* Heat progress for all post types */}
+        {!post.autoPromoted && (
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">热度进度</span>
+              <span className="text-sm font-medium text-gray-900">
+                {calculateScore(post)} / 10
+              </span>
             </div>
-          )}
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className="bg-blue-500 h-2 rounded-full transition-all"
+                style={{
+                  width: `${Math.min(100, (calculateScore(post) / 10) * 100)}%`,
+                }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              点赞×1 + 评论×2 + 收藏×3 = 热度评分，≥10分自动推送
+            </p>
+          </div>
+        )}
 
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-6 pt-6 border-t border-gray-100">
@@ -648,11 +646,20 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
 
           <button
             onClick={() => {
-              const url = `${window.location.origin}/community/${postId}`;
+              const qaCategories = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other', 'qa']);
+              const basePath = qaCategories.has(post.category) ? '/questions' : '/community';
+              const shareUrl = `${window.location.origin}${basePath}/${postId}`;
+              const showToast = (msg: string) => {
+                const toast = document.createElement('div');
+                toast.textContent = msg;
+                toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;opacity:1;transition:opacity 0.3s;';
+                document.body.appendChild(toast);
+                setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+              };
               if (navigator.share) {
-                navigator.share({ title: post.title, url });
+                navigator.share({ title: post.title, url: shareUrl }).catch(() => showToast('分享失败'));
               } else {
-                navigator.clipboard.writeText(url);
+                navigator.clipboard.writeText(shareUrl).then(() => showToast('链接已复制到剪贴板')).catch(() => showToast('复制失败'));
               }
             }}
             className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
