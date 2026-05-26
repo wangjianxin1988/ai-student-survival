@@ -220,6 +220,51 @@ FUNCEOF
             -d '{"query":"GRANT EXECUTE ON FUNCTION increment_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION increment_favorites_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_favorites_count(UUID) TO anon;"}')
           echo "Result: $RESP"
 
+          # Step 19: Create sponsors table
+          echo "=== Creating sponsors table ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"CREATE TABLE IF NOT EXISTS sponsors (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL, nickname TEXT NOT NULL, amount INTEGER NOT NULL, tier VARCHAR(20) NOT NULL DEFAULT '\''coffee'\'', payment_method VARCHAR(20) NOT NULL DEFAULT '\''wechat'\'', message TEXT, status VARCHAR(20) NOT NULL DEFAULT '\''approved'\'', created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"}')
+          echo "Result: $RESP"
+
+          # Step 20: Sponsors indexes
+          echo "=== Creating sponsors indexes ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"CREATE INDEX IF NOT EXISTS idx_sponsors_status ON sponsors(status); CREATE INDEX IF NOT EXISTS idx_sponsors_created_at ON sponsors(created_at DESC);"}')
+          echo "Result: $RESP"
+
+          # Step 21: Sponsors RLS
+          echo "=== Creating sponsors RLS policies ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"ALTER TABLE sponsors ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS \"Allow public read of approved sponsors\" ON sponsors; CREATE POLICY \"Allow public read of approved sponsors\" ON sponsors FOR SELECT USING (status = '\''approved'\''); DROP POLICY IF EXISTS \"Allow authenticated users to create sponsors\" ON sponsors; CREATE POLICY \"Allow authenticated users to create sponsors\" ON sponsors FOR INSERT WITH CHECK (auth.uid() = user_id);"}')
+          echo "Result: $RESP"
+
+          # Step 22: Sponsors grants
+          echo "=== Sponsors grants ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON sponsors TO anon; GRANT INSERT ON sponsors TO anon;"}')
+          echo "Result: $RESP"
+
+          # Step 23: Seed sponsors data
+          echo "=== Seeding sponsors data ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"INSERT INTO sponsors (nickname, amount, tier, payment_method, message, status) VALUES ('\''小明同学'\'', 18, '\''meal'\'', '\''wechat'\'', '\''希望平台越办越好！'\'', '\''approved'\''), ('\''留学小助手'\'', 66, '\''super'\'', '\''alipay'\'', '\''加油！'\'', '\''approved'\''), ('\''匿名好友'\'', 6, '\''coffee'\'', '\''wechat'\'', NULL, '\''approved'\''), ('\''Jack W'\'', 18, '\''meal'\'', '\''wechat'\'', '\''Great platform!'\'', '\''approved'\''), ('\''璐璐'\'', 66, '\''super'\'', '\''alipay'\'', '\''帮助更多留学生！'\'', '\''approved'\'') ON CONFLICT DO NOTHING;"}')
+          echo "Result: $RESP"
+
       - name: Verify public_leaderboard view
         run: |
           RESULT=$(curl -s -X POST \
@@ -237,4 +282,13 @@ FUNCEOF
             -H "Content-Type: application/json" \
             -d '{"query":"SELECT count(*) as cnt FROM user_points_balance;"}')
           echo "user_points_balance: $RESULT"
+
+      - name: Verify sponsors table
+        run: |
+          RESULT=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"SELECT count(*) as cnt FROM sponsors;"}')
+          echo "sponsors: $RESULT"
 
