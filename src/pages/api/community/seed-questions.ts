@@ -27,16 +27,20 @@ function mapQuestionCategoryToCommunity(qCat: string): CommunityCategory {
 export const POST: APIRoute = async () => {
   // Get service role key from Cloudflare Workers runtime env
   // @ts-ignore
-  const serviceRoleKey: string = cfEnv.SUPABASE_SERVICE_ROLE_KEY;
+  const rawKey = (cfEnv as Record<string, unknown>)['SUPABASE_SERVICE_ROLE_KEY'];
+  const serviceRoleKey = typeof rawKey === 'string' && rawKey.length > 0 ? rawKey : null;
 
   if (!serviceRoleKey) {
     return new Response(
       JSON.stringify({
         success: false,
-        error: { message: 'SUPABASE_SERVICE_ROLE_KEY not available in Cloudflare runtime env' },
+        error: { message: 'SUPABASE_SERVICE_ROLE_KEY not available or empty' },
         debug: {
           cfEnvKeys: cfEnv ? Object.keys(cfEnv).filter(k => k.includes('SUPABASE')) : [],
-          runtimeType: typeof cfEnv,
+          rawKeyType: typeof rawKey,
+          rawKeyIsEmpty: rawKey === '',
+          rawKeyIsNull: rawKey === null,
+          rawKeyIsUndefined: rawKey === undefined,
         },
       }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }

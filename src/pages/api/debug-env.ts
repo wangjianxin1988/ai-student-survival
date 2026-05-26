@@ -2,6 +2,27 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
+// @ts-ignore
+import { env as cfEnv } from 'cloudflare:workers';
+
+export const GET: APIRoute = async () => {
+  const key: unknown = (cfEnv as Record<string, unknown>)['SUPABASE_SERVICE_ROLE_KEY'];
+  const url: unknown = (cfEnv as Record<string, unknown>)['SUPABASE_URL'];
+
+  return new Response(JSON.stringify({
+    cfEnvKeys: cfEnv ? Object.keys(cfEnv) : [],
+    keyType: typeof key,
+    keyIsEmpty: key === '',
+    keyIsNull: key === null,
+    keyIsUndefined: key === undefined,
+    keyLength: typeof key === 'string' ? key.length : null,
+    keyFirst10: typeof key === 'string' && key.length > 0 ? key.substring(0, 10) : null,
+    urlValue: typeof url === 'string' ? url.substring(0, 20) : String(url),
+  }, null, 2), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+};
+
 export const GET: APIRoute = async () => {
   // Cloudflare global
   // @ts-ignore
