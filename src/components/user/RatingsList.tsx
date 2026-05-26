@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getCurrentUser, onAuthStateChange, initAuth, getAccessToken, type DemoUser } from '@/lib/auth';
+import React, { useState, useEffect } from 'react';
+import { getCurrentUser, onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
 import { toolsData } from '@/data/toolsData';
 import { promptTemplates } from '@/data/promptTemplates';
+
+const RATINGS_KEY = 'demo_ratings';
 
 const translations = {
   zh: {
@@ -52,56 +54,20 @@ function getRatedItem(targetType: string, targetId: string): { name: string; des
   return null;
 }
 
+function getRatings(): Record<string, Record<string, number>> {
+  if (typeof window === 'undefined') return {};
+  const stored = localStorage.getItem(RATINGS_KEY);
+  return stored ? JSON.parse(stored) : {};
+}
+
 export default function RatingsList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [ratings, setRatings] = useState<{ targetType: string; targetId: string; rating: number; name: string; description?: string; href: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const t = translations[locale];
 
-  const loadRatings = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      const token = await getAccessToken();
-      // Fetch ratings from API - note: the ratings API returns ratings for a specific target
-      // For user-specific ratings, we need to query the ratings table directly
-      const response = await fetch('/api/ratings/user', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.ratings && Array.isArray(data.ratings)) {
-          const parsed = data.ratings.map((r: { target_type: string; target_id: string; rating: number }) => {
-            const item = getRatedItem(r.target_type, r.target_id);
-            return {
-              targetType: r.target_type,
-              targetId: r.target_id,
-              rating: r.rating,
-              name: item?.name || `${r.target_type} #${r.target_id}`,
-              description: item?.description,
-              href: item?.href || `/${r.target_type}s/${r.target_id}`,
-            };
-          });
-          setRatings(parsed);
-        } else {
-          setRatings([]);
-        }
-      } else {
-        // Fallback to empty if API fails
-        setRatings([]);
-      }
-    } catch (error) {
-      console.error('[RatingsList] Failed to load ratings:', error);
-      setRatings([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
   useEffect(() => {
+    // Initialize auth first so OAuth sessions are detected synchronously
     initAuth().then(user => {
       setUser(user);
     });
@@ -119,8 +85,23 @@ export default function RatingsList({ locale = 'zh' }: { locale?: 'zh' | 'en' })
       return;
     }
 
-    loadRatings();
-  }, [user, loadRatings]);
+    const allRatings = getRatings();
+    const userRatings = allRatings[user.id] || {};
+    const parsed = Object.entries(userRatings).map(([key, rating]) => {
+      const [targetType, targetId] = key.split('_');
+      const item = getRatedItem(targetType, targetId);
+      return {
+        targetType,
+        targetId,
+        rating,
+        name: item?.name || `${targetType} #${targetId}`,
+        description: item?.description,
+        href: item?.href || `/${targetType}s/${targetId}`,
+      };
+    });
+    setRatings(parsed);
+    setLoading(false);
+  }, [user]);
 
   const renderStars = (rating: number) => {
     return (

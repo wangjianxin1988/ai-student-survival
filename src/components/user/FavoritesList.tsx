@@ -1,10 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { getCurrentUser, onAuthStateChange, initAuth, getAccessToken, type DemoUser } from '@/lib/auth';
+import React, { useState, useEffect } from 'react';
+import { getCurrentUser, onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
 import { toolsData } from '@/data/toolsData';
 import { paymentSolutionsData } from '@/data/paymentSolutions';
 import { policiesData } from '@/data/policies';
 import { promptTemplates } from '@/data/promptTemplates';
+
+const FAVORITES_KEY = 'demo_favorites';
 
 const translations = {
   zh: {
@@ -82,59 +84,32 @@ function getFavoriteItem(type: string, id: string): { name: string; description?
   return null;
 }
 
+function getFavorites(): Record<string, string[]> {
+  if (typeof window === 'undefined') return {};
+  const stored = localStorage.getItem(FAVORITES_KEY);
+  return stored ? JSON.parse(stored) : {};
+}
+
+function removeFavorite(userId: string, targetType: string, targetId: string): void {
+  const favorites = getFavorites();
+  const key = `${targetType}_${targetId}`;
+  if (favorites[userId]) {
+    favorites[userId] = favorites[userId].filter(k => k !== key);
+    if (favorites[userId].length === 0) {
+      delete favorites[userId];
+    }
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify(favorites));
+  }
+}
+
 export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [favorites, setFavorites] = useState<{ type: string; id: string; name: string; description?: string; href: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const t = translations[locale];
 
-  const loadFavorites = useCallback(async () => {
-    if (!user) return;
-
-    try {
-      const token = await getAccessToken();
-      const response = await fetch('/api/favorites', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.favorites && Array.isArray(data.favorites)) {
-          const parsed = data.favorites.map((fav: { target_type: string; target_id: string; tools?: { name: string; slug: string; description?: string } }) => {
-            const item = getFavoriteItem(fav.target_type, fav.target_id);
-            // Use tool data from API if available, otherwise fallback to local data
-            let name = item?.name || `${fav.target_type} #${fav.target_id}`;
-            let description = item?.description;
-            let href = item?.href || `/${fav.target_type}s/${fav.target_id}`;
-
-            // If it's a tool and API returned tool data, use it
-            if (fav.target_type === 'tool' && fav.tools) {
-              name = fav.tools.name;
-              description = fav.tools.description;
-              href = `/tools/${fav.tools.slug}`;
-            }
-
-            return {
-              type: fav.target_type,
-              id: fav.target_id,
-              name,
-              description,
-              href,
-            };
-          });
-          setFavorites(parsed);
-        }
-      }
-    } catch (error) {
-      console.error('[FavoritesList] Failed to load favorites:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
   useEffect(() => {
+    // Initialize auth first so OAuth sessions are detected synchronously
     initAuth().then(user => {
       setUser(user);
     });
@@ -152,29 +127,27 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
       return;
     }
 
-    loadFavorites();
-  }, [user, loadFavorites]);
+    const allFavorites = getFavorites();
+    const userFavorites = allFavorites[user.id] || [];
+    const parsed = userFavorites.map(key => {
+      const [type, id] = key.split('_');
+      const item = getFavoriteItem(type, id);
+      return {
+        type,
+        id,
+        name: item?.name || `${type} #${id}`,
+        description: item?.description,
+        href: item?.href || `/${type}s/${id}`,
+      };
+    });
+    setFavorites(parsed);
+    setLoading(false);
+  }, [user]);
 
-  const handleRemove = async (type: string, id: string) => {
+  const handleRemove = (type: string, id: string) => {
     if (!user) return;
-
-    try {
-      const token = await getAccessToken();
-      const response = await fetch('/api/favorites', {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ target_type: type, target_id: id }),
-      });
-
-      if (response.ok) {
-        setFavorites(prev => prev.filter(f => !(f.type === type && f.id === id)));
-      }
-    } catch (error) {
-      console.error('[FavoritesList] Failed to remove favorite:', error);
-    }
+    removeFavorite(user.id, type, id);
+    setFavorites(prev => prev.filter(f => !(f.type === type && f.id === id)));
   };
 
   const getTypeIcon = (type: string) => {
