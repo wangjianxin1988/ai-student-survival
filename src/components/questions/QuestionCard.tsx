@@ -8,22 +8,27 @@ interface QuestionCardProps {
   locale?: 'zh' | 'en';
 }
 
+const CATEGORY_COLORS: Record<string, string> = {
+  academic: 'bg-orange-100 text-orange-700',
+  life: 'bg-green-100 text-green-700',
+  visa: 'bg-blue-100 text-blue-700',
+  job: 'bg-indigo-100 text-indigo-700',
+  policy: 'bg-purple-100 text-purple-700',
+  payment: 'bg-emerald-100 text-emerald-700',
+  ai_tools: 'bg-cyan-100 text-cyan-700',
+  study_life: 'bg-rose-100 text-rose-700',
+  job_recruitment: 'bg-amber-100 text-amber-700',
+  other: 'bg-gray-100 text-gray-700',
+};
+
 const translations = {
   zh: {
     resolved: '已解决',
-    answers: '回答',
-    views: '浏览',
     unresolved: '待解决',
-    askQuestion: '提问',
-    by: 'by',
   },
   en: {
     resolved: 'Resolved',
-    answers: 'answers',
-    views: 'views',
     unresolved: 'Unresolved',
-    askQuestion: 'Ask',
-    by: 'by',
   },
 };
 
@@ -44,87 +49,90 @@ export default function QuestionCard({ question, locale = 'zh' }: QuestionCardPr
     return date.toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US');
   };
 
+  const handleClick = () => {
+    window.location.href = getLocaleHref(`/questions/${question.id}`, locale);
+  };
+
+  const categoryColor = CATEGORY_COLORS[question.category] || CATEGORY_COLORS.other;
+
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
-      <div className="flex gap-4">
-        {/* Left sidebar - stats */}
-        <div className="flex flex-col items-center gap-2 min-w-[60px] text-center">
-          <div className={`text-lg font-semibold ${question.isResolved ? 'text-green-600' : 'text-gray-600'}`}>
-            {question.answerCount}
-          </div>
-          <div className="text-xs text-gray-500">{t.answers}</div>
-          <div className="text-sm text-gray-400">{question.viewCount} {t.views}</div>
+    <div
+      className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 cursor-pointer hover:shadow-md transition-shadow"
+      onClick={handleClick}
+    >
+      {/* Category badges row */}
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
+        <span className={`text-xs px-2 py-1 rounded-full font-medium ${categoryColor}`}>
+          {category?.icon} {locale === 'zh' ? category?.label : category?.labelEn}
+        </span>
+        <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+          question.isResolved
+            ? 'bg-green-100 text-green-700'
+            : 'bg-gray-100 text-gray-500'
+        }`}>
+          {question.isResolved ? t.resolved : t.unresolved}
+        </span>
+      </div>
+
+      {/* Title */}
+      <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2">
+        {locale === 'zh' ? question.titleZh : question.title}
+      </h3>
+
+      {/* Excerpt */}
+      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+        {locale === 'zh' ? question.contentZh : question.content}
+      </p>
+
+      {/* Tags */}
+      {question.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          {question.tags.slice(0, 3).map(tag => (
+            <span
+              key={tag}
+              className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Bottom row: author info + horizontal stats */}
+      <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        {/* Author + date */}
+        <div className="flex items-center gap-3 text-xs text-gray-500">
+          {question.isAnonymous ? (
+            <span>{locale === 'zh' ? '匿名用户' : 'Anonymous'}</span>
+          ) : (
+            <>
+              <img
+                src={question.authorAvatar}
+                alt={question.authorName}
+                className="w-4 h-4 rounded-full"
+              />
+              <span>{question.authorName}</span>
+            </>
+          )}
+          <span>·</span>
+          <span>{formatDate(question.createdAt)}</span>
+          <span className="flex items-center gap-1">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            {question.viewCount}
+          </span>
         </div>
 
-        {/* Main content */}
-        <div className="flex-1 min-w-0">
-          {/* Title */}
-          <h3 className="text-lg font-medium mb-2 line-clamp-2">
-            <a
-              href={getLocaleHref(`/questions/${question.id}`, locale)}
-              className="text-gray-900 hover:text-primary-600 transition-colors"
-            >
-              {locale === 'zh' ? question.titleZh : question.title}
-            </a>
-          </h3>
-
-          {/* Excerpt */}
-          <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-            {locale === 'zh' ? question.contentZh : question.content}
-          </p>
-
-          {/* Meta info */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Category badge */}
-            <span
-              className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium"
-              style={{
-                backgroundColor: 'var(--category-bg, #f3f4f6)',
-                color: 'var(--category-color, #374151)',
-              }}
-            >
-              <span>{category?.icon || '💬'}</span>
-              <span>{locale === 'zh' ? category?.label : category?.labelEn}</span>
-            </span>
-
-            {/* Resolved badge */}
-            {question.isResolved && (
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                {t.resolved}
-              </span>
-            )}
-
-            {/* Tags */}
-            {question.tags.slice(0, 3).map(tag => (
-              <span
-                key={tag}
-                className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs"
-              >
-                #{tag}
-              </span>
-            ))}
-
-            {/* Author and date */}
-            <div className="flex items-center gap-2 ml-auto text-xs text-gray-500">
-              {question.isAnonymous ? (
-                <span>{locale === 'zh' ? '匿名用户' : 'Anonymous'}</span>
-              ) : (
-                <>
-                  <img
-                    src={question.authorAvatar}
-                    alt={question.authorName}
-                    className="w-5 h-5 rounded-full"
-                  />
-                  <span>{question.authorName}</span>
-                </>
-              )}
-              <span>·</span>
-              <span>{formatDate(question.createdAt)}</span>
-            </div>
-          </div>
+        {/* Horizontal stats: answers */}
+        <div className="flex items-center gap-1">
+          <span className="flex items-center gap-1 px-2 py-1 text-xs text-gray-400">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span>{question.answerCount}</span>
+          </span>
         </div>
       </div>
     </div>

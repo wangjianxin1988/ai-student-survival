@@ -42,6 +42,36 @@ const CATEGORIES: {
     label: "妙妙贴",
     description: "分享留学生活技巧、防坑指南",
   },
+  {
+    value: "academic",
+    label: "学业问题",
+    description: "选课、论文、考试、学术相关",
+  },
+  {
+    value: "life",
+    label: "日常生活",
+    description: "租房、交通、购物等生活话题",
+  },
+  {
+    value: "visa",
+    label: "签证身份",
+    description: "签证、居留、工作许可等",
+  },
+  {
+    value: "job",
+    label: "求职就业",
+    description: "实习、找工作、职业发展",
+  },
+  {
+    value: "study_life",
+    label: "学习生活",
+    description: "校园生活、社交活动、时间管理",
+  },
+  {
+    value: "job_recruitment",
+    label: "求职招聘",
+    description: "校招、社招、面试技巧",
+  },
   { value: "discussion", label: "讨论", description: "自由讨论话题" },
   { value: "qa", label: "问答", description: "提问和解答" },
 ];

@@ -1,0 +1,78 @@
+export const prerender = false;
+
+import type { APIRoute } from 'astro';
+import { supabaseAdmin } from '@/lib/supabase';
+import { questionsData } from '@/data/questions';
+import type { CommunityCategory } from '@/lib/community/types';
+
+function mapQuestionCategoryToCommunity(qCat: string): CommunityCategory {
+  const map: Record<string, CommunityCategory> = {
+    academic: 'academic',
+    life: 'life',
+    visa: 'visa',
+    job: 'job',
+    policy: 'policy',
+    payment: 'payment',
+    ai_tools: 'academic',
+    study_life: 'study_life',
+    job_recruitment: 'job_recruitment',
+    other: 'discussion',
+  };
+  return map[qCat] || 'discussion';
+}
+
+export const POST: APIRoute = async () => {
+  // Check if seed posts already exist (IDs starting with 00000000-0000-0000-0000)
+  const { data: existing } = await supabaseAdmin
+    .from('community_posts')
+    .select('id')
+    .like('id', '00000000-0000-0000-0000-%')
+    .limit(1);
+
+  if (existing && existing.length > 0) {
+    return new Response(
+      JSON.stringify({ success: false, error: { message: 'Seed posts already exist' } }),
+      { status: 409, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  // Create posts from questions data
+  const posts = questionsData.map((q) => ({
+    id: `00000000-0000-0000-0000-${String(questionsData.indexOf(q) + 1).padStart(12, '0')}`,
+    user_id: '00000000-0000-0000-0000-000000000001',
+    title: q.titleZh,
+    content: q.contentZh,
+    excerpt: q.contentZh.substring(0, 150),
+    category: mapQuestionCategoryToCommunity(q.category),
+    tags: q.tags,
+    images: [],
+    likes_count: Math.floor(Math.random() * 20) + 1,
+    comments_count: q.answerCount,
+    views_count: q.viewCount,
+    favorites_count: Math.floor(Math.random() * 10),
+    is_pinned: false,
+    is_locked: false,
+    auto_promoted: false,
+    status: 'published' as const,
+    created_at: q.createdAt,
+    updated_at: q.createdAt,
+  }));
+
+  const { data, error } = await supabaseAdmin.from('community_posts').insert(posts).select('id');
+
+  if (error) {
+    return new Response(
+      JSON.stringify({ success: false, error: { message: error.message } }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  return new Response(
+    JSON.stringify({
+      success: true,
+      message: `Seeded ${posts.length} posts`,
+      postIds: data?.map((p) => p.id),
+    }),
+    { status: 200, headers: { 'Content-Type': 'application/json' } }
+  );
+};

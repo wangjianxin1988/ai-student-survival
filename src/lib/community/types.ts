@@ -6,6 +6,12 @@ export type CommunityCategory =
   | 'policy'     // 大学政策
   | 'prompt'     // Prompt
   | 'survival'   // 妙妙贴
+  | 'academic'   // 学业问题
+  | 'life'      // 日常生活
+  | 'visa'      // 签证身份
+  | 'job'       // 求职就业
+  | 'study_life' // 学习生活
+  | 'job_recruitment' // 求职招聘
   | 'discussion' // 讨论
   | 'qa';        // 问答
 
@@ -174,6 +180,12 @@ export const CATEGORY_LABELS: Record<CommunityCategory, { zh: string; en: string
   policy: { zh: '大学政策', en: 'Policies' },
   prompt: { zh: 'Prompt', en: 'Prompts' },
   survival: { zh: '妙妙贴', en: 'Survival' },
+  academic: { zh: '学业问题', en: 'Academic' },
+  life: { zh: '日常生活', en: 'Life' },
+  visa: { zh: '签证身份', en: 'Visa' },
+  job: { zh: '求职就业', en: 'Job' },
+  study_life: { zh: '学习生活', en: 'Study Life' },
+  job_recruitment: { zh: '求职招聘', en: 'Job Recruitment' },
   discussion: { zh: '讨论', en: 'Discussion' },
   qa: { zh: '问答', en: 'Q&A' },
 };
@@ -188,6 +200,12 @@ export const CATEGORY_CONFIG: Record<CommunityCategory, {
   policy: { path: '/policies', requireMeta: true, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
   prompt: { path: '/prompts', requireMeta: true, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
   survival: { path: '/survival', requireMeta: true, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
+  academic: { path: '/questions', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
+  life: { path: '/questions', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
+  visa: { path: '/questions', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
+  job: { path: '/questions', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
+  study_life: { path: '/questions', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
+  job_recruitment: { path: '/questions', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
   discussion: { path: '/community', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
   qa: { path: '/community', requireMeta: false, promotionThreshold: { likes: 5, comments: 3, favorites: 2 } },
 };
@@ -199,6 +217,12 @@ export const CATEGORY_PATHS: Record<CommunityCategory, string> = {
   policy: '/policies',
   prompt: '/prompts',
   survival: '/survival',
+  academic: '/questions',
+  life: '/questions',
+  visa: '/questions',
+  job: '/questions',
+  study_life: '/questions',
+  job_recruitment: '/questions',
   discussion: '/community',
   qa: '/community',
 };
