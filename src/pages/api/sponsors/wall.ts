@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ request }) => {
   // RLS policy allows public read of approved sponsors
   const { data: sponsors, error } = await supabase
     .from('sponsors')
-    .select('id, nickname, display_name, amount, tier, payment_method, message, avatar_url, profile_url, created_at')
+    .select('id, nickname, amount, tier, payment_method, message, avatar_url, profile_url, created_at')
     .eq('status', 'approved')
     .order('created_at', { ascending: false })
     .limit(limit);
