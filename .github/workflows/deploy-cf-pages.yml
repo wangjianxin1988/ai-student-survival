@@ -71,13 +71,16 @@ jobs:
             -H "Content-Type: application/json")
           echo "Zone API response: $(echo "$ZONE_RESP" | head -c 500)"
           ZONE_ID=$(echo "$ZONE_RESP" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
-          # Try alternate domains if not found
           if [ -z "$ZONE_ID" ]; then
             ZONE_RESP2=$(curl -s "https://api.cloudflare.com/client/v4/zones" \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
               -H "Content-Type: application/json")
-            echo "All zones: $(echo "$ZONE_RESP2" | head -c 500)"
+            echo "All zones response: $(echo "$ZONE_RESP2" | head -c 500)"
             ZONE_ID=$(echo "$ZONE_RESP2" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
+          fi
+          if [ -z "$ZONE_ID" ]; then
+            echo "⚠️ Zone ID not found. Using CLOUDFLARE_ZONE_ID from secrets if available."
+            ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID }}"
           fi
           echo "Zone ID: $ZONE_ID"
 
