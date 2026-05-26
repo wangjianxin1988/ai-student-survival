@@ -1,0 +1,15 @@
+name: Debug Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Debug step
+        run: |
+          echo "=== Debug workflow ran ==="
+          echo "PAT length: ${#SUPABASE_PAT}"
+          echo "PAT prefix: ${SUPABASE_PAT:0:4}"
+          echo "PAT value: $SUPABASE_PAT"
