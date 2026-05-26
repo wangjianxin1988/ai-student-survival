@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
+import { onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
+import { getAuthHeaders } from '@/lib/auth';
+import { isSupabaseConfigured, isDemoMode } from '@/lib/supabase';
 import { getAuthLoginHref } from '@/lib/i18n';
 import { toolsData } from '@/data/toolsData';
 import { promptTemplates } from '@/data/promptTemplates';
@@ -60,6 +62,19 @@ function getRatings(): Record<string, Record<string, number>> {
   return stored ? JSON.parse(stored) : {};
 }
 
+async function fetchRatingsFromApi(): Promise<Array<{ target_type: string; target_id: string; rating: number }>> {
+  if (!isSupabaseConfigured || isDemoMode()) return [];
+  try {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/ratings/user', { headers });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.ratings || [];
+  } catch {
+    return [];
+  }
+}
+
 export default function RatingsList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [ratings, setRatings] = useState<{ targetType: string; targetId: string; rating: number; name: string; description?: string; href: string }[]>([]);
@@ -85,22 +100,42 @@ export default function RatingsList({ locale = 'zh' }: { locale?: 'zh' | 'en' })
       return;
     }
 
-    const allRatings = getRatings();
-    const userRatings = allRatings[user.id] || {};
-    const parsed = Object.entries(userRatings).map(([key, rating]) => {
-      const [targetType, targetId] = key.split('_');
-      const item = getRatedItem(targetType, targetId);
-      return {
-        targetType,
-        targetId,
-        rating,
-        name: item?.name || `${targetType} #${targetId}`,
-        description: item?.description,
-        href: item?.href || `/${targetType}s/${targetId}`,
-      };
-    });
-    setRatings(parsed);
-    setLoading(false);
+    async function loadRatings() {
+      const apiRatings = await fetchRatingsFromApi();
+      if (apiRatings.length > 0) {
+        const parsed = apiRatings.map((r: { target_type: string; target_id: string; rating: number }) => {
+          const item = getRatedItem(r.target_type, r.target_id);
+          return {
+            targetType: r.target_type,
+            targetId: r.target_id,
+            rating: r.rating,
+            name: item?.name || `${r.target_type} #${r.target_id}`,
+            description: item?.description,
+            href: item?.href || `/${r.target_type}s/${r.target_id}`,
+          };
+        });
+        setRatings(parsed);
+      } else {
+        const allRatings = getRatings();
+        const userRatings = allRatings[user.id] || {};
+        const parsed = Object.entries(userRatings).map(([key, rating]: [string, number]) => {
+          const [targetType, targetId] = key.split('_');
+          const item = getRatedItem(targetType, targetId);
+          return {
+            targetType,
+            targetId,
+            rating,
+            name: item?.name || `${targetType} #${targetId}`,
+            description: item?.description,
+            href: item?.href || `/${targetType}s/${targetId}`,
+          };
+        });
+        setRatings(parsed);
+      }
+      setLoading(false);
+    }
+
+    loadRatings();
   }, [user]);
 
   const renderStars = (rating: number) => {

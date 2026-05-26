@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { getAuthHeaders } from '@/lib/auth';
+import { isSupabaseConfigured, isDemoMode } from '@/lib/supabase';
 import { getAuthLoginHref } from '@/lib/i18n';
 import SubmitOfferForm from '@/components/offers/SubmitOfferForm';
 
@@ -77,6 +79,19 @@ function saveOffers(offers: Record<string, Offer[]>): void {
   localStorage.setItem(OFFERS_KEY, JSON.stringify(offers));
 }
 
+async function fetchOffersFromApi(): Promise<Offer[]> {
+  if (!isSupabaseConfigured || isDemoMode()) return [];
+  try {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/offers/user', { headers });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.offers || [];
+  } catch {
+    return [];
+  }
+}
+
 export default function OffersList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -84,12 +99,39 @@ export default function OffersList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) 
   const [showAddForm, setShowAddForm] = useState(false);
   const t = translations[locale];
 
-  // Reload offers from localStorage
-  const reloadOffers = () => {
+  // Reload offers from API then fallback to localStorage
+  const reloadOffers = async () => {
     if (!user) return;
-    const allOffers = getOffers();
-    const userOffers = allOffers[user.id] || [];
-    setOffers(userOffers);
+    const apiOffers = await fetchOffersFromApi();
+    if (apiOffers.length > 0) {
+      const parsed: Offer[] = apiOffers.map((o: any) => ({
+        id: o.id,
+        universityName: o.university_name || o.universityName || '',
+        program: o.program || '',
+        admissionResult: o.admission_result || 'accepted',
+        background: o.background || '',
+        offerImage: o.offer_image_url || o.offerImage || '',
+        createdAt: o.created_at || new Date().toISOString(),
+        userId: o.user_id || '',
+        userName: o.user_name || '',
+        userAvatar: o.user_avatar || '',
+        universityCountry: o.university_country || '',
+        programName: o.program_name || '',
+        degree: o.degree || '',
+        scholarship: o.scholarship || undefined,
+        backgroundDetails: o.background_details || undefined,
+        aiToolsUsed: o.ai_tools_used || o.aiToolsUsed || [],
+        timeline: o.timeline || '',
+        advice: o.advice || '',
+        likes: o.likes || 0,
+        comments: o.comments || 0,
+      }));
+      setOffers(parsed);
+    } else {
+      const allOffers = getOffers();
+      const userOffers = allOffers[user.id] || [];
+      setOffers(userOffers);
+    }
   };
 
   useEffect(() => {
@@ -109,10 +151,41 @@ export default function OffersList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) 
       return;
     }
 
-    const allOffers = getOffers();
-    const userOffers = allOffers[user.id] || [];
-    setOffers(userOffers);
-    setLoading(false);
+    async function loadOffers() {
+      const apiOffers = await fetchOffersFromApi();
+      if (apiOffers.length > 0) {
+        const parsed: Offer[] = apiOffers.map((o: any) => ({
+          id: o.id,
+          universityName: o.university_name || o.universityName || '',
+          program: o.program || '',
+          admissionResult: o.admission_result || 'accepted',
+          background: o.background || '',
+          offerImage: o.offer_image_url || o.offerImage || '',
+          createdAt: o.created_at || new Date().toISOString(),
+          userId: o.user_id || '',
+          userName: o.user_name || '',
+          userAvatar: o.user_avatar || '',
+          universityCountry: o.university_country || '',
+          programName: o.program_name || '',
+          degree: o.degree || '',
+          scholarship: o.scholarship || undefined,
+          backgroundDetails: o.background_details || undefined,
+          aiToolsUsed: o.ai_tools_used || o.aiToolsUsed || [],
+          timeline: o.timeline || '',
+          advice: o.advice || '',
+          likes: o.likes || 0,
+          comments: o.comments || 0,
+        }));
+        setOffers(parsed);
+      } else {
+        const allOffers = getOffers();
+        const userOffers = allOffers[user.id] || [];
+        setOffers(userOffers);
+      }
+      setLoading(false);
+    }
+
+    loadOffers();
   }, [user]);
 
   const handleOfferSuccess = (offerId: string) => {

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
+import { onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
+import { getAuthHeaders } from '@/lib/auth';
+import { isSupabaseConfigured, isDemoMode } from '@/lib/supabase';
 import { getAuthLoginHref } from '@/lib/i18n';
 import { toolsData } from '@/data/toolsData';
 import { paymentSolutionsData } from '@/data/paymentSolutions';
@@ -90,7 +92,31 @@ function getFavorites(): Record<string, string[]> {
   return stored ? JSON.parse(stored) : {};
 }
 
-function removeFavorite(userId: string, targetType: string, targetId: string): void {
+async function fetchFavoritesFromApi(): Promise<Array<{ target_type: string; target_id: string }>> {
+  if (!isSupabaseConfigured || isDemoMode()) return [];
+  try {
+    const headers = await getAuthHeaders();
+    const res = await fetch('/api/favorites', { headers });
+    if (!res.ok) return [];
+    const json = await res.json();
+    return json.favorites || [];
+  } catch {
+    return [];
+  }
+}
+
+async function removeFavoriteFromApi(id: string): Promise<boolean> {
+  if (!isSupabaseConfigured || isDemoMode()) return false;
+  try {
+    const headers = await getAuthHeaders();
+    const res = await fetch(`/api/favorites/${id}`, { method: 'DELETE', headers });
+    return res.ok || res.status === 204;
+  } catch {
+    return false;
+  }
+}
+
+function removeFavoriteLocal(userId: string, targetType: string, targetId: string): void {
   const favorites = getFavorites();
   const key = `${targetType}_${targetId}`;
   if (favorites[userId]) {
@@ -104,7 +130,7 @@ function removeFavorite(userId: string, targetType: string, targetId: string): v
 
 export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) {
   const [user, setUser] = useState<DemoUser | null>(null);
-  const [favorites, setFavorites] = useState<{ type: string; id: string; name: string; description?: string; href: string }[]>([]);
+  const [favorites, setFavorites] = useState<{ type: string; id: string; name: string; description?: string; href: string; dbId?: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const t = translations[locale];
 
@@ -127,26 +153,52 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
       return;
     }
 
-    const allFavorites = getFavorites();
-    const userFavorites = allFavorites[user.id] || [];
-    const parsed = userFavorites.map(key => {
-      const [type, id] = key.split('_');
-      const item = getFavoriteItem(type, id);
-      return {
-        type,
-        id,
-        name: item?.name || `${type} #${id}`,
-        description: item?.description,
-        href: item?.href || `/${type}s/${id}`,
-      };
-    });
-    setFavorites(parsed);
-    setLoading(false);
+    async function loadFavorites() {
+      // Try Supabase API first
+      const apiFavorites = await fetchFavoritesFromApi();
+      if (apiFavorites.length > 0) {
+        const parsed = apiFavorites.map((fav: { id: string; target_type: string; target_id: string }) => {
+          const item = getFavoriteItem(fav.target_type, fav.target_id);
+          return {
+            type: fav.target_type,
+            id: fav.target_id,
+            name: item?.name || `${fav.target_type} #${fav.target_id}`,
+            description: item?.description,
+            href: item?.href || `/${fav.target_type}s/${fav.target_id}`,
+            dbId: fav.id,
+          };
+        });
+        setFavorites(parsed);
+      } else {
+        // Fall back to localStorage
+        const allFavorites = getFavorites();
+        const userFavorites = allFavorites[user.id] || [];
+        const parsed = userFavorites.map((key: string) => {
+          const [type, id] = key.split('_');
+          const item = getFavoriteItem(type, id);
+          return {
+            type,
+            id,
+            name: item?.name || `${type} #${id}`,
+            description: item?.description,
+            href: item?.href || `/${type}s/${id}`,
+          };
+        });
+        setFavorites(parsed);
+      }
+      setLoading(false);
+    }
+
+    loadFavorites();
   }, [user]);
 
   const handleRemove = (type: string, id: string) => {
     if (!user) return;
-    removeFavorite(user.id, type, id);
+    const fav = favorites.find(f => f.type === type && f.id === id);
+    if (fav && (fav as any).dbId) {
+      removeFavoriteFromApi((fav as any).dbId);
+    }
+    removeFavoriteLocal(user.id, type, id);
     setFavorites(prev => prev.filter(f => !(f.type === type && f.id === id)));
   };
 
