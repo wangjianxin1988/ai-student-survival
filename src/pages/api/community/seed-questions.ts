@@ -69,7 +69,7 @@ export const POST: APIRoute = async () => {
   // Create posts from questions data
   const posts = questionsData.map((q) => ({
     id: `00000000-0000-0000-0000-${String(questionsData.indexOf(q) + 1).padStart(12, '0')}`,
-    user_id: '00000000-0000-0000-0000-000000000001',
+    user_id: '7fa8052c-4d62-4ec6-947d-9d49ba927b76',
     title: q.titleZh,
     content: q.contentZh,
     excerpt: q.contentZh.substring(0, 150),
