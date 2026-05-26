@@ -9,14 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Apply migration via Management API
+      - name: Apply public_leaderboard migration via Management API
         run: |
-          echo "Applying migration to Supabase..."
-          # Read the migration file and convert to properly escaped JSON string
-          SQL_RAW=$(cat supabase/migrations/20260525_add_oauth_provider_function.sql)
-          # Use jq to create a properly escaped JSON string from the SQL
+          echo "Applying public_leaderboard migration to Supabase..."
+          SQL_RAW=$(cat supabase/migrations/20260526_add_public_leaderboard.sql)
           SQL_JSON=$(printf '%s' "$SQL_RAW" | jq -Rs .)
-          # Build and send the JSON payload
           RESPONSE=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
@@ -29,12 +26,22 @@ jobs:
             echo "Migration applied successfully"
           fi
 
-      - name: Verify get_oauth_provider_v2 function works
+      - name: Verify public_leaderboard view exists
         run: |
-          echo "=== Verify function ==="
+          echo "=== Verify public_leaderboard view ==="
           RESULT=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
-            -d '{"query":"SELECT get_oauth_provider_v2('\''18801400211@163.com'\'');"}')
-          echo "Function test result for test email: $RESULT"
+            -d '{"query":"SELECT COUNT(*) as count FROM public_leaderboard;"}')
+          echo "public_leaderboard count: $RESULT"
+
+      - name: Verify user_points_balance table exists
+        run: |
+          echo "=== Verify user_points_balance table ==="
+          RESULT=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"SELECT COUNT(*) as count FROM user_points_balance;"}')
+          echo "user_points_balance count: $RESULT"
