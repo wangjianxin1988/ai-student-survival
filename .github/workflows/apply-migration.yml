@@ -5,10 +5,6 @@ on:
   repository_dispatch:
     types: [apply-migration]
 
-env:
-  SUPABASE_REF: giynvpfnzzelzwpmsgtf
-  MGMT_API: https://api.supabase.com/v1/projects/$SUPABASE_REF/database/query
-
 jobs:
   migrate:
     runs-on: ubuntu-latest
@@ -17,6 +13,7 @@ jobs:
 
       - name: Step 1 - user_points_balance
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE TABLE IF NOT EXISTS user_points_balance (user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE, balance INTEGER DEFAULT 0 NOT NULL, total_earned INTEGER DEFAULT 0 NOT NULL, total_spent INTEGER DEFAULT 0 NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -28,6 +25,7 @@ jobs:
 
       - name: Step 2 - points_transactions
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE TABLE IF NOT EXISTS points_transactions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, amount INTEGER NOT NULL, type TEXT NOT NULL, description TEXT, reference_id TEXT, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -39,6 +37,7 @@ jobs:
 
       - name: Step 3 - public_leaderboard view
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE OR REPLACE VIEW public_leaderboard AS SELECT upb.user_id, upb.balance, upb.total_earned, upb.updated_at, u.raw_user_meta_data->>'name' as name, u.raw_user_meta_data->>'avatar_url' as avatar FROM user_points_balance upb LEFT JOIN auth.users u ON u.id = upb.user_id WHERE upb.balance > 0 ORDER BY upb.balance DESC;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -50,6 +49,7 @@ jobs:
 
       - name: Step 4 - public_leaderboard policy
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="DROP POLICY IF EXISTS \"Allow public read of public_leaderboard\" ON public_leaderboard; CREATE POLICY \"Allow public read of public_leaderboard\" ON public_leaderboard FOR SELECT USING (true);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -61,6 +61,7 @@ jobs:
 
       - name: Step 5 - user_points_balance policy
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="DROP POLICY IF EXISTS \"Allow public read for positive balance\" ON user_points_balance; CREATE POLICY \"Allow public read for positive balance\" ON user_points_balance FOR SELECT USING (balance > 0);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -72,6 +73,7 @@ jobs:
 
       - name: Step 6 - users RLS
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Allow public read of user profiles') THEN ALTER TABLE users ENABLE ROW LEVEL SECURITY; CREATE POLICY \"Allow public read of user profiles\" ON users FOR SELECT USING (true); END IF; END \$\$;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -83,6 +85,7 @@ jobs:
 
       - name: Step 7 - post_likes
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE TABLE IF NOT EXISTS post_likes (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL, UNIQUE(post_id, user_id));"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -94,6 +97,7 @@ jobs:
 
       - name: Step 8 - post_favorites
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE TABLE IF NOT EXISTS post_favorites (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL, UNIQUE(post_id, user_id));"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -105,6 +109,7 @@ jobs:
 
       - name: Step 9 - post_comments
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE TABLE IF NOT EXISTS post_comments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, content TEXT NOT NULL, parent_id UUID REFERENCES post_comments(id) ON DELETE CASCADE, likes_count INTEGER DEFAULT 0, status VARCHAR(20) DEFAULT 'published', created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -116,6 +121,7 @@ jobs:
 
       - name: Step 10 - trigger function
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE OR REPLACE FUNCTION update_points_balance_on_transaction() RETURNS TRIGGER AS \$\$ DECLARE v_new_balance INTEGER; v_new_earned INTEGER := 0; v_new_spent INTEGER := 0; BEGIN IF TG_OP = 'INSERT' THEN SELECT COALESCE(balance, 0), COALESCE(total_earned, 0), COALESCE(total_spent, 0) INTO v_new_balance, v_new_earned, v_new_spent FROM user_points_balance WHERE user_id = NEW.user_id; v_new_balance := v_new_balance + NEW.amount; IF NEW.amount >= 0 THEN v_new_earned := v_new_earned + NEW.amount; ELSE v_new_spent := v_new_spent + ABS(NEW.amount); END IF; INSERT INTO user_points_balance (user_id, balance, total_earned, total_spent) VALUES (NEW.user_id, v_new_balance, v_new_earned, v_new_spent) ON CONFLICT (user_id) DO UPDATE SET balance = user_points_balance.balance + NEW.amount, total_earned = CASE WHEN NEW.amount >= 0 THEN user_points_balance.total_earned + NEW.amount ELSE user_points_balance.total_earned END, total_spent = CASE WHEN NEW.amount < 0 THEN user_points_balance.total_spent + ABS(NEW.amount) ELSE user_points_balance.total_spent END, updated_at = NOW(); RETURN NEW; END IF; RETURN NEW; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -127,6 +133,7 @@ jobs:
 
       - name: Step 11 - trigger
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="DROP TRIGGER IF EXISTS trigger_update_points_balance ON points_transactions; CREATE TRIGGER trigger_update_points_balance AFTER INSERT ON points_transactions FOR EACH ROW EXECUTE FUNCTION update_points_balance_on_transaction();"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -138,6 +145,7 @@ jobs:
 
       - name: Step 12 - post_likes RLS
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="DROP POLICY IF EXISTS \"Allow public read of post_likes\" ON post_likes; CREATE POLICY \"Allow public read of post_likes\" ON post_likes FOR SELECT USING (true); DROP POLICY IF EXISTS \"Allow authenticated insert of post_likes\" ON post_likes; CREATE POLICY \"Allow authenticated insert of post_likes\" ON post_likes FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS \"Allow owner delete post_likes\" ON post_likes; CREATE POLICY \"Allow owner delete post_likes\" ON post_likes FOR DELETE USING (auth.uid() = user_id);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -149,6 +157,7 @@ jobs:
 
       - name: Step 13 - post_favorites RLS
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="DROP POLICY IF EXISTS \"Allow public read of post_favorites\" ON post_favorites; CREATE POLICY \"Allow public read of post_favorites\" ON post_favorites FOR SELECT USING (true); DROP POLICY IF EXISTS \"Allow authenticated insert of post_favorites\" ON post_favorites; CREATE POLICY \"Allow authenticated insert of post_favorites\" ON post_favorites FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS \"Allow owner delete post_favorites\" ON post_favorites; CREATE POLICY \"Allow owner delete post_favorites\" ON post_favorites FOR DELETE USING (auth.uid() = user_id);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -160,6 +169,7 @@ jobs:
 
       - name: Step 14 - post_comments RLS
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="DROP POLICY IF EXISTS \"Allow public read of post_comments\" ON post_comments; CREATE POLICY \"Allow public read of post_comments\" ON post_comments FOR SELECT USING (true); DROP POLICY IF EXISTS \"Allow authenticated insert of post_comments\" ON post_comments; CREATE POLICY \"Allow authenticated insert of post_comments\" ON post_comments FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS \"Allow owner delete post_comments\" ON post_comments; CREATE POLICY \"Allow owner delete post_comments\" ON post_comments FOR DELETE USING (auth.uid() = user_id);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -171,6 +181,7 @@ jobs:
 
       - name: Step 15 - grants
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON public_leaderboard TO anon; GRANT SELECT ON user_points_balance TO anon; GRANT SELECT, INSERT, DELETE ON post_likes TO anon; GRANT SELECT, INSERT, DELETE ON post_favorites TO anon; GRANT SELECT, INSERT, DELETE ON post_comments TO anon;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -182,6 +193,7 @@ jobs:
 
       - name: Step 16 - indexes
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE INDEX IF NOT EXISTS idx_post_likes_post_id ON post_likes(post_id); CREATE INDEX IF NOT EXISTS idx_post_likes_user_id ON post_likes(user_id); CREATE INDEX IF NOT EXISTS idx_post_favorites_post_id ON post_favorites(post_id); CREATE INDEX IF NOT EXISTS idx_post_favorites_user_id ON post_favorites(user_id); CREATE INDEX IF NOT EXISTS idx_post_comments_post_id ON post_comments(post_id); CREATE INDEX IF NOT EXISTS idx_post_comments_user_id ON post_comments(user_id);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -193,6 +205,7 @@ jobs:
 
       - name: Step 17-21 - RPC functions and grants
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE OR REPLACE FUNCTION increment_likes_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET likes_count = likes_count + 1 WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; CREATE OR REPLACE FUNCTION decrement_likes_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; CREATE OR REPLACE FUNCTION increment_favorites_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET favorites_count = favorites_count + 1 WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; CREATE OR REPLACE FUNCTION decrement_favorites_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET favorites_count = GREATEST(favorites_count - 1, 0) WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; GRANT EXECUTE ON FUNCTION increment_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION increment_favorites_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_favorites_count(UUID) TO anon;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -204,6 +217,7 @@ jobs:
 
       - name: Step 22 - sponsors table
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE TABLE IF NOT EXISTS sponsors (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL, nickname TEXT NOT NULL, amount INTEGER NOT NULL, tier VARCHAR(20) NOT NULL DEFAULT 'coffee', payment_method VARCHAR(20) NOT NULL DEFAULT 'wechat', message TEXT, status VARCHAR(20) NOT NULL DEFAULT 'approved', created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -215,6 +229,7 @@ jobs:
 
       - name: Step 23 - sponsors indexes
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="CREATE INDEX IF NOT EXISTS idx_sponsors_status ON sponsors(status); CREATE INDEX IF NOT EXISTS idx_sponsors_created_at ON sponsors(created_at DESC);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -226,6 +241,7 @@ jobs:
 
       - name: Step 24 - sponsors RLS
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="ALTER TABLE sponsors ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS \"Allow public read of approved sponsors\" ON sponsors; CREATE POLICY \"Allow public read of approved sponsors\" ON sponsors FOR SELECT USING (status = 'approved'); DROP POLICY IF EXISTS \"Allow authenticated users to create sponsors\" ON sponsors; CREATE POLICY \"Allow authenticated users to create sponsors\" ON sponsors FOR INSERT WITH CHECK (auth.uid() = user_id);"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -237,6 +253,7 @@ jobs:
 
       - name: Step 25 - sponsors grants
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON sponsors TO anon; GRANT INSERT ON sponsors TO anon;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -248,6 +265,7 @@ jobs:
 
       - name: Step 26 - seed sponsors
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           SQL="INSERT INTO sponsors (nickname, amount, tier, payment_method, message, status) VALUES ('小明同学', 18, 'meal', 'wechat', '希望平台越办越好！', 'approved'), ('留学小助手', 66, 'super', 'alipay', '加油！', 'approved'), ('匿名好友', 6, 'coffee', 'wechat', NULL, 'approved'), ('Jack W', 18, 'meal', 'wechat', 'Great platform!', 'approved'), ('璐璐', 66, 'super', 'alipay', '帮助更多留学生！', 'approved') ON CONFLICT DO NOTHING;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
           RESP=$(curl -s -X POST "$MGMT_API" \
@@ -259,6 +277,7 @@ jobs:
 
       - name: Verify
         run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
           echo "=== Verifying sponsors table ==="
           SQL="SELECT count(*) as cnt FROM sponsors;"
           ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
