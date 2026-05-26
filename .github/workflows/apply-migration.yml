@@ -117,3 +117,4 @@ USEREOF
             -H "Content-Type: application/json" \
             -d '{"query":"SELECT count(*) as cnt FROM user_points_balance;"}')
           echo "user_points_balance: $RESULT"
+
