@@ -47,84 +47,80 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           FORCE_DEMO_AUTH: ${{ vars.FORCE_DEMO_AUTH || 'false' }}
 
-      - name: Check current production deployment
-        id: check_production
+      - name: Upload to Cloudflare Pages
         run: |
-          echo "Fetching current project config to check production deployment..."
-          CONFIG=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/ai-student-survival" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/json")
-          echo "Project config: $(echo "$CONFIG" | head -c 1000)"
-          CUR_DEPLOY=$(echo "$CONFIG" | grep -o '"selected_deployment_id": "[^"]*"' | sed 's/"selected_deployment_id": "//;s/"//')
-          echo "Current selected_deployment_id: ${CUR_DEPLOY:-'(not set)'}"
-          echo "current_deployment=${CUR_DEPLOY}" >> $GITHUB_OUTPUT
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-      - name: Upload to Cloudflare Pages (production environment)
-        run: |
-          echo "Uploading build to Cloudflare Pages production environment..."
-          pnpm exec wrangler pages publish dist --project-name=ai-student-survival --env=production --commit-message="${{ github.sha }}" 2>&1 | tee /tmp/wrangler.log
+          echo "Uploading build to Cloudflare Pages..."
+          pnpm exec wrangler pages publish dist --project-name=ai-student-survival --branch=production --commit-message="${{ github.sha }}" 2>&1 | tee /tmp/wrangler.log
           echo "upload_done=true" >> $GITHUB_OUTPUT
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Update and purge CDN
+      - name: Update production deployment and purge cache
         run: |
-          echo "Getting latest deployment ID..."
+          echo "=== Getting latest deployment ID ==="
           DEPLOYMENTS=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/ai-student-survival/deployments?per_page=5&order_by=created_at" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json")
           DEPLOYMENT_ID=$(echo "$DEPLOYMENTS" | grep -o '"id": "[a-f0-9-]*"' | head -1 | sed 's/"id": "//;s/"//')
           echo "Latest deployment: $DEPLOYMENT_ID"
 
-          echo "Getting Cloudflare Zone ID..."
-          ZONE_RESP=$(curl -s "https://api.cloudflare.com/client/v4/zones?name=mi-to-ai.com" \
+          echo "=== Trying to update custom hostname binding ==="
+          CH_RESPONSE=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/ai-student-survival/custom-hostnames" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json")
-          echo "Zone API response: $(echo "$ZONE_RESP" | head -c 500)"
-          ZONE_ID=$(echo "$ZONE_RESP" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
+          echo "Custom hostname response: $(echo "$CH_RESPONSE" | head -c 500)"
+          CH_ID=$(echo "$CH_RESPONSE" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
+          echo "Custom hostname ID: ${CH_ID:-'(not found - may need Dashboard update)'}"
+
+          if [ -n "$CH_ID" ]; then
+            echo "Updating custom hostname binding to deployment $DEPLOYMENT_ID..."
+            CH_UPDATE=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/ai-student-survival/custom-hostnames/$CH_ID" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"deployment_id\":\"$DEPLOYMENT_ID\"}")
+            echo "Result: $(echo "$CH_UPDATE" | head -c 300)"
+            if echo "$CH_UPDATE" | grep -q '"success": true'; then
+              echo "✅ Custom hostname binding updated!"
+            else
+              echo "⚠️ Custom hostname update failed"
+            fi
+          else
+            echo "⚠️ Custom hostname ID not found via API. Please update production deployment manually in Cloudflare Dashboard if needed."
+          fi
+
+          echo "=== Getting Zone ID for cache purge ==="
+          ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID }}"
           if [ -z "$ZONE_ID" ]; then
-            ZONE_RESP2=$(curl -s "https://api.cloudflare.com/client/v4/zones" \
+            ZONE_RESP=$(curl -s "https://api.cloudflare.com/client/v4/zones?name=mi-to-ai.com" \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
               -H "Content-Type: application/json")
-            echo "All zones response: $(echo "$ZONE_RESP2" | head -c 500)"
-            ZONE_ID=$(echo "$ZONE_RESP2" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
+            ZONE_ID=$(echo "$ZONE_RESP" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
           fi
           if [ -z "$ZONE_ID" ]; then
-            echo "⚠️ Zone ID not found. Using CLOUDFLARE_ZONE_ID from secrets if available."
-            ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID }}"
+            ZONE_ALL=$(curl -s "https://api.cloudflare.com/client/v4/zones" \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              -H "Content-Type: application/json")
+            ZONE_ID=$(echo "$ZONE_ALL" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
           fi
-          echo "Zone ID: $ZONE_ID"
-
-          echo "Updating production deployment to: $DEPLOYMENT_ID..."
-          UPDATE=$(curl -s -X PATCH "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/ai-student-survival" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d "{\"deployment_configs\":{\"production\":{\"selected_deployment_id\":\"$DEPLOYMENT_ID\"}}}")
-          echo "Update result: $(echo "$UPDATE" | head -c 200)"
+          echo "Zone ID: ${ZONE_ID:-'(not available)'}"
 
           if [ -n "$ZONE_ID" ]; then
-            echo "Purging CDN cache for mi-to-ai.com (zone: $ZONE_ID)..."
+            echo "=== Purging CDN cache ==="
             PURGE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/purge_cache" \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
               -H "Content-Type: application/json" \
               -d '{"purge_everything": true}')
-            echo "Purge result: $PURGE"
+            echo "Purge result: $(echo "$PURGE" | head -c 300)"
             if echo "$PURGE" | grep -q '"success": true'; then
               echo "✅ CDN cache purged!"
             else
-              echo "⚠️ CDN purge failed or zone not found (non-critical)"
+              echo "⚠️ CDN purge failed (non-critical - cache will update within minutes)"
             fi
-          else
-            echo "⚠️ Could not get zone ID - CDN purge skipped"
           fi
 
           echo ""
-          echo "✅ Deployment pipeline complete!"
-          echo "   mi-to-ai.com should serve new build within 1-3 minutes."
+          echo "🎉 Deployment complete! mi-to-ai.com should serve the new build shortly."
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
