@@ -14,16 +14,31 @@ interface Sponsor {
 const WECHAT_ID = 'jian_xin_happy';
 const ALIPAY_ID = '18801400211';
 
-const tierLabels = {
-  coffee: { zh: '☕ 一杯咖啡', en: '☕ A Coffee', amount: '¥6.6' },
-  meal: { zh: '🍜 一顿饭', en: '🍜 A Meal', amount: '¥18.8' },
-  super: { zh: '🎉 超级赞助', en: '🎉 Super Sponsor', amount: '¥66.6+' },
-};
+const tiers = [
+  { key: 'coffee', zh: '☕ 一杯咖啡', en: '☕ A Coffee', minAmount: 0, maxAmount: 11.99, suggestedAmount: 6.6, points: 66 },
+  { key: 'meal', zh: '🍜 一顿饭', en: '🍜 A Meal', minAmount: 12, maxAmount: 49.99, suggestedAmount: 18.8, points: 188 },
+  { key: 'super', zh: '🎉 超级赞助', en: '🎉 Super Sponsor', minAmount: 50, maxAmount: 199.99, suggestedAmount: 66.6, points: 666 },
+  { key: 'custom', zh: '💎 自定义', en: '💎 Custom', minAmount: 0, maxAmount: Infinity, suggestedAmount: 0, points: 0 },
+];
 
-const tierColors = {
+function detectTier(amount: number): string {
+  if (amount >= 50) return 'super';
+  if (amount >= 12) return 'meal';
+  if (amount > 0) return 'coffee';
+  return 'custom';
+}
+
+function getTierLabel(key: string, locale: 'zh' | 'en') {
+  const t = tiers.find(t => t.key === key);
+  if (!t) return key;
+  return locale === 'zh' ? t.zh : t.en;
+}
+
+const tierColors: Record<string, { bg: string; border: string; badge: string; icon: string }> = {
   coffee: { bg: 'bg-gray-50', border: 'border-gray-200', badge: 'bg-gray-100 text-gray-600', icon: '☕' },
   meal: { bg: 'bg-primary-50', border: 'border-primary-200', badge: 'bg-primary-100 text-primary-700', icon: '🍜' },
   super: { bg: 'bg-yellow-50', border: 'border-yellow-200', badge: 'bg-yellow-100 text-yellow-700', icon: '🎉' },
+  custom: { bg: 'bg-purple-50', border: 'border-purple-200', badge: 'bg-purple-100 text-purple-700', icon: '💎' },
 };
 
 interface SponsorPageProps {
@@ -39,7 +54,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
   // Form state
   const [nickname, setNickname] = useState('');
   const [amount, setAmount] = useState('');
-  const [tier, setTier] = useState<'coffee' | 'meal' | 'super'>('meal');
+  const [tier, setTier] = useState<string>('meal');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -98,13 +113,15 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
       const token = localStorage.getItem('demo_token') || localStorage.getItem('supabase-token');
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
+      const finalTier = tier === 'custom' ? detectTier(parseFloat(amount) || 0) : tier;
+
       const res = await fetch('/api/sponsors/record', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...headers },
         body: JSON.stringify({
           nickname: nickname.trim(),
           amount: parseFloat(amount),
-          tier,
+          tier: finalTier,
           paymentMethod: activeTab === 'wechat' ? 'wechat' : 'alipay',
           message: message.trim(),
         }),
@@ -320,38 +337,51 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
       {/* Sponsor Tiers */}
       <div className="mb-10">
         <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">{t.tiersTitle}</h2>
-        <div className="grid md:grid-cols-3 gap-4">
-          {(['coffee', 'meal', 'super'] as const).map(tierKey => (
-            <div
-              key={tierKey}
-              className={`p-6 rounded-xl text-center border-2 ${
-                tierKey === 'meal' ? 'border-primary-300 bg-primary-50 relative' : 'border-gray-200'
-              }`}
-            >
-              {tierKey === 'meal' && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary-600 text-white text-xs px-3 py-1 rounded-full">
-                  {locale === 'zh' ? '推荐' : 'Recommended'}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {tiers.map((t) => {
+            const isCustom = t.key === 'custom';
+            return (
+              <div
+                key={t.key}
+                className={`p-4 rounded-xl text-center border-2 transition-all ${
+                  tier === t.key
+                    ? 'border-primary-400 bg-primary-50 relative shadow-md'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {t.key === 'meal' && (
+                  <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-primary-600 text-white text-xs px-2 py-0.5 rounded-full whitespace-nowrap">
+                    {locale === 'zh' ? '推荐' : 'Popular'}
+                  </div>
+                )}
+                <div className="text-2xl mb-1.5">{tierColors[t.key]?.icon || '💎'}</div>
+                <div className="font-bold text-gray-900 text-sm mb-0.5">
+                  {locale === 'zh' ? t.zh : t.en}
                 </div>
-              )}
-              <div className="text-3xl mb-3">{tierColors[tierKey].icon}</div>
-              <h3 className="font-bold text-gray-900 mb-1">
-                {locale === 'zh' ? tierLabels[tierKey].zh : tierLabels[tierKey].en}
-              </h3>
-              <p className="text-primary-600 font-bold text-lg mb-1">{tierLabels[tierKey].amount}</p>
-              <p className="text-sm text-gray-500">
-                {tierKey === 'coffee' ? (locale === 'zh' ? '+66 积分' : '+66 pts') :
-                 tierKey === 'meal' ? (locale === 'zh' ? '+188 积分 + 赞助墙' : '+188 pts + Wall') :
-                 (locale === 'zh' ? '+666 积分 + 置顶' : '+666 pts + Top')}
-              </p>
-            </div>
-          ))}
+                {isCustom ? (
+                  <div className="text-xs text-purple-600 font-medium">
+                    {locale === 'zh' ? '上不封顶' : 'No limit'}
+                  </div>
+                ) : (
+                  <div className="text-primary-600 font-bold text-sm mb-0.5">
+                    ¥{t.suggestedAmount.toFixed(1)}
+                  </div>
+                )}
+                <div className="text-xs text-gray-500">
+                  {t.key === 'custom'
+                    ? (locale === 'zh' ? '自定义金额' : 'Custom amount')
+                    : `+${t.points} ${locale === 'zh' ? '积分' : 'pts'}`}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Record Sponsor Form */}
       <div className="bg-white rounded-2xl border border-gray-200 p-6 md:p-8 mb-10">
-        <h2 className="text-xl font-bold text-gray-900 mb-2 text-center">{t.recordTitle}</h2>
-        <p className="text-sm text-gray-500 text-center mb-6">{t.recordDesc}</p>
+        <h2 className="text-xl font-bold text-gray-900 mb-1 text-center">{t.recordTitle}</h2>
+        <p className="text-sm text-gray-500 text-center mb-5">{t.recordDesc}</p>
 
         {submitStatus !== 'idle' && (
           <div className={`mb-4 p-3 rounded-lg text-sm ${
@@ -387,33 +417,71 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t.amountLabel} *</label>
+
+            {/* Tier selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">{t.selectTier}</label>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-2">
+                {tiers.map((t) => (
+                  <button
+                    key={t.key}
+                    type="button"
+                    onClick={() => {
+                      const detected = t.key === 'custom' ? 'custom' : t.key;
+                      setTier(detected);
+                      if (t.key !== 'custom') {
+                        setAmount(t.suggestedAmount.toString());
+                      } else {
+                        setAmount('');
+                      }
+                    }}
+                    className={`py-2 px-3 rounded-lg border text-sm font-medium transition-all ${
+                      tier === t.key
+                        ? 'border-primary-400 bg-primary-50 text-primary-700'
+                        : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
+                    }`}
+                  >
+                    <div className="text-base mb-0.5">{tierColors[t.key]?.icon || '💎'}</div>
+                    <div className="text-xs">{locale === 'zh' ? t.zh : t.en}</div>
+                    {t.key !== 'custom' && (
+                      <div className="text-xs font-bold">¥{t.suggestedAmount.toFixed(1)}</div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Amount input */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.amountLabel} *</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">¥</span>
                 <input
                   type="number"
                   value={amount}
-                  onChange={e => setAmount(e.target.value)}
-                  placeholder={t.amountPlaceholder}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setAmount(val);
+                    if (val && parseFloat(val) > 0) {
+                      setTier(detectTier(parseFloat(val)));
+                    }
+                  }}
+                  placeholder={tier === 'custom' ? (locale === 'zh' ? '输入自定义金额...' : 'Enter custom amount...') : t.amountPlaceholder}
                   required
                   min="0.01"
                   step="0.01"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  className="w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t.selectTier}</label>
-                <select
-                  value={tier}
-                  onChange={e => setTier(e.target.value as typeof tier)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-                >
-                  <option value="coffee">{tierLabels.coffee[locale === 'zh' ? 'zh' : 'en']} - ¥6.6</option>
-                  <option value="meal">{tierLabels.meal[locale === 'zh' ? 'zh' : 'en']} - ¥18.8</option>
-                  <option value="super">{tierLabels.super[locale === 'zh' ? 'zh' : 'en']} - ¥66.6+</option>
-                </select>
-              </div>
+              {amount && parseFloat(amount) > 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  {locale === 'zh'
+                    ? `预计获得 ${Math.round(parseFloat(amount) * 10)} 积分`
+                    : `Estimated ${Math.round(parseFloat(amount) * 10)} points`}
+                </p>
+              )}
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">{t.messageLabel}</label>
               <textarea

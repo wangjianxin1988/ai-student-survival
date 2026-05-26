@@ -267,4 +267,13 @@ function getAlternatePath(loc: Locale): string {
   *:focus-visible {
     @apply outline-none ring-2 ring-primary-500 ring-offset-2;
   }
+
+  /* Hide scrollbar utility */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 </style>
