@@ -47,6 +47,21 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           FORCE_DEMO_AUTH: ${{ vars.FORCE_DEMO_AUTH || 'false' }}
 
+      - name: Check current production deployment
+        id: check_production
+        run: |
+          echo "Fetching current project config to check production deployment..."
+          CONFIG=$(curl -s "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/ai-student-survival" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json")
+          echo "Project config: $(echo "$CONFIG" | head -c 1000)"
+          CUR_DEPLOY=$(echo "$CONFIG" | grep -o '"selected_deployment_id": "[^"]*"' | sed 's/"selected_deployment_id": "//;s/"//')
+          echo "Current selected_deployment_id: ${CUR_DEPLOY:-'(not set)'}"
+          echo "current_deployment=${CUR_DEPLOY}" >> $GITHUB_OUTPUT
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
       - name: Upload to Cloudflare Pages
         run: |
           echo "Uploading build to Cloudflare Pages..."
