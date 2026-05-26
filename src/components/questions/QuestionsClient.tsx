@@ -10,9 +10,10 @@ import {
   type QuestionCategory,
   QUESTION_CATEGORIES,
 } from '@/data/questions';
-import { CommunityFeed } from '@/components/community';
+import { CommunityFeed, PostCard } from '@/components/community';
 import type { CommunityPost } from '@/lib/community/types';
-import { getCurrentLocale } from '@/lib/i18n';
+import { getCurrentLocale, getLocaleHref } from '@/lib/i18n';
+import { getAuthHeaders } from '@/lib/auth';
 
 interface QuestionsClientProps {
   locale?: 'zh' | 'en';
@@ -92,6 +93,43 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
   // Real-time community posts
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [communityPostsLoading, setCommunityPostsLoading] = useState(false);
+
+  // Client-side user detection for PostCard interactions
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const checkSession = () => {
+      if (typeof window === 'undefined') return;
+      try {
+        const demoRaw = sessionStorage.getItem('demo_session');
+        if (demoRaw) {
+          const d = JSON.parse(demoRaw);
+          if (d && d.id) { setCurrentUserId(d.id); return; }
+        }
+        const keys = Object.keys(localStorage);
+        for (const k of keys) {
+          if (!k.startsWith('sb-')) continue;
+          if (k.indexOf('auth') === -1 && k.indexOf('token') === -1) continue;
+          const raw = localStorage.getItem(k);
+          if (!raw) continue;
+          try {
+            const p = JSON.parse(raw);
+            const accessToken = p?.tokens?.access_token || p?.access_token;
+            const refreshToken = p?.tokens?.refresh_token || p?.refresh_token;
+            if (!accessToken || !refreshToken) continue;
+            const parts = accessToken.split('.');
+            if (parts.length !== 3) continue;
+            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+            if (payload.sub) { setCurrentUserId(payload.sub); return; }
+          } catch { /* skip */ }
+        }
+      } catch {}
+      setCurrentUserId(undefined);
+    };
+    checkSession();
+    const interval = setInterval(checkSession, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Fetch real-time community posts
   const fetchCommunityPosts = useCallback(async () => {
@@ -434,59 +472,49 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                 </div>
               ) : mergedQuestions.length > 0 ? (
                 mergedQuestions.map((item) => {
-                  // Real community post rendered as a card
                   if ('_isCommunityPost' in item && item._isCommunityPost) {
                     const post = item._post;
                     return (
-                      <div key={item.id} className="bg-white rounded-lg border-2 border-blue-200 p-5 hover:shadow-md transition-shadow">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
-                            社区帖子
-                          </span>
-                          {post.autoPromoted && (
-                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                              精选
-                            </span>
-                          )}
-                        </div>
-                        <a
-                          href={`/community/${post.id}`}
-                          className="block group"
-                        >
-                          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
-                            {post.title}
-                          </h3>
-                          {post.excerpt && (
-                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                              {post.excerpt}
-                            </p>
-                          )}
-                        </a>
-                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
-                          <div className="flex items-center gap-1.5">
-                            <img
-                              src={post.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userName}`}
-                              alt={post.userName}
-                              className="w-5 h-5 rounded-full"
-                            />
-                            <span>{post.userName}</span>
-                          </div>
-                          <span>👍 {post.likesCount}</span>
-                          <span>💬 {post.commentsCount}</span>
-                          <span>👁 {post.viewsCount}</span>
-                          <span>{new Date(post.createdAt).toLocaleDateString('zh-CN')}</span>
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 mt-2">
-                          {post.tags.map(tag => (
-                            <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                      <PostCard
+                        key={item.id}
+                        post={post}
+                        currentUserId={currentUserId}
+                        onClick={(postId) => {
+                          window.location.href = `/community/${postId}`;
+                        }}
+                        onLike={async (postId) => {
+                          if (!currentUserId) return;
+                          // Optimistic update
+                          setCommunityPosts(prev => prev.map(p => {
+                            if (p.id !== postId) return p;
+                            return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
+                          }));
+                          try {
+                            const headers = await getAuthHeaders();
+                            await fetch(`/api/community/${postId}/like`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', ...headers },
+                            });
+                          } catch {}
+                        }}
+                        onFavorite={async (postId) => {
+                          if (!currentUserId) return;
+                          // Optimistic update
+                          setCommunityPosts(prev => prev.map(p => {
+                            if (p.id !== postId) return p;
+                            return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
+                          }));
+                          try {
+                            const headers = await getAuthHeaders();
+                            await fetch(`/api/community/${postId}/favorite`, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', ...headers },
+                            });
+                          } catch {}
+                        }}
+                      />
                     );
                   }
-                  // Static question card
                   return (
                     <QuestionCard
                       key={item.id}
