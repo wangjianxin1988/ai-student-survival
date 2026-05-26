@@ -40,8 +40,6 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           CONTACT_TO_EMAIL: ${{ secrets.CONTACT_TO_EMAIL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          # FORCE_DEMO_AUTH: enables demo mode (any credentials work) for testing
-          # Set to 'true' for PR previews, 'false' or remove for production
           FORCE_DEMO_AUTH: ${{ vars.FORCE_DEMO_AUTH || 'false' }}
 
       - name: Upload to Cloudflare Pages
@@ -53,6 +51,8 @@ jobs:
           directory: dist
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           commitMessage: "Deploy ${{ github.sha }}"
+          secrets: |
+            SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
   test:
     runs-on: ubuntu-latest
@@ -74,4 +74,3 @@ jobs:
 
       - name: Build
         run: npm run build
-# trigger

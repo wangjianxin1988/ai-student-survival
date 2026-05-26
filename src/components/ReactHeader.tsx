@@ -52,6 +52,7 @@ export default function ReactHeader({ locale = 'zh', currentPath = '/', siteName
     href: getLocaleHref(link.href, locale),
     key: link.key,
     short: locale === 'zh' ? link.shortZh : link.shortEn,
+    accent: (link as any).accent || false,
   }));
 
   // Mobile menu toggle effect
@@ -138,9 +139,11 @@ export default function ReactHeader({ locale = 'zh', currentPath = '/', siteName
                   key={link.href}
                   href={link.href}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                    currentPath.startsWith(link.href)
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    link.accent
+                      ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                      : currentPath.startsWith(link.href)
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                   }`}
                 >
                   {link.short}

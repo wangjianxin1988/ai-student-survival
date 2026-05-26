@@ -1,0 +1,28 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import SponsorPage from '@/components/sponsor/SponsorPage';
+
+export const prerender = false;
+
+const locale = 'en';
+---
+
+<Layout
+  title="Sponsor Us - AI Student Survival Guide"
+  description="Support MI TO AI Student Survival Guide to help us continue serving international students."
+  locale="en"
+>
+  <!-- Hero -->
+  <section class="hero-gradient text-white py-16">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      <h1 class="text-4xl font-bold mb-4">Sponsor Us</h1>
+      <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+        Your support keeps MI TO AI running and helping international students worldwide
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 bg-white">
+    <SponsorPage locale={locale} client:only="react" />
+  </section>
+</Layout>

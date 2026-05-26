@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { PostCard } from '@/components/community';
 import { CommunityFeed } from '@/components/community/CommunityFeed';
 import type { CommunityPost } from '@/lib/community/types';
@@ -8,6 +8,9 @@ import { getAuthHeaders } from '@/lib/auth';
 interface QuestionsClientProps {
   locale?: 'zh' | 'en';
 }
+
+const PAGE_SIZE = 10; // items per API fetch
+const CARD_ESTIMATED_HEIGHT = 160; // fallback card height in px before measurement
 
 const translations = {
   zh: {
@@ -99,17 +102,28 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
   const [sortBy, setSortBy] = useState<'newest' | 'hottest' | 'unanswered'>('newest');
   const [activeTab, setActiveTab] = useState<'all' | 'hot' | 'unanswered' | 'community'>('all');
 
-  // Real Q&A posts from Supabase (replacing static data)
-  const [qaPosts, setQaPosts] = useState<CommunityPost[]>([]);
-  const [qaLoading, setQaLoading] = useState(false);
+  // Viewport-aware pagination state
+  const [qaAllPosts, setQaAllPosts] = useState<CommunityPost[]>([]);
+  const [commAllPosts, setCommAllPosts] = useState<CommunityPost[]>([]);
+  const [qaOffset, setQaOffset] = useState(0);
+  const [commOffset, setCommOffset] = useState(0);
+  const [qaTotal, setQaTotal] = useState(0);
+  const [commTotal, setCommTotal] = useState(0);
+  const [hasMoreQa, setHasMoreQa] = useState(true);
+  const [hasMoreComm, setHasMoreComm] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
-  // Real-time community posts
-  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
-  const [communityPostsLoading, setCommunityPostsLoading] = useState(false);
+  // Sentinel ref for IntersectionObserver
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const measuredRef = useRef(false);
+  const viewportCountRef = useRef(PAGE_SIZE);
 
   // Client-side user detection
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
 
+  // Session detection
   useEffect(() => {
     const checkSession = () => {
       if (typeof window === 'undefined') return;
@@ -144,150 +158,196 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch Q&A posts from Supabase
-  const fetchQaPosts = useCallback(async () => {
-    setQaLoading(true);
-    try {
-      const params = new URLSearchParams({
-        sort: sortBy === 'hottest' ? 'popular' : 'latest',
-        limit: '100',
-        offset: '0',
-      });
-      if (selectedCategory) {
-        params.set('category', selectedCategory);
-      }
-      if (currentUserId) {
-        params.set('userId', currentUserId);
-      }
-      const res = await fetch(`/api/questions?${params}`);
-      const data = await res.json();
-      if (data.success && data.data.length > 0) {
-        let posts = data.data as CommunityPost[];
-        // Client-side search filter
-        if (searchQuery) {
-          const q = searchQuery.toLowerCase();
-          posts = posts.filter(p =>
-            p.title.toLowerCase().includes(q) ||
-            p.content.toLowerCase().includes(q) ||
-            p.tags.some(t => t.toLowerCase().includes(q))
-          );
-        }
-        setQaPosts(posts);
-      } else {
-        setQaPosts([]);
-      }
-    } catch (e) {
-      console.error('[QuestionsClient] Error fetching Q&A posts:', e);
-      setQaPosts([]);
-    } finally {
-      setQaLoading(false);
+  // Measure viewport to compute how many cards to show
+  const measureViewport = useCallback(() => {
+    if (measuredRef.current || typeof window === 'undefined') return;
+    measuredRef.current = true;
+    const card = document.querySelector('[data-post-card]');
+    if (card) {
+      const cardHeight = card.getBoundingClientRect().height;
+      const gap = 16; // space-y-4 = 16px
+      const viewportH = window.innerHeight;
+      const count = Math.max(1, Math.floor((viewportH * 0.6) / (cardHeight + gap)));
+      viewportCountRef.current = Math.max(PAGE_SIZE, count);
     }
+  }, []);
+
+  // Fetch one page of Q&A posts
+  const fetchQaPage = useCallback(async (offset: number, limit: number, reset = false) => {
+    const params = new URLSearchParams({
+      sort: sortBy === 'hottest' ? 'popular' : 'latest',
+      limit: limit.toString(),
+      offset: offset.toString(),
+    });
+    if (selectedCategory) params.set('category', selectedCategory);
+    if (currentUserId) params.set('userId', currentUserId);
+    const res = await fetch(`/api/questions?${params}`);
+    const data = await res.json();
+    if (data.success) {
+      let posts = data.data as CommunityPost[];
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        posts = posts.filter(p =>
+          p.title.toLowerCase().includes(q) ||
+          p.content.toLowerCase().includes(q) ||
+          p.tags.some(t => t.toLowerCase().includes(q))
+        );
+      }
+      const newTotal = data.meta?.total || 0;
+      if (reset) {
+        setQaAllPosts(posts);
+      } else {
+        setQaAllPosts(prev => [...prev, ...posts]);
+      }
+      setQaTotal(newTotal);
+      setHasMoreQa(offset + posts.length < newTotal);
+    }
+    return data;
   }, [sortBy, selectedCategory, currentUserId, searchQuery]);
 
-  // Fetch real-time community posts
-  const fetchCommunityPosts = useCallback(async () => {
-    setCommunityPostsLoading(true);
-    try {
-      const params = new URLSearchParams({
-        sort: sortBy === 'hottest' ? 'popular' : 'latest',
-        limit: '20',
-        offset: '0',
-      });
-      if (selectedCategory) {
-        const categoryMap: Record<string, string> = {
-          academic: 'qa',
-          life: 'discussion',
-          visa: 'qa',
-          job: 'qa',
-          policy: 'policy',
-          payment: 'payment',
-          ai_tools: 'tools',
-          study_life: 'discussion',
-          job_recruitment: 'discussion',
-          other: 'discussion',
-        };
-        const communityCat = categoryMap[selectedCategory];
-        if (communityCat) {
-          params.set('category', communityCat);
-        }
-      }
-      const res = await fetch(`/api/community?${params}`);
-      const data = await res.json();
-      if (data.success && data.data.length > 0) {
-        const posts = data.data as CommunityPost[];
-        // Filter out Q&A category posts to avoid duplicates when merged with Q&A posts
-        const QNA_CATEGORIES = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other']);
-        const nonQnaPosts = posts.filter(p => !QNA_CATEGORIES.has(p.category));
-        const postIds = nonQnaPosts.map(p => p.id);
-        const { likes, favorites } = await fetchMyInteractions(postIds);
-        const postsWithState = nonQnaPosts.map(p => ({
-          ...p,
-          isLiked: likes.has(p.id),
-          isFavorited: favorites.has(p.id),
-        }));
-        setCommunityPosts(postsWithState);
-      } else {
-        setCommunityPosts([]);
-      }
-    } catch (e) {
-      console.error('[QuestionsClient] Error fetching posts:', e);
-      setCommunityPosts([]);
-    } finally {
-      setCommunityPostsLoading(false);
+  // Fetch one page of community posts (non-Q&A categories)
+  const fetchCommPage = useCallback(async (offset: number, limit: number, reset = false) => {
+    const params = new URLSearchParams({
+      sort: sortBy === 'hottest' ? 'popular' : 'latest',
+      limit: limit.toString(),
+      offset: offset.toString(),
+    });
+    if (selectedCategory) {
+      const categoryMap: Record<string, string> = {
+        academic: 'qa', life: 'discussion', visa: 'qa', job: 'qa',
+        policy: 'policy', payment: 'payment', ai_tools: 'tools',
+        study_life: 'discussion', job_recruitment: 'discussion', other: 'discussion',
+      };
+      const communityCat = categoryMap[selectedCategory];
+      if (communityCat) params.set('category', communityCat);
     }
+    const res = await fetch(`/api/community?${params}`);
+    const data = await res.json();
+    if (data.success) {
+      const QNA_CATS = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other']);
+      const nonQnaPosts = (data.data as CommunityPost[]).filter(p => !QNA_CATS.has(p.category));
+      const postIds = nonQnaPosts.map(p => p.id);
+      const { likes, favorites } = await fetchMyInteractions(postIds);
+      const postsWithState = nonQnaPosts.map(p => ({
+        ...p,
+        isLiked: likes.has(p.id),
+        isFavorited: favorites.has(p.id),
+      }));
+      const newTotal = data.meta?.total || 0;
+      if (reset) {
+        setCommAllPosts(postsWithState);
+      } else {
+        setCommAllPosts(prev => [...prev, ...postsWithState]);
+      }
+      setCommTotal(newTotal);
+      setHasMoreComm(offset + postsWithState.length < newTotal);
+    }
+    return data;
   }, [sortBy, selectedCategory]);
+
+  // Initial load + reset on filter change
+  const loadInitial = useCallback(async () => {
+    setInitialLoading(true);
+    measuredRef.current = false;
+    viewportCountRef.current = PAGE_SIZE;
+    setQaOffset(0);
+    setCommOffset(0);
+    await Promise.all([
+      fetchQaPage(0, PAGE_SIZE, true),
+      fetchCommPage(0, PAGE_SIZE, true),
+    ]);
+    setInitialLoading(false);
+    // Measure after render
+    setTimeout(measureViewport, 100);
+  }, [fetchQaPage, fetchCommPage, measureViewport]);
 
   useEffect(() => {
     if (activeTab === 'community') return;
-    fetchQaPosts();
-  }, [activeTab, fetchQaPosts]);
+    loadInitial();
+  }, [activeTab, loadInitial]);
 
+  // IntersectionObserver for infinite scroll
   useEffect(() => {
-    if (activeTab !== 'community') {
-      fetchCommunityPosts();
-    }
-  }, [activeTab, fetchCommunityPosts]);
+    if (activeTab === 'community') return;
+    if (observerRef.current) observerRef.current.disconnect();
 
-  // Filtered Q&A posts
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !loadingMore) {
+          const qaCanLoad = hasMoreQa && (activeTab === 'all' || activeTab === 'hot' || activeTab === 'unanswered');
+          const commCanLoad = hasMoreComm && activeTab === 'all';
+          if (!qaCanLoad && !commCanLoad) return;
+          setLoadingMore(true);
+          Promise.all([
+            qaCanLoad ? fetchQaPage(qaOffset, PAGE_SIZE) : Promise.resolve(),
+            commCanLoad ? fetchCommPage(commOffset, PAGE_SIZE) : Promise.resolve(),
+          ]).then(([qaRes, commRes]) => {
+            if (qaRes?.success) setQaOffset(prev => prev + PAGE_SIZE);
+            if (commRes?.success) setCommOffset(prev => prev + PAGE_SIZE);
+            setLoadingMore(false);
+          });
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    if (sentinelRef.current) observerRef.current.observe(sentinelRef.current);
+    return () => observerRef.current?.disconnect();
+  }, [activeTab, hasMoreQa, hasMoreComm, loadingMore, qaOffset, commOffset, fetchQaPage, fetchCommPage]);
+
+  // Update offsets after load
+  useEffect(() => {
+    setQaOffset(qaAllPosts.length);
+  }, [qaAllPosts]);
+  useEffect(() => {
+    setCommOffset(commAllPosts.length);
+  }, [commAllPosts]);
+
+  // Filtered Q&A posts by tab
   const filteredQaPosts = useMemo(() => {
     if (activeTab === 'community') return [];
     if (activeTab === 'hot') {
-      return qaPosts
+      return qaAllPosts
         .filter(p => (p.likesCount + p.commentsCount * 2 + p.favoritesCount * 3) >= 5)
-        .slice(0, 5);
+        .slice(0, 10);
     }
     if (activeTab === 'unanswered') {
-      return qaPosts.filter(p => p.commentsCount === 0);
+      return qaAllPosts.filter(p => p.commentsCount === 0);
     }
-    return qaPosts;
-  }, [qaPosts, activeTab]);
+    return qaAllPosts;
+  }, [qaAllPosts, activeTab]);
 
-  // Merged list for display (all tab)
+  // Merged list for "all" tab: interleave Q&A + community posts
   const mergedPosts = useMemo(() => {
     if (activeTab === 'community') return [];
     if (activeTab !== 'all') return filteredQaPosts;
-
-    // Interleave Q&A posts and community posts
     const result: CommunityPost[] = [];
-    const maxLen = Math.max(filteredQaPosts.length, communityPosts.slice(0, 5).length);
+    const maxLen = Math.max(filteredQaPosts.length, commAllPosts.length);
     for (let i = 0; i < maxLen; i++) {
       if (filteredQaPosts[i]) result.push(filteredQaPosts[i]);
-      if (communityPosts[i]) result.push(communityPosts[i]);
+      if (commAllPosts[i]) result.push(commAllPosts[i]);
     }
     return result;
-  }, [activeTab, filteredQaPosts, communityPosts]);
+  }, [activeTab, filteredQaPosts, commAllPosts]);
 
-  const hotCount = useMemo(() => qaPosts.filter(p => (p.likesCount + p.commentsCount * 2 + p.favoritesCount * 3) >= 5).length, [qaPosts]);
-  const unansweredCount = useMemo(() => qaPosts.filter(p => p.commentsCount === 0).length, [qaPosts]);
+  const hotCount = useMemo(() =>
+    qaAllPosts.filter(p => (p.likesCount + p.commentsCount * 2 + p.favoritesCount * 3) >= 5).length,
+    [qaAllPosts]);
+  const unansweredCount = useMemo(() =>
+    qaAllPosts.filter(p => p.commentsCount === 0).length,
+    [qaAllPosts]);
 
   const categories = Object.entries(QUESTION_CATEGORIES) as [QuestionCategory, typeof QUESTION_CATEGORIES[QuestionCategory]][];
 
   const handleLike = async (postId: string) => {
     if (!currentUserId) return;
-    setQaPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
-    }));
+    // Optimistic update on both lists
+    const toggleLike = (p: CommunityPost) =>
+      p.id === postId
+        ? { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) }
+        : p;
+    setQaAllPosts(prev => prev.map(toggleLike));
+    setCommAllPosts(prev => prev.map(toggleLike));
     try {
       const headers = await getAuthHeaders();
       const res = await fetch(`/api/questions/${postId}/like`, {
@@ -296,20 +356,24 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
       });
       const data = await res.json();
       if (!data.success) {
-        setQaPosts(prev => prev.map(p => {
-          if (p.id !== postId) return p;
-          return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
-        }));
+        const revert = (p: CommunityPost) =>
+          p.id === postId
+            ? { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) }
+            : p;
+        setQaAllPosts(prev => prev.map(revert));
+        setCommAllPosts(prev => prev.map(revert));
       }
     } catch {}
   };
 
   const handleFavorite = async (postId: string) => {
     if (!currentUserId) return;
-    setQaPosts(prev => prev.map(p => {
-      if (p.id !== postId) return p;
-      return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
-    }));
+    const toggleFav = (p: CommunityPost) =>
+      p.id === postId
+        ? { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) }
+        : p;
+    setQaAllPosts(prev => prev.map(toggleFav));
+    setCommAllPosts(prev => prev.map(toggleFav));
     try {
       const headers = await getAuthHeaders();
       const res = await fetch(`/api/questions/${postId}/favorite`, {
@@ -318,10 +382,12 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
       });
       const data = await res.json();
       if (!data.success) {
-        setQaPosts(prev => prev.map(p => {
-          if (p.id !== postId) return p;
-          return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
-        }));
+        const revert = (p: CommunityPost) =>
+          p.id === postId
+            ? { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) }
+            : p;
+        setQaAllPosts(prev => prev.map(revert));
+        setCommAllPosts(prev => prev.map(revert));
       }
     } catch {}
   };
@@ -523,21 +589,34 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
             <div className="space-y-4">
               {activeTab === 'community' ? (
                 <CommunityFeed locale={locale} />
-              ) : qaLoading ? (
+              ) : initialLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
                   <span className="ml-3 text-gray-500">加载中...</span>
                 </div>
               ) : mergedPosts.length > 0 ? (
-                mergedPosts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    currentUserId={currentUserId}
-                    onLike={handleLike}
-                    onFavorite={handleFavorite}
-                  />
-                ))
+                <>
+                  {mergedPosts.map((post) => (
+                    <div key={post.id} data-post-card>
+                      <PostCard
+                        post={post}
+                        currentUserId={currentUserId}
+                        onLike={handleLike}
+                        onFavorite={handleFavorite}
+                      />
+                    </div>
+                  ))}
+                  {/* Sentinel for IntersectionObserver */}
+                  <div ref={sentinelRef} className="h-4" />
+                  {loadingMore && (
+                    <div className="flex items-center justify-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-600"></div>
+                    </div>
+                  )}
+                  {!hasMoreQa && !hasMoreComm && mergedPosts.length > 0 && (
+                    <p className="text-center text-sm text-gray-400 py-4">— 已加载全部 {mergedPosts.length} 条内容 —</p>
+                  )}
+                </>
               ) : (
                 <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                   <p className="text-gray-600">{t.noResults}</p>

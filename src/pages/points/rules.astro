@@ -1,0 +1,234 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, getLocaleFromUrl } from '@/i18n';
+
+export const prerender = false;
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+---
+
+<Layout
+  title="积分规则 - AI留学生存指南"
+  description="了解MI TO AI平台的积分系统规则，通过发帖、评论、互动等方式赚取积分，积分可用于置顶帖子、精选推荐等特权。"
+  locale={locale}
+>
+  <!-- Hero -->
+  <section class="hero-gradient text-white py-16">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+      <h1 class="text-4xl font-bold mb-4">积分规则</h1>
+      <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+        通过活跃参与社区赚取积分，解锁更多特权
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 bg-white">
+    <div class="max-w-4xl mx-auto px-4">
+      <!-- How to Earn -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+          <span class="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-lg">+</span>
+          如何获得积分
+        </h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-6 bg-green-50 rounded-xl border border-green-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">📝</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">发布帖子</h3>
+                <p class="text-green-600 font-medium">+5 积分</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">发布一条问题或分享内容，被审核通过后获得</p>
+          </div>
+          <div class="p-6 bg-green-50 rounded-xl border border-green-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">💬</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">帖子被评论</h3>
+                <p class="text-green-600 font-medium">+3 积分</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">你的帖子收到其他用户的评论</p>
+          </div>
+          <div class="p-6 bg-green-50 rounded-xl border border-green-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">👍</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">收到点赞</h3>
+                <p class="text-green-600 font-medium">+1 积分</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">你的帖子或评论收到其他用户的点赞</p>
+          </div>
+          <div class="p-6 bg-green-50 rounded-xl border border-green-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">⭐</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">收到收藏</h3>
+                <p class="text-green-600 font-medium">+2 积分</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">你的帖子被其他用户收藏</p>
+          </div>
+          <div class="p-6 bg-green-50 rounded-xl border border-green-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">🔗</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">分享帖子</h3>
+                <p class="text-green-600 font-medium">+1 积分</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">分享帖子到社交媒体或其他平台</p>
+          </div>
+          <div class="p-6 bg-green-50 rounded-xl border border-green-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">🎯</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">被设为精选</h3>
+                <p class="text-green-600 font-medium">+10 积分</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">你的帖子被管理员精选推荐</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- How to Spend -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+          <span class="w-10 h-10 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center text-lg">−</span>
+          积分消耗方式
+        </h2>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div class="p-6 bg-orange-50 rounded-xl border border-orange-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">📌</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">置顶帖子</h3>
+                <p class="text-orange-600 font-medium">50 积分/天</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">让你的帖子在列表顶部展示一天，获得更多曝光</p>
+          </div>
+          <div class="p-6 bg-orange-50 rounded-xl border border-orange-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">🔥</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">热门助推</h3>
+                <p class="text-orange-600 font-medium">20 积分/次</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">短时间内提升帖子热度，增加曝光机会</p>
+          </div>
+          <div class="p-6 bg-orange-50 rounded-xl border border-orange-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">🎁</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">礼物赠送</h3>
+                <p class="text-orange-600 font-medium">自定义积分</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">将积分赠送给喜欢的帖子作者，支持优质内容</p>
+          </div>
+          <div class="p-6 bg-orange-50 rounded-xl border border-orange-100">
+            <div class="flex items-center gap-3 mb-3">
+              <span class="text-2xl">🎖️</span>
+              <div>
+                <h3 class="font-semibold text-gray-900">精选推荐</h3>
+                <p class="text-orange-600 font-medium">100 积分/次</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-600">直接申请精选推荐，让优质内容获得官方认证</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Level System -->
+      <div class="mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+          <span class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-lg">🏆</span>
+          积分等级特权
+        </h2>
+        <div class="space-y-4">
+          <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
+            <div class="w-16 text-center">
+              <div class="text-2xl mb-1">🌱</div>
+              <div class="text-xs font-medium text-gray-500">Lv.1</div>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">新手用户</div>
+              <div class="text-sm text-gray-500">0 - 49 积分 · 基础发帖和评论功能</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
+            <div class="w-16 text-center">
+              <div class="text-2xl mb-1">🌿</div>
+              <div class="text-xs font-medium text-gray-500">Lv.2</div>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">活跃用户</div>
+              <div class="text-sm text-gray-500">50 - 199 积分 · 解锁置顶功能</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
+            <div class="w-16 text-center">
+              <div class="text-2xl mb-1">🌳</div>
+              <div class="text-xs font-medium text-gray-500">Lv.3</div>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">资深用户</div>
+              <div class="text-sm text-gray-500">200 - 499 积分 · 解锁热门助推和精选推荐</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 p-4 border border-gray-200 rounded-xl">
+            <div class="w-16 text-center">
+              <div class="text-2xl mb-1">⭐</div>
+              <div class="text-xs font-medium text-gray-500">Lv.4</div>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold text-gray-900">核心贡献者</div>
+              <div class="text-sm text-gray-500">500+ 积分 · 全部特权 + 社区荣誉标识</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rules -->
+      <div class="bg-gray-50 rounded-xl p-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4">积分规则说明</h2>
+        <ul class="space-y-3 text-sm text-gray-600">
+          <li class="flex gap-2">
+            <span class="text-red-500 mt-0.5">•</span>
+            积分不可转让、不可提现，仅限本平台使用
+          </li>
+          <li class="flex gap-2">
+            <span class="text-red-500 mt-0.5">•</span>
+            同一用户对同一帖子只能点赞一次，多次点赞不重复计分
+          </li>
+          <li class="flex gap-2">
+            <span class="text-red-500 mt-0.5">•</span>
+            发现刷分、作弊等行为，平台有权扣除全部积分并封禁账号
+          </li>
+          <li class="flex gap-2">
+            <span class="text-red-500 mt-0.5">•</span>
+            积分政策可能根据运营需要调整，届时会在站内公告通知
+          </li>
+          <li class="flex gap-2">
+            <span class="text-red-500 mt-0.5">•</span>
+            最终解释权归 MI TO AI 平台所有
+          </li>
+        </ul>
+      </div>
+
+      <!-- CTA -->
+      <div class="text-center mt-12">
+        <p class="text-gray-500 mb-4">想快速获得更多积分特权？</p>
+        <a href="/sponsor" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors">
+          <span>❤️</span>
+          赞助我们
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>

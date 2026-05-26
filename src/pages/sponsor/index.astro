@@ -1,0 +1,29 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, getLocaleFromUrl } from '@/i18n';
+import SponsorPage from '@/components/sponsor/SponsorPage';
+
+export const prerender = false;
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+---
+
+<Layout
+  title="赞助我们 - AI留学生存指南"
+  description="赞助 MI TO AI 留学生生存指南，帮助我们持续运营，为留学生提供更多优质内容和服务。"
+  locale={locale}
+>
+  <!-- Hero -->
+  <section class="hero-gradient text-white py-16">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+      <h1 class="text-4xl font-bold mb-4">赞助我们</h1>
+      <p class="text-xl text-primary-100 max-w-2xl mx-auto">
+        感谢你的支持，让 MI TO AI 能够持续为留学生群体提供帮助
+      </p>
+    </div>
+  </section>
+
+  <section class="py-16 bg-white">
+    <SponsorPage locale={locale} client:only="react" />
+  </section>
+</Layout>

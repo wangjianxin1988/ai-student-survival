@@ -12,6 +12,8 @@ import OffersList from './OffersList';
 import RatingsList from './RatingsList';
 import EnhancedSettings from './EnhancedSettings';
 import { FollowingListTab } from './FollowingListTab';
+import SponsorTab from './SponsorTab';
+import PointsRulesTab from './PointsRulesTab';
 
 interface ProfilePageProps {
   locale?: 'zh' | 'en';
@@ -109,7 +111,7 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
   const [userRank, setUserRank] = useState<number | null>(null);
   const [localProfile, setLocalProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'offers' | 'ratings' | 'settings' | 'badges' | 'leaderboard' | 'history' | 'following'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'offers' | 'ratings' | 'settings' | 'badges' | 'leaderboard' | 'history' | 'following' | 'sponsor' | 'pointsRules'>('overview');
   const [pointsHistory, setPointsHistory] = useState<Array<{ id: string; amount: number; type: string; description: string; referenceId?: string; createdAt: string }>>([]);
   const t = translations[locale];
 
@@ -239,6 +241,8 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
     { id: 'badges', label: locale === 'zh' ? '徽章' : 'Badges' },
     { id: 'leaderboard', label: t.leaderboard },
     { id: 'history', label: t.pointsHistory },
+    { id: 'sponsor', label: locale === 'zh' ? '赞助我们' : 'Sponsor' },
+    { id: 'pointsRules', label: locale === 'zh' ? '积分规则' : 'Points Rules' },
   ];
 
   return (
@@ -428,6 +432,18 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'sponsor' && (
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <SponsorTab locale={locale} />
+          </div>
+        )}
+
+        {activeTab === 'pointsRules' && (
+          <div className="bg-white rounded-xl border border-gray-200 p-6">
+            <PointsRulesTab locale={locale} />
           </div>
         )}
       </div>

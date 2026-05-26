@@ -21,27 +21,67 @@ export const GET: APIRoute = async ({ params }) => {
     );
   }
 
-  const { data: comments, error } = await supabase
-    .from('post_comments')
-    .select(`
-      *,
-      author:users(id, name, avatar_url)
-    `)
-    .eq('post_id', postId)
-    .eq('status', 'published')
-    .order('created_at', { ascending: true });
+  // Use raw SQL RPC to avoid PostgREST schema cache relationship issues
+  const { data: comments, error } = await supabase.rpc('get_post_comments', {
+    p_post_id: postId,
+  });
 
   if (error) {
+    // Fallback: query without join and fetch users separately
+    const { data: rawComments, error: fallbackError } = await supabase
+      .from('post_comments')
+      .select('*')
+      .eq('post_id', postId)
+      .eq('status', 'published')
+      .order('created_at', { ascending: true });
+
+    if (fallbackError) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: { code: 'DB_ERROR', message: fallbackError.message },
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Fetch unique user IDs
+    const userIds = [...new Set((rawComments || []).map((c) => c.user_id).filter(Boolean))];
+    let usersMap: Record<string, { id: string; name: string; avatar_url: string }> = {};
+    if (userIds.length > 0) {
+      const { data: users } = await supabase
+        .from('users')
+        .select('id, name, avatar_url')
+        .in('id', userIds);
+      if (users) {
+        usersMap = Object.fromEntries(users.map((u) => [u.id, u]));
+      }
+    }
+
+    const formattedComments = (rawComments || []).map((c) => ({
+      id: c.id,
+      postId: c.post_id,
+      userId: c.user_id,
+      content: c.content,
+      status: c.status,
+      createdAt: c.created_at,
+      author: {
+        id: c.user_id,
+        name: usersMap[c.user_id]?.name || '匿名用户',
+        avatar: usersMap[c.user_id]?.avatar_url || '',
+      },
+    }));
+
     return new Response(
       JSON.stringify({
-        success: false,
-        error: { code: 'DB_ERROR', message: error.message },
+        success: true,
+        data: formattedComments,
       }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
-  const formattedComments = (comments || []).map((c) => ({
+  const formattedComments = ((comments as Array<Record<string, unknown>>) || []).map((c) => ({
     id: c.id,
     postId: c.post_id,
     userId: c.user_id,
@@ -49,9 +89,9 @@ export const GET: APIRoute = async ({ params }) => {
     status: c.status,
     createdAt: c.created_at,
     author: {
-      id: c.author?.id,
-      name: c.author?.name || '匿名用户',
-      avatar: c.author?.avatar_url,
+      id: c.user_id,
+      name: (c.author_name as string) || '匿名用户',
+      avatar: (c.author_avatar as string) || '',
     },
   }));
 
@@ -132,7 +172,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     // 创建评论
-    const { data: comment, error } = await supabase
+    const { data: newComment, error } = await supabase
       .from('post_comments')
       .insert({
         post_id: postId,
@@ -140,10 +180,7 @@ export const POST: APIRoute = async ({ params, request }) => {
         content: content.trim(),
         status: 'published',
       })
-      .select(`
-        *,
-        author:users(id, name, avatar_url)
-      `)
+      .select('*')
       .single();
 
     if (error) {
@@ -157,7 +194,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     // 增加帖子评论数
-    await supabase.rpc('increment_comments_count', { post_id: postId });
+    try { await supabase.rpc('increment_comments_count', { post_id: postId }); } catch { /* ignore */ }
 
     // 给帖子作者增加积分（被评论）
     await earnPoints(supabase, post.userId, {
@@ -171,16 +208,16 @@ export const POST: APIRoute = async ({ params, request }) => {
     await checkAndPromote(postId);
 
     const formattedComment = {
-      id: comment.id,
-      postId: comment.post_id,
-      userId: comment.user_id,
-      content: comment.content,
-      status: comment.status,
-      createdAt: comment.created_at,
+      id: newComment.id,
+      postId: newComment.post_id,
+      userId: newComment.user_id,
+      content: newComment.content,
+      status: newComment.status,
+      createdAt: newComment.created_at,
       author: {
-        id: comment.author?.id,
-        name: comment.author?.name || '匿名用户',
-        avatar: comment.author?.avatar_url,
+        id: user.id,
+        name: user.name || '匿名用户',
+        avatar: '',
       },
     };
 
