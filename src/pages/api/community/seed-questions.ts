@@ -1,9 +1,12 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabaseAdmin } from '@/lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { questionsData } from '@/data/questions';
 import type { CommunityCategory } from '@/lib/community/types';
+
+// @ts-ignore - cloudflare:workers is available in Cloudflare Pages runtime
+import { env as cfEnv } from 'cloudflare:workers';
 
 function mapQuestionCategoryToCommunity(qCat: string): CommunityCategory {
   const map: Record<string, CommunityCategory> = {
@@ -22,7 +25,30 @@ function mapQuestionCategoryToCommunity(qCat: string): CommunityCategory {
 }
 
 export const POST: APIRoute = async () => {
-  // Check if seed posts already exist (IDs starting with 00000000-0000-0000-0000)
+  // Get service role key from Cloudflare Workers runtime env
+  // @ts-ignore
+  const serviceRoleKey: string = cfEnv.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!serviceRoleKey) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: { message: 'SUPABASE_SERVICE_ROLE_KEY not available in Cloudflare runtime env' },
+        debug: {
+          cfEnvKeys: cfEnv ? Object.keys(cfEnv).filter(k => k.includes('SUPABASE')) : [],
+          runtimeType: typeof cfEnv,
+        },
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const supabaseUrl = 'https://giynvpfnzzelzwpmsgtf.supabase.co';
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+
+  // Check if seed posts already exist
   const { data: existing } = await supabaseAdmin
     .from('community_posts')
     .select('id')
