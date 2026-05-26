@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import QuestionCard from './QuestionCard';
 import {
   questionsData,
@@ -11,6 +11,8 @@ import {
   QUESTION_CATEGORIES,
 } from '@/data/questions';
 import { CommunityFeed } from '@/components/community';
+import type { CommunityPost } from '@/lib/community/types';
+import { getCurrentLocale } from '@/lib/i18n';
 
 interface QuestionsClientProps {
   locale?: 'zh' | 'en';
@@ -81,10 +83,137 @@ const translations = {
 
 export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps) {
   const t = translations[locale];
+  const currentLocale = locale || getCurrentLocale();
   const [selectedCategory, setSelectedCategory] = useState<QuestionCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'hottest' | 'unanswered'>('newest');
   const [activeTab, setActiveTab] = useState<'all' | 'hot' | 'unanswered' | 'community'>('all');
+
+  // Real-time community posts
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
+  const [communityPostsLoading, setCommunityPostsLoading] = useState(false);
+
+  // Fetch real-time community posts
+  const fetchCommunityPosts = useCallback(async () => {
+    setCommunityPostsLoading(true);
+    try {
+      const params = new URLSearchParams({
+        sort: sortBy === 'hottest' ? 'popular' : 'latest',
+        limit: '20',
+        offset: '0',
+      });
+      if (selectedCategory) {
+        // Map static question categories to community categories
+        const categoryMap: Record<string, string> = {
+          academic: 'qa',
+          life: 'discussion',
+          visa: 'qa',
+          job: 'qa',
+          policy: 'policy',
+          payment: 'payment',
+          ai_tools: 'tools',
+          study_life: 'discussion',
+          job_recruitment: 'discussion',
+          other: 'discussion',
+        };
+        const communityCat = categoryMap[selectedCategory];
+        if (communityCat) {
+          params.set('category', communityCat);
+        }
+      }
+      const res = await fetch(`/api/community?${params}`);
+      const data = await res.json();
+      if (data.success && data.data.length > 0) {
+        setCommunityPosts(data.data);
+      } else {
+        setCommunityPosts([]);
+      }
+    } catch {
+      setCommunityPosts([]);
+    } finally {
+      setCommunityPostsLoading(false);
+    }
+  }, [sortBy, selectedCategory]);
+
+  useEffect(() => {
+    if (activeTab !== 'community') {
+      fetchCommunityPosts();
+    }
+  }, [activeTab, fetchCommunityPosts]);
+
+  // Determine if a community post maps to the selected category
+  const categoryToCommunityCat: Record<string, string> = {
+    academic: 'qa',
+    life: 'discussion',
+    visa: 'qa',
+    job: 'qa',
+    policy: 'policy',
+    payment: 'payment',
+    ai_tools: 'tools',
+    study_life: 'discussion',
+    job_recruitment: 'discussion',
+    other: 'discussion',
+  };
+
+  const filteredCommunityPosts = useMemo(() => {
+    if (activeTab === 'community') return [];
+    if (activeTab === 'hot') {
+      return communityPosts
+        .filter(p => (p.likesCount + p.commentsCount * 2 + p.favoritesCount * 3) >= 5)
+        .slice(0, 5);
+    }
+    if (activeTab === 'unanswered') {
+      return communityPosts.filter(p => p.commentsCount === 0);
+    }
+    if (selectedCategory) {
+      const cat = categoryToCommunityCat[selectedCategory];
+      return communityPosts.filter(p => p.category === cat);
+    }
+    // Show latest 5 community posts at the top for 'all' tab
+    return communityPosts.slice(0, 5);
+  }, [communityPosts, activeTab, selectedCategory]);
+
+  // Merge static questions with real community posts for display
+  const mergedQuestions = useMemo(() => {
+    if (activeTab === 'community') return [];
+
+    // Real posts as "virtual" questions
+    const communityAsQuestions: (Question & { _isCommunityPost: true; _post: CommunityPost })[] =
+      filteredCommunityPosts.map(post => ({
+        id: `community-${post.id}`,
+        title: post.title,
+        titleZh: post.title,
+        content: post.content,
+        contentZh: post.content,
+        category: 'other' as QuestionCategory,
+        authorName: post.userName,
+        authorAvatar: post.userAvatar,
+        isAnonymous: false,
+        viewCount: post.viewsCount,
+        answerCount: post.commentsCount,
+        isResolved: false,
+        tags: post.tags,
+        createdAt: post.createdAt,
+        _isCommunityPost: true,
+        _post: post,
+      }));
+
+    // For 'all' tab: show real posts first, then static questions
+    // For 'hot'/'unanswered': show real posts mixed with static
+    const staticQuestions = filteredQuestions;
+
+    if (activeTab === 'all') {
+      return [...communityAsQuestions, ...staticQuestions];
+    }
+    // For hot/unanswered: interleave
+    const result: (typeof communityAsQuestions[0] | Question)[] = [];
+    const maxLen = Math.max(communityAsQuestions.length, staticQuestions.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (communityAsQuestions[i]) result.push(communityAsQuestions[i]);
+      if (staticQuestions[i]) result.push(staticQuestions[i]);
+    }
+    return result;
+  }, [activeTab, filteredQuestions, filteredCommunityPosts]);
 
   // Filter and sort questions
   const filteredQuestions = useMemo(() => {
@@ -281,7 +410,7 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
             {activeTab !== 'community' && activeTab === 'all' && (
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-600">
-                  {t.results.replace('{count}', String(filteredQuestions.length))}
+                  {t.results.replace('{count}', String(mergedQuestions.length))}
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">{t.sortBy}:</span>
@@ -302,10 +431,74 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
             <div className="space-y-4">
               {activeTab === 'community' ? (
                 <CommunityFeed locale={locale} />
-              ) : filteredQuestions.length > 0 ? (
-                filteredQuestions.map((question) => (
-                  <QuestionCard key={question.id} question={question} locale={locale} />
-                ))
+              ) : communityPostsLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
+                  <span className="ml-3 text-gray-500">加载社区帖子...</span>
+                </div>
+              ) : mergedQuestions.length > 0 ? (
+                mergedQuestions.map((item) => {
+                  // Real community post rendered as a card
+                  if ('_isCommunityPost' in item && item._isCommunityPost) {
+                    const post = item._post;
+                    return (
+                      <div key={item.id} className="bg-white rounded-lg border-2 border-blue-200 p-5 hover:shadow-md transition-shadow">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                            社区帖子
+                          </span>
+                          {post.autoPromoted && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                              精选
+                            </span>
+                          )}
+                        </div>
+                        <a
+                          href={`/community/${post.id}`}
+                          className="block group"
+                        >
+                          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                            {post.title}
+                          </h3>
+                          {post.excerpt && (
+                            <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+                              {post.excerpt}
+                            </p>
+                          )}
+                        </a>
+                        <div className="flex items-center gap-4 mt-3 text-sm text-gray-500">
+                          <div className="flex items-center gap-1.5">
+                            <img
+                              src={post.userAvatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${post.userName}`}
+                              alt={post.userName}
+                              className="w-5 h-5 rounded-full"
+                            />
+                            <span>{post.userName}</span>
+                          </div>
+                          <span>👍 {post.likesCount}</span>
+                          <span>💬 {post.commentsCount}</span>
+                          <span>👁 {post.viewsCount}</span>
+                          <span>{new Date(post.createdAt).toLocaleDateString('zh-CN')}</span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {post.tags.map(tag => (
+                            <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  // Static question card
+                  return (
+                    <QuestionCard
+                      key={item.id}
+                      question={item}
+                      locale={locale}
+                    />
+                  );
+                })
               ) : (
                 <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                   <p className="text-gray-600">{t.noResults}</p>
