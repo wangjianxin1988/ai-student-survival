@@ -92,9 +92,10 @@ export const POST: APIRoute = async () => {
     updated_at: q.createdAt,
   }));
 
+  // Use upsert to handle cases where posts already exist
   const { data, error: insertError } = await supabaseAdmin
     .from('community_posts')
-    .insert(posts)
+    .upsert(posts, { onConflict: 'id' })
     .select('id');
 
   if (insertError) {
