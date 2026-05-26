@@ -35,7 +35,7 @@ jobs:
           echo "Executing DDL via Management API..."
           RESPONSE=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/${SUPABASE_REF}/database/query" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
             -d "{\"query\": $SQL_ESCAPED}")
           echo "Response: $RESPONSE"
