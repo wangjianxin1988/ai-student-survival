@@ -10,7 +10,7 @@ export const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as stri
   || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined)
   || '';
 const supabaseServiceKey = (import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined)
-  || (typeof process !== 'undefined' ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined)
+  || (typeof process !== 'undefined' && process.env.SUPABASE_SERVICE_ROLE_KEY ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined)
   || '';
 
 // Check if Supabase is properly configured
