@@ -50,7 +50,10 @@ jobs:
       - name: Upload to Cloudflare Pages
         id: upload
         run: |
-          echo "deploy_url=$(pnpm exec wrangler pages publish dist --project-name=ai-student-survival --branch=production --commit-message="${{ github.sha }}" 2>&1 | tee /tmp/wrangler.log; grep -o 'https://[^ ]*\.pages\.dev' /tmp/wrangler.log | tail -1)" >> $GITHUB_OUTPUT
+          pnpm exec wrangler pages publish dist --project-name=ai-student-survival --branch=production --commit-message="${{ github.sha }}" 2>&1 | tee /tmp/wrangler.log
+          DEPLOY_URL=$(grep -o 'https://[^ ]*\.pages\.dev' /tmp/wrangler.log | tail -1)
+          echo "deploy_url=${DEPLOY_URL}" >> $GITHUB_OUTPUT
+          echo "Uploaded deployment: ${DEPLOY_URL}"
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
