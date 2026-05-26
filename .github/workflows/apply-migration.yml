@@ -14,7 +14,7 @@ jobs:
       - name: Write SQL files
         run: |
           python3 - <<'PYEOF'
-          import json, os
+          import json, os, urllib.request, urllib.parse
 
           PAT = os.environ['SUPABASE_PAT']
           REF = 'giynvpfnzzelzwpmsgtf'
@@ -22,9 +22,8 @@ jobs:
           HDR = {'Authorization': f'Bearer {PAT}', 'Content-Type': 'application/json'}
 
           def sql(query):
-              resp = __import__('urllib.request').urlopen(
-                  __import__('urllib.request').Request(URL, json.dumps({'query': query}).encode(),
-                      headers=HDR))
+              req = urllib.request.Request(URL, json.dumps({'query': query}).encode(), headers=HDR)
+              resp = urllib.request.urlopen(req)
               body = resp.read().decode()
               if body.strip() in ('null','') or body.strip().startswith('['):
                   return True, body
