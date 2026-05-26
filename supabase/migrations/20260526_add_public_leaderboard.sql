@@ -37,10 +37,7 @@ LEFT JOIN auth.users u ON u.id = upb.user_id
 WHERE upb.balance > 0
 ORDER BY upb.balance DESC;
 
--- Step 4: Enable RLS on view
-ALTER VIEW public_leaderboard ENABLE ROW LEVEL SECURITY;
-
--- Step 5: Public SELECT policy on view
+-- Step 4: Public SELECT policy on view (views inherit RLS from base tables)
 DROP POLICY IF EXISTS "Allow public read of public_leaderboard" ON public_leaderboard;
 CREATE POLICY "Allow public read of public_leaderboard"
 ON public_leaderboard FOR SELECT USING (true);
