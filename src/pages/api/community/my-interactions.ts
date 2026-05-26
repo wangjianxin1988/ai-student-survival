@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 
 export const GET: APIRoute = async ({ request }) => {
@@ -26,15 +26,15 @@ export const GET: APIRoute = async ({ request }) => {
     );
   }
 
-  // Fetch user's likes
+  // Fetch user's likes (post_likes has public SELECT policy)
   const { data: likes } = await supabase
     .from('post_likes')
     .select('post_id')
     .eq('user_id', user.id)
     .in('post_id', postIds);
 
-  // Fetch user's favorites
-  const { data: favorites } = await supabase
+  // Fetch user's favorites (uses supabaseAdmin to bypass RLS which requires auth.uid = user_id)
+  const { data: favorites } = await supabaseAdmin
     .from('post_favorites')
     .select('post_id')
     .eq('user_id', user.id)

@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
@@ -10,7 +10,8 @@ export const GET: APIRoute = async ({ request }) => {
   const period = url.searchParams.get('period') || 'total'; // total, weekly, monthly
 
   // Fetch top users by points from user_points_balance
-  let balanceQuery = supabase
+  // Use supabaseAdmin (service role) to bypass RLS
+  let balanceQuery = supabaseAdmin
     .from('user_points_balance')
     .select('user_id, balance, total_earned, updated_at')
     .order('balance', { ascending: false })
@@ -38,8 +39,8 @@ export const GET: APIRoute = async ({ request }) => {
   // Get user IDs
   const userIds = balances.map(b => b.user_id);
 
-  // Fetch user metadata from auth.users
-  const { data: users, error: usersError } = await supabase
+  // Fetch user metadata from auth.users (use admin client to bypass RLS)
+  const { data: users, error: usersError } = await supabaseAdmin
     .from('auth.users' as any)
     .select('id, email, user_metadata')
     .in('id', userIds);
