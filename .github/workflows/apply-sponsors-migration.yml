@@ -1,0 +1,60 @@
+name: Apply Sponsors Migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'migrate'
+        type: choice
+        options:
+          - migrate
+          - seed
+          - status
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  SUPABASE_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+
+jobs:
+  sponsors-migration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apply sponsors DDL via Supabase Management API
+        if: github.event.inputs.action == 'migrate'
+        run: |
+          echo "Applying sponsors DDL to production database..."
+          echo "Reading migration SQL..."
+          SQL=$(cat supabase/migrations/20260527_create_sponsors.sql)
+          echo "Executing DDL via Management API..."
+          RESPONSE=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/${SUPABASE_REF}/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": \"$(echo "$SQL" | tr '\n' ' ')\"}")
+          echo "Response: $RESPONSE"
+          if echo "$RESPONSE" | grep -q '"error"'; then
+            echo "Migration failed!"
+            exit 1
+          else
+            echo "DDL applied successfully!"
+          fi
+
+      - name: Seed sponsors data
+        if: github.event.inputs.action == 'seed'
+        run: |
+          echo "Triggering sponsors seed via migration API..."
+          curl -s -X POST "https://mi-to-ai.com/api/sponsors/apply-migration"
+          echo ""
+          echo "Verifying wall API..."
+          curl -s "https://mi-to-ai.com/api/sponsors/wall" | head -c 500
+
+      - name: Check sponsors table status
+        if: github.event.inputs.action == 'status'
+        run: |
+          echo "Checking sponsors wall API..."
+          curl -s "https://mi-to-ai.com/api/sponsors/wall"
