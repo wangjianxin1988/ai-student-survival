@@ -5,125 +5,277 @@ on:
   repository_dispatch:
     types: [apply-migration]
 
+env:
+  SUPABASE_REF: giynvpfnzzelzwpmsgtf
+  MGMT_API: https://api.supabase.com/v1/projects/$SUPABASE_REF/database/query
+
 jobs:
   migrate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Write SQL files
+      - name: Step 1 - user_points_balance
         run: |
-          python3 - <<'PYEOF'
-          import json, os, urllib.request, urllib.parse
+          SQL="CREATE TABLE IF NOT EXISTS user_points_balance (user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE, balance INTEGER DEFAULT 0 NOT NULL, total_earned INTEGER DEFAULT 0 NOT NULL, total_spent INTEGER DEFAULT 0 NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 1: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          PAT = os.environ['SUPABASE_PAT']
-          REF = 'giynvpfnzzelzwpmsgtf'
-          URL = f'https://api.supabase.com/v1/projects/{REF}/database/query'
-          HDR = {'Authorization': f'Bearer {PAT}', 'Content-Type': 'application/json'}
+      - name: Step 2 - points_transactions
+        run: |
+          SQL="CREATE TABLE IF NOT EXISTS points_transactions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, amount INTEGER NOT NULL, type TEXT NOT NULL, description TEXT, reference_id TEXT, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 2: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          def sql(query):
-              req = urllib.request.Request(URL, json.dumps({'query': query}).encode(), headers=HDR)
-              resp = urllib.request.urlopen(req)
-              body = resp.read().decode()
-              if body.strip() in ('null','') or body.strip().startswith('['):
-                  return True, body
-              try:
-                  data = json.loads(body)
-                  if isinstance(data, list):
-                      for d in data:
-                          if d.get('error'):
-                              return False, d['error']
-                      return True, body
-                  if data.get('error'):
-                      return False, data['error'].get('message', str(data['error']))
-              except:
-                  pass
-              return True, body
+      - name: Step 3 - public_leaderboard view
+        run: |
+          SQL="CREATE OR REPLACE VIEW public_leaderboard AS SELECT upb.user_id, upb.balance, upb.total_earned, upb.updated_at, u.raw_user_meta_data->>'name' as name, u.raw_user_meta_data->>'avatar_url' as avatar FROM user_points_balance upb LEFT JOIN auth.users u ON u.id = upb.user_id WHERE upb.balance > 0 ORDER BY upb.balance DESC;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 3: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          def step(n, query):
-              ok, res = sql(query)
-              print(f'Step {n}: {"OK" if ok else "ERROR"} - {res[:200]}')
-              if not ok:
-                  raise SystemExit(1)
+      - name: Step 4 - public_leaderboard policy
+        run: |
+          SQL="DROP POLICY IF EXISTS \"Allow public read of public_leaderboard\" ON public_leaderboard; CREATE POLICY \"Allow public read of public_leaderboard\" ON public_leaderboard FOR SELECT USING (true);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 4: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 1: user_points_balance
-          step(1, 'CREATE TABLE IF NOT EXISTS user_points_balance (user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE, balance INTEGER DEFAULT 0 NOT NULL, total_earned INTEGER DEFAULT 0 NOT NULL, total_spent INTEGER DEFAULT 0 NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);')
+      - name: Step 5 - user_points_balance policy
+        run: |
+          SQL="DROP POLICY IF EXISTS \"Allow public read for positive balance\" ON user_points_balance; CREATE POLICY \"Allow public read for positive balance\" ON user_points_balance FOR SELECT USING (balance > 0);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 5: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 2: points_transactions
-          step(2, 'CREATE TABLE IF NOT EXISTS points_transactions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, amount INTEGER NOT NULL, type TEXT NOT NULL, description TEXT, reference_id TEXT, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);')
+      - name: Step 6 - users RLS
+        run: |
+          SQL="DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Allow public read of user profiles') THEN ALTER TABLE users ENABLE ROW LEVEL SECURITY; CREATE POLICY \"Allow public read of user profiles\" ON users FOR SELECT USING (true); END IF; END \$\$;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 6: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 3: public_leaderboard view
-          step(3, "CREATE OR REPLACE VIEW public_leaderboard AS SELECT upb.user_id, upb.balance, upb.total_earned, upb.updated_at, u.raw_user_meta_data->>'name' as name, u.raw_user_meta_data->>'avatar_url' as avatar FROM user_points_balance upb LEFT JOIN auth.users u ON u.id = upb.user_id WHERE upb.balance > 0 ORDER BY upb.balance DESC;")
+      - name: Step 7 - post_likes
+        run: |
+          SQL="CREATE TABLE IF NOT EXISTS post_likes (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL, UNIQUE(post_id, user_id));"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 7: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 4: public_leaderboard policy
-          step(4, 'DROP POLICY IF EXISTS "Allow public read of public_leaderboard" ON public_leaderboard; CREATE POLICY "Allow public read of public_leaderboard" ON public_leaderboard FOR SELECT USING (true);')
+      - name: Step 8 - post_favorites
+        run: |
+          SQL="CREATE TABLE IF NOT EXISTS post_favorites (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL, UNIQUE(post_id, user_id));"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 8: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 5: user_points_balance policy
-          step(5, 'DROP POLICY IF EXISTS "Allow public read for positive balance" ON user_points_balance; CREATE POLICY "Allow public read for positive balance" ON user_points_balance FOR SELECT USING (balance > 0);')
+      - name: Step 9 - post_comments
+        run: |
+          SQL="CREATE TABLE IF NOT EXISTS post_comments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, content TEXT NOT NULL, parent_id UUID REFERENCES post_comments(id) ON DELETE CASCADE, likes_count INTEGER DEFAULT 0, status VARCHAR(20) DEFAULT 'published', created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 9: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 6: users RLS
-          step(6, "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Allow public read of user profiles') THEN ALTER TABLE users ENABLE ROW LEVEL SECURITY; CREATE POLICY \"Allow public read of user profiles\" ON users FOR SELECT USING (true); END IF; END $$;")
+      - name: Step 10 - trigger function
+        run: |
+          SQL="CREATE OR REPLACE FUNCTION update_points_balance_on_transaction() RETURNS TRIGGER AS \$\$ DECLARE v_new_balance INTEGER; v_new_earned INTEGER := 0; v_new_spent INTEGER := 0; BEGIN IF TG_OP = 'INSERT' THEN SELECT COALESCE(balance, 0), COALESCE(total_earned, 0), COALESCE(total_spent, 0) INTO v_new_balance, v_new_earned, v_new_spent FROM user_points_balance WHERE user_id = NEW.user_id; v_new_balance := v_new_balance + NEW.amount; IF NEW.amount >= 0 THEN v_new_earned := v_new_earned + NEW.amount; ELSE v_new_spent := v_new_spent + ABS(NEW.amount); END IF; INSERT INTO user_points_balance (user_id, balance, total_earned, total_spent) VALUES (NEW.user_id, v_new_balance, v_new_earned, v_new_spent) ON CONFLICT (user_id) DO UPDATE SET balance = user_points_balance.balance + NEW.amount, total_earned = CASE WHEN NEW.amount >= 0 THEN user_points_balance.total_earned + NEW.amount ELSE user_points_balance.total_earned END, total_spent = CASE WHEN NEW.amount < 0 THEN user_points_balance.total_spent + ABS(NEW.amount) ELSE user_points_balance.total_spent END, updated_at = NOW(); RETURN NEW; END IF; RETURN NEW; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 10: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 7: post_likes
-          step(7, 'CREATE TABLE IF NOT EXISTS post_likes (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL, UNIQUE(post_id, user_id));')
+      - name: Step 11 - trigger
+        run: |
+          SQL="DROP TRIGGER IF EXISTS trigger_update_points_balance ON points_transactions; CREATE TRIGGER trigger_update_points_balance AFTER INSERT ON points_transactions FOR EACH ROW EXECUTE FUNCTION update_points_balance_on_transaction();"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 11: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 8: post_favorites
-          step(8, 'CREATE TABLE IF NOT EXISTS post_favorites (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL, UNIQUE(post_id, user_id));')
+      - name: Step 12 - post_likes RLS
+        run: |
+          SQL="DROP POLICY IF EXISTS \"Allow public read of post_likes\" ON post_likes; CREATE POLICY \"Allow public read of post_likes\" ON post_likes FOR SELECT USING (true); DROP POLICY IF EXISTS \"Allow authenticated insert of post_likes\" ON post_likes; CREATE POLICY \"Allow authenticated insert of post_likes\" ON post_likes FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS \"Allow owner delete post_likes\" ON post_likes; CREATE POLICY \"Allow owner delete post_likes\" ON post_likes FOR DELETE USING (auth.uid() = user_id);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 12: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 9: post_comments
-          step(9, "CREATE TABLE IF NOT EXISTS post_comments (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), post_id UUID NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE, user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, content TEXT NOT NULL, parent_id UUID REFERENCES post_comments(id) ON DELETE CASCADE, likes_count INTEGER DEFAULT 0, status VARCHAR(20) DEFAULT 'published', created_at TIMESTAMPTZ DEFAULT NOW(), updated_at TIMESTAMPTZ DEFAULT NOW());")
+      - name: Step 13 - post_favorites RLS
+        run: |
+          SQL="DROP POLICY IF EXISTS \"Allow public read of post_favorites\" ON post_favorites; CREATE POLICY \"Allow public read of post_favorites\" ON post_favorites FOR SELECT USING (true); DROP POLICY IF EXISTS \"Allow authenticated insert of post_favorites\" ON post_favorites; CREATE POLICY \"Allow authenticated insert of post_favorites\" ON post_favorites FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS \"Allow owner delete post_favorites\" ON post_favorites; CREATE POLICY \"Allow owner delete post_favorites\" ON post_favorites FOR DELETE USING (auth.uid() = user_id);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 13: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 10: trigger function
-          step(10, "CREATE OR REPLACE FUNCTION update_points_balance_on_transaction() RETURNS TRIGGER AS $$ DECLARE v_new_balance INTEGER; v_new_earned INTEGER := 0; v_new_spent INTEGER := 0; BEGIN IF TG_OP = 'INSERT' THEN SELECT COALESCE(balance, 0), COALESCE(total_earned, 0), COALESCE(total_spent, 0) INTO v_new_balance, v_new_earned, v_new_spent FROM user_points_balance WHERE user_id = NEW.user_id; v_new_balance := v_new_balance + NEW.amount; IF NEW.amount >= 0 THEN v_new_earned := v_new_earned + NEW.amount; ELSE v_new_spent := v_new_spent + ABS(NEW.amount); END IF; INSERT INTO user_points_balance (user_id, balance, total_earned, total_spent) VALUES (NEW.user_id, v_new_balance, v_new_earned, v_new_spent) ON CONFLICT (user_id) DO UPDATE SET balance = user_points_balance.balance + NEW.amount, total_earned = CASE WHEN NEW.amount >= 0 THEN user_points_balance.total_earned + NEW.amount ELSE user_points_balance.total_earned END, total_spent = CASE WHEN NEW.amount < 0 THEN user_points_balance.total_spent + ABS(NEW.amount) ELSE user_points_balance.total_spent END, updated_at = NOW(); RETURN NEW; END IF; RETURN NEW; END; $$ LANGUAGE plpgsql SECURITY DEFINER;")
+      - name: Step 14 - post_comments RLS
+        run: |
+          SQL="DROP POLICY IF EXISTS \"Allow public read of post_comments\" ON post_comments; CREATE POLICY \"Allow public read of post_comments\" ON post_comments FOR SELECT USING (true); DROP POLICY IF EXISTS \"Allow authenticated insert of post_comments\" ON post_comments; CREATE POLICY \"Allow authenticated insert of post_comments\" ON post_comments FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS \"Allow owner delete post_comments\" ON post_comments; CREATE POLICY \"Allow owner delete post_comments\" ON post_comments FOR DELETE USING (auth.uid() = user_id);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 14: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 11: trigger
-          step(11, 'DROP TRIGGER IF EXISTS trigger_update_points_balance ON points_transactions; CREATE TRIGGER trigger_update_points_balance AFTER INSERT ON points_transactions FOR EACH ROW EXECUTE FUNCTION update_points_balance_on_transaction();')
+      - name: Step 15 - grants
+        run: |
+          SQL="GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON public_leaderboard TO anon; GRANT SELECT ON user_points_balance TO anon; GRANT SELECT, INSERT, DELETE ON post_likes TO anon; GRANT SELECT, INSERT, DELETE ON post_favorites TO anon; GRANT SELECT, INSERT, DELETE ON post_comments TO anon;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 15: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 12: post_likes RLS
-          step(12, 'DROP POLICY IF EXISTS "Allow public read of post_likes" ON post_likes; CREATE POLICY "Allow public read of post_likes" ON post_likes FOR SELECT USING (true); DROP POLICY IF EXISTS "Allow authenticated insert of post_likes" ON post_likes; CREATE POLICY "Allow authenticated insert of post_likes" ON post_likes FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS "Allow owner delete post_likes" ON post_likes; CREATE POLICY "Allow owner delete post_likes" ON post_likes FOR DELETE USING (auth.uid() = user_id);')
+      - name: Step 16 - indexes
+        run: |
+          SQL="CREATE INDEX IF NOT EXISTS idx_post_likes_post_id ON post_likes(post_id); CREATE INDEX IF NOT EXISTS idx_post_likes_user_id ON post_likes(user_id); CREATE INDEX IF NOT EXISTS idx_post_favorites_post_id ON post_favorites(post_id); CREATE INDEX IF NOT EXISTS idx_post_favorites_user_id ON post_favorites(user_id); CREATE INDEX IF NOT EXISTS idx_post_comments_post_id ON post_comments(post_id); CREATE INDEX IF NOT EXISTS idx_post_comments_user_id ON post_comments(user_id);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 16: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 13: post_favorites RLS
-          step(13, 'DROP POLICY IF EXISTS "Allow public read of post_favorites" ON post_favorites; CREATE POLICY "Allow public read of post_favorites" ON post_favorites FOR SELECT USING (true); DROP POLICY IF EXISTS "Allow authenticated insert of post_favorites" ON post_favorites; CREATE POLICY "Allow authenticated insert of post_favorites" ON post_favorites FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS "Allow owner delete post_favorites" ON post_favorites; CREATE POLICY "Allow owner delete post_favorites" ON post_favorites FOR DELETE USING (auth.uid() = user_id);')
+      - name: Step 17-21 - RPC functions and grants
+        run: |
+          SQL="CREATE OR REPLACE FUNCTION increment_likes_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET likes_count = likes_count + 1 WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; CREATE OR REPLACE FUNCTION decrement_likes_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; CREATE OR REPLACE FUNCTION increment_favorites_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET favorites_count = favorites_count + 1 WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; CREATE OR REPLACE FUNCTION decrement_favorites_count(post_id UUID) RETURNS VOID AS \$\$ BEGIN UPDATE community_posts SET favorites_count = GREATEST(favorites_count - 1, 0) WHERE id = post_id; END; \$\$ LANGUAGE plpgsql SECURITY DEFINER; GRANT EXECUTE ON FUNCTION increment_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION increment_favorites_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_favorites_count(UUID) TO anon;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Steps 17-21: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 14: post_comments RLS
-          step(14, 'DROP POLICY IF EXISTS "Allow public read of post_comments" ON post_comments; CREATE POLICY "Allow public read of post_comments" ON post_comments FOR SELECT USING (true); DROP POLICY IF EXISTS "Allow authenticated insert of post_comments" ON post_comments; CREATE POLICY "Allow authenticated insert of post_comments" ON post_comments FOR INSERT WITH CHECK (auth.uid() = user_id); DROP POLICY IF EXISTS "Allow owner delete post_comments" ON post_comments; CREATE POLICY "Allow owner delete post_comments" ON post_comments FOR DELETE USING (auth.uid() = user_id);')
+      - name: Step 22 - sponsors table
+        run: |
+          SQL="CREATE TABLE IF NOT EXISTS sponsors (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL, nickname TEXT NOT NULL, amount INTEGER NOT NULL, tier VARCHAR(20) NOT NULL DEFAULT 'coffee', payment_method VARCHAR(20) NOT NULL DEFAULT 'wechat', message TEXT, status VARCHAR(20) NOT NULL DEFAULT 'approved', created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 22: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 15: grants
-          step(15, 'GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON public_leaderboard TO anon; GRANT SELECT ON user_points_balance TO anon; GRANT SELECT, INSERT, DELETE ON post_likes TO anon; GRANT SELECT, INSERT, DELETE ON post_favorites TO anon; GRANT SELECT, INSERT, DELETE ON post_comments TO anon;')
+      - name: Step 23 - sponsors indexes
+        run: |
+          SQL="CREATE INDEX IF NOT EXISTS idx_sponsors_status ON sponsors(status); CREATE INDEX IF NOT EXISTS idx_sponsors_created_at ON sponsors(created_at DESC);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 23: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 16: indexes
-          step(16, 'CREATE INDEX IF NOT EXISTS idx_post_likes_post_id ON post_likes(post_id); CREATE INDEX IF NOT EXISTS idx_post_likes_user_id ON post_likes(user_id); CREATE INDEX IF NOT EXISTS idx_post_favorites_post_id ON post_favorites(post_id); CREATE INDEX IF NOT EXISTS idx_post_favorites_user_id ON post_favorites(user_id); CREATE INDEX IF NOT EXISTS idx_post_comments_post_id ON post_comments(post_id); CREATE INDEX IF NOT EXISTS idx_post_comments_user_id ON post_comments(user_id);')
+      - name: Step 24 - sponsors RLS
+        run: |
+          SQL="ALTER TABLE sponsors ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS \"Allow public read of approved sponsors\" ON sponsors; CREATE POLICY \"Allow public read of approved sponsors\" ON sponsors FOR SELECT USING (status = 'approved'); DROP POLICY IF EXISTS \"Allow authenticated users to create sponsors\" ON sponsors; CREATE POLICY \"Allow authenticated users to create sponsors\" ON sponsors FOR INSERT WITH CHECK (auth.uid() = user_id);"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 24: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 17: RPC functions
-          step(17, "CREATE OR REPLACE FUNCTION increment_likes_count(post_id UUID) RETURNS VOID AS $$ BEGIN UPDATE community_posts SET likes_count = likes_count + 1 WHERE id = post_id; END; $$ LANGUAGE plpgsql SECURITY DEFINER;")
-          step(18, "CREATE OR REPLACE FUNCTION decrement_likes_count(post_id UUID) RETURNS VOID AS $$ BEGIN UPDATE community_posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = post_id; END; $$ LANGUAGE plpgsql SECURITY DEFINER;")
-          step(19, "CREATE OR REPLACE FUNCTION increment_favorites_count(post_id UUID) RETURNS VOID AS $$ BEGIN UPDATE community_posts SET favorites_count = favorites_count + 1 WHERE id = post_id; END; $$ LANGUAGE plpgsql SECURITY DEFINER;")
-          step(20, "CREATE OR REPLACE FUNCTION decrement_favorites_count(post_id UUID) RETURNS VOID AS $$ BEGIN UPDATE community_posts SET favorites_count = GREATEST(favorites_count - 1, 0) WHERE id = post_id; END; $$ LANGUAGE plpgsql SECURITY DEFINER;")
+      - name: Step 25 - sponsors grants
+        run: |
+          SQL="GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON sponsors TO anon; GRANT INSERT ON sponsors TO anon;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 25: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 21: grant execute on RPC functions
-          step(21, 'GRANT EXECUTE ON FUNCTION increment_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_likes_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION increment_favorites_count(UUID) TO anon; GRANT EXECUTE ON FUNCTION decrement_favorites_count(UUID) TO anon;')
+      - name: Step 26 - seed sponsors
+        run: |
+          SQL="INSERT INTO sponsors (nickname, amount, tier, payment_method, message, status) VALUES ('小明同学', 18, 'meal', 'wechat', '希望平台越办越好！', 'approved'), ('留学小助手', 66, 'super', 'alipay', '加油！', 'approved'), ('匿名好友', 6, 'coffee', 'wechat', NULL, 'approved'), ('Jack W', 18, 'meal', 'wechat', 'Great platform!', 'approved'), ('璐璐', 66, 'super', 'alipay', '帮助更多留学生！', 'approved') ON CONFLICT DO NOTHING;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Step 26: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
 
-          # Step 22: sponsors table
-          step(22, "CREATE TABLE IF NOT EXISTS sponsors (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL, nickname TEXT NOT NULL, amount INTEGER NOT NULL, tier VARCHAR(20) NOT NULL DEFAULT 'coffee', payment_method VARCHAR(20) NOT NULL DEFAULT 'wechat', message TEXT, status VARCHAR(20) NOT NULL DEFAULT 'approved', created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);")
+      - name: Verify
+        run: |
+          echo "=== Verifying sponsors table ==="
+          SQL="SELECT count(*) as cnt FROM sponsors;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "sponsors count: $RESP"
 
-          # Step 23: sponsors indexes
-          step(23, 'CREATE INDEX IF NOT EXISTS idx_sponsors_status ON sponsors(status); CREATE INDEX IF NOT EXISTS idx_sponsors_created_at ON sponsors(created_at DESC);')
+          echo "=== Verifying public_leaderboard ==="
+          SQL="SELECT count(*) as cnt FROM public_leaderboard;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP2=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "public_leaderboard count: $RESP2"
 
-          # Step 24: sponsors RLS
-          step(24, "ALTER TABLE sponsors ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS \"Allow public read of approved sponsors\" ON sponsors; CREATE POLICY \"Allow public read of approved sponsors\" ON sponsors FOR SELECT USING (status = 'approved'); DROP POLICY IF EXISTS \"Allow authenticated users to create sponsors\" ON sponsors; CREATE POLICY \"Allow authenticated users to create sponsors\" ON sponsors FOR INSERT WITH CHECK (auth.uid() = user_id);")
-
-          # Step 25: sponsors grants
-          step(25, 'GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON sponsors TO anon; GRANT INSERT ON sponsors TO anon;')
-
-          # Step 26: seed sponsors
-          step(26, "INSERT INTO sponsors (nickname, amount, tier, payment_method, message, status) VALUES ('小明同学', 18, 'meal', 'wechat', '希望平台越办越好！', 'approved'), ('留学小助手', 66, 'super', 'alipay', '加油！', 'approved'), ('匿名好友', 6, 'coffee', 'wechat', NULL, 'approved'), ('Jack W', 18, 'meal', 'wechat', 'Great platform!', 'approved'), ('璐璐', 66, 'super', 'alipay', '帮助更多留学生！', 'approved') ON CONFLICT DO NOTHING;")
-
-          # Verify
-          ok, res = sql('SELECT count(*) as cnt FROM sponsors;')
-          print(f'Verify sponsors: {res}')
-          ok2, res2 = sql('SELECT count(*) as cnt FROM public_leaderboard;')
-          print(f'Verify public_leaderboard: {res2}')
-          print('All migrations completed!')
-          PYEOF
-        env:
-          SUPABASE_PAT: ${{ secrets.SUPABASE_PAT }}
+          echo ""
+          echo "✅ All migrations completed successfully!"
