@@ -76,7 +76,7 @@ jobs:
               -d "{\"deployment_configs\":{\"production\":{\"selected_deployment_id\":\"$DEPLOYMENT_ID\"}}}")
             echo "Update result: $UPDATE"
 
-            if echo "$UPDATE" | grep -q '"success":true'; then
+            if echo "$UPDATE" | grep -q '"success": true'; then
               echo "✅ SUCCESS: Production domain (mi-to-ai.com) is now serving the latest build!"
             else
               echo "⚠️ Update may have failed. Check the response above."
