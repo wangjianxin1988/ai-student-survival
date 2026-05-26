@@ -1,20 +1,24 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import type { Runtime } from '@astrojs/cloudflare';
 
 export const GET: APIRoute = async ({ locals }) => {
-  const runtime = locals.runtime as Runtime;
+  const pEnv = process.env;
+  const supabaseRelated: Record<string, string> = {};
+  const cloudflareRelated: Record<string, string> = {};
+
+  for (const [k, v] of Object.entries(pEnv)) {
+    if (k.includes('SUPABASE') || k.includes('CLOUDFLARE') || k.includes('PUBLIC')) {
+      supabaseRelated[k] = v ? '[SET]' : '[EMPTY]';
+    }
+  }
 
   return new Response(JSON.stringify({
-    hasRuntime: !!runtime,
-    runtimeType: typeof runtime,
-    runtimeKeys: runtime ? Object.keys(runtime) : [],
-    envKeys: runtime?.env ? Object.keys(runtime.env as Record<string, unknown>) : [],
-    supabaseServiceKey: runtime?.env
-      ? ((runtime.env as Record<string, unknown>).SUPABASE_SERVICE_ROLE_KEY ? '[SET]' : '[UNDEFINED]')
-      : '[NO ENV]',
-    processEnv: process.env.SUPABASE_SERVICE_ROLE_KEY ? '[SET]' : '[UNDEFINED]',
+    allEnvKeys: Object.keys(pEnv).sort(),
+    supabaseRelated,
+    hasLocals: !!locals,
+    localsKeys: Object.keys(locals),
+    localsRuntime: typeof locals.runtime,
   }, null, 2), {
     headers: { 'Content-Type': 'application/json' },
   });
