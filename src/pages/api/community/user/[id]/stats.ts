@@ -28,11 +28,13 @@ export const GET: APIRoute = async ({ params }) => {
     .eq('user_id', userId)
     .eq('status', 'published');
 
-  // Get comments count
-  const { count: commentsCount } = await supabase
+  // Get comments count (post_comments table may not exist yet)
+  let commentsCount = 0;
+  const { count } = await supabase
     .from('post_comments')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId);
+  if (count !== null) commentsCount = count;
 
   const seed = userId.substring(0, 8);
 
