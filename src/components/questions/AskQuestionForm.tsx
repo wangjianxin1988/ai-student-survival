@@ -1,8 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { QUESTION_CATEGORIES, type QuestionCategory } from '@/data/questions';
+import { getAuthHeaders } from '@/lib/auth';
+import { getAuthLoginHref } from '@/lib/i18n';
 
 interface AskQuestionFormProps {
   locale?: 'zh' | 'en';
+}
+
+// Unified user detection
+function getCurrentClientUser(): { id: string; email: string; name?: string } | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const demoRaw = sessionStorage.getItem('demo_session');
+    if (demoRaw) {
+      const d = JSON.parse(demoRaw);
+      if (d && d.id) return { id: d.id, email: d.email || '', name: d.name };
+    }
+    const keys = Object.keys(localStorage);
+    for (const k of keys) {
+      if (!k.startsWith('sb-')) continue;
+      if (k.indexOf('auth') === -1 && k.indexOf('token') === -1) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      try {
+        const p = JSON.parse(raw);
+        const accessToken = p?.tokens?.access_token || p?.access_token;
+        const refreshToken = p?.tokens?.refresh_token || p?.refresh_token;
+        if (!accessToken || !refreshToken) continue;
+        const parts = accessToken.split('.');
+        if (parts.length !== 3) continue;
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload.sub) return { id: payload.sub, email: '', name: '' };
+      } catch { /* skip */ }
+    }
+  } catch {}
+  return null;
 }
 
 const translations = {
@@ -60,6 +92,7 @@ const translations = {
 
 export default function AskQuestionForm({ locale = 'zh' }: AskQuestionFormProps) {
   const t = translations[locale];
+  const [user, setUser] = useState<{ id: string; email: string; name?: string } | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     titleZh: '',
@@ -74,6 +107,13 @@ export default function AskQuestionForm({ locale = 'zh' }: AskQuestionFormProps)
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const categories = Object.entries(QUESTION_CATEGORIES) as [QuestionCategory, typeof QUESTION_CATEGORIES[QuestionCategory]][];
+
+  useEffect(() => {
+    const checkUser = () => setUser(getCurrentClientUser());
+    checkUser();
+    const interval = setInterval(checkUser, 500);
+    return () => clearInterval(interval);
+  }, []);
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
@@ -97,21 +137,42 @@ export default function AskQuestionForm({ locale = 'zh' }: AskQuestionFormProps)
 
     if (!validate()) return;
 
+    if (!user) {
+      window.location.href = getAuthLoginHref();
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Use Chinese content if provided, otherwise English
+    const title = formData.titleZh.trim() || formData.title.trim();
+    const content = formData.contentZh.trim() || formData.content.trim();
+    const tags = formData.tags
+      ? formData.tags.split(',').map(t => t.trim()).filter(Boolean)
+      : [];
 
-    // In a real app, this would save to a backend
-    console.log('Question submitted:', formData);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch('/api/questions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+        body: JSON.stringify({ title, content, category: formData.category, tags }),
+      });
+      const data = await res.json();
 
-    setIsSubmitting(false);
-    setSubmitSuccess(true);
-
-    // Redirect after success
-    setTimeout(() => {
-      window.location.href = '/questions';
-    }, 1500);
+      if (data.success) {
+        setSubmitSuccess(true);
+        setTimeout(() => {
+          window.location.href = `/questions/${data.data.id}`;
+        }, 1500);
+      } else {
+        setErrors({ submit: data.error?.message || '发布失败，请重试' });
+      }
+    } catch (error) {
+      setErrors({ submit: '网络错误，请重试' });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -260,6 +321,13 @@ export default function AskQuestionForm({ locale = 'zh' }: AskQuestionFormProps)
                   {t.anonymous}
                 </label>
               </div>
+
+              {/* Submit error */}
+              {errors.submit && (
+                <div className="p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm">
+                  {errors.submit}
+                </div>
+              )}
 
               {/* Submit buttons */}
               <div className="flex items-center gap-4 pt-4">

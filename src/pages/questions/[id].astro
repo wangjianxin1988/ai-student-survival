@@ -1,6 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import QuestionDetailClient from '@/components/questions/QuestionDetailClient';
+import QuestionPostDetail from '@/components/questions/QuestionPostDetail';
 
 export const prerender = false;
 
@@ -20,5 +20,5 @@ if (!id) {
     { name: locale === 'zh' ? '问题详情' : 'Question Details' }
   ]}
 >
-  <QuestionDetailClient questionId={id} locale={locale} client:only="react" />
+  <QuestionPostDetail postId={id} locale={locale} client:only="react" />
 </Layout>

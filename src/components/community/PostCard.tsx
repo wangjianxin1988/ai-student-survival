@@ -24,6 +24,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   job_recruitment: "求职招聘",
   discussion: "讨论",
   qa: "问答",
+  other: "其他",
 };
 
 const CATEGORY_COLORS: Record<string, string> = {

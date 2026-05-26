@@ -52,23 +52,27 @@ export const POST: APIRoute = async () => {
     auth: { autoRefreshToken: false, persistSession: false },
   });
 
-  // Check if seed posts already exist
-  const { data: existing } = await supabaseAdmin
+  // Step 1: Delete all existing Q&A posts (both q-XXX and UUID-format)
+  // to ensure clean re-seed with q-XXX IDs matching questionsData
+  const qIds = questionsData.map(q => q.id);
+  const { error: deleteError } = await supabaseAdmin
     .from('community_posts')
-    .select('id')
-    .like('id', '00000000-0000-0000-0000-%')
-    .limit(1);
+    .delete()
+    .in('id', qIds);
 
-  if (existing && existing.length > 0) {
+  if (deleteError) {
     return new Response(
-      JSON.stringify({ success: false, error: { message: 'Seed posts already exist' } }),
-      { status: 409, headers: { 'Content-Type': 'application/json' } }
+      JSON.stringify({
+        success: false,
+        error: { message: `Delete failed: ${deleteError.message}` },
+      }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
-  // Create posts from questions data
+  // Step 2: Insert posts with q-XXX IDs matching questionsData
   const posts = questionsData.map((q) => ({
-    id: `00000000-0000-0000-0000-${String(questionsData.indexOf(q) + 1).padStart(12, '0')}`,
+    id: q.id,
     user_id: '7fa8052c-4d62-4ec6-947d-9d49ba927b76',
     title: q.titleZh,
     content: q.contentZh,
@@ -88,11 +92,17 @@ export const POST: APIRoute = async () => {
     updated_at: q.createdAt,
   }));
 
-  const { data, error } = await supabaseAdmin.from('community_posts').insert(posts).select('id');
+  const { data, error: insertError } = await supabaseAdmin
+    .from('community_posts')
+    .insert(posts)
+    .select('id');
 
-  if (error) {
+  if (insertError) {
     return new Response(
-      JSON.stringify({ success: false, error: { message: error.message } }),
+      JSON.stringify({
+        success: false,
+        error: { message: `Insert failed: ${insertError.message}` },
+      }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

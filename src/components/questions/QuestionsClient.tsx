@@ -1,18 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import QuestionCard from './QuestionCard';
-import {
-  questionsData,
-  filterQuestions,
-  sortQuestions,
-  getHotQuestions,
-  getUnansweredQuestions,
-  type Question,
-  type QuestionCategory,
-  QUESTION_CATEGORIES,
-} from '@/data/questions';
-import { CommunityFeed, PostCard } from '@/components/community';
+import { PostCard } from '@/components/community';
 import type { CommunityPost } from '@/lib/community/types';
-import { getCurrentLocale } from '@/lib/i18n';
+import { QUESTION_CATEGORIES, type QuestionCategory } from '@/data/questions';
 import { getAuthHeaders } from '@/lib/auth';
 
 interface QuestionsClientProps {
@@ -82,10 +71,9 @@ const translations = {
   },
 };
 
-// Fetch real like/favorite state for posts from Supabase
+// Fetch user interactions (likes + favorites) for a list of posts
 async function fetchMyInteractions(postIds: string[]): Promise<{ likes: Set<string>; favorites: Set<string> }> {
   if (postIds.length === 0) return { likes: new Set(), favorites: new Set() };
-
   try {
     const params = new URLSearchParams();
     postIds.forEach(id => params.append('postId', id));
@@ -105,17 +93,20 @@ async function fetchMyInteractions(postIds: string[]): Promise<{ likes: Set<stri
 
 export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps) {
   const t = translations[locale];
-  const currentLocale = locale || getCurrentLocale();
   const [selectedCategory, setSelectedCategory] = useState<QuestionCategory | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'newest' | 'hottest' | 'unanswered'>('newest');
   const [activeTab, setActiveTab] = useState<'all' | 'hot' | 'unanswered' | 'community'>('all');
 
+  // Real Q&A posts from Supabase (replacing static data)
+  const [qaPosts, setQaPosts] = useState<CommunityPost[]>([]);
+  const [qaLoading, setQaLoading] = useState(false);
+
   // Real-time community posts
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [communityPostsLoading, setCommunityPostsLoading] = useState(false);
 
-  // Client-side user detection for PostCard interactions
+  // Client-side user detection
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -152,7 +143,47 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch real-time community posts with like/favorite state
+  // Fetch Q&A posts from Supabase
+  const fetchQaPosts = useCallback(async () => {
+    setQaLoading(true);
+    try {
+      const params = new URLSearchParams({
+        sort: sortBy === 'hottest' ? 'popular' : 'latest',
+        limit: '100',
+        offset: '0',
+      });
+      if (selectedCategory) {
+        params.set('category', selectedCategory);
+      }
+      if (currentUserId) {
+        params.set('userId', currentUserId);
+      }
+      const res = await fetch(`/api/questions?${params}`);
+      const data = await res.json();
+      if (data.success && data.data.length > 0) {
+        let posts = data.data as CommunityPost[];
+        // Client-side search filter
+        if (searchQuery) {
+          const q = searchQuery.toLowerCase();
+          posts = posts.filter(p =>
+            p.title.toLowerCase().includes(q) ||
+            p.content.toLowerCase().includes(q) ||
+            p.tags.some(t => t.toLowerCase().includes(q))
+          );
+        }
+        setQaPosts(posts);
+      } else {
+        setQaPosts([]);
+      }
+    } catch (e) {
+      console.error('[QuestionsClient] Error fetching Q&A posts:', e);
+      setQaPosts([]);
+    } finally {
+      setQaLoading(false);
+    }
+  }, [sortBy, selectedCategory, currentUserId, searchQuery]);
+
+  // Fetch real-time community posts
   const fetchCommunityPosts = useCallback(async () => {
     setCommunityPostsLoading(true);
     try {
@@ -183,18 +214,16 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
       const data = await res.json();
       if (data.success && data.data.length > 0) {
         const posts = data.data as CommunityPost[];
-
-        // Fetch current user's like/favorite state
-        const postIds = posts.map(p => p.id);
+        // Filter out Q&A category posts to avoid duplicates when merged with Q&A posts
+        const QNA_CATEGORIES = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other']);
+        const nonQnaPosts = posts.filter(p => !QNA_CATEGORIES.has(p.category));
+        const postIds = nonQnaPosts.map(p => p.id);
         const { likes, favorites } = await fetchMyInteractions(postIds);
-
-        // Merge real state into posts
-        const postsWithState = posts.map(p => ({
+        const postsWithState = nonQnaPosts.map(p => ({
           ...p,
           isLiked: likes.has(p.id),
           isFavorited: favorites.has(p.id),
         }));
-
         setCommunityPosts(postsWithState);
       } else {
         setCommunityPosts([]);
@@ -208,99 +237,93 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
   }, [sortBy, selectedCategory]);
 
   useEffect(() => {
+    if (activeTab === 'community') return;
+    fetchQaPosts();
+  }, [activeTab, fetchQaPosts]);
+
+  useEffect(() => {
     if (activeTab !== 'community') {
       fetchCommunityPosts();
     }
   }, [activeTab, fetchCommunityPosts]);
 
-  // Determine if a community post maps to the selected category
-  const categoryToCommunityCat: Record<string, string> = {
-    academic: 'qa',
-    life: 'discussion',
-    visa: 'qa',
-    job: 'qa',
-    policy: 'policy',
-    payment: 'payment',
-    ai_tools: 'tools',
-    study_life: 'discussion',
-    job_recruitment: 'discussion',
-    other: 'discussion',
-  };
-
-  const filteredCommunityPosts = useMemo(() => {
+  // Filtered Q&A posts
+  const filteredQaPosts = useMemo(() => {
     if (activeTab === 'community') return [];
     if (activeTab === 'hot') {
-      return communityPosts
+      return qaPosts
         .filter(p => (p.likesCount + p.commentsCount * 2 + p.favoritesCount * 3) >= 5)
         .slice(0, 5);
     }
     if (activeTab === 'unanswered') {
-      return communityPosts.filter(p => p.commentsCount === 0);
+      return qaPosts.filter(p => p.commentsCount === 0);
     }
-    if (selectedCategory) {
-      const cat = categoryToCommunityCat[selectedCategory];
-      return communityPosts.filter(p => p.category === cat);
-    }
-    return communityPosts.slice(0, 5);
-  }, [communityPosts, activeTab, selectedCategory]);
+    return qaPosts;
+  }, [qaPosts, activeTab]);
 
-  // Filter and sort static questions
-  const filteredQuestions = useMemo(() => {
-    if (activeTab === 'hot') {
-      return getHotQuestions(5);
-    }
-    if (activeTab === 'unanswered') {
-      return getUnansweredQuestions();
-    }
-
-    let questions = filterQuestions({
-      category: selectedCategory || undefined,
-      search: searchQuery || undefined,
-    });
-
-    return sortQuestions(questions, sortBy);
-  }, [selectedCategory, searchQuery, sortBy, activeTab]);
-
-  // Merge static questions with real community posts for display
-  const mergedQuestions = useMemo(() => {
+  // Merged list for display (all tab)
+  const mergedPosts = useMemo(() => {
     if (activeTab === 'community') return [];
+    if (activeTab !== 'all') return filteredQaPosts;
 
-    const communityAsQuestions: (Question & { _isCommunityPost: true; _post: CommunityPost })[] =
-      filteredCommunityPosts.map(post => ({
-        id: `community-${post.id}`,
-        title: post.title,
-        titleZh: post.title,
-        content: post.content,
-        contentZh: post.content,
-        category: 'other' as QuestionCategory,
-        authorName: post.userName,
-        authorAvatar: post.userAvatar,
-        isAnonymous: false,
-        viewCount: post.viewsCount,
-        answerCount: post.commentsCount,
-        isResolved: false,
-        tags: post.tags,
-        createdAt: post.createdAt,
-        _isCommunityPost: true,
-        _post: post,
-      }));
-
-    if (activeTab === 'all') {
-      return [...communityAsQuestions, ...filteredQuestions];
-    }
-    const result: (typeof communityAsQuestions[0] | Question)[] = [];
-    const maxLen = Math.max(communityAsQuestions.length, filteredQuestions.length);
+    // Interleave Q&A posts and community posts
+    const result: CommunityPost[] = [];
+    const maxLen = Math.max(filteredQaPosts.length, communityPosts.slice(0, 5).length);
     for (let i = 0; i < maxLen; i++) {
-      if (communityAsQuestions[i]) result.push(communityAsQuestions[i]);
-      if (filteredQuestions[i]) result.push(filteredQuestions[i]);
+      if (filteredQaPosts[i]) result.push(filteredQaPosts[i]);
+      if (communityPosts[i]) result.push(communityPosts[i]);
     }
     return result;
-  }, [activeTab, filteredQuestions, filteredCommunityPosts]);
+  }, [activeTab, filteredQaPosts, communityPosts]);
 
-  const hotQuestions = useMemo(() => getHotQuestions(5), []);
-  const unresolvedQuestions = useMemo(() => getUnansweredQuestions(), []);
+  const hotCount = useMemo(() => qaPosts.filter(p => (p.likesCount + p.commentsCount * 2 + p.favoritesCount * 3) >= 5).length, [qaPosts]);
+  const unansweredCount = useMemo(() => qaPosts.filter(p => p.commentsCount === 0).length, [qaPosts]);
 
   const categories = Object.entries(QUESTION_CATEGORIES) as [QuestionCategory, typeof QUESTION_CATEGORIES[QuestionCategory]][];
+
+  const handleLike = async (postId: string) => {
+    if (!currentUserId) return;
+    setQaPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
+    }));
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/questions/${postId}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setQaPosts(prev => prev.map(p => {
+          if (p.id !== postId) return p;
+          return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
+        }));
+      }
+    } catch {}
+  };
+
+  const handleFavorite = async (postId: string) => {
+    if (!currentUserId) return;
+    setQaPosts(prev => prev.map(p => {
+      if (p.id !== postId) return p;
+      return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
+    }));
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(`/api/questions/${postId}/favorite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setQaPosts(prev => prev.map(p => {
+          if (p.id !== postId) return p;
+          return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
+        }));
+      }
+    } catch {}
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -312,7 +335,7 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
             <p className="text-gray-600">{t.subtitle}</p>
           </div>
 
-          {/* Search bar — hidden in community tab */}
+          {/* Search bar */}
           {activeTab !== 'community' && (
             <div className="max-w-2xl mx-auto mb-6">
               <div className="relative">
@@ -377,9 +400,11 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                   }`}
                 >
                   <span>{t.hotQuestions}</span>
-                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
-                    {hotQuestions.length}
-                  </span>
+                  {hotCount > 0 && (
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                      {hotCount}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('unanswered')}
@@ -390,9 +415,11 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                   }`}
                 >
                   <span>{t.unresolvedQuestions}</span>
-                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-                    {unresolvedQuestions.length}
-                  </span>
+                  {unansweredCount > 0 && (
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                      {unansweredCount}
+                    </span>
+                  )}
                 </button>
                 <button
                   onClick={() => setActiveTab('community')}
@@ -407,9 +434,9 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
               </nav>
             </div>
 
-            {/* Categories — hidden in community tab */}
+            {/* Categories */}
             {activeTab !== 'community' && (
-              <div className="bg-white rounded-lg border border-gray-200 p-4">
+              <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">{t.filters}</h3>
                 <div className="space-y-1">
                   <button
@@ -468,13 +495,13 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
             </div>
           </div>
 
-          {/* Questions list */}
+          {/* Posts list */}
           <div className="flex-1">
-            {/* Sort controls — only show for Q&A tabs */}
+            {/* Sort controls */}
             {activeTab !== 'community' && activeTab === 'all' && (
               <div className="flex items-center justify-between mb-4">
                 <p className="text-sm text-gray-600">
-                  {t.results.replace('{count}', String(mergedQuestions.length))}
+                  {t.results.replace('{count}', String(mergedPosts.length))}
                 </p>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">{t.sortBy}:</span>
@@ -491,84 +518,28 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
               </div>
             )}
 
-            {/* Questions or Community Feed */}
+            {/* Posts or Community Feed */}
             <div className="space-y-4">
               {activeTab === 'community' ? (
                 <CommunityFeed locale={locale} />
-              ) : communityPostsLoading ? (
+              ) : qaLoading ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-                  <span className="ml-3 text-gray-500">加载社区帖子...</span>
+                  <span className="ml-3 text-gray-500">加载中...</span>
                 </div>
-              ) : mergedQuestions.length > 0 ? (
-                mergedQuestions.map((item) => {
-                  if ('_isCommunityPost' in item && item._isCommunityPost) {
-                    const post = (item as unknown as { _post: CommunityPost })._post;
-                    return (
-                      <PostCard
-                        key={item.id}
-                        post={post}
-                        currentUserId={currentUserId}
-                        onClick={(postId) => {
-                          window.location.href = `/community/${postId}`;
-                        }}
-                        onLike={async (postId) => {
-                          if (!currentUserId) return;
-                          // Optimistic update
-                          setCommunityPosts(prev => prev.map(p => {
-                            if (p.id !== postId) return p;
-                            return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
-                          }));
-                          try {
-                            const headers = await getAuthHeaders();
-                            const res = await fetch(`/api/community/${postId}/like`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json', ...headers },
-                            });
-                            const data = await res.json();
-                            if (!data.success) {
-                              // Revert on error
-                              setCommunityPosts(prev => prev.map(p => {
-                                if (p.id !== postId) return p;
-                                return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
-                              }));
-                            }
-                          } catch {}
-                        }}
-                        onFavorite={async (postId) => {
-                          if (!currentUserId) return;
-                          // Optimistic update
-                          setCommunityPosts(prev => prev.map(p => {
-                            if (p.id !== postId) return p;
-                            return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
-                          }));
-                          try {
-                            const headers = await getAuthHeaders();
-                            const res = await fetch(`/api/community/${postId}/favorite`, {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json', ...headers },
-                            });
-                            const data = await res.json();
-                            if (!data.success) {
-                              // Revert on error
-                              setCommunityPosts(prev => prev.map(p => {
-                                if (p.id !== postId) return p;
-                                return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
-                              }));
-                            }
-                          } catch {}
-                        }}
-                      />
-                    );
-                  }
-                  return (
-                    <QuestionCard
-                      key={item.id}
-                      question={item}
-                      locale={locale}
-                    />
-                  );
-                })
+              ) : mergedPosts.length > 0 ? (
+                mergedPosts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    currentUserId={currentUserId}
+                    onClick={(postId) => {
+                      window.location.href = `/questions/${postId}`;
+                    }}
+                    onLike={handleLike}
+                    onFavorite={handleFavorite}
+                  />
+                ))
               ) : (
                 <div className="bg-white rounded-lg border border-gray-200 p-8 text-center">
                   <p className="text-gray-600">{t.noResults}</p>
