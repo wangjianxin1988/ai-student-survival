@@ -60,6 +60,8 @@ TEST_REPORT_*.md
 *.jpg
 *.jpeg
 !.public/og-image.png
+!.public/images/wechat-qr.png
+!.public/images/alipay-qr.png
 
 # TinaCMS local
 tina/__generated__
