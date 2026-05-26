@@ -9,39 +9,109 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Apply public_leaderboard migration via Management API
+      - name: Run each SQL statement
         run: |
-          echo "Applying public_leaderboard migration to Supabase..."
-          SQL_RAW=$(cat supabase/migrations/20260526_add_public_leaderboard.sql)
-          SQL_JSON=$(printf '%s' "$SQL_RAW" | jq -Rs .)
-          RESPONSE=$(curl -s -X POST \
+          # Step 1: Create user_points_balance table
+          echo "=== Creating user_points_balance table ==="
+          RESP=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
-            -d "{\"query\": $SQL_JSON}")
-          echo "Response: $RESPONSE"
-          if echo "$RESPONSE" | grep -qi "error"; then
-            echo "Migration may have issues: $RESPONSE"
-          else
-            echo "Migration applied successfully"
-          fi
+            -d '{"query":"CREATE TABLE IF NOT EXISTS user_points_balance (user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE, balance INTEGER DEFAULT 0 NOT NULL, total_earned INTEGER DEFAULT 0 NOT NULL, total_spent INTEGER DEFAULT 0 NOT NULL, updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"}')
+          echo "Result: $RESP"
 
-      - name: Verify public_leaderboard view exists
+          # Step 2: Create points_transactions table
+          echo "=== Creating points_transactions table ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"CREATE TABLE IF NOT EXISTS points_transactions (id UUID PRIMARY KEY DEFAULT gen_random_uuid(), user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, amount INTEGER NOT NULL, type TEXT NOT NULL, description TEXT, reference_id TEXT, created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL);"}')
+          echo "Result: $RESP"
+
+          # Step 3: Create public_leaderboard view
+          echo "=== Creating public_leaderboard view ==="
+          SQL_VIEW=$(cat <<'VIEWEOF'
+CREATE OR REPLACE VIEW public_leaderboard AS
+SELECT
+  upb.user_id,
+  upb.balance,
+  upb.total_earned,
+  upb.updated_at,
+  u.raw_user_meta_data->>'name' as name,
+  u.raw_user_meta_data->>'avatar_url' as avatar
+FROM user_points_balance upb
+LEFT JOIN auth.users u ON u.id = upb.user_id
+WHERE upb.balance > 0
+ORDER BY upb.balance DESC;
+VIEWEOF
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": $(printf '%s' "$SQL_VIEW" | jq -Rs .)}")
+          echo "Result: $RESP"
+
+          # Step 4: Policy on public_leaderboard view
+          echo "=== Creating public_leaderboard policy ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"DROP POLICY IF EXISTS \"Allow public read of public_leaderboard\" ON public_leaderboard; CREATE POLICY \"Allow public read of public_leaderboard\" ON public_leaderboard FOR SELECT USING (true);"}')
+          echo "Result: $RESP"
+
+          # Step 5: Policy on user_points_balance
+          echo "=== Creating user_points_balance policy ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"DROP POLICY IF EXISTS \"Allow public read for positive balance\" ON user_points_balance; CREATE POLICY \"Allow public read for positive balance\" ON user_points_balance FOR SELECT USING (balance > 0);"}')
+          echo "Result: $RESP"
+
+          # Step 6: Users public read policy
+          echo "=== Creating users public read policy ==="
+          SQL_USERS=$(cat <<'USEREOF'
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'users' AND policyname = 'Allow public read of user profiles') THEN
+    ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+    CREATE POLICY "Allow public read of user profiles" ON users FOR SELECT USING (true);
+  END IF;
+END
+$$;
+USEREOF
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": $(printf '%s' "$SQL_USERS" | jq -Rs .)}")
+          echo "Result: $RESP"
+
+          # Step 7: Grants
+          echo "=== Granting permissions ==="
+          RESP=$(curl -s -X POST \
+            "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d '{"query":"GRANT USAGE ON SCHEMA public TO anon; GRANT SELECT ON public_leaderboard TO anon; GRANT SELECT ON user_points_balance TO anon;"}')
+          echo "Result: $RESP"
+
+      - name: Verify public_leaderboard view
         run: |
-          echo "=== Verify public_leaderboard view ==="
           RESULT=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
-            -d '{"query":"SELECT COUNT(*) as count FROM public_leaderboard;"}')
-          echo "public_leaderboard count: $RESULT"
+            -d '{"query":"SELECT count(*) as cnt FROM public_leaderboard;"}')
+          echo "public_leaderboard: $RESULT"
 
-      - name: Verify user_points_balance table exists
+      - name: Verify user_points_balance table
         run: |
-          echo "=== Verify user_points_balance table ==="
           RESULT=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
             -H "Content-Type: application/json" \
-            -d '{"query":"SELECT COUNT(*) as count FROM user_points_balance;"}')
-          echo "user_points_balance count: $RESULT"
+            -d '{"query":"SELECT count(*) as cnt FROM user_points_balance;"}')
+          echo "user_points_balance: $RESULT"
