@@ -1,5 +1,6 @@
 name: Deploy to Cloudflare Pages
 
+# Triggered on push to main and master branches
 on:
   push:
     branches: [main]
@@ -73,3 +74,4 @@ jobs:
 
       - name: Build
         run: npm run build
+# trigger
