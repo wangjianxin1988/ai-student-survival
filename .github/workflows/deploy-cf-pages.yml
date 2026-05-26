@@ -26,11 +26,17 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: pnpm install
+
+      - name: Clear build cache
+        run: rm -rf .astro .vite dist node_modules/.vite
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
@@ -67,10 +73,10 @@ jobs:
           node-version: '24'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: pnpm install
 
       - name: Type check
-        run: npm run check || true
+        run: pnpm run check || true
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
