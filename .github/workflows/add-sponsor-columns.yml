@@ -1,0 +1,21 @@
+name: Add Sponsor Columns
+
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add avatar_url and profile_url columns to sponsors table
+        run: |
+          MGMT_API="https://api.supabase.com/v1/projects/giynvpfnzzelzwpmsgtf/database/query"
+          SQL="ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS avatar_url TEXT, ADD COLUMN IF NOT EXISTS profile_url TEXT, ADD COLUMN IF NOT EXISTS points_granted BOOLEAN DEFAULT FALSE, ADD COLUMN IF NOT EXISTS points_amount INTEGER DEFAULT 0;"
+          ESCAPED=$(echo "$SQL" | jq -Rs '{query: .}')
+          RESP=$(curl -s -X POST "$MGMT_API" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_PAT }}" \
+            -H "Content-Type: application/json" \
+            -d "$ESCAPED")
+          echo "Result: $RESP"
+          if echo "$RESP" | grep -qi '"error"'; then echo "FAILED"; exit 1; fi
+          echo "SUCCESS"
