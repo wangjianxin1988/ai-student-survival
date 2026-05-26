@@ -9,16 +9,18 @@ import { env as cfEnv } from 'cloudflare:workers';
 const SUPABASE_URL = 'https://giynvpfnzzelzwpmsgtf.supabase.co';
 const SUPABASE_REF = 'giynvpfnzzelzwpmsgtf';
 
-const MGMT_API = `https://api.supabase.com/v1/projects/${SUPABASE_REF}/database/query`;
+// Uses the service-role key — works in CF Workers via fetch
+const DB_QUERY_API = `https://${SUPABASE_REF}.supabase.co/database/v1/query`;
 
-// Executes raw SQL via Supabase Management API (works in CF Workers)
-async function runSql(serviceRoleKey: string, sql: string): Promise<{ error: string | null; response?: unknown }> {
-  const res = await fetch(MGMT_API, {
+// Executes raw SQL via Supabase DB Query API (service role key auth)
+async function runSql(serviceRoleKey: string, sql: string): Promise<{ error: string | null }> {
+  const res = await fetch(DB_QUERY_API, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${serviceRoleKey}`,
       'apikey': serviceRoleKey,
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
     },
     body: JSON.stringify({ query: sql }),
   });
@@ -35,14 +37,20 @@ async function runSql(serviceRoleKey: string, sql: string): Promise<{ error: str
 
   try {
     const data = JSON.parse(text);
-    // Management API returns { error: { message: "..." } } on failure even with 200
-    if (data?.error) {
+    // Returns array of results; check each for errors
+    if (Array.isArray(data)) {
+      for (const result of data) {
+        if (result?.error) {
+          return { error: result.error.message || JSON.stringify(result.error) };
+        }
+      }
+    } else if (data?.error) {
       return { error: data.error.message || JSON.stringify(data.error) };
     }
-    return { error: null, response: data };
   } catch {
-    return { error: null };
+    // Non-JSON response, treat as success
   }
+  return { error: null };
 }
 
 export const POST: APIRoute = async () => {
@@ -95,19 +103,8 @@ export const POST: APIRoute = async () => {
       );
     }
 
-    // Step 2: Reload PostgREST schema cache - try via Management API
+    // Step 2: Reload PostgREST schema cache
     await runSql(serviceRoleKey, `NOTIFY pgrst, 'reload schema';`);
-
-    // Also try via PostgRest endpoint directly
-    await fetch(`${SUPABASE_URL}/rpc/pgrst_schema_cache_invalidate`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': serviceRoleKey,
-        'Authorization': `Bearer ${serviceRoleKey}`,
-      },
-      body: JSON.stringify({}),
-    }).catch(() => { /* best effort */ });
 
     // Wait for schema cache to reload
     await new Promise(r => setTimeout(r, 2000));
