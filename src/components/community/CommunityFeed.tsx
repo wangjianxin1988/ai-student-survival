@@ -179,6 +179,23 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
     fetchFeatured();
   }, []);
 
+  const fetchMyInteractions = async (postIds: string[]): Promise<{ likes: Set<string>; favorites: Set<string> }> => {
+    if (postIds.length === 0) return { likes: new Set(), favorites: new Set() };
+    try {
+      const params = new URLSearchParams();
+      postIds.forEach(id => params.append('postId', id));
+      const res = await fetch(`/api/community/my-interactions?${params}`);
+      const data = await res.json();
+      if (data.success) {
+        return {
+          likes: new Set(data.data.likes || []),
+          favorites: new Set(data.data.favorites || []),
+        };
+      }
+    } catch {}
+    return { likes: new Set(), favorites: new Set() };
+  };
+
   const fetchPosts = async () => {
     setLoading(true);
     try {
@@ -195,7 +212,19 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
       const data = await response.json();
 
       if (data.success) {
-        setPosts(data.data);
+        const fetchedPosts = data.data as CommunityPost[];
+
+        // Fetch current user's like/favorite state
+        const postIds = fetchedPosts.map(p => p.id);
+        const { likes, favorites } = await fetchMyInteractions(postIds);
+
+        const postsWithState = fetchedPosts.map(p => ({
+          ...p,
+          isLiked: likes.has(p.id),
+          isFavorited: favorites.has(p.id),
+        }));
+
+        setPosts(postsWithState);
         setTotal(data.meta.total);
       }
     } catch (error) {

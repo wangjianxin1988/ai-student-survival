@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import QuestionCard from './QuestionCard';
 import {
   questionsData,
@@ -12,7 +12,7 @@ import {
 } from '@/data/questions';
 import { CommunityFeed, PostCard } from '@/components/community';
 import type { CommunityPost } from '@/lib/community/types';
-import { getCurrentLocale, getLocaleHref } from '@/lib/i18n';
+import { getCurrentLocale } from '@/lib/i18n';
 import { getAuthHeaders } from '@/lib/auth';
 
 interface QuestionsClientProps {
@@ -82,6 +82,27 @@ const translations = {
   },
 };
 
+// Fetch real like/favorite state for posts from Supabase
+async function fetchMyInteractions(postIds: string[]): Promise<{ likes: Set<string>; favorites: Set<string> }> {
+  if (postIds.length === 0) return { likes: new Set(), favorites: new Set() };
+
+  try {
+    const params = new URLSearchParams();
+    postIds.forEach(id => params.append('postId', id));
+    const res = await fetch(`/api/community/my-interactions?${params}`);
+    const data = await res.json();
+    if (data.success) {
+      return {
+        likes: new Set(data.data.likes || []),
+        favorites: new Set(data.data.favorites || []),
+      };
+    }
+  } catch (e) {
+    console.error('[QuestionsClient] Failed to fetch interactions:', e);
+  }
+  return { likes: new Set(), favorites: new Set() };
+}
+
 export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps) {
   const t = translations[locale];
   const currentLocale = locale || getCurrentLocale();
@@ -131,7 +152,7 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
     return () => clearInterval(interval);
   }, []);
 
-  // Fetch real-time community posts
+  // Fetch real-time community posts with like/favorite state
   const fetchCommunityPosts = useCallback(async () => {
     setCommunityPostsLoading(true);
     try {
@@ -141,7 +162,6 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
         offset: '0',
       });
       if (selectedCategory) {
-        // Map static question categories to community categories
         const categoryMap: Record<string, string> = {
           academic: 'qa',
           life: 'discussion',
@@ -162,11 +182,25 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
       const res = await fetch(`/api/community?${params}`);
       const data = await res.json();
       if (data.success && data.data.length > 0) {
-        setCommunityPosts(data.data);
+        const posts = data.data as CommunityPost[];
+
+        // Fetch current user's like/favorite state
+        const postIds = posts.map(p => p.id);
+        const { likes, favorites } = await fetchMyInteractions(postIds);
+
+        // Merge real state into posts
+        const postsWithState = posts.map(p => ({
+          ...p,
+          isLiked: likes.has(p.id),
+          isFavorited: favorites.has(p.id),
+        }));
+
+        setCommunityPosts(postsWithState);
       } else {
         setCommunityPosts([]);
       }
-    } catch {
+    } catch (e) {
+      console.error('[QuestionsClient] Error fetching posts:', e);
       setCommunityPosts([]);
     } finally {
       setCommunityPostsLoading(false);
@@ -207,7 +241,6 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
       const cat = categoryToCommunityCat[selectedCategory];
       return communityPosts.filter(p => p.category === cat);
     }
-    // Show latest 5 community posts at the top for 'all' tab
     return communityPosts.slice(0, 5);
   }, [communityPosts, activeTab, selectedCategory]);
 
@@ -232,7 +265,6 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
   const mergedQuestions = useMemo(() => {
     if (activeTab === 'community') return [];
 
-    // Real posts as "virtual" questions
     const communityAsQuestions: (Question & { _isCommunityPost: true; _post: CommunityPost })[] =
       filteredCommunityPosts.map(post => ({
         id: `community-${post.id}`,
@@ -256,7 +288,6 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
     if (activeTab === 'all') {
       return [...communityAsQuestions, ...filteredQuestions];
     }
-    // For hot/unanswered: interleave
     const result: (typeof communityAsQuestions[0] | Question)[] = [];
     const maxLen = Math.max(communityAsQuestions.length, filteredQuestions.length);
     for (let i = 0; i < maxLen; i++) {
@@ -266,7 +297,6 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
     return result;
   }, [activeTab, filteredQuestions, filteredCommunityPosts]);
 
-  // Get hot and unanswered counts
   const hotQuestions = useMemo(() => getHotQuestions(5), []);
   const unresolvedQuestions = useMemo(() => getUnansweredQuestions(), []);
 
@@ -377,7 +407,7 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
               </nav>
             </div>
 
-            {/* Categories — hidden in community tab (CommunityFeed has its own filter) */}
+            {/* Categories — hidden in community tab */}
             {activeTab !== 'community' && (
               <div className="bg-white rounded-lg border border-gray-200 p-4">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">{t.filters}</h3>
@@ -473,7 +503,7 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
               ) : mergedQuestions.length > 0 ? (
                 mergedQuestions.map((item) => {
                   if ('_isCommunityPost' in item && item._isCommunityPost) {
-                    const post = item._post;
+                    const post = (item as unknown as { _post: CommunityPost })._post;
                     return (
                       <PostCard
                         key={item.id}
@@ -491,10 +521,18 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                           }));
                           try {
                             const headers = await getAuthHeaders();
-                            await fetch(`/api/community/${postId}/like`, {
+                            const res = await fetch(`/api/community/${postId}/like`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json', ...headers },
                             });
+                            const data = await res.json();
+                            if (!data.success) {
+                              // Revert on error
+                              setCommunityPosts(prev => prev.map(p => {
+                                if (p.id !== postId) return p;
+                                return { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) };
+                              }));
+                            }
                           } catch {}
                         }}
                         onFavorite={async (postId) => {
@@ -506,10 +544,18 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                           }));
                           try {
                             const headers = await getAuthHeaders();
-                            await fetch(`/api/community/${postId}/favorite`, {
+                            const res = await fetch(`/api/community/${postId}/favorite`, {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json', ...headers },
                             });
+                            const data = await res.json();
+                            if (!data.success) {
+                              // Revert on error
+                              setCommunityPosts(prev => prev.map(p => {
+                                if (p.id !== postId) return p;
+                                return { ...p, isFavorited: !p.isFavorited, favoritesCount: (p.favoritesCount || 0) + (p.isFavorited ? -1 : 1) };
+                              }));
+                            }
                           } catch {}
                         }}
                       />

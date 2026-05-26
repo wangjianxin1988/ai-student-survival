@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
-import { userStatsApi, getBadgesWithStatus, type UserProfile } from '@/lib/userProfile';
+import { getBadgesWithStatus } from '@/lib/userProfile';
 import { sampleOffers, type Offer } from '@/data/offers';
 import FollowButton from './FollowButton';
 import { BadgeGrid } from './Badge';
@@ -9,6 +9,18 @@ import { getLocaleHref } from '@/lib/i18n';
 interface UserPublicProfileProps {
   userId: string | undefined;
   locale?: 'zh' | 'en';
+}
+
+interface SupabaseUserStats {
+  userId: string;
+  name: string;
+  avatar: string;
+  email: string;
+  points: number;
+  totalEarned: number;
+  postsCount: number;
+  commentsCount: number;
+  joinDate: string;
 }
 
 const translations = {
@@ -33,6 +45,9 @@ const translations = {
     rejected: '拒信',
     waitlisted: '候补',
     scholarship: '奖学金',
+    postsCount: '帖子',
+    commentsCount: '评论',
+    loading: '加载中...',
   },
   en: {
     profile: 'Profile',
@@ -55,6 +70,9 @@ const translations = {
     rejected: 'Rejected',
     waitlisted: 'Waitlisted',
     scholarship: 'Scholarship',
+    postsCount: 'Posts',
+    commentsCount: 'Comments',
+    loading: 'Loading...',
   },
 };
 
@@ -71,9 +89,22 @@ const levelColors = [
   'from-yellow-300 to-yellow-500',
 ];
 
+function getLevelFromPoints(points: number): number {
+  if (points >= 10000) return 10;
+  if (points >= 5000) return 9;
+  if (points >= 2000) return 8;
+  if (points >= 1000) return 7;
+  if (points >= 500) return 6;
+  if (points >= 200) return 5;
+  if (points >= 100) return 4;
+  if (points >= 50) return 3;
+  if (points >= 20) return 2;
+  return 1;
+}
+
 export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicProfileProps) {
   const [currentUser, setCurrentUser] = useState<DemoUser | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [userStats, setUserStats] = useState<SupabaseUserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'offers' | 'favorites' | 'ratings'>('offers');
   const [userOffers, setUserOffers] = useState<Offer[]>([]);
@@ -86,10 +117,17 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
     setCurrentUser(user);
 
     if (userId) {
-      const userProfile = userStatsApi.getProfile(userId);
-      setProfile(userProfile);
+      // Fetch user stats from Supabase
+      fetch(`/api/community/user/${userId}/stats`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            setUserStats(data.data);
+          }
+        })
+        .catch(e => console.error('[UserPublicProfile] Failed to fetch user stats:', e));
 
-      // Load user's offers
+      // Load localStorage-based offers/favorites/ratings
       if (typeof window !== 'undefined') {
         const storedOffers = localStorage.getItem('demo_offers');
         if (storedOffers) {
@@ -98,7 +136,7 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
             const offers: Offer[] = [];
             Object.values(parsed).forEach((userOfferList: any) => {
               if (Array.isArray(userOfferList)) {
-                const filtered = userOfferList.filter((o: Offer) => o.userId === userId);
+                const filtered = (userOfferList as Offer[]).filter((o: Offer) => o.userId === userId);
                 offers.push(...filtered);
               }
             });
@@ -108,25 +146,21 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
           }
         }
 
-        // Load user's favorites
         const storedFavorites = localStorage.getItem('demo_favorites');
         if (storedFavorites) {
           try {
             const parsed = JSON.parse(storedFavorites);
-            const userFavs = parsed[userId] || [];
-            setUserFavorites(userFavs);
+            setUserFavorites(parsed[userId] || []);
           } catch (e) {
             console.error('Failed to parse favorites:', e);
           }
         }
 
-        // Load user's ratings
         const storedRatings = localStorage.getItem('demo_ratings');
         if (storedRatings) {
           try {
             const parsed = JSON.parse(storedRatings);
-            const userRatingsList = parsed[userId] || [];
-            setUserRatings(userRatingsList);
+            setUserRatings(parsed[userId] || []);
           } catch (e) {
             console.error('Failed to parse ratings:', e);
           }
@@ -156,7 +190,7 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
     );
   }
 
-  if (!profile) {
+  if (!userStats) {
     return (
       <div className="min-h-[calc(100vh-200px)] py-12 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -177,8 +211,7 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
     );
   }
 
-  const badgesWithStatus = getBadgesWithStatus(profile);
-  const earnedBadges = badgesWithStatus.filter(b => b.earned);
+  const level = getLevelFromPoints(userStats.points);
 
   const tabs = [
     { id: 'offers', label: `${t.offersLabel} (${userOffers.length})` },
@@ -208,36 +241,48 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
             {/* Avatar */}
             <div className="relative">
               <img
-                src={profile.avatar}
-                alt={profile.name}
+                src={userStats.avatar}
+                alt={userStats.name}
                 className="w-24 h-24 rounded-full bg-gray-100"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`;
+                }}
               />
-              <span className={`absolute -bottom-2 -right-2 px-2 py-1 rounded-full bg-gradient-to-r ${levelColors[profile.level - 1]} text-white text-xs font-bold`}>
-                Lv{profile.level}
+              <span className={`absolute -bottom-2 -right-2 px-2 py-1 rounded-full bg-gradient-to-r ${levelColors[level - 1]} text-white text-xs font-bold`}>
+                Lv{level}
               </span>
             </div>
 
             {/* Info */}
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-2">
-                <h1 className="text-2xl font-bold text-gray-900">{profile.name}</h1>
+                <h1 className="text-2xl font-bold text-gray-900">{userStats.name}</h1>
                 {currentUser && currentUser.id !== userId && (
-                  <FollowButton targetUserId={userId!} targetUser={profile} locale={locale} size="md" />
+                  <FollowButton
+                    targetUserId={userId!}
+                    targetUser={{ id: userId!, name: userStats.name, avatar: userStats.avatar, level, badges: [], joinDate: userStats.joinDate, points: userStats.points, email: '', followees: [], followers: [], lastActive: userStats.joinDate, favoritesCount: 0, ratingsCount: 0, reviewsCount: 0 }}
+                    locale={locale}
+                    size="md"
+                  />
                 )}
               </div>
               <p className="text-gray-500 mb-4">
-                {t.joined} {new Date(profile.joinDate).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US')}
+                {t.joined} {new Date(userStats.joinDate).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-US')}
               </p>
 
               {/* Stats */}
               <div className="flex flex-wrap gap-6">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{profile.points}</div>
+                  <div className="text-2xl font-bold text-gray-900">{userStats.points}</div>
                   <div className="text-sm text-gray-500">{t.points}</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{earnedBadges.length}</div>
-                  <div className="text-sm text-gray-500">{locale === 'zh' ? '徽章' : 'Badges'}</div>
+                  <div className="text-2xl font-bold text-gray-900">{userStats.postsCount}</div>
+                  <div className="text-sm text-gray-500">{t.postsCount}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-900">{userStats.commentsCount}</div>
+                  <div className="text-sm text-gray-500">{t.commentsCount}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-gray-900">{userOffers.length}</div>
@@ -247,38 +292,9 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
                   <div className="text-2xl font-bold text-gray-900">{userFavorites.length}</div>
                   <div className="text-sm text-gray-500">{t.favorites}</div>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">{userRatings.length}</div>
-                  <div className="text-sm text-gray-500">{t.ratings}</div>
-                </div>
               </div>
             </div>
           </div>
-
-          {/* Badges Preview */}
-          {earnedBadges.length > 0 && (
-            <div className="mt-6 pt-6 border-t border-gray-100">
-              <div className="flex flex-wrap gap-2">
-                {earnedBadges.slice(0, 8).map(({ badge, earned }) => (
-                  <div
-                    key={badge.id}
-                    className={`px-3 py-1 rounded-full text-sm flex items-center gap-1 ${
-                      earned ? 'bg-primary-50 text-primary-700' : 'bg-gray-100 text-gray-400'
-                    }`}
-                    title={locale === 'zh' ? badge.descriptionZh : badge.description}
-                  >
-                    <span>{badge.icon}</span>
-                    <span>{locale === 'zh' ? badge.nameZh : badge.name}</span>
-                  </div>
-                ))}
-                {earnedBadges.length > 8 && (
-                  <span className="px-3 py-1 bg-gray-100 text-gray-500 rounded-full text-sm">
-                    +{earnedBadges.length - 8}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Tabs */}

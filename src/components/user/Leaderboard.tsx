@@ -1,6 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { userStatsApi, type UserProfile } from '@/lib/userProfile';
+import React, { useState, useEffect, useCallback } from 'react';
 import FollowButton from './FollowButton';
+
+interface LeaderboardEntry {
+  rank: number;
+  userId: string;
+  name: string;
+  avatar: string;
+  points: number;
+  totalEarned: number;
+  updatedAt: string;
+}
 
 interface LeaderboardProps {
   locale?: 'zh' | 'en';
@@ -56,26 +65,52 @@ const levelGradients = [
   'from-yellow-300 to-yellow-500',
 ];
 
+// Calculate level from points (same formula as userProfile.ts)
+function getLevelFromPoints(points: number): number {
+  if (points >= 10000) return 10;
+  if (points >= 5000) return 9;
+  if (points >= 2000) return 8;
+  if (points >= 1000) return 7;
+  if (points >= 500) return 6;
+  if (points >= 200) return 5;
+  if (points >= 100) return 4;
+  if (points >= 50) return 3;
+  if (points >= 20) return 2;
+  return 1;
+}
+
 export default function Leaderboard({
   locale = 'zh',
   type = 'total',
   limit = 10,
   currentUserId,
 }: LeaderboardProps) {
-  const [leaderboard, setLeaderboard] = useState<UserProfile[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'total' | 'weekly' | 'monthly'>(type);
   const t = translations[locale];
 
-  useEffect(() => {
-    loadLeaderboard();
+  const loadLeaderboard = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/community/leaderboard?limit=${limit}&period=${activeTab}`);
+      const data = await res.json();
+      if (data.success && data.data) {
+        setLeaderboard(data.data);
+      } else {
+        setLeaderboard([]);
+      }
+    } catch (e) {
+      console.error('[Leaderboard] Failed to load:', e);
+      setLeaderboard([]);
+    } finally {
+      setLoading(false);
+    }
   }, [activeTab, limit]);
 
-  const loadLeaderboard = () => {
-    const data = userStatsApi.getLeaderboard(activeTab, limit);
-    setLeaderboard(data);
-    setLoading(false);
-  };
+  useEffect(() => {
+    loadLeaderboard();
+  }, [loadLeaderboard]);
 
   const getRankIcon = (rank: number) => {
     if (rank === 1) return '🥇';
@@ -136,13 +171,14 @@ export default function Leaderboard({
         </div>
       ) : (
         <div className="space-y-3">
-          {leaderboard.map((profile, index) => {
-            const rank = index + 1;
-            const isCurrentUser = currentUserId === profile.id;
+          {leaderboard.map((entry) => {
+            const rank = entry.rank;
+            const isCurrentUser = currentUserId === entry.userId;
+            const level = getLevelFromPoints(entry.points);
 
             return (
               <div
-                key={profile.id}
+                key={entry.userId}
                 className={`flex items-center gap-4 p-4 rounded-xl border transition-all ${
                   isCurrentUser ? 'ring-2 ring-primary-500' : ''
                 } ${getRankStyle(rank)}`}
@@ -157,12 +193,15 @@ export default function Leaderboard({
                 </div>
 
                 {/* Avatar */}
-                <a href={`/user/${profile.id}`} onClick={(e) => e.stopPropagation()}>
+                <a href={`/user/${entry.userId}`} onClick={(e) => e.stopPropagation()}>
                   <img
-                    src={profile.avatar}
-                    alt={profile.name}
+                    src={entry.avatar}
+                    alt={entry.name}
                     className="w-12 h-12 rounded-full bg-gray-100 border-2 border-white hover:ring-2 hover:ring-primary-300 cursor-pointer transition-all"
-                    title={`查看 ${profile.name} 的主页`}
+                    title={`查看 ${entry.name} 的主页`}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${entry.userId}`;
+                    }}
                   />
                 </a>
 
@@ -170,47 +209,23 @@ export default function Leaderboard({
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={`font-semibold text-gray-900 truncate ${isCurrentUser ? 'text-primary-600' : ''}`}>
-                      {profile.name}
+                      {entry.name}
                       {isCurrentUser && ' (你)'}
                     </span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium text-white ${levelColors[profile.level - 1]}`}>
-                      Lv{profile.level}
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium text-white ${levelColors[level - 1]}`}>
+                      Lv{level}
                     </span>
                   </div>
                   <div className="text-sm text-gray-500">
-                    {profile.points} {t.points}
+                    {entry.points} {t.points}
                   </div>
                 </div>
 
-                {/* Badges Preview */}
-                {profile.badges.length > 0 && (
-                  <div className="flex -space-x-2">
-                    {profile.badges.slice(0, 3).map((badgeId) => {
-                      const badge = userStatsApi.getBadgeById(badgeId);
-                      if (!badge) return null;
-                      return (
-                        <div
-                          key={badgeId}
-                          className="w-8 h-8 rounded-full bg-yellow-100 border-2 border-white flex items-center justify-center text-sm"
-                          title={locale === 'zh' ? badge.nameZh : badge.name}
-                        >
-                          {badge.icon}
-                        </div>
-                      );
-                    })}
-                    {profile.badges.length > 3 && (
-                      <div className="w-8 h-8 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-xs text-gray-500">
-                        +{profile.badges.length - 3}
-                      </div>
-                    )}
-                  </div>
-                )}
-
                 {/* Follow Button (only show if not current user) */}
-                {!isCurrentUser && (
+                {!isCurrentUser && currentUserId && (
                   <FollowButton
-                    targetUserId={profile.id}
-                    targetUser={profile}
+                    targetUserId={entry.userId}
+                    targetUser={{ id: entry.userId, name: entry.name, avatar: entry.avatar, level, badges: [], joinDate: entry.updatedAt, points: entry.points, email: '', followees: [], followers: [], lastActive: entry.updatedAt, favoritesCount: 0, ratingsCount: 0, reviewsCount: 0 }}
                     locale={locale}
                     size="sm"
                   />
@@ -231,23 +246,49 @@ interface UserRankCardProps {
 
 export function UserRankCard({ userId, locale = 'zh' }: UserRankCardProps) {
   const [rank, setRank] = useState<number | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [stats, setStats] = useState<{ name: string; avatar: string; points: number; level: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const t = translations[locale];
 
   useEffect(() => {
-    const userProfile = userStatsApi.getProfile(userId);
-    setProfile(userProfile);
+    async function load() {
+      try {
+        // Fetch user stats and leaderboard in parallel
+        const [statsRes, leaderboardRes] = await Promise.all([
+          fetch(`/api/community/user/${userId}/stats`),
+          fetch('/api/community/leaderboard?limit=100'),
+        ]);
 
-    if (userProfile) {
-      const userRank = userStatsApi.getUserRank(userId);
-      setRank(userRank);
+        const statsData = await statsRes.json();
+        const leaderboardData = await leaderboardRes.json();
+
+        if (statsData.success && statsData.data) {
+          const level = getLevelFromPoints(statsData.data.points);
+          setStats({
+            name: statsData.data.name,
+            avatar: statsData.data.avatar,
+            points: statsData.data.points,
+            level,
+          });
+        }
+
+        if (leaderboardData.success && leaderboardData.data) {
+          const userRank = leaderboardData.data.findIndex(
+            (e: LeaderboardEntry) => e.userId === userId
+          );
+          setRank(userRank >= 0 ? userRank + 1 : null);
+        }
+      } catch (e) {
+        console.error('[UserRankCard] Failed to load:', e);
+      } finally {
+        setLoading(false);
+      }
     }
 
-    setLoading(false);
+    load();
   }, [userId]);
 
-  if (loading || !profile) {
+  if (loading || !stats) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-24 mb-4" />
@@ -262,13 +303,13 @@ export function UserRankCard({ userId, locale = 'zh' }: UserRankCardProps) {
         {locale === 'zh' ? '我的排名' : 'My Rank'}
       </h3>
       <div className="flex items-center gap-4">
-        <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${levelGradients[profile.level - 1]} flex items-center justify-center text-white text-2xl font-bold`}>
+        <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${levelGradients[stats.level - 1]} flex items-center justify-center text-white text-2xl font-bold`}>
           #{rank || '-'}
         </div>
         <div>
-          <div className="text-2xl font-bold text-gray-900">{profile.name}</div>
+          <div className="text-2xl font-bold text-gray-900">{stats.name}</div>
           <div className="text-gray-600">
-            {profile.points} {t.points} · {t.level} {profile.level}
+            {stats.points} {t.points} · {t.level} {stats.level}
           </div>
         </div>
       </div>
