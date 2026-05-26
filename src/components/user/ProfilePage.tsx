@@ -112,6 +112,15 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
   const [localProfile, setLocalProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'favorites' | 'offers' | 'ratings' | 'settings' | 'badges' | 'leaderboard' | 'history' | 'following' | 'sponsor' | 'pointsRules'>('overview');
+
+  // Read tab from URL parameters on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab && tabs.some(t => t.id === tab)) {
+      setActiveTab(tab as typeof activeTab);
+    }
+  }, []);
   const [pointsHistory, setPointsHistory] = useState<Array<{ id: string; amount: number; type: string; description: string; referenceId?: string; createdAt: string }>>([]);
   const t = translations[locale];
 
@@ -258,16 +267,16 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
 
         {/* Tabs - Icon Navigation */}
         <div className="mb-8">
-          {/* Mobile: horizontal scroll, label below icon */}
+          {/* Mobile: horizontal scroll with tighter spacing, min-width 48px; Desktop: centered with normal spacing */}
           <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-hide md:justify-center md:overflow-visible md:pb-0 md:gap-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 title={tab.label}
-                className={`flex flex-col items-center flex-shrink-0 px-3 py-2 rounded-xl transition-all min-w-[56px] ${
+                className={`flex flex-col items-center flex-shrink-0 px-2 py-2 rounded-xl transition-all min-w-[48px] md:min-w-[56px] ${
                   activeTab === tab.id
-                    ? 'bg-primary-50 text-primary-600 shadow-sm'
+                    ? 'bg-primary-100 text-primary-700 shadow-sm'
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
@@ -277,11 +286,11 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  strokeWidth={activeTab === tab.id ? 2.5 : 1.5}
+                  strokeWidth={activeTab === tab.id ? 3 : 1.5}
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
                 </svg>
-                <span className={`text-xs font-medium whitespace-nowrap ${activeTab === tab.id ? 'text-primary-600' : ''}`}>
+                <span className={`text-xs font-medium whitespace-nowrap ${activeTab === tab.id ? 'text-primary-600 font-semibold' : ''}`}>
                   {tab.label}
                 </span>
               </button>

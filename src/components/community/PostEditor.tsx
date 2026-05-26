@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { type CommunityCategory, CATEGORY_LABELS } from "@/lib/community/types";
 import MathCaptcha from "@/components/common/MathCaptcha";
+import { initAuth, onAuthStateChange, type DemoUser } from "@/lib/auth";
+import { getBadgesWithStatus, userStatsApi, type UserProfile } from "@/lib/userProfile";
 
 interface PostEditorProps {
   initialData?: {
@@ -837,6 +839,35 @@ export function PostEditor({
   const [error, setError] = useState("");
   const [honeypot, setHoneypot] = useState(""); // Honeypot field
   const [captchaVerified, setCaptchaVerified] = useState(false); // Math captcha
+  const [currentUser, setCurrentUser] = useState<DemoUser | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [earnedBadges, setEarnedBadges] = useState<Array<{ badge: { id: string; icon: string; name: string; nameZh: string }; earned: boolean }>>([]);
+
+  // Load user and badges on mount
+  useEffect(() => {
+    initAuth().then((user) => {
+      setCurrentUser(user);
+      if (user) {
+        const profile = userStatsApi.getOrCreateProfile(user);
+        setUserProfile(profile);
+        setEarnedBadges(getBadgesWithStatus(profile).filter(b => b.earned));
+      }
+    });
+
+    const unsubscribe = onAuthStateChange((user) => {
+      setCurrentUser(user);
+      if (user) {
+        const profile = userStatsApi.getOrCreateProfile(user);
+        setUserProfile(profile);
+        setEarnedBadges(getBadgesWithStatus(profile).filter(b => b.earned));
+      } else {
+        setUserProfile(null);
+        setEarnedBadges([]);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
 
   const handleMetaChange = (field: string, value: unknown) => {
     setMeta((prev) => ({ ...prev, [field]: value }));
@@ -956,6 +987,46 @@ export function PostEditor({
         <h2 className="text-xl font-bold text-gray-900 mb-6">
           {initialData ? "编辑帖子" : "发布帖子"}
         </h2>
+
+        {/* User info with badges */}
+        {currentUser && userProfile && (
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200 flex items-center gap-4">
+            <img
+              src={userProfile.avatar}
+              alt={userProfile.name}
+              className="w-12 h-12 rounded-full bg-gray-200"
+            />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-semibold text-gray-900">{userProfile.name}</span>
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium text-white ${
+                  userProfile.level >= 9 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
+                  userProfile.level >= 6 ? 'bg-gradient-to-r from-blue-400 to-purple-500' :
+                  userProfile.level >= 3 ? 'bg-gradient-to-r from-green-400 to-blue-500' :
+                  'bg-gradient-to-r from-gray-400 to-gray-500'
+                }`}>
+                  Lv{userProfile.level}
+                </span>
+                {/* Earned badges displayed as small icons */}
+                {earnedBadges.slice(0, 5).map(({ badge }) => (
+                  <span
+                    key={badge.id}
+                    className="text-lg cursor-help"
+                    title={badge.nameZh}
+                  >
+                    {badge.icon}
+                  </span>
+                ))}
+                {earnedBadges.length > 5 && (
+                  <span className="text-xs text-gray-500">+{earnedBadges.length - 5}</span>
+                )}
+              </div>
+              <div className="text-sm text-gray-500">
+                {userProfile.points} 积分
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">

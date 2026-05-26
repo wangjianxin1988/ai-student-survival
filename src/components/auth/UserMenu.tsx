@@ -182,7 +182,7 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
 
           <div className="py-1">
             <a
-              href="/user/favorites"
+              href={`${getLocaleHref('/user', locale)}?tab=favorites`}
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
@@ -202,7 +202,7 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
               {t.myFavorites}
             </a>
             <a
-              href="/user/ratings"
+              href={`${getLocaleHref('/user', locale)}?tab=ratings`}
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
@@ -216,7 +216,7 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
               {t.myRatings}
             </a>
             <a
-              href="/user/offers"
+              href={`${getLocaleHref('/user', locale)}?tab=offers`}
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
@@ -236,7 +236,7 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
               {t.myOffers}
             </a>
             <a
-              href="/points/rules"
+              href={`${getLocaleHref('/user', locale)}?tab=pointsRules`}
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
@@ -256,7 +256,7 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
               {t.pointsRules}
             </a>
             <a
-              href="/sponsor"
+              href={`${getLocaleHref('/user', locale)}?tab=sponsor`}
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >
@@ -276,7 +276,7 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
               {t.sponsorUs}
             </a>
             <a
-              href="/user"
+              href={`${getLocaleHref('/user', locale)}?tab=overview`}
               className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
               onClick={() => setIsOpen(false)}
             >

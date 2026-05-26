@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getCurrentUser, initAuth, onAuthStateChange, type DemoUser } from '@/lib/auth';
 
 interface Sponsor {
   id: string;
   nickname: string;
+  display_name?: string;
   amount: number;
   tier: string;
   payment_method: string;
   message: string | null;
+  avatar_url?: string;
+  profile_url?: string;
   created_at: string;
 }
 
@@ -56,11 +59,13 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
   const [amount, setAmount] = useState('');
   const [tier, setTier] = useState<string>('meal');
   const [message, setMessage] = useState('');
+  const [profileUrl, setProfileUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [submitMsg, setSubmitMsg] = useState('');
   const [copyWechat, setCopyWechat] = useState(false);
   const [copyAlipay, setCopyAlipay] = useState(false);
+  const amountInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     initAuth().then(u => setUser(u));
@@ -124,6 +129,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
           tier: finalTier,
           paymentMethod: activeTab === 'wechat' ? 'wechat' : 'alipay',
           message: message.trim(),
+          profileUrl: profileUrl.trim(),
         }),
       });
 
@@ -138,10 +144,19 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
         setNickname('');
         setAmount('');
         setMessage('');
+        setProfileUrl('');
         // Refresh sponsor wall
         const wallRes = await fetch('/api/sponsors/wall');
         const wallData = await wallRes.json();
         if (wallData.success) setSponsors(wallData.data || []);
+        // Open mailto after successful submission
+        const mailtoSubject = encodeURIComponent(locale === 'zh' ? `【赞助】来自 ${nickname.trim()} 的留言` : `[Sponsor] Message from ${nickname.trim()}`);
+        const mailtoBody = encodeURIComponent(
+          locale === 'zh'
+            ? `赞助者: ${nickname.trim()}\n金额: ${amount}元\n方式: ${activeTab === 'wechat' ? '微信' : '支付宝'}\n留言: ${message.trim() || '无'}\n个人主页: ${profileUrl.trim() || '无'}`
+            : `Sponsor: ${nickname.trim()}\nAmount: ${amount}CNY\nMethod: ${activeTab === 'wechat' ? 'WeChat' : 'Alipay'}\nMessage: ${message.trim() || 'None'}\nProfile: ${profileUrl.trim() || 'None'}`
+        );
+        window.location.href = `mailto:18801400211@163.com?subject=${mailtoSubject}&body=${mailtoBody}`;
       } else {
         setSubmitStatus('error');
         setSubmitMsg(data.error?.message || (locale === 'zh' ? '提交失败，请稍后重试' : 'Failed to submit'));
@@ -197,6 +212,8 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
     selectTier: locale === 'zh' ? '选择赞助档位' : 'Select tier',
     messageLabel: locale === 'zh' ? '留言（可选）' : 'Message (optional)',
     messagePlaceholder: locale === 'zh' ? '留下您的鼓励和祝福...' : 'Leave your message...',
+    profileUrlLabel: locale === 'zh' ? '个人主页（可选）' : 'Personal Homepage (optional)',
+    profileUrlPlaceholder: locale === 'zh' ? '如 https://mi-to-ai.com/user/xxx' : 'e.g. https://mi-to-ai.com/user/xxx',
     submit: locale === 'zh' ? '提交记录' : 'Submit Record',
     submitting: locale === 'zh' ? '提交中...' : 'Submitting...',
     loginRequired: locale === 'zh' ? '请先登录后再提交' : 'Please login first',
@@ -358,11 +375,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
                 <div className="font-bold text-gray-900 text-sm mb-0.5">
                   {locale === 'zh' ? t.zh : t.en}
                 </div>
-                {isCustom ? (
-                  <div className="text-xs text-purple-600 font-medium">
-                    {locale === 'zh' ? '上不封顶' : 'No limit'}
-                  </div>
-                ) : (
+                {!isCustom && (
                   <div className="text-primary-600 font-bold text-sm mb-0.5">
                     ¥{t.suggestedAmount.toFixed(1)}
                   </div>
@@ -433,6 +446,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
                         setAmount(t.suggestedAmount.toString());
                       } else {
                         setAmount('');
+                        setTimeout(() => amountInputRef.current?.focus(), 50);
                       }
                     }}
                     className={`py-2 px-3 rounded-lg border text-sm font-medium transition-all ${
@@ -457,6 +471,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-medium">¥</span>
                 <input
+                  ref={amountInputRef}
                   type="number"
                   value={amount}
                   onChange={(e) => {
@@ -493,6 +508,17 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t.profileUrlLabel}</label>
+              <input
+                type="url"
+                value={profileUrl}
+                onChange={e => setProfileUrl(e.target.value)}
+                placeholder={t.profileUrlPlaceholder}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+              />
+            </div>
             <button
               type="submit"
               disabled={submitting}
@@ -517,17 +543,41 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
           <p className="text-gray-400 py-8">{t.noSponsors}</p>
         ) : (
           <div className="flex flex-wrap gap-2 justify-center mb-8">
-            {sponsors.map(sponsor => (
-              <div
-                key={sponsor.id}
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${tierColors[sponsor.tier as keyof typeof tierColors]?.badge || 'bg-gray-100 text-gray-600'}`}
-                title={sponsor.message || undefined}
-              >
-                <span>{tierColors[sponsor.tier as keyof typeof tierColors]?.icon || '💛'}</span>
-                <span className="font-medium">{sponsor.nickname}</span>
-                {sponsor.amount >= 66 && <span className="text-xs">🎖️</span>}
-              </div>
-            ))}
+            {sponsors.map(sponsor => {
+              const ProfileLink = ({ children }: { children: React.ReactNode }) =>
+                sponsor.profile_url ? (
+                  <a
+                    href={sponsor.profile_url.startsWith('http') ? sponsor.profile_url : `/${locale}/user/${sponsor.profile_url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                  >
+                    {children}
+                  </a>
+                ) : (
+                <span>{children}</span>
+              );
+              return (
+                <div
+                  key={sponsor.id}
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${tierColors[sponsor.tier as keyof typeof tierColors]?.badge || 'bg-gray-100 text-gray-600'}`}
+                  title={sponsor.message || undefined}
+                >
+                  <span>{tierColors[sponsor.tier as keyof typeof tierColors]?.icon || '💛'}</span>
+                  {sponsor.avatar_url ? (
+                    <img
+                      src={sponsor.avatar_url}
+                      alt={sponsor.nickname}
+                      className="w-5 h-5 rounded-full object-cover"
+                    />
+                  ) : null}
+                  <ProfileLink>
+                    <span className="font-medium">{sponsor.nickname}</span>
+                  </ProfileLink>
+                  {sponsor.amount >= 66 && <span className="text-xs">🎖️</span>}
+                </div>
+              );
+            })}
           </div>
         )}
 

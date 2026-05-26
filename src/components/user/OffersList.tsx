@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import React, { useState, useEffect, useCallback } from 'react';
+import { getCurrentUser, onAuthStateChange, initAuth, getAccessToken, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
 import SubmitOfferForm from '@/components/offers/SubmitOfferForm';
-
-const OFFERS_KEY = 'demo_offers';
 
 interface Offer {
   id: string;
@@ -66,17 +64,6 @@ const translations = {
   },
 };
 
-function getOffers(): Record<string, Offer[]> {
-  if (typeof window === 'undefined') return {};
-  const stored = localStorage.getItem(OFFERS_KEY);
-  return stored ? JSON.parse(stored) : {};
-}
-
-function saveOffers(offers: Record<string, Offer[]>): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(OFFERS_KEY, JSON.stringify(offers));
-}
-
 export default function OffersList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
@@ -84,17 +71,54 @@ export default function OffersList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) 
   const [showAddForm, setShowAddForm] = useState(false);
   const t = translations[locale];
 
-  // Reload offers from localStorage
-  const reloadOffers = () => {
+  const loadOffers = useCallback(async () => {
     if (!user) return;
-    const allOffers = getOffers();
-    const userOffers = allOffers[user.id] || [];
-    setOffers(userOffers);
-  };
+
+    try {
+      const token = await getAccessToken();
+      const response = await fetch('/api/offers/user', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.offers && Array.isArray(data.offers)) {
+          const mappedOffers: Offer[] = data.offers.map((o: {
+            id: string;
+            university_name: string;
+            university_slug?: string;
+            program: string;
+            admission_result: 'accepted' | 'rejected' | 'waitlisted';
+            background?: string;
+            tools_used?: string[];
+            created_at: string;
+            user_id?: string;
+          }) => ({
+            id: o.id,
+            universityName: o.university_name,
+            program: o.program,
+            admissionResult: o.admission_result,
+            background: o.background,
+            aiToolsUsed: o.tools_used,
+            createdAt: o.created_at,
+            userId: o.user_id,
+          }));
+          setOffers(mappedOffers);
+        }
+      }
+    } catch (error) {
+      console.error('[OffersList] Failed to load offers:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
+    initAuth().then(user => {
+      setUser(user);
+    });
 
     const unsubscribe = onAuthStateChange((newUser) => {
       setUser(newUser);
@@ -109,15 +133,12 @@ export default function OffersList({ locale = 'zh' }: { locale?: 'zh' | 'en' }) 
       return;
     }
 
-    const allOffers = getOffers();
-    const userOffers = allOffers[user.id] || [];
-    setOffers(userOffers);
-    setLoading(false);
-  }, [user]);
+    loadOffers();
+  }, [user, loadOffers]);
 
   const handleOfferSuccess = (offerId: string) => {
     setShowAddForm(false);
-    reloadOffers();
+    loadOffers();
   };
 
   const getResultClass = (result: string) => {

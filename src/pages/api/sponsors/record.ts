@@ -15,7 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  let body: { nickname?: string; amount?: number; tier?: string; paymentMethod?: string; message?: string };
+  let body: { nickname?: string; amount?: number; tier?: string; paymentMethod?: string; message?: string; profileUrl?: string };
   try {
     body = await request.json();
   } catch {
@@ -25,7 +25,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const { nickname, amount, tier = 'coffee', paymentMethod = 'wechat', message } = body;
+  const { nickname, amount, tier = 'coffee', paymentMethod = 'wechat', message, profileUrl } = body;
 
   // Validation
   if (!nickname || typeof nickname !== 'string' || nickname.trim().length === 0) {
@@ -82,9 +82,10 @@ export const POST: APIRoute = async ({ request }) => {
       tier: resolvedTier,
       payment_method: paymentMethod,
       message: message?.trim().substring(0, 200) || null,
+      profile_url: profileUrl?.trim() || null,
       status: 'approved', // Auto-approve for now
     })
-    .select('id, nickname, amount, tier, payment_method, message, created_at')
+    .select('id, nickname, amount, tier, payment_method, message, avatar_url, profile_url, created_at')
     .single();
 
   if (error) {
