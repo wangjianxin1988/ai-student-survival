@@ -17,9 +17,9 @@ export const GET: APIRoute = async ({ request }) => {
     .limit(limit);
 
   if (error) {
-    console.error('[sponsors/wall] Error fetching sponsors:', error);
+    console.error('[sponsors/wall] Error fetching sponsors:', JSON.stringify(error));
     return new Response(
-      JSON.stringify({ success: false, error: { message: 'Failed to fetch sponsor wall' } }),
+      JSON.stringify({ success: false, error: { message: error.message, code: error.code } }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

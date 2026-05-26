@@ -65,9 +65,13 @@ export const POST: APIRoute = async () => {
   ];
 
   let seeded = 0;
+  const errors: string[] = [];
   for (const sponsor of seedData) {
-    const { error } = await admin.from('sponsors').insert(sponsor).select('id').limit(1);
+    const { error } = await admin.from('sponsors').upsert(sponsor, {
+      onConflict: 'nickname',
+    }).select('id').limit(1);
     if (!error) seeded++;
+    else errors.push(`${sponsor.nickname}: ${error.message}`);
   }
 
   return new Response(
@@ -75,6 +79,7 @@ export const POST: APIRoute = async () => {
       success: true,
       message: 'Sponsors migration applied',
       seeded,
+      errors: errors.length > 0 ? errors : undefined,
     }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
