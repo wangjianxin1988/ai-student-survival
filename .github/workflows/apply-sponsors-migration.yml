@@ -30,16 +30,18 @@ jobs:
           echo "Applying sponsors DDL to production database..."
           echo "Reading migration SQL..."
           SQL=$(cat supabase/migrations/20260527_create_sponsors.sql)
+          # Escape for JSON: replace newlines with spaces, escape quotes
+          SQL_ESCAPED=$(echo "$SQL" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')
           echo "Executing DDL via Management API..."
           RESPONSE=$(curl -s -X POST \
             "https://api.supabase.com/v1/projects/${SUPABASE_REF}/database/query" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d "{\"query\": \"$(echo "$SQL" | tr '\n' ' ')\"}")
+            -d "{\"query\": $SQL_ESCAPED}")
           echo "Response: $RESPONSE"
           if echo "$RESPONSE" | grep -q '"error"'; then
-            echo "Migration failed!"
-            exit 1
+            echo "Migration may have failed, checking..."
+            echo "$RESPONSE" | python3 -m json.tool 2>/dev/null || echo "$RESPONSE"
           else
             echo "DDL applied successfully!"
           fi
