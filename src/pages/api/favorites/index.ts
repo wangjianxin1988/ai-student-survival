@@ -1,9 +1,6 @@
 import type { APIRoute } from 'astro';
+import type { APIRoute } from 'astro';
 import { supabase } from '@/lib/supabase';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
 
 export const prerender = false;
 
@@ -14,11 +11,9 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   const token = authHeader.replace('Bearer ', '');
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  });
-
+  const client = supabase;
   const { data: { user }, error: authError } = await client.auth.getUser(token);
+
   if (authError || !user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
@@ -29,8 +24,7 @@ export const GET: APIRoute = async ({ request }) => {
       id,
       target_type,
       target_id,
-      created_at,
-      tools(id, name, slug, description, icon)
+      created_at
     `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
@@ -39,7 +33,7 @@ export const GET: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
-  return new Response(JSON.stringify({ favorites }), { status: 200 });
+  return new Response(JSON.stringify({ favorites: favorites || [] }), { status: 200 });
 };
 
 export const POST: APIRoute = async ({ request }) => {
@@ -49,10 +43,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const token = authHeader.replace('Bearer ', '');
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  });
-
+  const client = supabase;
   const { data: { user }, error: authError } = await client.auth.getUser(token);
   if (authError || !user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });

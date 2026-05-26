@@ -1,8 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
+import { supabase } from '@/lib/supabase';
 
 export const prerender = false;
 
@@ -17,10 +14,7 @@ export const DELETE: APIRoute = async ({ request, params }) => {
   }
 
   const token = authHeader.replace('Bearer ', '');
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  });
-
+  const client = supabase;
   const { data: { user }, error: authError } = await client.auth.getUser(token);
   if (authError || !user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
