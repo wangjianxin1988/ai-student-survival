@@ -2,6 +2,8 @@ name: Apply Database Migration
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [apply-migration]
 
 jobs:
   migrate:
