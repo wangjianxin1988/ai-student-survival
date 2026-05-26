@@ -69,7 +69,7 @@ jobs:
           ZONE_RESP=$(curl -s "https://api.cloudflare.com/client/v4/zones?name=mi-to-ai.com" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json")
-          ZONE_ID=$(echo "$ZONE_RESP" | grep -o '"id": "[a-f0-9]*"' | head -1 | sed 's/"id": "//;s/"//')
+          ZONE_ID=$(echo "$ZONE_RESP" | grep -o '"id": "[a-fA-F0-9-]*"' | head -1 | sed 's/"id": "//;s/"//')
           echo "Zone ID: $ZONE_ID"
 
           echo "Updating production deployment to: $DEPLOYMENT_ID..."
