@@ -1,14 +1,2 @@
-# Cloudflare Pages Configuration
-
 name = "ai-student-survival"
 compatibility_date = "2024-04-01"
-pages_build_output_dir = "dist"
-account_id = "d6d81a527b2e9b2620245bfa56711398"
-
-# Cloudflare Pages 环境变量 (在 Cloudflare Dashboard → Settings → Environment Variables 中配置)
-# 运行时通过 import.meta.env.SUPABASE_URL / SUPABASE_ANON_KEY 访问
-# GitHub Actions 构建时通过 PUBLIC_SUPABASE_* 前缀传入 (Vite 会自动暴露为 import.meta.env.PUBLIC_*)
-[vars]
-SUPABASE_URL = "https://giynvpfnzzelzwpmsgtf.supabase.co"
-# FORCE_DEMO_AUTH: set to "true" in Cloudflare Dashboard to enable demo auth for testing
-# SUPABASE_ANON_KEY 在 Cloudflare Dashboard 环境变量中配置，不在此文件中硬编码
