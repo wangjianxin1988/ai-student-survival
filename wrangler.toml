@@ -2,6 +2,7 @@
 
 name = "ai-student-survival"
 compatibility_date = "2024-04-01"
+pages_build_output_dir = "dist"
 account_id = "d6d81a527b2e9b2620245bfa56711398"
 
 # Cloudflare Pages 环境变量 (在 Cloudflare Dashboard → Settings → Environment Variables 中配置)
