@@ -55,7 +55,7 @@ jobs:
           projectName: ai-student-survival
           directory: dist
           branch: main
-          wranglerVersion: "3"
+          output: "dist/_worker.js/index.js"
 
       - name: Purge CDN cache
         run: |
