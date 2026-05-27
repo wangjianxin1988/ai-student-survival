@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
 import OfferCard from './OfferCard';
 import SubmitOfferForm from './SubmitOfferForm';
-import { sampleOffers, filterOffers, sortOffers, getUniqueCountries, type Offer } from '@/data/offers';
+import { sampleOffers, filterOffers, sortOffers, getUniqueCountries, DEGREE_TYPES, DEGREE_LABELS, type Offer } from '@/data/offers';
 import { getLocaleHref } from '@/lib/i18n';
 
 const OFFERS_STORAGE_KEY = 'demo_offers';
@@ -30,6 +30,7 @@ const translations = {
     admitted: '录取',
     rejected: '拒信',
     waitlisted: '候补',
+    Bachelor: '本科',
     Master: '硕士',
     PhD: '博士',
     Postdoc: '博后',
@@ -57,6 +58,7 @@ const translations = {
     admitted: 'Admitted',
     rejected: 'Rejected',
     waitlisted: 'Waitlisted',
+    Bachelor: 'Bachelor',
     Master: 'Master',
     PhD: 'PhD',
     Postdoc: 'Postdoc',
@@ -261,9 +263,9 @@ export default function OffersClient({ locale = 'zh' }: OffersClientProps) {
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-sm"
               >
                 <option value="">{t.allDegrees}</option>
-                <option value="Master">{t.Master}</option>
-                <option value="PhD">{t.PhD}</option>
-                <option value="Postdoc">{t.Postdoc}</option>
+                {DEGREE_TYPES.map(d => (
+                  <option key={d} value={d}>{DEGREE_LABELS[d][locale === 'zh' ? 'zh' : 'en']}</option>
+                ))}
               </select>
 
               <select

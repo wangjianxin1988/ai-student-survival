@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
 import { contentModerationApi } from '@/lib/content-moderation';
+import { DEGREE_TYPES, DEGREE_LABELS, type DegreeType } from '@/data/offers';
 
 interface SubmitOfferFormProps {
   locale?: 'zh' | 'en';
@@ -17,6 +18,7 @@ const translations = {
     programName: '申请项目',
     programNamePlaceholder: '例如：MS Computer Science',
     degree: '学位类型',
+    bachelor: '本科',
     master: '硕士',
     phd: '博士',
     postdoc: '博后',
@@ -62,6 +64,7 @@ const translations = {
     programName: 'Program',
     programNamePlaceholder: 'e.g., MS Computer Science',
     degree: 'Degree Type',
+    bachelor: 'Bachelor',
     master: 'Master',
     phd: 'PhD',
     postdoc: 'Postdoc',
@@ -125,7 +128,7 @@ export default function SubmitOfferForm({ locale = 'zh', onSuccess, onCancel }: 
   // Form state
   const [universityName, setUniversityName] = useState('');
   const [programName, setProgramName] = useState('');
-  const [degree, setDegree] = useState<'Master' | 'PhD' | 'Postdoc'>('Master');
+  const [degree, setDegree] = useState<DegreeType>('Master');
   const [country, setCountry] = useState('');
   const [admissionResult, setAdmissionResult] = useState<'admitted' | 'rejected' | 'waitlisted'>('admitted');
   const [scholarshipType, setScholarshipType] = useState<'full' | 'partial' | 'none'>('none');
@@ -319,12 +322,12 @@ export default function SubmitOfferForm({ locale = 'zh', onSuccess, onCancel }: 
             </label>
             <select
               value={degree}
-              onChange={(e) => setDegree(e.target.value as typeof degree)}
+              onChange={(e) => setDegree(e.target.value as DegreeType)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
             >
-              <option value="Master">{t.master}</option>
-              <option value="PhD">{t.phd}</option>
-              <option value="Postdoc">{t.postdoc}</option>
+              {DEGREE_TYPES.map(d => (
+                <option key={d} value={d}>{DEGREE_LABELS[d][locale === 'zh' ? 'zh' : 'en']}</option>
+              ))}
             </select>
           </div>
           <div>

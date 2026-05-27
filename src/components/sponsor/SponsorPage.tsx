@@ -263,7 +263,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
               {/* QR Code */}
               <div className="w-40 h-40 bg-white rounded-xl flex items-center justify-center border-2 border-green-200 flex-shrink-0 overflow-hidden">
                 <img
-                  src="/images/wechat-qr.png"
+                  src="/images/wechat-qr.png?v=20260527"
                   alt="WeChat QR Code"
                   className="w-full h-full object-contain"
                   onError={(e) => {
@@ -300,7 +300,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
               {/* QR Code */}
               <div className="w-40 h-40 bg-white rounded-xl flex items-center justify-center border-2 border-blue-200 flex-shrink-0 overflow-hidden">
                 <img
-                  src="/images/alipay-qr.png"
+                  src="/images/alipay-qr.png?v=20260527"
                   alt="Alipay QR Code"
                   className="w-full h-full object-contain"
                   onError={(e) => {

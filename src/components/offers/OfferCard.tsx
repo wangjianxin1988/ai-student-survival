@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Offer } from '@/data/offers';
+import { DEGREE_LABELS } from '@/data/offers';
 
 interface OfferCardProps {
   offer: Offer;
@@ -30,6 +31,7 @@ const translations = {
     viewDetails: '查看详情',
     likes: '点赞',
     comments: '评论',
+    Bachelor: '本科',
     Master: '硕士',
     PhD: '博士',
     Postdoc: '博后',
@@ -57,6 +59,7 @@ const translations = {
     viewDetails: 'View Details',
     likes: 'Likes',
     comments: 'Comments',
+    Bachelor: 'Bachelor',
     Master: 'Master',
     PhD: 'PhD',
     Postdoc: 'Postdoc',
@@ -85,12 +88,6 @@ const countryFlags: Record<string, string> = {
   Netherlands: '🇳🇱',
 };
 
-const degreeLabels = {
-  Master: { zh: '硕士', en: 'Master' },
-  PhD: { zh: '博士', en: 'PhD' },
-  Postdoc: { zh: '博后', en: 'Postdoc' },
-};
-
 export default function OfferCard({ offer, locale = 'zh', showDetails = false }: OfferCardProps) {
   const t = translations[locale];
   const flag = countryFlags[offer.universityCountry] || '';
@@ -114,7 +111,7 @@ export default function OfferCard({ offer, locale = 'zh', showDetails = false }:
   };
 
   const getDegreeLabel = () => {
-    return degreeLabels[offer.degree]?.[locale === 'zh' ? 'zh' : 'en'] || offer.degree;
+    return DEGREE_LABELS[offer.degree]?.[locale === 'zh' ? 'zh' : 'en'] || offer.degree;
   };
 
   if (showDetails) {

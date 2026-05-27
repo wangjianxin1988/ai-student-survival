@@ -1,6 +1,18 @@
 // Offer data model matching the interface from ARCHITECTURE.md
 export type VerificationStatus = 'verified' | 'pending' | 'rejected' | 'none';
 
+// Comprehensive degree types - covers all academic levels
+export const DEGREE_TYPES = ['Bachelor', 'Master', 'PhD', 'Postdoc'] as const;
+export type DegreeType = typeof DEGREE_TYPES[number];
+
+// Degree labels for UI display
+export const DEGREE_LABELS: Record<DegreeType, { zh: string; en: string }> = {
+  Bachelor: { zh: '本科', en: 'Bachelor' },
+  Master: { zh: '硕士', en: 'Master' },
+  PhD: { zh: '博士', en: 'PhD' },
+  Postdoc: { zh: '博后', en: 'Postdoc' },
+};
+
 export interface Offer {
   id: string;
   userId: string;
@@ -10,7 +22,7 @@ export interface Offer {
   universityLogo: string;
   universityCountry: string;
   programName: string;
-  degree: 'Master' | 'PhD' | 'Postdoc';
+  degree: DegreeType;
   admissionResult: 'admitted' | 'rejected' | 'waitlisted';
   scholarship: {
     amount: number;
