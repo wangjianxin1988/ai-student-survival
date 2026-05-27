@@ -11,6 +11,9 @@ export default defineConfig({
       enabled: true,
     },
   }),
+  image: {
+    service: {},
+  },
   integrations: [
     react(),
     tailwind({
