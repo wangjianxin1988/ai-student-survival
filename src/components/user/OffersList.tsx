@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { onAuthStateChange, getCurrentUser, type DemoUser } from '@/lib/auth';
 import { getAuthHeaders } from '@/lib/auth';
 import { isSupabaseConfigured, isDemoMode } from '@/lib/supabase';
 import { getAuthLoginHref } from '@/lib/i18n';

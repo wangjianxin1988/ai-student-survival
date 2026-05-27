@@ -2,25 +2,61 @@
  * Content Moderation Module - Anti-Spam and Anti-Advertisement System
  * Prevents spam, advertisement, flooding, and duplicate content
  *
- * Enhanced with:
- * - glin-profanity library for ML-powered profanity detection
+ * Features:
  * - Leet speak detection (letter substitution)
  * - Homophonic word detection (谐音词)
  * - Keyboard mashing detection
  * - Semantic pattern analysis
+ * - Built-in profanity detection (replaced glin-profanity due to edge runtime issues)
  */
 
-import { Filter, checkProfanity, isWordProfane } from 'glin-profanity';
+// NOTE: glin-profanity was removed due to ESM initialization issues in Cloudflare Workers edge runtime
+// The TDZ (Temporal Dead Zone) error occurred because the library uses ES modules that fail to initialize
+// We now use our built-in profanity detection instead
 
-// Initialize the glin-profanity filter with aggressive settings
-const profanityFilter = new Filter({
-  languages: ['english', 'chinese'],
-  detectLeetspeak: true,
-  leetspeakLevel: 'aggressive',
-  normalizeUnicode: true,
-  cacheResults: true,
-  maxCacheSize: 1000,
-});
+// Types for profanity detection result
+interface ProfanityCheckResult {
+  containsProfanity: boolean;
+  profaneWords: string[];
+}
+
+// Simple profanity checker that works in edge runtime
+function createSimpleProfanityFilter(): {
+  checkProfanity: (text: string) => ProfanityCheckResult;
+} {
+  // Combined profanity word list (English + Chinese)
+  const profaneWordsSet = new Set([
+    // English
+    'fuck', 'shit', 'damn', 'ass', 'bitch', 'bastard', 'asshole', 'crap', 'bastard',
+    // Chinese (abbreviated list - the main filtering is done via pattern matching)
+    '傻比', '傻逼', '混蛋', '王八蛋',
+  ]);
+
+  return {
+    checkProfanity(text: string): ProfanityCheckResult {
+      const words: string[] = [];
+      const lowerText = text.toLowerCase();
+
+      for (const word of profaneWordsSet) {
+        if (lowerText.includes(word.toLowerCase())) {
+          words.push(word);
+        }
+      }
+
+      return {
+        containsProfanity: words.length > 0,
+        profaneWords: words,
+      };
+    },
+  };
+}
+
+let profanityFilter = null;
+try {
+  profanityFilter = createSimpleProfanityFilter();
+} catch (err) {
+  console.warn('[content-moderation] profanity filter initialization failed:', err);
+}
 
 // Types
 export interface ModerationResult {
@@ -559,16 +595,18 @@ export function moderateContent(
     score += 10;
   }
 
-  // 5. Use glin-profanity library for ML-powered profanity detection
+  // 5. Use built-in profanity detection
   try {
-    const glinResult = profanityFilter.checkProfanity(content);
-    if (glinResult.containsProfanity) {
-      console.log('[内容审核] glin-profanity检测到脏话:', glinResult.profaneWords);
-      flags.push('profanity');
-      score += 40;
+    if (profanityFilter) {
+      const profanityResult = profanityFilter.checkProfanity(content);
+      if (profanityResult.containsProfanity) {
+        console.log('[内容审核] 检测到脏话:', profanityResult.profaneWords);
+        flags.push('profanity');
+        score += 40;
+      }
     }
   } catch (err) {
-    console.log('[内容审核] glin-profanity检测出错:', err);
+    console.log('[内容审核] profanity检测出错:', err);
   }
 
   // 6. Check for Leet Speak (字母替换)

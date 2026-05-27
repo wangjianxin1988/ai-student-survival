@@ -94,6 +94,46 @@ function getAlternatePath(loc: Locale): string {
           } catch(e) {}
         }
       }
+      // Also check for Supabase cookie-based session (Cloudflare Pages edge runtime)
+      // Supabase stores session in a cookie named '__session' or 'sb-[ref]-auth-token' as cookie
+      if (!user) {
+        var cookieMap = {};
+        if (document.cookie) {
+          document.cookie.split(';').forEach(function(c) {
+            var parts = c.trim().split('=');
+            if (parts.length >= 2) {
+              cookieMap[decodeURIComponent(parts[0])] = decodeURIComponent(parts.slice(1).join('='));
+            }
+          });
+        }
+        // Try Supabase cookie named 'sb-[ref]-auth-token' or '__session'
+        var cookieNames = ['__session', 'sb-auth-token', 'supabase-auth-token'];
+        for (var i = 0; i < cookieNames.length && !user; i++) {
+          var cookieVal = cookieMap[cookieNames[i]];
+          if (cookieVal) {
+            try {
+              // Cookie value is typically a JSON string with tokens
+              var cookieData = JSON.parse(cookieVal);
+              var cToken = cookieData.tokens && cookieData.tokens.access_token || cookieData.access_token;
+              if (cToken) {
+                var cParts = cToken.split('.');
+                if (cParts.length === 3) {
+                  var cHeader = JSON.parse(atob(cParts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (['ES256', 'RS256'].indexOf(cHeader.alg) !== -1) {
+                    var cPayload = JSON.parse(atob(cParts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                    if (cPayload.sub) {
+                      var cUser = cookieData.user || (cookieData.tokens && cookieData.tokens.user);
+                      if (cUser) {
+                        user = { id: cUser.id, email: cUser.email || '', name: cUser.user_metadata && (cUser.user_metadata.name || cUser.user_metadata.full_name) || '', avatar_url: cUser.user_metadata && (cUser.user_metadata.avatar_url || cUser.user_metadata.picture) || '' };
+                      }
+                    }
+                  }
+                }
+              }
+            } catch(e) {}
+          }
+        }
+      }
       window.__INITIAL_AUTH_USER__ = user;
     })();
     </script>
