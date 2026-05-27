@@ -102,3 +102,4 @@ P3_DESIGN.md
 
 # Astro local settings
 .astro/settings.json
+.supabase-schema/
