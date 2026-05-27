@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [main]
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  CLOUDFLARE_PROJECT_NAME: ai-student-survival
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,82 +16,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          node-version: '20'
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Clear build cache
-        run: rm -rf .astro .vite dist node_modules/.vite
+      - name: Run lint
+        run: pnpm lint || true
 
       - name: Build
-        run: pnpm run build
-        env:
-          PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
-          PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.PUBLIC_TURNSTILE_SITE_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          CONTACT_TO_EMAIL: ${{ secrets.CONTACT_TO_EMAIL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          FORCE_DEMO_AUTH: ${{ vars.FORCE_DEMO_AUTH || 'false' }}
+        run: pnpm build
 
-      - name: Publish to Cloudflare Pages
+      - name: Deploy to Cloudflare Pages
         uses: cloudflare/pages-action@v1.5.0
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           projectName: ai-student-survival
           directory: dist
-          branch: main
-          output: "dist/_worker.js/index.js"
-
-      - name: Purge CDN cache
-        run: |
-          echo "=== Getting Zone ID for cache purge ==="
-          ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID }}"
-          if [ -z "$ZONE_ID" ]; then
-            ZONE_RESP=$(curl -s "https://api.cloudflare.com/client/v4/zones?name=mi-to-ai.com" \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              -H "Content-Type: application/json")
-            ZONE_ID=$(echo "$ZONE_RESP" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
-          fi
-          if [ -z "$ZONE_ID" ]; then
-            ZONE_ALL=$(curl -s "https://api.cloudflare.com/client/v4/zones" \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              -H "Content-Type: application/json")
-            ZONE_ID=$(echo "$ZONE_ALL" | grep -o '"id": "[^"]*"' | head -1 | sed 's/"id": "//;s/"//')
-          fi
-          echo "Zone ID: ${ZONE_ID:-'(not available - will skip purge)'}"
-
-          if [ -n "$ZONE_ID" ]; then
-            echo "=== Purging CDN cache ==="
-            PURGE=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/purge_cache" \
-              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-              -H "Content-Type: application/json" \
-              -d '{"purge_everything": true}')
-            if echo "$PURGE" | grep -q '"success": true'; then
-              echo "✅ CDN cache purged!"
-            else
-              echo "⚠️ CDN purge failed: $(echo "$PURGE" | head -c 200)"
-              echo "   (Non-critical - cache will update within minutes)"
-            fi
-          else
-            echo "⚠️ No Zone ID found. Skipping cache purge."
-            echo "   Cloudflare Pages serves from latest deployment automatically."
-          fi
-
-          echo ""
-          echo "🎉 Deployment complete! mi-to-ai.com should serve the new build."
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     runs-on: ubuntu-latest
@@ -104,19 +49,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          node-version: '20'
 
       - name: Install dependencies
         run: pnpm install
 
       - name: Type check
-        run: pnpm run check || true
+        run: pnpm check || true
 
       - name: Build
-        run: pnpm run build
+        run: pnpm build
