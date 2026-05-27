@@ -10,6 +10,15 @@ export default defineConfig({
     platformProxy: {
       enabled: true,
     },
+    routeConfig: {
+      exclude: [
+        "/_astro/*",
+        "/images/*",
+        "/api/*",
+        "/auth/debug",
+        "/auth/test-register",
+      ],
+    },
   }),
   image: {
     service: {},
