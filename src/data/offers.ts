@@ -1,16 +1,43 @@
 // Offer data model matching the interface from ARCHITECTURE.md
 export type VerificationStatus = 'verified' | 'pending' | 'rejected' | 'none';
 
-// Comprehensive degree types - covers all academic levels
-export const DEGREE_TYPES = ['Bachelor', 'Master', 'PhD', 'Postdoc'] as const;
+// Comprehensive degree types - covers all academic levels for international students
+export const DEGREE_TYPES = [
+  'Foundation',      // 预科
+  'Associate',       // 副学士
+  'Bachelor',        // 本科
+  'GraduateCertificate',  // 研究生证书
+  'GraduateDiploma',     // 研究生文凭
+  'Master',          // 硕士
+  'PhD',             // 博士
+  'Postdoc',         // 博士后
+  'VisitingScholar', // 访问学者
+  'ShortProgram',    // 短期项目
+  'SummerSchool',    // 夏季课程
+  'Online',          // 线上课程
+  'Exchange',        // 交换生
+  'JointDegree',     // 联合培养
+  'AdvancedStudy',   // 研修班
+] as const;
 export type DegreeType = typeof DEGREE_TYPES[number];
 
 // Degree labels for UI display
 export const DEGREE_LABELS: Record<DegreeType, { zh: string; en: string }> = {
+  Foundation: { zh: '预科', en: 'Foundation' },
+  Associate: { zh: '副学士', en: 'Associate' },
   Bachelor: { zh: '本科', en: 'Bachelor' },
+  GraduateCertificate: { zh: '研究生证书', en: 'Graduate Certificate' },
+  GraduateDiploma: { zh: '研究生文凭', en: 'Graduate Diploma' },
   Master: { zh: '硕士', en: 'Master' },
   PhD: { zh: '博士', en: 'PhD' },
-  Postdoc: { zh: '博后', en: 'Postdoc' },
+  Postdoc: { zh: '博士后', en: 'Postdoc' },
+  VisitingScholar: { zh: '访问学者', en: 'Visiting Scholar' },
+  ShortProgram: { zh: '短期项目', en: 'Short Program' },
+  SummerSchool: { zh: '夏季课程', en: 'Summer School' },
+  Online: { zh: '线上课程', en: 'Online' },
+  Exchange: { zh: '交换生', en: 'Exchange' },
+  JointDegree: { zh: '联合培养', en: 'Joint Degree' },
+  AdvancedStudy: { zh: '研修班', en: 'Advanced Study' },
 };
 
 export interface Offer {
