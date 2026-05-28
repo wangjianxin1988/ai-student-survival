@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import type { MapMarker, MapMarkerCategory } from './types';
 
 // Read from environment variables
 // Cloudflare Pages runtime: wrangler.toml vars exposed as process.env.SUPABASE_URL / process.env.SUPABASE_ANON_KEY
@@ -404,6 +405,113 @@ export function transformUniversityPolicy(db: DbUniversityPolicy): UniversityPol
 }
 
 // API helper functions
+export interface DbCampusMarker {
+  id: string;
+  user_id: string | null;
+  university_id: string;
+  name: string;
+  category: string;
+  description: string | null;
+  coordinates: { lat: number; lng: number };
+  images: string[];
+  tags: string[];
+  rating: number;
+  rating_count: number;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewer_id: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Transform database row to application type
+export function transformCampusMarker(db: DbCampusMarker): MapMarker {
+  return {
+    id: db.id,
+    universityId: db.university_id,
+    universityName: '',
+    name: db.name,
+    nameZh: db.name,
+    category: db.category as MapMarkerCategory,
+    description: db.description || '',
+    descriptionZh: db.description || '',
+    coordinates: db.coordinates,
+    images: db.images || [],
+    rating: db.rating || 0,
+    ratingCount: db.rating_count || 0,
+    tags: db.tags || [],
+    createdAt: db.created_at,
+  };
+}
+
+export async function getCampusMarkers(params?: {
+  universityId?: string;
+  status?: string;
+  category?: string;
+  limit?: number;
+}) {
+  let query = supabase
+    .from('campus_markers')
+    .select('*')
+    .eq('status', params?.status || 'approved');
+
+  if (params?.universityId) {
+    query = query.eq('university_id', params.universityId);
+  }
+  if (params?.category) {
+    query = query.eq('category', params.category);
+  }
+  if (params?.limit) {
+    query = query.limit(params.limit);
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return (data as DbCampusMarker[]).map(transformCampusMarker);
+}
+
+export async function createCampusMarker(marker: {
+  universityId: string;
+  name: string;
+  category: string;
+  description: string;
+  coordinates: { lat: number; lng: number };
+  images?: string[];
+  tags?: string[];
+}) {
+  const { data, error } = await supabase
+    .from('campus_markers')
+    .insert({
+      university_id: marker.universityId,
+      name: marker.name,
+      category: marker.category,
+      description: marker.description,
+      coordinates: marker.coordinates,
+      images: marker.images || [],
+      tags: marker.tags || [],
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as DbCampusMarker;
+}
+
+export async function getMyCampusMarkers() {
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData.user) return [];
+
+  const { data, error } = await supabase
+    .from('campus_markers')
+    .select('*')
+    .eq('user_id', userData.user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data as DbCampusMarker[];
+}
+
 export async function getTools(params?: {
   category?: string;
   pricing?: string;

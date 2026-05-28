@@ -138,8 +138,9 @@ export async function ensureUserBalance(userId: string, accessToken?: string): P
     });
   }
 
-  // Ensure the user has a row in public.users (needed for FK constraints on points_transactions)
-  await client.from('users').upsert({ id: userId }, { onConflict: 'id', ignoreDuplicates: true });
+  // Note: FK constraint on points_transactions references auth.users(id),
+  // so no need to insert into a public users table — the authenticated user
+  // already exists in auth.users.
 
   const { data } = await client
     .from('user_points_balance')

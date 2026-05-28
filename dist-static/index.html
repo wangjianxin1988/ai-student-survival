@@ -1,0 +1,480 @@
+<!DOCTYPE html><html lang="zh"> <head><meta charset="UTF-8"><!-- Inline auth init: read Supabase session from localStorage before React hydrates. --><!-- This prevents SSR/hydration mismatch where header shows "登录" briefly on load. --><script>
+    (function() {
+      var demoRaw = null;
+      try { demoRaw = sessionStorage.getItem('demo_session'); } catch(e) {}
+      var user = null;
+      if (demoRaw) {
+        try { var d = JSON.parse(demoRaw); if (d && d.id) { user = { id: d.id, email: d.email || '', name: d.name, avatar_url: d.avatar }; } } catch(e) {}
+      }
+      if (!user) {
+        // Scan all sb-* localStorage keys for Supabase auth token (Supabase v2.x uses this prefix)
+        // Also check keys containing 'supabase' + 'auth' for older/supabase-admin-client format
+        var keys = Object.keys(localStorage);
+        for (var i = 0; i < keys.length; i++) {
+          var k = keys[i];
+          // Match: sb-* keys containing 'auth' or 'token', OR keys containing 'supabase' + 'auth'
+          if (!k.startsWith('sb-')) continue;
+          if (k.indexOf('auth') === -1 && k.indexOf('token') === -1) continue;
+          var raw = null;
+          try { raw = localStorage.getItem(k); } catch(e) {}
+          if (!raw) continue;
+          try {
+            var p = JSON.parse(raw);
+            var token = p.tokens && p.tokens.access_token || p.access_token;
+            var refresh = p.tokens && p.tokens.refresh_token || p.refresh_token;
+            if (token && refresh) {
+              var parts = token.split('.');
+              if (parts.length === 3) {
+                var header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                if (['ES256','RS256'].indexOf(header.alg) !== -1) {
+                  var payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (payload.sub) {
+                    var u = p.user || (p.tokens && p.tokens.user);
+                    if (u) { user = { id: u.id, email: u.email || '', name: u.user_metadata && (u.user_metadata.name || u.user_metadata.full_name) || '', avatar_url: u.user_metadata && (u.user_metadata.avatar_url || u.user_metadata.picture) || '' }; }
+                    break;
+                  }
+                }
+              }
+            }
+          } catch(e) {}
+        }
+      }
+      // Also check for Supabase cookie-based session (Cloudflare Pages edge runtime)
+      // Supabase stores session in a cookie named '__session' or 'sb-[ref]-auth-token' as cookie
+      if (!user) {
+        var cookieMap = {};
+        if (document.cookie) {
+          document.cookie.split(';').forEach(function(c) {
+            var parts = c.trim().split('=');
+            if (parts.length >= 2) {
+              cookieMap[decodeURIComponent(parts[0])] = decodeURIComponent(parts.slice(1).join('='));
+            }
+          });
+        }
+        // Try Supabase cookie named 'sb-[ref]-auth-token' or '__session'
+        var cookieNames = ['__session', 'sb-auth-token', 'supabase-auth-token'];
+        for (var i = 0; i < cookieNames.length && !user; i++) {
+          var cookieVal = cookieMap[cookieNames[i]];
+          if (cookieVal) {
+            try {
+              // Cookie value is typically a JSON string with tokens
+              var cookieData = JSON.parse(cookieVal);
+              var cToken = cookieData.tokens && cookieData.tokens.access_token || cookieData.access_token;
+              if (cToken) {
+                var cParts = cToken.split('.');
+                if (cParts.length === 3) {
+                  var cHeader = JSON.parse(atob(cParts[0].replace(/-/g, '+').replace(/_/g, '/')));
+                  if (['ES256', 'RS256'].indexOf(cHeader.alg) !== -1) {
+                    var cPayload = JSON.parse(atob(cParts[1].replace(/-/g, '+').replace(/_/g, '/')));
+                    if (cPayload.sub) {
+                      var cUser = cookieData.user || (cookieData.tokens && cookieData.tokens.user);
+                      if (cUser) {
+                        user = { id: cUser.id, email: cUser.email || '', name: cUser.user_metadata && (cUser.user_metadata.name || cUser.user_metadata.full_name) || '', avatar_url: cUser.user_metadata && (cUser.user_metadata.avatar_url || cUser.user_metadata.picture) || '' };
+                      }
+                    }
+                  }
+                }
+              }
+            } catch(e) {}
+          }
+        }
+      }
+      window.__INITIAL_AUTH_USER__ = user;
+    })();
+    </script><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="Astro v4.16.19"><!-- Primary Meta Tags --><title>MI TO AI留学生存指南</title><meta name="title" content="MI TO AI留学生存指南"><meta name="description" content="中国留学生AI工具大全 - 工具推荐·支付指南·大学政策·Prompt模板"><meta name="keywords" content="AI工具, 留学生, ChatGPT, AI写作, 支付解决方案, 大学AI政策, Prompt模板"><!-- Open Graph / Facebook --><meta property="og:type" content="website"><meta property="og:url" content="https://mi-to-ai.com/"><meta property="og:title" content="MI TO AI留学生存指南"><meta property="og:description" content="中国留学生AI工具大全 - 工具推荐·支付指南·大学政策·Prompt模板"><meta property="og:image" content="/og-image.png"><meta property="og:site_name" content="MI TO AI留学生存指南"><meta property="og:locale" content="zh_CN"><!-- Alternate languages for SEO --><link rel="alternate" hreflang="zh" href="/"><link rel="alternate" hreflang="en" href="/en/"><link rel="alternate" hreflang="x-default" href="/"><!-- Twitter --><meta property="twitter:card" content="summary_large_image"><meta property="twitter:url" content="https://mi-to-ai.com/"><meta property="twitter:title" content="MI TO AI留学生存指南"><meta property="twitter:description" content="中国留学生AI工具大全 - 工具推荐·支付指南·大学政策·Prompt模板"><meta property="twitter:image" content="/og-image.png"><!-- Canonical URL --><link rel="canonical" href="https://mi-to-ai.com/"><!-- Favicon --><link rel="icon" type="image/svg+xml" href="/favicon.svg"><!-- Google Fonts --><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"><!-- Schema.org JSON-LD (page-specific) --><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MI TO AI留学生存指南","description":"中国留学生AI工具大全 - 工具推荐·支付指南·大学政策·Prompt模板","url":"https://mi-to-ai.com","potentialAction":{"@type":"SearchAction","target":"https://mi-to-ai.com/tools?q={search_term_string}","query-input":"required name=search_term_string"},"hasOfferCatalog":{"@type":"OfferCatalog","name":"AI Tools for Students","itemListElement":[]}}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What AI tools are available for international students?","acceptedAnswer":{"@type":"Answer","text":"This platform provides a comprehensive database of 500+ AI tools including GPT-4, Claude, Midjourney, and many others, specifically curated for international students with information about pricing, payment methods, accessibility in China, and academic use cases."}},{"@type":"Question","name":"How can students in China access Western AI tools?","acceptedAnswer":{"@type":"Answer","text":"Students in China can access Western AI tools through virtual cards (like Depax, AssistCard), gift cards, web-based tools that bypass restrictions, and specific China-friendly payment solutions. Our payment solutions section provides step-by-step guides."}},{"@type":"Question","name":"What university policies should international students know about AI tool usage?","acceptedAnswer":{"@type":"Answer","text":"University policies on AI tools vary by institution. Our policy database covers 200+ university AI guidelines, including restrictions on ChatGPT usage, academic integrity requirements, and approved tool lists. Always check your specific university's policy before using AI tools in coursework."}},{"@type":"Question","name":"How do I choose the right AI tool for my academic needs?","acceptedAnswer":{"@type":"Answer","text":"Our platform provides detailed comparisons of AI tools across categories including writing, research, coding, image generation, and language learning. Each tool listing includes pricing, key features, China accessibility rating, and student reviews."}},{"@type":"Question","name":"What payment methods work for international students subscribing to AI tools?","acceptedAnswer":{"@type":"Answer","text":"Payment methods include international credit cards, virtual cards (Depax, Wenjin virtual card), Alipay/WeChat Pay with foreign card linking, cryptocurrency, and region-specific gift cards. Our payment solutions database provides working methods tested by real international students."}},{"@type":"Question","name":"Are AI tools allowed in academic work?","acceptedAnswer":{"@type":"Answer","text":"Policies vary by university and country. Many universities allow AI as a learning aid but require disclosure. Some prohibit it for exams or graded assignments. Our university policy database covers specific guidelines for 200+ institutions worldwide."}},{"@type":"Question","name":"What AI tools work well without credit card verification?","acceptedAnswer":{"@type":"Answer","text":"Free AI tools that don't require credit card include Claude (free tier), Copilot (free with Microsoft account), Gemini, Poe, and various open-source models. Our tools database filters for free-accessibility in China and no-credit-card requirements."}},{"@type":"Question","name":"How can students share and discover AI tool recommendations?","acceptedAnswer":{"@type":"Answer","text":"This platform includes a community section where students can share tool reviews, survival guides, ask questions, and discover recommendations from fellow international students facing similar challenges."}}]}</script><script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://mi-to-ai.com"}]}</script><!-- WebSite Schema (global, for site-level search) --><script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"MI TO AI留学生存指南","url":"https://mi-to-ai.com/","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://mi-to-ai.com//tools?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script><!-- Organization Schema --><script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"MI TO AI留学生存指南","url":"https://mi-to-ai.com/","logo":"https://mi-to-ai.com//favicon.svg","description":"为海外留学生打造的AI工具导航、大学AI政策数据库和支付解决方案平台","sameAs":["https://github.com/ai-student-survival"]}</script><link rel="stylesheet" href="/_astro/about.CS7k7meY.css"></head> <body class="min-h-screen bg-gray-50 text-gray-900 antialiased"> <!-- AuthProvider wraps ALL components that need auth context. client:only skips SSR to avoid hydration mismatch. --> <!-- NOTE: ReactHeader has NO client directive so it renders inline within AuthProvider's island, --> <!-- sharing the same React context. UserMenu (inside ReactHeader) can access AuthProvider's auth state. --> <!-- Language switcher is rendered inside ReactHeader's top bar (not floating) for clean UX on all pages. --> <style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).only=e;window.dispatchEvent(new Event("astro:only"));})();;(()=>{var A=Object.defineProperty;var g=(i,o,a)=>o in i?A(i,o,{enumerable:!0,configurable:!0,writable:!0,value:a}):i[o]=a;var d=(i,o,a)=>g(i,typeof o!="symbol"?o+"":o,a);{let i={0:t=>m(t),1:t=>a(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(a(t)),5:t=>new Set(a(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>1/0*t},o=t=>{let[l,e]=t;return l in i?i[l](e):void 0},a=t=>t.map(o),m=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([l,e])=>[l,o(e)]));class y extends HTMLElement{constructor(){super(...arguments);d(this,"Component");d(this,"hydrator");d(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let c=this.querySelectorAll("astro-slot"),n={},h=this.querySelectorAll("template[data-astro-template]");for(let r of h){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("data-astro-template")||"default"]=r.innerHTML,r.remove())}for(let r of c){let s=r.closest(this.tagName);s!=null&&s.isSameNode(this)&&(n[r.getAttribute("name")||"default"]=r.innerHTML)}let p;try{p=this.hasAttribute("props")?m(JSON.parse(this.getAttribute("props"))):{}}catch(r){let s=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(s+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${s}`,this.getAttribute("props"),r),r}let u;await this.hydrator(this)(this.Component,p,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});d(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),c.disconnect(),this.childrenConnectedCallback()},c=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});c.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}async start(){let e=JSON.parse(this.getAttribute("opts")),c=this.getAttribute("client");if(Astro[c]===void 0){window.addEventListener(`astro:${c}`,()=>this.start(),{once:!0});return}try{await Astro[c](async()=>{let n=this.getAttribute("renderer-url"),[h,{default:p}]=await Promise.all([import(this.getAttribute("component-url")),n?import(n):()=>()=>{}]),u=this.getAttribute("component-export")||"default";if(!u.includes("."))this.Component=h[u];else{this.Component=h;for(let f of u.split("."))this.Component=this.Component[f]}return this.hydrator=p,this.hydrate},e,this)}catch(n){console.error(`[astro-island] Error hydrating ${this.getAttribute("component-url")}`,n)}}attributeChangedCallback(){this.hydrate()}}d(y,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",y)}})();</script><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><astro-island uid="ZMKk3N" component-url="/_astro/AuthProvider.D2IudmC0.js" component-export="AuthProvider" renderer-url="/_astro/client.CaOyRcmD.js" props="{}" ssr="" client="only" opts="{&quot;name&quot;:&quot;AuthProvider&quot;,&quot;value&quot;:&quot;react&quot;}" await-children=""><template data-astro-template> <astro-island uid="Z1lMSa3" component-url="/_astro/ReactHeader.0F_x2lw2.js" component-export="default" renderer-url="/_astro/client.CaOyRcmD.js" props="{&quot;locale&quot;:[0,&quot;zh&quot;],&quot;currentPath&quot;:[0,&quot;/&quot;],&quot;siteName&quot;:[0,&quot;MI TO AI留学生存指南&quot;],&quot;languageSwitcher&quot;:[1,[[0,{&quot;locale&quot;:[0,&quot;zh&quot;],&quot;label&quot;:[0,&quot;中文&quot;],&quot;current&quot;:[0,true]}],[0,{&quot;locale&quot;:[0,&quot;en&quot;],&quot;label&quot;:[0,&quot;EN&quot;],&quot;current&quot;:[0,false]}]]],&quot;getAlternateUrl&quot;:[0,null]}" ssr="" client="only" opts="{&quot;name&quot;:&quot;ReactHeader&quot;,&quot;value&quot;:&quot;react&quot;}"></astro-island>    <section class="hero-gradient text-white relative overflow-hidden"> <!-- Background decoration --> <div class="absolute inset-0 opacity-10"> <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full blur-3xl"></div> <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-500 rounded-full blur-3xl"></div> </div> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative z-10"> <div class="text-center mb-12"> <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 animate-fade-in"> 留学AI工具，一个就够 </h1> <p class="text-xl sm:text-2xl text-primary-100 mb-6 animate-slide-up"> 工具地图 · 支付方案 · 大学政策 · Prompt模板 · Offer展示 </p> <p class="text-lg text-primary-200 mb-10 max-w-2xl mx-auto animate-slide-up"> 一站式解决：工具选择、支付难题、大学政策、申请经验。学长学姐真实分享，让你的留学生活开挂 </p> <!-- Killer Features Stats --> <div class="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mb-10 animate-slide-up"> <a href="/tools" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all hover:scale-105"> <div class="text-3xl font-bold text-white mb-1">500+</div> <div class="text-sm text-primary-200">AI工具收录</div> </a> <a href="/payment" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all hover:scale-105"> <div class="text-3xl font-bold text-white mb-1">20+</div> <div class="text-sm text-primary-200">支付解决方案</div> </a> <a href="/policies" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all hover:scale-105"> <div class="text-3xl font-bold text-white mb-1">200+</div> <div class="text-sm text-primary-200">大学AI政策</div> </a> <a href="/prompts" class="bg-white/10 backdrop-blur-sm rounded-xl p-4 hover:bg-white/20 transition-all hover:scale-105"> <div class="text-3xl font-bold text-white mb-1">1000+</div> <div class="text-sm text-primary-200">Prompt模板</div> </a> </div> <!-- CTA Buttons --> <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-slide-up"> <a href="/tools" class="btn bg-white text-primary-700 hover:bg-primary-50 px-8 py-3 text-lg font-semibold shadow-lg"> 探索AI工具库 </a> <a href="/offers" class="btn border-2 border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg"> 查看学长Offer </a> </div> </div> </div> </section>  <section class="py-16 bg-white"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="text-center mb-12"> <h2 class="text-3xl font-bold mb-4">留学生必备AI工具箱</h2> <p class="text-gray-600 max-w-2xl mx-auto">有了这些，再也不怕AI工具选择困难症</p> </div> <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6"> <a href="/tools" class="card p-6 hover:border-primary-300 group"> <div class="w-12 h-12 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> </div> <h3 class="text-xl font-semibold mb-2 group-hover:text-primary-600 transition-colors"> AI工具库 </h3> <p class="text-gray-600 text-sm mb-4"> 500+主流AI工具，多维对比评分，附真实用户评价，找到最适合你的那一款 </p> <div class="flex items-center text-primary-600 text-sm font-medium"> <span>浏览</span> <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> </div> </a><a href="/payment" class="card p-6 hover:border-secondary-300 group"> <div class="w-12 h-12 rounded-xl bg-secondary-100 text-secondary-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg> </div> <h3 class="text-xl font-semibold mb-2 group-hover:text-primary-600 transition-colors"> 支付解决方案 </h3> <p class="text-gray-600 text-sm mb-4"> 没有信用卡？虚拟卡、礼品卡、地区定价...20+方案帮你搞定支付难题 </p> <div class="flex items-center text-secondary-600 text-sm font-medium"> <span>浏览</span> <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> </div> </a><a href="/policies" class="card p-6 hover:border-green-300 group"> <div class="w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg> </div> <h3 class="text-xl font-semibold mb-2 group-hover:text-primary-600 transition-colors"> 大学AI政策 </h3> <p class="text-gray-600 text-sm mb-4"> 首家全面收录200+海外大学AI政策，实时更新，再也不怕违规使用 </p> <div class="flex items-center text-green-600 text-sm font-medium"> <span>浏览</span> <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> </div> </a><a href="/prompts" class="card p-6 hover:border-orange-300 group"> <div class="w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"> <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg> </div> <h3 class="text-xl font-semibold mb-2 group-hover:text-primary-600 transition-colors"> Prompt模板 </h3> <p class="text-gray-600 text-sm mb-4"> 1000+精选模板，覆盖申请文书、论文写作、求职面试，直接用 </p> <div class="flex items-center text-orange-600 text-sm font-medium"> <span>浏览</span> <svg class="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg> </div> </a> </div> </div> </section>  <section class="py-16 bg-gray-50"> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"> <div class="grid lg:grid-cols-2 gap-12 items-center"> <div> <h2 class="text-3xl font-bold mb-6">留学生使用AI工具的四大痛点</h2> <div class="space-y-4"> <a href="/tools" class="flex items-start gap-4 p-2 rounded-lg hover:bg-white hover:shadow-md transition-all cursor-pointer"> <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5"> <span class="text-sm font-bold">1</span> </div> <div> <h4 class="font-semibold mb-1">工具选择困难症</h4> <p class="text-gray-600 text-sm">AI工具琳琅满目，不知道哪个最适合自己？效果最好？</p> </div> </a><a href="/payment" class="flex items-start gap-4 p-2 rounded-lg hover:bg-white hover:shadow-md transition-all cursor-pointer"> <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5"> <span class="text-sm font-bold">2</span> </div> <div> <h4 class="font-semibold mb-1">支付完全不会</h4> <p class="text-gray-600 text-sm">没有信用卡？国内银行卡被拒？虚拟卡申请复杂怕踩坑？</p> </div> </a><a href="/policies" class="flex items-start gap-4 p-2 rounded-lg hover:bg-white hover:shadow-md transition-all cursor-pointer"> <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5"> <span class="text-sm font-bold">3</span> </div> <div> <h4 class="font-semibold mb-1">政策一头雾水</h4> <p class="text-gray-600 text-sm">学校到底让不让用AI？用了会不会被处分？一头雾水</p> </div> </a><a href="/prompts" class="flex items-start gap-4 p-2 rounded-lg hover:bg-white hover:shadow-md transition-all cursor-pointer"> <div class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0 mt-0.5"> <span class="text-sm font-bold">4</span> </div> <div> <h4 class="font-semibold mb-1">Prompt写不好</h4> <p class="text-gray-600 text-sm">明明有AI工具，却写不出有效的Prompt，效果大打折扣</p> </div> </a> </div> </div> <div class="bg-white rounded-2xl shadow-xl p-8"> <h3 class="text-xl font-semibold mb-6 text-center">留学生必备AI工具箱</h3> <div class="grid grid-cols-2 gap-4"> <a href="/tools" class="text-center p-4 rounded-xl bg-green-50 hover:shadow-md transition-shadow block"> <div class="text-3xl font-bold mb-2 text-green-600">500+</div> <div class="text-sm text-gray-600">精选AI工具</div> </a><a href="/payment" class="text-center p-4 rounded-xl bg-blue-50 hover:shadow-md transition-shadow block"> <div class="text-3xl font-bold mb-2 text-blue-600">20+</div> <div class="text-sm text-gray-600">支付方案</div> </a><a href="/policies" class="text-center p-4 rounded-xl bg-purple-50 hover:shadow-md transition-shadow block"> <div class="text-3xl font-bold mb-2 text-purple-600">200+</div> <div class="text-sm text-gray-600">大学政策</div> </a><a href="/prompts" class="text-center p-4 rounded-xl bg-orange-50 hover:shadow-md transition-shadow block"> <div class="text-3xl font-bold mb-2 text-orange-600">1000+</div> <div class="text-sm text-gray-600">Prompt模板</div> </a> </div> </div> </div> </div> </section>  <footer class="bg-gray-900 text-white"> <!-- Main Footer --> <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12"> <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8"> <!-- Brand & Description --> <div class="lg:col-span-1"> <a href="/" class="flex items-center gap-2 mb-4"> <img src="/logo.svg" alt="MI TO AI留学生存指南" class="w-10 h-10 rounded-lg"> <span class="font-semibold text-lg">MI TO AI留学生存指南</span> </a> <p class="text-gray-400 text-sm mb-4"> 中国留学生AI工具第一站 - 从工具选择到成功支付，一站式解决留学路上的所有AI难题 </p> <!-- Social Links --> <div class="flex items-center gap-4"> <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors" aria-label="Twitter"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path> </svg> </a> <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors" aria-label="GitHub"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd"></path> </svg> </a> <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-white transition-colors" aria-label="Discord"> <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"> <path d="M20.317 4.3698a19.7913 19.7913 0 00-4.8851-1.5152.0741.0741 0 00-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 00-.0785-.037 19.7363 19.7363 0 00-4.8852 1.515.0699.0699 0 00-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 00.0312.0561c1.5148 1.271 3.1723 2.0526 4.8396 2.3696a.0777.0777 0 00.0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 00-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 01-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 01.0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 01.0785.0095c.1202.099.246.1981.3728.2924a.077.077 0 01-.0066.1276 12.2986 12.2986 0 01-1.873.8914.0766.0766 0 00-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 00.0842.0286c1.961-.3167 3.6096-1.0892 4.8391-2.3682.0358-.0285.0587-.0658.0826-.1055.0349-.0948.0526-.1963.0541-.3054-.0005-.0173-.0019-.0346-.0019-.0526.0007-.0189.0009-.0377.0009-.0566zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z"></path> </svg> </a> </div> </div> <!-- Core Features --> <div> <h4 class="font-semibold mb-4 text-white">footer.coreFeatures</h4> <ul class="space-y-2 text-sm"> <li><a href="/tools" class="text-gray-400 hover:text-white transition-colors">AI工具库</a></li><li><a href="/payment" class="text-gray-400 hover:text-white transition-colors">支付解决方案</a></li><li><a href="/policies" class="text-gray-400 hover:text-white transition-colors">大学政策</a></li><li><a href="/prompts" class="text-gray-400 hover:text-white transition-colors">Prompt库</a></li><li><a href="/offers" class="text-gray-400 hover:text-white transition-colors">Offer展示</a></li><li><a href="/questions" class="text-gray-400 hover:text-white transition-colors">问答社区</a></li> </ul> </div> <!-- Resources --> <div> <h4 class="font-semibold mb-4 text-white">资源</h4> <ul class="space-y-2 text-sm"> <li><a href="/faq" class="text-gray-400 hover:text-white transition-colors">常见问题</a></li><li><a href="/compare" class="text-gray-400 hover:text-white transition-colors">工具对比</a></li><li><a href="/map" class="text-gray-400 hover:text-white transition-colors">校园地图</a></li><li><a href="/survival" class="text-gray-400 hover:text-white transition-colors">防坑指南</a></li> <li><a href="/tools?category=writing" class="text-gray-400 hover:text-white transition-colors">写作工具</a></li><li><a href="/tools?category=coding" class="text-gray-400 hover:text-white transition-colors">编程工具</a></li><li><a href="/tools?category=design" class="text-gray-400 hover:text-white transition-colors">设计工具</a></li><li><a href="/tools?category=research" class="text-gray-400 hover:text-white transition-colors">研究工具</a></li> </ul> </div> <!-- Company & Legal --> <div> <h4 class="font-semibold mb-4 text-white">关于我们</h4> <ul class="space-y-2 text-sm"> <li><a href="/about" class="text-gray-400 hover:text-white transition-colors">关于我们</a></li><li><a href="/contact" class="text-gray-400 hover:text-white transition-colors">联系我们</a></li><li><a href="/about#guide" class="text-gray-400 hover:text-white transition-colors">使用指南</a></li> </ul> <h4 class="font-semibold mb-4 mt-6 text-white">隐私政策</h4> <ul class="space-y-2 text-sm"> <li><a href="/privacy" class="text-gray-400 hover:text-white transition-colors">隐私政策</a></li><li><a href="/terms" class="text-gray-400 hover:text-white transition-colors">使用条款</a></li> </ul> </div> </div> <!-- Bottom Bar --> <div class="border-t border-gray-800 pt-8"> <div class="flex flex-col md:flex-row items-center justify-between gap-4"> <p class="text-sm text-gray-500">
+&copy; 2026 MI TO AI留学生存指南. All rights reserved.
+<span class="ml-2 px-2 py-0.5 bg-indigo-600/30 text-indigo-300 text-xs rounded">v1.0.0</span> </p> <div class="flex items-center gap-6 text-sm text-gray-500"> <a href="/about" class="hover:text-white transition-colors">关于我们</a> <a href="/contact" class="hover:text-white transition-colors">联系我们</a> <a href="/privacy" class="hover:text-white transition-colors">隐私政策</a> <a href="/terms" class="hover:text-white transition-colors">使用条款</a> </div> </div> </div> </div> </footer>  <div id="search-modal" class="fixed inset-0 z-50 hidden" aria-hidden="false" data-astro-cid-uc2jpb5a> <!-- Backdrop --> <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="search-backdrop" data-astro-cid-uc2jpb5a></div> <!-- Modal --> <div class="relative top-[10vh] max-w-2xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden" data-astro-cid-uc2jpb5a> <!-- Search Input --> <div class="flex items-center border-b border-gray-200 px-4" data-astro-cid-uc2jpb5a> <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-astro-cid-uc2jpb5a> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" data-astro-cid-uc2jpb5a></path> </svg> <input type="text" id="search-input" placeholder="搜索工具..." class="flex-1 px-4 py-4 text-lg outline-none placeholder-gray-400" autocomplete="off" data-astro-cid-uc2jpb5a> <kbd class="hidden sm:inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-500 rounded" data-astro-cid-uc2jpb5a>ESC</kbd> </div> <!-- Search Results --> <div id="search-results" class="max-h-[60vh] overflow-y-auto" data-astro-cid-uc2jpb5a> <!-- Initial State --> <div id="search-initial" class="p-6 text-center text-gray-500" data-astro-cid-uc2jpb5a> <div id="search-history-section" class="mb-4" data-astro-cid-uc2jpb5a> <div class="flex items-center justify-between mb-2" data-astro-cid-uc2jpb5a> <p class="text-sm font-medium text-gray-700" data-astro-cid-uc2jpb5a>搜索历史</p> <button id="clear-history" class="text-xs text-gray-400 hover:text-gray-600" data-astro-cid-uc2jpb5a>清空</button> </div> <div id="search-history-list" class="flex flex-wrap justify-center gap-2 text-sm" data-astro-cid-uc2jpb5a></div> </div> <p class="mb-2 text-gray-400" data-astro-cid-uc2jpb5a>热门搜索</p> <div class="flex flex-wrap justify-center gap-2 text-sm" data-astro-cid-uc2jpb5a> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="ChatGPT" data-astro-cid-uc2jpb5a>ChatGPT</span> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="Claude" data-astro-cid-uc2jpb5a>Claude</span> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="Midjourney" data-astro-cid-uc2jpb5a>Midjourney</span> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="支付" data-astro-cid-uc2jpb5a>支付</span> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="MIT" data-astro-cid-uc2jpb5a>MIT</span> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="斯坦福" data-astro-cid-uc2jpb5a>斯坦福</span> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="GitHub Copilot" data-astro-cid-uc2jpb5a>GitHub Copilot</span> <span class="px-2 py-1 bg-gray-100 rounded cursor-pointer hover:bg-gray-200 search-trending" data-trending="Prompt模板" data-astro-cid-uc2jpb5a>Prompt模板</span> </div> </div> <!-- Loading State --> <div id="search-loading" class="hidden p-6 text-center text-gray-500" data-astro-cid-uc2jpb5a> <div class="animate-spin w-6 h-6 border-2 border-primary-500 border-t-transparent rounded-full mx-auto" data-astro-cid-uc2jpb5a></div> <p class="mt-2" data-astro-cid-uc2jpb5a>搜索中...</p> </div> <!-- Results Container --> <div id="search-results-container" class="hidden" data-astro-cid-uc2jpb5a></div> <!-- No Results --> <div id="search-no-results" class="hidden p-6 text-center text-gray-500" data-astro-cid-uc2jpb5a> <p data-astro-cid-uc2jpb5a>没有找到相关结果</p> </div> </div> <!-- Footer --> <div class="border-t border-gray-200 px-4 py-3 bg-gray-50 flex items-center justify-between text-xs text-gray-500" data-astro-cid-uc2jpb5a> <div class="flex items-center gap-4" data-astro-cid-uc2jpb5a> <span data-astro-cid-uc2jpb5a><kbd class="px-1 py-0.5 bg-gray-200 rounded" data-astro-cid-uc2jpb5a>导航</kbd> 上/下</span> <span data-astro-cid-uc2jpb5a><kbd class="px-1 py-0.5 bg-gray-200 rounded" data-astro-cid-uc2jpb5a>Enter</kbd> 选择</span> <span data-astro-cid-uc2jpb5a><kbd class="px-1 py-0.5 bg-gray-200 rounded" data-astro-cid-uc2jpb5a>ESC</kbd> 关闭</span> </div> <span data-astro-cid-uc2jpb5a>MI TO AI留学生存指南</span> </div> </div> </div>  <script>
+  // Listen for search button click (event delegation)
+  document.addEventListener('click', function(e) {
+    var target = e.target.closest('[data-search-trigger]');
+    if (target) {
+      var modal = document.getElementById('search-modal');
+      var input = document.getElementById('search-input');
+      if (modal) {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        if (input) input.focus();
+        document.body.style.overflow = 'hidden';
+      }
+    }
+  });
+
+  // Search data sources
+  const searchData = {
+    tools: [
+      { name: 'ChatGPT', slug: 'chatgpt', category: '对话', description: 'OpenAI开发的AI对话助手' },
+      { name: 'Claude', slug: 'claude', category: '对话', description: 'Anthropic开发的AI助手，擅长长文本处理' },
+      { name: 'Midjourney', slug: 'midjourney', category: '设计', description: 'AI图像生成工具' },
+      { name: 'GitHub Copilot', slug: 'github-copilot', category: '编程', description: 'AI编程助手' },
+      { name: 'Notion AI', slug: 'notion-ai', category: '写作', description: '集成在Notion中的AI助手' },
+      { name: 'Perplexity', slug: 'perplexity', category: '研究', description: 'AI搜索引擎' },
+      { name: 'Kimi', slug: 'kimi', category: '对话', description: '月之暗面开发的AI助手，20万字上下文' },
+      { name: 'Gemini', slug: 'gemini', category: '对话', description: 'Google开发的AI助手' },
+      { name: 'DALL-E 3', slug: 'dalle-3', category: '设计', description: 'OpenAI开发的AI图像生成模型' },
+      { name: 'Stable Diffusion', slug: 'stable-diffusion', category: '设计', description: '开源AI图像生成模型' },
+      { name: 'Figma', slug: 'figma', category: '设计', description: 'AI增强的设计工具' },
+      { name: 'Grammarly', slug: 'grammarly', category: '写作', description: 'AI写作辅助工具' },
+      { name: 'QuillBot', slug: 'quillbot', category: '写作', description: 'AI改写和润色工具' },
+      { name: 'Cursor', slug: 'cursor', category: '编程', description: 'AI代码编辑器' },
+      { name: 'Jasper', slug: 'jasper', category: '写作', description: '企业级AI写作助手' },
+    ],
+    pages: [
+      { name: 'AI工具库', url: '/tools', description: '精选留学生常用的AI工具' },
+      { name: '支付解决方案', url: '/payment', description: '一站式解决AI工具支付难题' },
+      { name: '大学AI政策', url: '/policies', description: '首家全面收录海外大学AI使用政策' },
+      { name: 'Prompt模板库', url: '/prompts', description: '精选留学生常用的Prompt模板' },
+      { name: '工具对比', url: '/compare', description: '横向对比多个AI工具' },
+    ],
+    // Dynamically loaded on first search
+    community: null,
+    policies: null,
+  };
+
+  // Lazy-load community posts and policies
+  async function loadDynamicSearchData() {
+    if (searchData.community === null) {
+      try {
+        const res = await fetch('/api/community?limit=30&sort=latest');
+        const data = await res.json();
+        if (data.success && data.data) {
+          searchData.community = data.data.slice(0, 30).map((post: any) => ({
+            name: post.title || post.content?.slice(0, 60) || '社区帖子',
+            url: `/community/${post.id}`,
+            description: post.content?.slice(0, 120) || '',
+          }));
+        }
+      } catch { /* ignore */ }
+    }
+    if (searchData.policies === null) {
+      try {
+        const res = await fetch('/api/policies');
+        const data = await res.json();
+        if (data.success && data.data) {
+          searchData.policies = data.data.slice(0, 20).map((policy: any) => ({
+            name: policy.university || policy.name || '大学政策',
+            url: `/policies/${policy.slug || policy.id}`,
+            description: policy.summary || policy.ai_policy || '',
+          }));
+        }
+      } catch { /* ignore */ }
+    }
+  }
+
+  // Search History Management
+  const SEARCH_HISTORY_KEY = 'demo_search_history';
+  const MAX_HISTORY_ITEMS = 10;
+
+  function getSearchHistory(): string[] {
+    try {
+      const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function addToSearchHistory(query: string) {
+    if (!query.trim()) return;
+    let history = getSearchHistory();
+    // Remove if already exists
+    history = history.filter(item => item !== query);
+    // Add to front
+    history.unshift(query);
+    // Keep only max items
+    if (history.length > MAX_HISTORY_ITEMS) {
+      history = history.slice(0, MAX_HISTORY_ITEMS);
+    }
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+    renderSearchHistory();
+  }
+
+  function clearSearchHistory() {
+    localStorage.removeItem(SEARCH_HISTORY_KEY);
+    renderSearchHistory();
+  }
+
+  function renderSearchHistory() {
+    const historyList = document.getElementById('search-history-list');
+    const historySection = document.getElementById('search-history-section');
+    if (!historyList || !historySection) return;
+
+    const history = getSearchHistory();
+    if (history.length === 0) {
+      historySection.classList.add('hidden');
+      return;
+    }
+
+    historySection.classList.remove('hidden');
+    historyList.innerHTML = history.map(item => `
+      <button class="px-2 py-1 bg-gray-100 rounded text-sm hover:bg-gray-200 cursor-pointer search-history-item">${item}</button>
+    `).join('');
+
+    // Add click handlers
+    historyList.querySelectorAll('.search-history-item').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const text = e.target.textContent;
+        if (input) input.value = text;
+        search(text);
+      });
+    });
+  }
+
+  // DOM Elements
+  const modal = document.getElementById('search-modal');
+  const input = document.getElementById('search-input');
+  const backdrop = document.getElementById('search-backdrop');
+  const initialState = document.getElementById('search-initial');
+  const loadingState = document.getElementById('search-loading');
+  const resultsContainer = document.getElementById('search-results-container');
+  const noResults = document.getElementById('search-no-results');
+  const clearHistoryBtn = document.getElementById('clear-history');
+
+  let selectedIndex = -1;
+  let currentResults: Array<{type: string, name: string, url: string, description: string, category?: string}> = [];
+
+  function openModal() {
+    modal?.classList.add('active');
+    modal?.setAttribute('aria-hidden', 'false');
+    input?.focus();
+    document.body.style.overflow = 'hidden';
+    renderSearchHistory();
+  }
+
+  function closeModal() {
+    modal?.classList.remove('active');
+    modal?.setAttribute('aria-hidden', 'true');
+    if (input) input.value = '';
+    resetToInitialState();
+    document.body.style.overflow = '';
+    selectedIndex = -1;
+  }
+
+  function resetToInitialState() {
+    initialState?.classList.remove('hidden');
+    loadingState?.classList.add('hidden');
+    resultsContainer?.classList.add('hidden');
+    noResults?.classList.add('hidden');
+    if (resultsContainer) resultsContainer.innerHTML = '';
+  }
+
+  function showLoading() {
+    initialState?.classList.add('hidden');
+    loadingState?.classList.remove('hidden');
+    resultsContainer?.classList.add('hidden');
+    noResults?.classList.add('hidden');
+  }
+
+  function showResults(results: typeof currentResults) {
+    loadingState?.classList.add('hidden');
+    initialState?.classList.add('hidden');
+    noResults?.classList.add('hidden');
+    resultsContainer?.classList.remove('hidden');
+
+    if (results.length === 0) {
+      resultsContainer?.classList.add('hidden');
+      noResults?.classList.remove('hidden');
+      return;
+    }
+
+    currentResults = results;
+    selectedIndex = -1;
+
+    if (!resultsContainer) return;
+    resultsContainer.innerHTML = `
+      <div class="py-2">
+        ${results.map((item, i) => `
+          <a href="${item.url}"
+             class="search-result flex items-start gap-3 px-4 py-3 hover:bg-gray-50 transition-colors"
+             data-index="${i}">
+            <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center">
+              ${item.type === 'tool' ? `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                </svg>
+              ` : item.type === 'community' ? `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                </svg>
+              ` : item.type === 'policy' ? `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              ` : `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              `}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="font-medium text-gray-900">${item.name}</span>
+                ${item.category ? `<span class="text-xs px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded">${item.category}</span>` : ''}
+                ${item.type === 'community' ? `<span class="text-xs px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded">社区</span>` : ''}
+                ${item.type === 'policy' ? `<span class="text-xs px-1.5 py-0.5 bg-green-50 text-green-600 rounded">政策</span>` : ''}
+              </div>
+              <p class="text-sm text-gray-500 truncate">${item.description}</p>
+            </div>
+            <svg class="w-4 h-4 text-gray-400 flex-shrink-0 mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+        `).join('')}
+      </div>
+    `;
+
+    // Add hover effect for keyboard navigation
+    updateSelection();
+  }
+
+  function updateSelection() {
+    const items = document.querySelectorAll('.search-result');
+    items.forEach((item, i) => {
+      if (i === selectedIndex) {
+        item.classList.add('bg-primary-50', 'border-l-2', 'border-primary-500');
+      } else {
+        item.classList.remove('bg-primary-50', 'border-l-2', 'border-primary-500');
+      }
+    });
+  }
+
+  async function search(query: string) {
+    if (!query.trim()) {
+      resetToInitialState();
+      return;
+    }
+
+    showLoading();
+
+    // Add to search history
+    addToSearchHistory(query);
+
+    // Load dynamic data (community posts, policies) on first search
+    await loadDynamicSearchData();
+
+    const q = query.toLowerCase();
+
+    // Simulate a short delay for instant-appearing results
+    setTimeout(() => {
+      const results: typeof currentResults = [];
+
+      // Search tools
+      searchData.tools.forEach(tool => {
+        if (
+          tool.name.toLowerCase().includes(q) ||
+          tool.description.toLowerCase().includes(q) ||
+          tool.category.toLowerCase().includes(q)
+        ) {
+          results.push({ type: 'tool', ...tool, url: `/tools/${tool.slug}` });
+        }
+      });
+
+      // Search pages
+      searchData.pages.forEach(page => {
+        if (
+          page.name.toLowerCase().includes(q) ||
+          page.description.toLowerCase().includes(q)
+        ) {
+          results.push({ type: 'page', ...page });
+        }
+      });
+
+      // Search community posts
+      if (searchData.community) {
+        searchData.community.forEach(post => {
+          if (
+            post.name.toLowerCase().includes(q) ||
+            post.description.toLowerCase().includes(q)
+          ) {
+            results.push({ type: 'community', ...post });
+          }
+        });
+      }
+
+      // Search university policies
+      if (searchData.policies) {
+        searchData.policies.forEach(policy => {
+          if (
+            policy.name.toLowerCase().includes(q) ||
+            policy.description.toLowerCase().includes(q)
+          ) {
+            results.push({ type: 'policy', ...policy });
+          }
+        });
+      }
+
+      showResults(results.slice(0, 15));
+    }, 200);
+  }
+
+  // Event Listeners
+  document.addEventListener('keydown', (e) => {
+    // Open modal with Ctrl+K or Cmd+K
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openModal();
+    }
+
+    // Close with ESC
+    if (e.key === 'Escape' && modal?.classList.contains('active')) {
+      closeModal();
+    }
+
+    // Keyboard navigation in modal
+    if (modal?.classList.contains('active')) {
+      const items = document.querySelectorAll('.search-result');
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+        updateSelection();
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, -1);
+        updateSelection();
+      } else if (e.key === 'Enter' && selectedIndex >= 0) {
+        e.preventDefault();
+        items[selectedIndex]?.click();
+      }
+    }
+  });
+
+  // Click handlers
+  backdrop?.addEventListener('click', closeModal);
+
+  // Clear history button
+  clearHistoryBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    clearSearchHistory();
+  });
+
+  // Search input handler
+  input?.addEventListener('input', (e) => {
+    search(e.target.value);
+  });
+
+  // Trending search clicks
+  document.querySelectorAll('.search-trending').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const text = (e.target as HTMLElement).textContent;
+      if (input) input.value = text;
+      search(text);
+    });
+  });
+
+  // Expose open function for other components
+  window.openSearch = openModal;
+</script> <astro-island uid="ZqK9M5" prefix="r0" component-url="/_astro/Chatbot.BLJrCth2.js" component-export="default" renderer-url="/_astro/client.CaOyRcmD.js" props="{&quot;locale&quot;:[0,&quot;zh&quot;]}" ssr="" client="load" opts="{&quot;name&quot;:&quot;Chatbot&quot;,&quot;value&quot;:true}" await-children=""><button class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 shadow-lg hover:shadow-xl transition-all flex items-center gap-2 " aria-label="展开聊天"><span class="text-white text-sm font-medium">展开</span><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg></button><!--astro:end--></astro-island> </template><!--astro:end--></astro-island> <script>
+      // Connect search trigger button to search modal
+      document.querySelectorAll('[data-search-trigger]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          var modal = document.getElementById('search-modal');
+          var input = document.getElementById('search-input');
+          if (modal) {
+            modal.classList.add('active');
+            modal.setAttribute('aria-hidden', 'false');
+            if (input) input.focus();
+            document.body.style.overflow = 'hidden';
+          }
+        });
+      });
+    </script> </body> </html> 

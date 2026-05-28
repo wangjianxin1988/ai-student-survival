@@ -122,10 +122,27 @@ const navLinks = [
 </nav>
 
 <script>
+  console.log('Header script loading...');
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const mobileMenu = document.getElementById('mobile-menu');
 
   mobileMenuBtn?.addEventListener('click', () => {
     mobileMenu?.classList.toggle('hidden');
+  });
+
+  // Search button click handler - directly show modal
+  const searchBtn = document.querySelector('[data-search-trigger]');
+  console.log('Search button found:', searchBtn);
+  searchBtn?.addEventListener('click', () => {
+    console.log('Search button clicked!');
+    const modal = document.getElementById('search-modal');
+    const input = document.getElementById('search-input');
+    console.log('Modal:', modal, 'Input:', input);
+    if (modal) {
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+      input?.focus();
+      document.body.style.overflow = 'hidden';
+    }
   });
 </script>

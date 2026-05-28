@@ -87,10 +87,20 @@ const currentPath = '/map/add';
 
   <script>
     import { saveUGCMarker, getUGCMarkers } from '@/lib/marker-storage';
+    import { supabase, isSupabaseConfigured, createCampusMarker, getMyCampusMarkers, getCampusMarkers, DbCampusMarker } from '@/lib/supabase';
+    import { CATEGORY_ICONS } from '@/lib/types';
     import type { MapMarker } from '@/lib/types';
     import { universities } from '@/data/map-markers';
 
     const MARKER_COST = 10; // 每次标记消耗10积分
+
+    // Determine if we're in demo mode (no real auth)
+    function isDemoUser(): boolean {
+      try {
+        const session = sessionStorage.getItem('demo_session');
+        return !!session;
+      } catch { return false; }
+    }
 
     // 获取用户积分（从sessionStorage的demo用户）
     function getUserPoints() {
@@ -123,18 +133,44 @@ const currentPath = '/map/add';
       const markerData = e.detail;
 
       try {
-        // 检查积分
-        const userPoints = getUserPoints();
-        if (userPoints < MARKER_COST) {
-          showNotification(`积分不足！需要${MARKER_COST}积分，您的余额为${userPoints}积分`, 'error');
-          return;
+        // In demo mode, check and deduct points from sessionStorage
+        if (isDemoUser() && !isSupabaseConfigured) {
+          const userPoints = getUserPoints();
+          if (userPoints < MARKER_COST) {
+            showNotification(`积分不足！需要${MARKER_COST}积分，您的余额为${userPoints}积分`, 'error');
+            return;
+          }
+          deductPoints(MARKER_COST);
         }
 
-        // 扣除积分
-        deductPoints(MARKER_COST);
+        let saved: any;
+        const university = universities.find(u => u.id === markerData.universityId);
+        const markerWithUni = {
+          ...markerData,
+          universityName: university?.nameZh || university?.name || markerData.universityName || '',
+        };
 
-        // 保存标记（直接通过，无需审核）
-        const saved = saveUGCMarker(markerData, 'approved'); // approved = 直接显示
+        // Try to save to Supabase first (real database)
+        if (isSupabaseConfigured) {
+          try {
+            saved = await createCampusMarker({
+              universityId: markerData.universityId,
+              name: markerData.name,
+              category: markerData.category,
+              description: markerData.description || '',
+              coordinates: markerData.coordinates,
+              images: markerData.images || [],
+              tags: markerData.tags || [],
+            });
+          } catch (err) {
+            console.warn('Supabase insert failed, falling back to localStorage:', err);
+          }
+        }
+
+        // Fall back to localStorage if Supabase insert failed or not configured
+        if (!saved) {
+          saved = saveUGCMarker(markerWithUni, 'approved');
+        }
 
         // Show success message
         showNotification(`标记已发布！消耗${MARKER_COST}积分`, 'success');
@@ -167,21 +203,56 @@ const currentPath = '/map/add';
     }
 
     // Update submissions list
-    function updateSubmissionsList() {
+    async function updateSubmissionsList() {
       const container = document.getElementById('my-submissions');
       if (!container) return;
 
-      const markers = getUGCMarkers();
+      let localMarkers: any[] = [];
+      let dbMarkers: DbCampusMarker[] = [];
 
-      if (markers.length === 0) {
+      // Always load localStorage markers (for demo mode)
+      localMarkers = getUGCMarkers();
+
+      // Try to load Supabase markers if configured
+      if (isSupabaseConfigured) {
+        try {
+          dbMarkers = await getMyCampusMarkers();
+        } catch (e) {
+          console.warn('Could not fetch Supabase markers:', e);
+        }
+      }
+
+      // Merge local and Supabase markers (deduplicate by id)
+      const allMarkers = [
+        ...dbMarkers.map(m => ({
+          id: m.id,
+          name: m.name,
+          category: m.category,
+          universityName: universities.find(u => u.id === m.university_id)?.nameZh || m.university_id,
+          status: m.status,
+          source: 'db' as const,
+        })),
+        ...localMarkers
+          .filter(m => !dbMarkers.some(db => db.id === m.id))
+          .map(m => ({
+            id: m.id,
+            name: m.name,
+            category: m.category,
+            universityName: m.universityName,
+            status: m.status,
+            source: 'local' as const,
+          })),
+      ];
+
+      if (allMarkers.length === 0) {
         container.innerHTML = '<p class="text-gray-500 text-sm">暂无提交记录</p>';
         return;
       }
 
-      container.innerHTML = markers.slice(-5).reverse().map(marker => `
+      container.innerHTML = allMarkers.slice(-5).reverse().map(marker => `
         <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <span class="text-2xl">${getCategoryIcon(marker.category)}</span>
+            <span class="text-2xl">${CATEGORY_ICONS[marker.category as keyof typeof CATEGORY_ICONS] || '📍'}</span>
             <div>
               <p class="font-medium text-gray-900">${marker.name}</p>
               <p class="text-sm text-gray-500">${marker.universityName}</p>
@@ -197,22 +268,6 @@ const currentPath = '/map/add';
           </span>
         </div>
       `).join('');
-    }
-
-    // Get category icon
-    function getCategoryIcon(category: string): string {
-      const icons: Record<string, string> = {
-        library: '📚',
-        canteen: '🍜',
-        dorm: '🏠',
-        supermarket: '🛒',
-        bank: '🏦',
-        restaurant: '🍽️',
-        danger: '⚠️',
-        safety: '✅',
-        other: '📍',
-      };
-      return icons[category] || '📍';
     }
 
     // Initial update

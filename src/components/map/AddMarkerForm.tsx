@@ -44,6 +44,18 @@ export default function AddMarkerForm({
     };
   }, []);
 
+  // Dispatch initial university-changed on mount so CampusMap centers correctly
+  useEffect(() => {
+    const uni = universities.find((u) => u.id === formData.universityId);
+    if (uni) {
+      window.dispatchEvent(
+        new CustomEvent("university-changed", {
+          detail: { universityId: formData.universityId, lat: uni.location.lat, lng: uni.location.lng },
+        }),
+      );
+    }
+  }, []);
+
   const handleUniversityChange = (newUniversityId: string) => {
     setFormData((prev) => ({ ...prev, universityId: newUniversityId }));
     // Notify map to update center

@@ -33,14 +33,11 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Install wrangler v4
+        run: npm install -g wrangler@latest
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/pages-action@v1.5.0
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: mi-to-ai-new
-          directory: dist
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+        run: wrangler pages deploy dist --project-name=mi-to-ai-new --branch=main --commit-dirty=true
 
   test:
     runs-on: ubuntu-latest

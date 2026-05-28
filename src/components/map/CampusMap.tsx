@@ -39,10 +39,20 @@ function addMarkersToLayer(
   universities: University[]
 ) {
   layer.clearLayers();
+
+  // Custom emoji-based icon to avoid Leaflet default icon image dependency
+  const customIcon = L.divIcon({
+    html: '<div style="font-size:28px;line-height:28px;text-align:center;">📍</div>',
+    className: 'custom-leaflet-marker',
+    iconSize: [28, 36],
+    iconAnchor: [14, 36],
+    popupAnchor: [0, -36],
+  });
+
   markers.forEach(marker => {
     const uni = universities.find(u => u.id === marker.universityId);
     const content = buildPopupContent(marker, uni?.name || uni?.nameZh);
-    L.marker([marker.coordinates.lat, marker.coordinates.lng])
+    L.marker([marker.coordinates.lat, marker.coordinates.lng], { icon: customIcon })
       .bindPopup(L.popup().setContent(content))
       .addTo(layer);
   });
@@ -65,6 +75,13 @@ export default function CampusMap({
   // Store L reference for use in update effect
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const LRef = useRef<any>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const pendingMarkerRef = useRef<any>(null);
+  // Store university-changed handler for cleanup
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const universityHandlerRef = useRef<any>(null);
+  // Clicked coordinates for add mode
+  const [clickedCoords, setClickedCoords] = React.useState<{ lat: number; lng: number } | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !mapRef.current) return;
@@ -109,10 +126,30 @@ export default function CampusMap({
       };
       L.control.layers(baseMaps).addTo(map);
 
-      // Click handler for add mode
+      // Click handler for add mode - show interactive marker
       if (isAddMode && onMapClick) {
         map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
-          onMapClick(e.latlng.lat, e.latlng.lng);
+          const { lat, lng } = e.latlng;
+          onMapClick(lat, lng);
+          setClickedCoords({ lat, lng });
+
+          // Remove previous pending marker
+          if (pendingMarkerRef.current) {
+            map.removeLayer(pendingMarkerRef.current);
+          }
+
+          // Add a pulsing marker at clicked location
+          const pulseIcon = L.divIcon({
+            html: `<div class="add-marker-pulse">
+              <div class="add-marker-dot"></div>
+              <div class="add-marker-ring"></div>
+            </div>`,
+            className: 'add-marker-container',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+          });
+
+          pendingMarkerRef.current = L.marker([lat, lng], { icon: pulseIcon }).addTo(map);
         });
       }
 
@@ -123,12 +160,32 @@ export default function CampusMap({
       if (markers.length > 0) {
         addMarkersToLayer(L, markersLayerRef.current, markers, universities);
       }
+
+      // Listen for university-changed events from AddMarkerForm
+      const handleUniversityChanged = (e: CustomEvent) => {
+        const { universityId } = e.detail;
+        const uni = universities.find(u => u.id === universityId);
+        if (uni) {
+          map.setView([uni.location.lat, uni.location.lng], 15, { animate: true });
+          // Reset pending marker when university changes
+          if (pendingMarkerRef.current) {
+            map.removeLayer(pendingMarkerRef.current);
+            pendingMarkerRef.current = null;
+          }
+          setClickedCoords(null);
+        }
+      };
+      universityHandlerRef.current = handleUniversityChanged;
+      window.addEventListener('university-changed', handleUniversityChanged as EventListener);
     };
 
     initMap();
 
     return () => {
       if (mapInstanceRef.current) {
+        if (universityHandlerRef.current) {
+          window.removeEventListener('university-changed', universityHandlerRef.current as EventListener);
+        }
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
@@ -153,11 +210,26 @@ export default function CampusMap({
 
   if (isAddMode) {
     return (
-      <div
-        ref={mapRef}
-        style={{ height }}
-        className="w-full rounded-lg border-2 border-dashed border-gray-300 bg-gray-50"
-      />
+      <div className="relative w-full" style={{ height }}>
+        <div
+          ref={mapRef}
+          className="w-full rounded-lg border-2 border-dashed border-gray-300 bg-gray-50"
+          style={{ height: '100%' }}
+        />
+        <div className="absolute inset-x-0 bottom-3 flex justify-center pointer-events-none z-[1000]">
+          {clickedCoords ? (
+            <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-sm font-medium text-gray-700">
+              {clickedCoords.lat.toFixed(5)}, {clickedCoords.lng.toFixed(5)}
+            </div>
+          ) : (
+            <div className="bg-white/90 backdrop-blur px-4 py-2 rounded-full shadow-lg text-sm text-gray-500">
+              {universities.find(u => u.id === selectedUniversity)
+                ? '点击地图选择位置'
+                : '请先选择大学'}
+            </div>
+          )}
+        </div>
+      </div>
     );
   }
 

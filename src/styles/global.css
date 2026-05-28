@@ -115,6 +115,59 @@
   .hero-gradient {
     @apply bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-700;
   }
+
+  /* Custom Leaflet marker — hide default bg/shadow so emoji icon is clean */
+  .custom-leaflet-marker {
+    background: transparent;
+    border: none;
+  }
+
+  /* Add marker pulse animation */
+  .add-marker-container {
+    background: transparent;
+    border: none;
+  }
+
+  .add-marker-pulse {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .add-marker-dot {
+    width: 16px;
+    height: 16px;
+    background: #3b82f6;
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.5);
+    position: relative;
+    z-index: 2;
+  }
+
+  .add-marker-ring {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: addMarkerPulse 1.5s ease-out infinite;
+    opacity: 0;
+  }
+
+  @keyframes addMarkerPulse {
+    0% {
+      transform: scale(0.5);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
 }
 
 @layer utilities {
