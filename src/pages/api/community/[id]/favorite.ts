@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 import { toggleFavorite, getPostById } from '@/lib/community/service';
 
@@ -29,8 +29,12 @@ export const POST: APIRoute = async ({ params, request }) => {
     );
   }
 
+  // Extract access token from Authorization header
+  const authHeader = request.headers.get('Authorization');
+  const accessToken = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : undefined;
+
   // 获取帖子作者ID
-  const resultPost = await getPostById(supabase, postId);
+  const resultPost = await getPostById(supabaseAdmin, postId);
   if (!resultPost.success || !resultPost.post) {
     return new Response(
       JSON.stringify({
@@ -41,7 +45,7 @@ export const POST: APIRoute = async ({ params, request }) => {
     );
   }
 
-  const result = await toggleFavorite(supabase, postId, user.id, resultPost.post.userId);
+  const result = await toggleFavorite(supabaseAdmin, postId, user.id, resultPost.post.userId, accessToken);
 
   if (!result.success) {
     return new Response(

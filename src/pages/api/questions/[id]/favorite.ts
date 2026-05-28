@@ -2,7 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getServerUser } from '@/lib/server-auth';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const POST: APIRoute = async ({ params, request }) => {
   const postId = params.id;
@@ -29,7 +29,7 @@ export const POST: APIRoute = async ({ params, request }) => {
   }
 
   // Check existing favorite
-  const { data: existing } = await supabase
+  const { data: existing } = await supabaseAdmin
     .from('post_favorites')
     .select('id')
     .eq('post_id', postId)
@@ -39,17 +39,17 @@ export const POST: APIRoute = async ({ params, request }) => {
   let favorited: boolean;
   if (existing) {
     // Unfavorite
-    await supabase.from('post_favorites').delete().eq('id', existing.id);
-    await supabase.rpc('decrement_favorites_count', { post_id: postId });
+    await supabaseAdmin.from('post_favorites').delete().eq('id', existing.id);
+    await supabaseAdmin.rpc('decrement_favorites_count', { post_id: postId });
     favorited = false;
   } else {
     // Favorite
-    await supabase.from('post_favorites').insert({ post_id: postId, user_id: user.id });
-    await supabase.rpc('increment_favorites_count', { post_id: postId });
+    await supabaseAdmin.from('post_favorites').insert({ post_id: postId, user_id: user.id });
+    await supabaseAdmin.rpc('increment_favorites_count', { post_id: postId });
     favorited = true;
   }
 
-  const { data: post } = await supabase
+  const { data: post } = await supabaseAdmin
     .from('community_posts')
     .select('favorites_count')
     .eq('id', postId)

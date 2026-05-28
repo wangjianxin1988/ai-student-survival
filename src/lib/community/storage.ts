@@ -276,12 +276,14 @@ export async function deletePost(postId: string, userId: string): Promise<boolea
   return true;
 }
 
-export async function toggleLike(postId: string, userId: string): Promise<{
+export async function toggleLike(postId: string, userId: string, accessToken?: string): Promise<{
   liked: boolean;
   likesCount: number;
 }> {
+  const client = getAuthClient(accessToken);
+
   // 检查是否已经点赞
-  const { data: existing } = await supabase
+  const { data: existing } = await client
     .from('post_likes')
     .select('id')
     .eq('post_id', postId)
@@ -292,29 +294,29 @@ export async function toggleLike(postId: string, userId: string): Promise<{
 
   if (existing) {
     // 取消点赞
-    await supabase
+    await client
       .from('post_likes')
       .delete()
       .eq('id', existing.id);
 
     // 减少点赞数
-    await supabase.rpc('decrement_likes_count', { post_id: postId });
+    await client.rpc('decrement_likes_count', { post_id: postId });
 
     liked = false;
   } else {
     // 添加点赞
-    await supabase
+    await client
       .from('post_likes')
       .insert({ post_id: postId, user_id: userId });
 
     // 增加点赞数
-    await supabase.rpc('increment_likes_count', { post_id: postId });
+    await client.rpc('increment_likes_count', { post_id: postId });
 
     liked = true;
   }
 
   // 获取最新的点赞数
-  const { data: post } = await supabase
+  const { data: post } = await client
     .from('community_posts')
     .select('likes_count')
     .eq('id', postId)
@@ -326,12 +328,14 @@ export async function toggleLike(postId: string, userId: string): Promise<{
   };
 }
 
-export async function toggleFavorite(postId: string, userId: string): Promise<{
+export async function toggleFavorite(postId: string, userId: string, accessToken?: string): Promise<{
   favorited: boolean;
   favoritesCount: number;
 }> {
+  const client = getAuthClient(accessToken);
+
   // 检查是否已经收藏
-  const { data: existing } = await supabase
+  const { data: existing } = await client
     .from('post_favorites')
     .select('id')
     .eq('post_id', postId)
@@ -342,29 +346,29 @@ export async function toggleFavorite(postId: string, userId: string): Promise<{
 
   if (existing) {
     // 取消收藏
-    await supabase
+    await client
       .from('post_favorites')
       .delete()
       .eq('id', existing.id);
 
     // 减少收藏数
-    await supabase.rpc('decrement_favorites_count', { post_id: postId });
+    await client.rpc('decrement_favorites_count', { post_id: postId });
 
     favorited = false;
   } else {
     // 添加收藏
-    await supabase
+    await client
       .from('post_favorites')
       .insert({ post_id: postId, user_id: userId });
 
     // 增加收藏数
-    await supabase.rpc('increment_favorites_count', { post_id: postId });
+    await client.rpc('increment_favorites_count', { post_id: postId });
 
     favorited = true;
   }
 
   // 获取最新的收藏数
-  const { data: post } = await supabase
+  const { data: post } = await client
     .from('community_posts')
     .select('favorites_count')
     .eq('id', postId)

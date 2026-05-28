@@ -109,9 +109,10 @@ export async function toggleLike(
   supabase: SupabaseClient,
   postId: string,
   userId: string,
-  postUserId: string
+  postUserId: string,
+  accessToken?: string
 ): Promise<{ success: boolean; liked?: boolean; likesCount?: number; error?: string }> {
-  const result = await storage.toggleLike(postId, userId);
+  const result = await storage.toggleLike(postId, userId, accessToken);
 
   if (result.liked) {
     // 给帖子作者增加积分（被点赞）
@@ -138,9 +139,10 @@ export async function toggleFavorite(
   supabase: SupabaseClient,
   postId: string,
   userId: string,
-  postUserId: string
+  postUserId: string,
+  accessToken?: string
 ): Promise<{ success: boolean; favorited?: boolean; favoritesCount?: number; error?: string }> {
-  const result = await storage.toggleFavorite(postId, userId);
+  const result = await storage.toggleFavorite(postId, userId, accessToken);
 
   if (result.favorited) {
     // 给帖子作者增加积分（被收藏）
