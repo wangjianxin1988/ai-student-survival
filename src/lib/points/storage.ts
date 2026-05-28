@@ -1,5 +1,5 @@
 // 积分存储操作
-import { supabase, supabaseUrl, supabaseAnonKey } from '@/lib/supabase';
+import { supabase, supabaseAdmin, supabaseUrl, supabaseAnonKey } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
 export interface PointsTransaction {
@@ -19,9 +19,9 @@ export interface UserPointsBalance {
   totalSpent: number;
 }
 
-// 获取用户积分余额
+// 获取用户积分余额 (server-side, uses admin client to bypass RLS)
 export async function getUserBalance(userId: string): Promise<UserPointsBalance> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('user_points_balance')
     .select('*')
     .eq('user_id', userId)
@@ -45,7 +45,7 @@ export async function getUserBalance(userId: string): Promise<UserPointsBalance>
   };
 }
 
-// 获取积分变动历史
+// 获取积分变动历史 (server-side, uses admin client to bypass RLS)
 export async function getTransactionHistory(
   userId: string,
   options?: {
@@ -56,7 +56,7 @@ export async function getTransactionHistory(
 ): Promise<{ transactions: PointsTransaction[]; total: number }> {
   const { limit = 20, offset = 0, type } = options || {};
 
-  let query = supabase
+  let query = supabaseAdmin
     .from('points_transactions')
     .select('*', { count: 'exact' })
     .eq('user_id', userId)
@@ -88,7 +88,7 @@ export async function getTransactionHistory(
   return { transactions, total: count || 0 };
 }
 
-// 记录积分变动（不处理余额，由数据库触发器自动更新）
+// 记录积分变动（不处理余额，由数据库触发器自动更新） (server-side, uses admin client to bypass RLS)
 export async function recordTransaction(
   userId: string,
   amount: number,
@@ -96,7 +96,7 @@ export async function recordTransaction(
   description: string,
   referenceId?: string
 ): Promise<PointsTransaction | null> {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('points_transactions')
     .insert({
       user_id: userId,
@@ -124,23 +124,10 @@ export async function recordTransaction(
   };
 }
 
-// 确保用户有积分余额记录
+// 确保用户有积分余额记录 (server-side, uses admin client to bypass RLS)
 export async function ensureUserBalance(userId: string, accessToken?: string): Promise<void> {
-  // Create a client with the user's access token so RLS allows the upsert.
-  // The users table INSERT policy requires auth.uid() = id.
-  let client = supabase;
-  if (accessToken) {
-    client = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-  }
-
-  // Note: FK constraint on points_transactions references auth.users(id),
-  // so no need to insert into a public users table — the authenticated user
-  // already exists in auth.users.
+  // Use admin client to bypass RLS for server-side operations
+  const client = supabaseAdmin;
 
   const { data } = await client
     .from('user_points_balance')

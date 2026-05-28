@@ -15,7 +15,8 @@ async function sendSponsorEmail(params: {
   profileUrl: string | null;
 }) {
   const resendApiKey = (import.meta.env.RESEND_API_KEY as string)
-    || (typeof process !== 'undefined' ? process.env.RESEND_API_KEY : undefined);
+    || (typeof process !== 'undefined' ? process.env.RESEND_API_KEY : undefined)
+    || '';
 
   if (!resendApiKey) {
     console.warn('[sponsors/record] RESEND_API_KEY not configured, skipping email notification');

@@ -10,9 +10,27 @@ export const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | unde
 export const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
   || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined)
   || '';
-const supabaseServiceKey = (import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined)
+// NOTE: supabaseServiceKey is evaluated LAZY at call time, not module load time.
+// On Cloudflare Pages, import.meta.env.SUPABASE_SERVICE_ROLE_KEY is injected at build time via vite define,
+// but process.env values are only available at RUNTIME. So we read from multiple sources inside the getter.
+const _buildTimeServiceKey = (import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined)
   || (typeof process !== 'undefined' && process.env.SUPABASE_SERVICE_ROLE_KEY ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined)
   || '';
+
+/** Lazily resolve the service role key — tries build-time value, then process.env at runtime. */
+function getServiceRoleKey(): string {
+  if (_buildTimeServiceKey) return _buildTimeServiceKey;
+  // Cloudflare Pages runtime: process.env is populated after module init
+  if (typeof process !== 'undefined' && process.env?.SUPABASE_SERVICE_ROLE_KEY) {
+    return process.env.SUPABASE_SERVICE_ROLE_KEY;
+  }
+  // Cloudflare env bindings (if using platformProxy)
+  try {
+    const cf = (globalThis as any).__env__;
+    if (cf?.SUPABASE_SERVICE_ROLE_KEY) return cf.SUPABASE_SERVICE_ROLE_KEY;
+  } catch { /* ignore */ }
+  return '';
+}
 
 // Check if Supabase is properly configured
 // FORCE_DEMO_AUTH env var: when true, bypasses Supabase even when configured (for demo/testing)
@@ -91,13 +109,16 @@ let _supabaseAdmin: SupabaseClient | null = null;
 function getSupabaseAdminClient(): SupabaseClient {
   if (_supabaseAdmin) return _supabaseAdmin;
 
-  if (!supabaseServiceKey || !supabaseUrl.includes('supabase.co')) {
+  // Re-read service key lazily at call time (process.env may be available now)
+  const serviceKey = getServiceRoleKey();
+
+  if (!serviceKey || !supabaseUrl.includes('supabase.co')) {
     // Fallback to anon client if service key not configured
     console.warn('SUPABASE_SERVICE_ROLE_KEY not configured, using anon client for admin operations');
     return getSupabaseClient();
   }
 
-  _supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  _supabaseAdmin = createClient(supabaseUrl, serviceKey, {
     auth: { autoRefreshToken: false, persistSession: false },
     global: {
       fetch: (url, options) => {

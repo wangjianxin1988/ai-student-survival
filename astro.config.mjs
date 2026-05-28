@@ -39,9 +39,6 @@ export default defineConfig({
     optimizeDeps: {
       include: ['react', 'react-dom'],
     },
-    define: {
-      'import.meta.env.SUPABASE_SERVICE_ROLE_KEY': JSON.stringify(process.env.SUPABASE_SERVICE_ROLE_KEY || ''),
-    },
   },
   i18n: {
     defaultLocale: 'zh',

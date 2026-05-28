@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { getAccessToken } from '@/lib/auth';
+import { getAuthHeaders } from '@/lib/auth';
 
 interface Transaction {
   id: string;
@@ -62,11 +62,9 @@ export function PointsHistory({ userId }: PointsHistoryProps) {
         limit: PAGE_SIZE.toString(),
         offset: offset.toString(),
       });
-      const accessToken = await getAccessToken();
+      const authHeaders = await getAuthHeaders();
       const response = await fetch(`/api/community/points-history?${params}`, {
-        headers: {
-          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
-        },
+        headers: authHeaders,
       });
       const data = await response.json();
       if (data.success) {

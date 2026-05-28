@@ -70,6 +70,14 @@ export const POST: APIRoute = async ({ request }) => {
 
     const avatarUrl = urlData?.publicUrl || `${supabaseUrl}/storage/v1/object/public/user-uploads/${filePath}`;
 
+    // Update profiles table with new avatar URL (bypasses RLS)
+    await supabaseAdmin
+      .from('profiles')
+      .upsert(
+        { user_id: serverUser.id, avatar_url: avatarUrl, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      );
+
     return new Response(
       JSON.stringify({ success: true, url: avatarUrl }),
       { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }

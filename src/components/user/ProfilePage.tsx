@@ -159,11 +159,13 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
     if (!user) return;
 
     try {
+      const authHeaders = await getAuthHeaders();
+
       // Fetch user stats and points history from Supabase in parallel
       const [statsRes, historyRes, leaderboardRes] = await Promise.all([
-        fetch(`/api/community/user/${user.id}/stats`),
-        fetch('/api/community/points-history?limit=50', { headers: await getAuthHeaders() }),
-        fetch('/api/community/leaderboard?limit=100'),
+        fetch(`/api/community/user/${user.id}/stats`, { headers: authHeaders }),
+        fetch('/api/community/points-history?limit=50', { headers: authHeaders }),
+        fetch('/api/community/leaderboard?limit=100', { headers: authHeaders }),
       ]);
 
       const statsData = await statsRes.json();

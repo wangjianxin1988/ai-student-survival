@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getCurrentUser, initAuth, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { getCurrentUser, initAuth, onAuthStateChange, getAuthHeaders, type DemoUser } from '@/lib/auth';
 
 interface Sponsor {
   id: string;
@@ -114,9 +114,7 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
     setSubmitStatus('idle');
 
     try {
-      const headers: Record<string, string> = {};
-      const token = localStorage.getItem('demo_token') || localStorage.getItem('supabase-token');
-      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const headers = await getAuthHeaders();
 
       const finalTier = tier === 'custom' ? detectTier(parseFloat(amount) || 0) : tier;
 
