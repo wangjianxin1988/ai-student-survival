@@ -1,6 +1,6 @@
+name = "mi-to-ai-new"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
 [vars]
 SUPABASE_URL = "https://giynvpfnzzelzwpmsgtf.supabase.co"
-
-[[pages_rules]]
-include = ["/*"]
-script = "env"

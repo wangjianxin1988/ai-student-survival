@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin, getSupabaseAdminForRequest } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 
 // Send notification email to admin via Resend API
@@ -66,7 +66,8 @@ async function sendSponsorEmail(params: {
   }
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const admin = getSupabaseAdminForRequest(locals);
   // Verify auth using server-side helper (handles both demo and real auth)
   const serverUser = await getServerUser(request);
 
@@ -110,7 +111,7 @@ export const POST: APIRoute = async ({ request }) => {
   const resolvedTier = tierMap[tier] || 'coffee';
 
   // Insert sponsor record using admin client (bypasses RLS)
-  const { data: sponsor, error } = await supabaseAdmin
+  const { data: sponsor, error } = await admin
     .from('sponsors')
     .insert({
       user_id: userId,
@@ -138,7 +139,7 @@ export const POST: APIRoute = async ({ request }) => {
   const awardedPoints = pointsMap[resolvedTier] || 66;
 
   if (userId) {
-    await supabaseAdmin
+    await admin
       .from('points_transactions')
       .insert({
         user_id: userId,

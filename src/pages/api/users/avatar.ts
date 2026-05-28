@@ -2,11 +2,12 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabaseAdmin, supabaseUrl } from '@/lib/supabase';
+import { supabaseAdmin, getSupabaseAdminForRequest, supabaseUrl } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 
 // POST /api/users/avatar - upload avatar image
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const admin = getSupabaseAdminForRequest(locals);
   const serverUser = await getServerUser(request);
   if (!serverUser) {
     return new Response(
@@ -48,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Upload to Supabase Storage
     const arrayBuffer = await file.arrayBuffer();
-    const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+    const { data: uploadData, error: uploadError } = await admin.storage
       .from('user-uploads')
       .upload(filePath, arrayBuffer, {
         contentType: file.type,
@@ -64,14 +65,14 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     // Get public URL
-    const { data: urlData } = supabaseAdmin.storage
+    const { data: urlData } = admin.storage
       .from('user-uploads')
       .getPublicUrl(filePath);
 
     const avatarUrl = urlData?.publicUrl || `${supabaseUrl}/storage/v1/object/public/user-uploads/${filePath}`;
 
     // Update profiles table with new avatar URL (bypasses RLS)
-    await supabaseAdmin
+    await admin
       .from('profiles')
       .upsert(
         { user_id: serverUser.id, avatar_url: avatarUrl, updated_at: new Date().toISOString() },

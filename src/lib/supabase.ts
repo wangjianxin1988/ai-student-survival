@@ -13,15 +13,24 @@ export const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as stri
 // NOTE: Service role key is read LAZY at call time, not module load time.
 // On Cloudflare Pages, process.env is populated by the adapter AFTER module init,
 // so we must NOT evaluate it at module level.
-const _buildTimeServiceKey = '';
+let _cloudflareEnv: Record<string, any> | null = null;
+
+/** Called by middleware to inject Cloudflare env bindings. */
+export function setCloudflareEnv(env: Record<string, any>) {
+  _cloudflareEnv = env;
+}
 
 /** Lazily resolve the service role key — tries multiple sources at call time. */
 function getServiceRoleKey(): string {
-  // Source 1: process.env (populated at runtime by Cloudflare adapter)
+  // Source 1: Cloudflare env bindings (set by middleware)
+  if (_cloudflareEnv?.SUPABASE_SERVICE_ROLE_KEY) {
+    return _cloudflareEnv.SUPABASE_SERVICE_ROLE_KEY;
+  }
+  // Source 2: process.env (populated at runtime by Cloudflare adapter)
   if (typeof process !== 'undefined' && process.env?.SUPABASE_SERVICE_ROLE_KEY) {
     return process.env.SUPABASE_SERVICE_ROLE_KEY;
   }
-  // Source 2: Cloudflare env bindings (if using platformProxy)
+  // Source 3: globalThis env bindings
   try {
     const cf = (globalThis as any).__env__;
     if (cf?.SUPABASE_SERVICE_ROLE_KEY) return cf.SUPABASE_SERVICE_ROLE_KEY;
@@ -139,6 +148,28 @@ export const supabaseAdmin = new Proxy({} as SupabaseClient, {
     return value;
   },
 });
+
+/**
+ * Get a Supabase admin client that reads the service role key from Cloudflare runtime env.
+ * Use this in API routes when the default supabaseAdmin falls back to anon client.
+ * Usage: const admin = getSupabaseAdminForRequest(Astro.locals);
+ */
+export function getSupabaseAdminForRequest(locals?: Record<string, any>): SupabaseClient {
+  const cfKey = locals?.runtime?.env?.SUPABASE_SERVICE_ROLE_KEY;
+  if (cfKey && typeof cfKey === 'string' && cfKey.length > 10) {
+    return createClient(supabaseUrl, cfKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+      global: {
+        fetch: (url: any, options: any) => {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 15000);
+          return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
+        },
+      },
+    });
+  }
+  return supabaseAdmin;
+}
 
 // Database types (snake_case, matches Supabase schema)
 export interface DbTool {

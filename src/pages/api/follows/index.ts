@@ -3,11 +3,12 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin, getSupabaseAdminForRequest } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 
 // GET /api/follows?type=following|followers&user_id=xxx
-export const GET: APIRoute = async ({ request, url }) => {
+export const GET: APIRoute = async ({ request, url, locals }) => {
+  const admin = getSupabaseAdminForRequest(locals);
   const serverUser = await getServerUser(request);
 
   const targetUserId = url.searchParams.get('user_id') || serverUser?.id;
@@ -22,7 +23,7 @@ export const GET: APIRoute = async ({ request, url }) => {
 
   if (type === 'following') {
     // Get users that targetUserId follows
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await admin
       .from('user_follows')
       .select('following_id, created_at')
       .eq('follower_id', targetUserId)
@@ -42,7 +43,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     );
   } else {
     // Get followers of targetUserId
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await admin
       .from('user_follows')
       .select('follower_id, created_at')
       .eq('following_id', targetUserId)
@@ -64,7 +65,8 @@ export const GET: APIRoute = async ({ request, url }) => {
 };
 
 // POST /api/follows { following_id: string }
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const admin = getSupabaseAdminForRequest(locals);
   const serverUser = await getServerUser(request);
   if (!serverUser) {
     return new Response(
@@ -90,7 +92,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await admin
     .from('user_follows')
     .insert({ follower_id: serverUser.id, following_id })
     .select()
@@ -117,7 +119,8 @@ export const POST: APIRoute = async ({ request }) => {
 };
 
 // DELETE /api/follows { following_id: string }
-export const DELETE: APIRoute = async ({ request }) => {
+export const DELETE: APIRoute = async ({ request, locals }) => {
+  const admin = getSupabaseAdminForRequest(locals);
   const serverUser = await getServerUser(request);
   if (!serverUser) {
     return new Response(
@@ -136,7 +139,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     );
   }
 
-  const { error } = await supabaseAdmin
+  const { error } = await admin
     .from('user_follows')
     .delete()
     .eq('follower_id', serverUser.id)
