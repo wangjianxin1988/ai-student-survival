@@ -1,3 +1,6 @@
-name = "ai-student-survival"
-compatibility_date = "2025-01-01"
-pages_build_output_dir = "dist"
+[vars]
+SUPABASE_URL = "https://giynvpfnzzelzwpmsgtf.supabase.co"
+
+[[pages_rules]]
+include = ["/*"]
+script = "env"

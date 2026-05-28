@@ -10,21 +10,18 @@ export const supabaseUrl = (import.meta.env.PUBLIC_SUPABASE_URL as string | unde
 export const supabaseAnonKey = (import.meta.env.PUBLIC_SUPABASE_ANON_KEY as string | undefined)
   || (typeof process !== 'undefined' ? process.env.SUPABASE_ANON_KEY : undefined)
   || '';
-// NOTE: supabaseServiceKey is evaluated LAZY at call time, not module load time.
-// On Cloudflare Pages, import.meta.env.SUPABASE_SERVICE_ROLE_KEY is injected at build time via vite define,
-// but process.env values are only available at RUNTIME. So we read from multiple sources inside the getter.
-const _buildTimeServiceKey = (import.meta.env.SUPABASE_SERVICE_ROLE_KEY as string | undefined)
-  || (typeof process !== 'undefined' && process.env.SUPABASE_SERVICE_ROLE_KEY ? process.env.SUPABASE_SERVICE_ROLE_KEY : undefined)
-  || '';
+// NOTE: Service role key is read LAZY at call time, not module load time.
+// On Cloudflare Pages, process.env is populated by the adapter AFTER module init,
+// so we must NOT evaluate it at module level.
+const _buildTimeServiceKey = '';
 
-/** Lazily resolve the service role key — tries build-time value, then process.env at runtime. */
+/** Lazily resolve the service role key — tries multiple sources at call time. */
 function getServiceRoleKey(): string {
-  if (_buildTimeServiceKey) return _buildTimeServiceKey;
-  // Cloudflare Pages runtime: process.env is populated after module init
+  // Source 1: process.env (populated at runtime by Cloudflare adapter)
   if (typeof process !== 'undefined' && process.env?.SUPABASE_SERVICE_ROLE_KEY) {
     return process.env.SUPABASE_SERVICE_ROLE_KEY;
   }
-  // Cloudflare env bindings (if using platformProxy)
+  // Source 2: Cloudflare env bindings (if using platformProxy)
   try {
     const cf = (globalThis as any).__env__;
     if (cf?.SUPABASE_SERVICE_ROLE_KEY) return cf.SUPABASE_SERVICE_ROLE_KEY;
