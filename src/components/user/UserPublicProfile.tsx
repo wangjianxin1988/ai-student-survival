@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
-import { getBadgesWithStatus } from '@/lib/userProfile';
+import { getBadgesWithStatus, fetchUserStats, type RealUserStats } from '@/lib/userProfile';
 import { sampleOffers, type Offer } from '@/data/offers';
 import FollowButton from './FollowButton';
-import { BadgeGrid } from './Badge';
+import { BadgeGrid, BadgeDisplay } from './Badge';
 import { getLocaleHref } from '@/lib/i18n';
 
 interface UserPublicProfileProps {
@@ -110,6 +110,7 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
   const [userOffers, setUserOffers] = useState<Offer[]>([]);
   const [userFavorites, setUserFavorites] = useState<any[]>([]);
   const [userRatings, setUserRatings] = useState<any[]>([]);
+  const [realBadgeStats, setRealBadgeStats] = useState<RealUserStats | null>(null);
   const t = translations[locale];
 
   useEffect(() => {
@@ -123,6 +124,13 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
         .then(data => {
           if (data.success && data.data) {
             setUserStats(data.data);
+            setRealBadgeStats({
+              points: data.data.points || 0,
+              totalEarned: data.data.totalEarned || 0,
+              totalSpent: data.data.totalSpent || 0,
+              postsCount: data.data.postsCount || 0,
+              commentsCount: data.data.commentsCount || 0,
+            });
           }
         })
         .catch(e => console.error('[UserPublicProfile] Failed to fetch user stats:', e));
@@ -213,6 +221,28 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
 
   const level = getLevelFromPoints(userStats.points);
 
+  // Compute earned badges using real Supabase stats
+  const minimalProfile = {
+    id: userId || '',
+    email: userStats.email || '',
+    name: userStats.name,
+    avatar: userStats.avatar,
+    points: userStats.points,
+    level,
+    badges: [],
+    favoritesCount: 0,
+    ratingsCount: 0,
+    reviewsCount: 0,
+    followees: [],
+    followers: [],
+    joinDate: userStats.joinDate,
+    lastActive: userStats.joinDate,
+  };
+  const badgesWithStatus = realBadgeStats
+    ? getBadgesWithStatus(minimalProfile, realBadgeStats)
+    : getBadgesWithStatus(minimalProfile);
+  const earnedBadges = badgesWithStatus.filter(b => b.earned);
+
   const tabs = [
     { id: 'offers', label: `${t.offersLabel} (${userOffers.length})` },
     { id: 'favorites', label: `${t.favorites} (${userFavorites.length})` },
@@ -296,6 +326,20 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
             </div>
           </div>
         </div>
+
+        {/* Earned Badges */}
+        {earnedBadges.length > 0 && (
+          <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+            <h3 className="text-sm font-semibold text-gray-700 mb-3">
+              {locale === 'zh' ? '已获得徽章' : 'Earned Badges'} ({earnedBadges.length})
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {earnedBadges.map(({ badge, earned }) => (
+                <BadgeDisplay key={badge.id} badge={badge} earned={earned} size="md" locale={locale} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-gray-200">

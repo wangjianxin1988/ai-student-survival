@@ -1,9 +1,42 @@
 /**
  * User Profile Module - Points, Levels, Badges, and Social Features
  * Uses localStorage for demo mode persistence
+ * Badge system supports real Supabase data with localStorage fallback
  */
 
 import type { DemoUser } from './auth';
+
+// Real user stats from Supabase
+export interface RealUserStats {
+  points: number;
+  totalEarned: number;
+  totalSpent: number;
+  postsCount: number;
+  commentsCount: number;
+}
+
+/**
+ * Fetch real user stats from Supabase via API
+ * Returns null on failure (caller should fall back to localStorage)
+ */
+export async function fetchUserStats(userId: string): Promise<RealUserStats | null> {
+  try {
+    const res = await fetch(`/api/community/user/${userId}/stats`);
+    const data = await res.json();
+    if (data.success && data.data) {
+      return {
+        points: data.data.points || 0,
+        totalEarned: data.data.totalEarned || 0,
+        totalSpent: data.data.totalSpent || 0,
+        postsCount: data.data.postsCount || 0,
+        commentsCount: data.data.commentsCount || 0,
+      };
+    }
+  } catch (e) {
+    console.error('[userProfile] Failed to fetch real user stats:', e);
+  }
+  return null;
+}
 
 // Types
 export interface UserProfile {
@@ -31,7 +64,7 @@ export interface Badge {
   descriptionZh: string;
   icon: string;
   requirement: string;
-  condition: (profile: UserProfile) => boolean;
+  condition: (profile: UserProfile, realStats?: RealUserStats | null) => boolean;
 }
 
 export interface Comment {
@@ -115,6 +148,8 @@ export const POINTS_CONFIG = {
 };
 
 // Badge definitions
+// Conditions prefer real Supabase stats (realStats) when available,
+// falling back to localStorage-based profile data for demo mode.
 export const BADGES: Badge[] = [
   {
     id: 'newcomer',
@@ -174,7 +209,49 @@ export const BADGES: Badge[] = [
     descriptionZh: '撰写第一条评论',
     icon: '✍️',
     requirement: '评论1次',
-    condition: (profile) => profile.reviewsCount >= 1,
+    condition: (profile, realStats) => {
+      if (realStats) return realStats.commentsCount >= 1;
+      return profile.reviewsCount >= 1;
+    },
+  },
+  {
+    id: 'first_post',
+    name: 'First Post',
+    nameZh: '初次发帖',
+    description: 'Published your first post',
+    descriptionZh: '发布第一篇帖子',
+    icon: '📝',
+    requirement: '发布1篇帖子',
+    condition: (_profile, realStats) => {
+      if (realStats) return realStats.postsCount >= 1;
+      return false;
+    },
+  },
+  {
+    id: 'active_poster',
+    name: 'Active Poster',
+    nameZh: '活跃发帖',
+    description: 'Published 10 posts',
+    descriptionZh: '发布10篇帖子',
+    icon: '📰',
+    requirement: '发布10篇帖子',
+    condition: (_profile, realStats) => {
+      if (realStats) return realStats.postsCount >= 10;
+      return false;
+    },
+  },
+  {
+    id: 'commentator',
+    name: 'Commentator',
+    nameZh: '活跃评论',
+    description: 'Left 10 comments',
+    descriptionZh: '发表10条评论',
+    icon: '💬',
+    requirement: '发表10条评论',
+    condition: (profile, realStats) => {
+      if (realStats) return realStats.commentsCount >= 10;
+      return profile.reviewsCount >= 10;
+    },
   },
   {
     id: 'influencer',
@@ -197,12 +274,38 @@ export const BADGES: Badge[] = [
     condition: (profile) => profile.followees.length >= 10,
   },
   {
+    id: 'points_100',
+    name: 'Point Collector',
+    nameZh: '积分收集者',
+    description: 'Earned 100 points',
+    descriptionZh: '获得100积分',
+    icon: '💰',
+    requirement: '获得100积分',
+    condition: (profile, realStats) => {
+      if (realStats) return realStats.points >= 100;
+      return profile.points >= 100;
+    },
+  },
+  {
+    id: 'points_500',
+    name: 'Point Master',
+    nameZh: '积分大师',
+    description: 'Earned 500 points',
+    descriptionZh: '获得500积分',
+    icon: '💎',
+    requirement: '获得500积分',
+    condition: (profile, realStats) => {
+      if (realStats) return realStats.points >= 500;
+      return profile.points >= 500;
+    },
+  },
+  {
     id: 'Lv5',
     name: 'Level 5',
     nameZh: '5级用户',
     description: 'Reached Level 5',
     descriptionZh: '达到5级',
-    icon: '💎',
+    icon: '🏅',
     requirement: '达到5级',
     condition: (profile) => profile.level >= 5,
   },
@@ -686,11 +789,11 @@ export function getBadgeById(badgeId: string): Badge | undefined {
   return BADGES.find(b => b.id === badgeId);
 }
 
-// Get all badges with earned status
-export function getBadgesWithStatus(profile: UserProfile): { badge: Badge; earned: boolean }[] {
+// Get all badges with earned status (supports real Supabase stats)
+export function getBadgesWithStatus(profile: UserProfile, realStats?: RealUserStats | null): { badge: Badge; earned: boolean }[] {
   return BADGES.map(badge => ({
     badge,
-    earned: profile.badges.includes(badge.id),
+    earned: badge.condition(profile, realStats),
   }));
 }
 
@@ -772,8 +875,8 @@ export const userStatsApi = {
     return getBadgeById(badgeId);
   },
 
-  getBadgesWithStatus(profile: UserProfile): { badge: Badge; earned: boolean }[] {
-    return getBadgesWithStatus(profile);
+  getBadgesWithStatus(profile: UserProfile, realStats?: RealUserStats | null): { badge: Badge; earned: boolean }[] {
+    return getBadgesWithStatus(profile, realStats);
   },
 
   getPointsHistory(userId: string, limit?: number): PointsHistoryEntry[] {

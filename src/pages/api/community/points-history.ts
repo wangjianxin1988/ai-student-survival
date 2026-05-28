@@ -21,6 +21,22 @@ export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
   const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 200);
 
+  // Check if this is a demo user (demo IDs start with 'demo-' prefix)
+  const isDemoUser = user.id.startsWith('demo-');
+
+  if (isDemoUser) {
+    // Demo mode: return demo points history from localStorage-like mock data
+    // The client handles local storage for demo users
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: [],
+        demo: true,
+      }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
   const result = await getPointsHistory(user.id, { limit });
 
   return new Response(

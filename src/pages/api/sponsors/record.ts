@@ -3,17 +3,11 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { supabase } from '@/lib/supabase';
-import { getAuthHeaders } from '@/lib/auth';
+import { getServerUser } from '@/lib/server-auth';
 
 export const POST: APIRoute = async ({ request }) => {
-  // Verify auth
-  const authHeaders = await getAuthHeaders();
-  if (!authHeaders || !authHeaders['Authorization']) {
-    return new Response(
-      JSON.stringify({ success: false, error: { code: 'UNAUTHORIZED', message: '请先登录' } }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
-    );
-  }
+  // Verify auth using server-side helper (handles both demo and real auth)
+  const serverUser = await getServerUser(request);
 
   let body: { nickname?: string; amount?: number; tier?: string; paymentMethod?: string; message?: string; profileUrl?: string };
   try {
@@ -42,27 +36,9 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  // Get user from auth headers (check demo mode or real auth)
-  let userId: string | null = null;
-  const authHeader = authHeaders['Authorization'];
-
-  if (authHeader) {
-    // Try to get user from demo auth or real auth
-    const demoTokenMatch = authHeader.match(/^Bearer demo_user_([a-f0-9-]+)$/);
-    if (demoTokenMatch) {
-      userId = demoTokenMatch[1];
-    } else if (authHeader !== 'Bearer demo_token') {
-      // Real Supabase auth token - validate and get user
-      try {
-        const { data: userData } = await supabase.auth.getUser(
-          authHeader.replace('Bearer ', '')
-        );
-        userId = userData?.user?.id || null;
-      } catch {
-        // Fallback to null user_id (anonymous sponsorship)
-      }
-    }
-  }
+  // Get user ID from server auth (NULL for demo users - their UUID doesn't exist in auth.users)
+  const isDemoUser = serverUser?.id?.startsWith('demo-') || false;
+  const userId: string | null = (serverUser && !isDemoUser) ? serverUser.id : null;
 
   // Determine tier from amount
   const tierMap: Record<string, string> = {
@@ -97,23 +73,23 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   // Award points to logged-in user
-  if (userId) {
-    const pointsMap: Record<string, number> = { coffee: 66, meal: 188, super: 666 };
-    const points = pointsMap[resolvedTier] || 66;
+  const pointsMap: Record<string, number> = { coffee: 66, meal: 188, super: 666 };
+  const awardedPoints = pointsMap[resolvedTier] || 66;
 
+  if (userId) {
     await supabase
       .from('points_transactions')
       .insert({
         user_id: userId,
-        amount: points,
-        type: 'sponsor_reward',
+        amount: awardedPoints,
+        type: 'earn_sponsor',
         description: `赞助奖励 (${amount}元 ${tier === 'coffee' ? '一杯咖啡' : tier === 'meal' ? '一顿饭' : '超级赞助'})`,
       })
       .catch(e => console.warn('[sponsors/record] Failed to award points:', e));
   }
 
   return new Response(
-    JSON.stringify({ success: true, data: sponsor, points: userId ? (pointsMap[resolvedTier] || 66) : 0 }),
+    JSON.stringify({ success: true, data: sponsor, points: userId ? awardedPoints : 0 }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );
 };

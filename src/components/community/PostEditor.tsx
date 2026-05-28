@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { type CommunityCategory, CATEGORY_LABELS } from "@/lib/community/types";
 import MathCaptcha from "@/components/common/MathCaptcha";
 import { initAuth, onAuthStateChange, type DemoUser } from "@/lib/auth";
-import { getBadgesWithStatus, userStatsApi, type UserProfile } from "@/lib/userProfile";
+import { getBadgesWithStatus, fetchUserStats, userStatsApi, type UserProfile } from "@/lib/userProfile";
 
 interface PostEditorProps {
   initialData?: {
@@ -845,21 +845,24 @@ export function PostEditor({
 
   // Load user and badges on mount
   useEffect(() => {
-    initAuth().then((user) => {
+    initAuth().then(async (user) => {
       setCurrentUser(user);
       if (user) {
         const profile = userStatsApi.getOrCreateProfile(user);
         setUserProfile(profile);
-        setEarnedBadges(getBadgesWithStatus(profile).filter(b => b.earned));
+        // Fetch real stats from Supabase for accurate badge computation
+        const realStats = await fetchUserStats(user.id);
+        setEarnedBadges(getBadgesWithStatus(profile, realStats).filter(b => b.earned));
       }
     });
 
-    const unsubscribe = onAuthStateChange((user) => {
+    const unsubscribe = onAuthStateChange(async (user) => {
       setCurrentUser(user);
       if (user) {
         const profile = userStatsApi.getOrCreateProfile(user);
         setUserProfile(profile);
-        setEarnedBadges(getBadgesWithStatus(profile).filter(b => b.earned));
+        const realStats = await fetchUserStats(user.id);
+        setEarnedBadges(getBadgesWithStatus(profile, realStats).filter(b => b.earned));
       } else {
         setUserProfile(null);
         setEarnedBadges([]);

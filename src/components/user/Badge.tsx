@@ -1,5 +1,5 @@
 import React from 'react';
-import { BADGES, type Badge, type UserProfile, getBadgesWithStatus } from '@/lib/userProfile';
+import { BADGES, type Badge, type UserProfile, type RealUserStats, getBadgesWithStatus } from '@/lib/userProfile';
 
 interface BadgeDisplayProps {
   badge: Badge;
@@ -48,13 +48,14 @@ export function BadgeDisplay({ badge, earned, size = 'md', locale = 'zh' }: Badg
 
 interface BadgeGridProps {
   profile: UserProfile;
+  realStats?: RealUserStats | null;
   size?: 'sm' | 'md' | 'lg';
   locale?: 'zh' | 'en';
   showLocked?: boolean;
 }
 
-export function BadgeGrid({ profile, size = 'md', locale = 'zh', showLocked = true }: BadgeGridProps) {
-  const badgesWithStatus = getBadgesWithStatus(profile);
+export function BadgeGrid({ profile, realStats, size = 'md', locale = 'zh', showLocked = true }: BadgeGridProps) {
+  const badgesWithStatus = getBadgesWithStatus(profile, realStats);
   const earnedBadges = badgesWithStatus.filter(b => b.earned);
   const lockedBadges = badgesWithStatus.filter(b => !b.earned);
 

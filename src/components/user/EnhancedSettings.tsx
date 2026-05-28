@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { demoAuthApi, getCurrentUser, onAuthStateChange, notifyAuthChange, type DemoUser } from '@/lib/auth';
+import { demoAuthApi, getCurrentUser, onAuthStateChange, notifyAuthChange, getAuthHeaders, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
-
-const USERS_KEY = 'demo_users';
-const SETTINGS_KEY = 'demo_user_settings';
 
 interface UserSettings {
   name: string;
@@ -67,6 +64,8 @@ const translations = {
     deleteAccount: '删除账户',
     deleteConfirm: '确定要删除账户吗？此操作不可撤销。',
     saved: '保存成功！',
+    saveFailed: '保存失败，请重试',
+    loadFailed: '加载设置失败',
     language: '语言设置',
     languageZh: '中文',
     languageEn: 'English',
@@ -100,6 +99,8 @@ const translations = {
     deleteAccount: 'Delete Account',
     deleteConfirm: 'Are you sure you want to delete your account? This action cannot be undone.',
     saved: 'Saved successfully!',
+    saveFailed: 'Save failed, please try again',
+    loadFailed: 'Failed to load settings',
     language: 'Language',
     languageZh: '中文',
     languageEn: 'English',
@@ -115,30 +116,45 @@ export default function EnhancedSettings({ locale = 'zh' }: { locale?: 'zh' | 'e
   const fileInputRef = useRef<HTMLInputElement>(null);
   const t = translations[locale];
 
+  // Fetch settings from API
+  const fetchSettings = async (currentUser: DemoUser) => {
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch('/api/users/profile', {
+        headers: { ...headers, 'Content-Type': 'application/json' },
+      });
+
+      if (!res.ok) {
+        console.error('[EnhancedSettings] Failed to fetch profile:', res.status);
+        return;
+      }
+
+      const result = await res.json();
+      if (result.success && result.data) {
+        const data = result.data;
+        const newSettings: UserSettings = {
+          name: data.name || currentUser.name || '',
+          bio: data.bio || '',
+          avatar: data.avatar || currentUser.avatar || '',
+          privacy: data.privacy || 'public',
+          notifications: data.notifications || defaultSettings.notifications,
+          language: data.language || 'zh',
+        };
+        setSettings(newSettings);
+        setAvatarPreview(newSettings.avatar);
+      }
+    } catch (err) {
+      console.error('[EnhancedSettings] Error fetching settings:', err);
+    }
+  };
+
   useEffect(() => {
     const currentUser = getCurrentUser();
     setUser(currentUser);
 
-    // Load settings from localStorage
-    if (typeof window !== 'undefined') {
-      const storedSettings = localStorage.getItem(SETTINGS_KEY);
-      if (storedSettings) {
-        try {
-          const parsed = JSON.parse(storedSettings);
-          setSettings({ ...defaultSettings, ...parsed });
-          setAvatarPreview(parsed.avatar || '');
-        } catch (e) {
-          console.error('Failed to parse settings:', e);
-        }
-      } else if (currentUser) {
-        // Initialize with user data
-        setSettings(prev => ({
-          ...prev,
-          name: currentUser.name,
-          avatar: currentUser.avatar || '',
-        }));
-        setAvatarPreview(currentUser.avatar || '');
-      }
+    if (currentUser) {
+      // Fetch settings from Supabase API
+      fetchSettings(currentUser);
     }
 
     setLoading(false);
@@ -146,12 +162,7 @@ export default function EnhancedSettings({ locale = 'zh' }: { locale?: 'zh' | 'e
     const unsubscribe = onAuthStateChange((newUser) => {
       setUser(newUser);
       if (newUser) {
-        setSettings(prev => ({
-          ...prev,
-          name: newUser.name,
-          avatar: newUser.avatar || prev.avatar,
-        }));
-        setAvatarPreview(newUser.avatar || settings.avatar);
+        fetchSettings(newUser);
       }
     });
 
@@ -188,45 +199,40 @@ export default function EnhancedSettings({ locale = 'zh' }: { locale?: 'zh' | 'e
 
     setSaving(true);
 
-    // Save settings to localStorage
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: settings.name,
+          bio: settings.bio,
+          avatar_url: settings.avatar,
+          privacy: settings.privacy,
+          notifications: settings.notifications,
+          language: settings.language,
+        }),
+      });
 
-    // Update user data in demo_users
-    const stored = localStorage.getItem(USERS_KEY);
-    if (stored) {
-      const users = JSON.parse(stored);
-      if (users[user.id]) {
-        users[user.id].name = settings.name;
-        users[user.id].avatar = settings.avatar;
-        users[user.id].bio = settings.bio;
-        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+      if (!res.ok) {
+        const result = await res.json();
+        console.error('[EnhancedSettings] Save failed:', result.error);
+        alert(t.saveFailed);
+        setSaving(false);
+        return;
       }
+
+      // Update local auth state for UI consistency
+      const updatedUser = { ...user, name: settings.name, avatar: settings.avatar };
+      notifyAuthChange(updatedUser);
+
+      alert(t.saved);
+    } catch (err) {
+      console.error('[EnhancedSettings] Save error:', err);
+      alert(t.saveFailed);
     }
-
-    // Update user profile in demo_user_profiles (for avatar sync)
-    const USER_PROFILES_KEY = 'demo_user_profiles';
-    const storedProfiles = localStorage.getItem(USER_PROFILES_KEY);
-    if (storedProfiles) {
-      const profiles = JSON.parse(storedProfiles);
-      if (profiles[user.id]) {
-        profiles[user.id].name = settings.name;
-        profiles[user.id].avatar = settings.avatar;
-        localStorage.setItem(USER_PROFILES_KEY, JSON.stringify(profiles));
-      }
-    }
-
-    // Update session
-    const updatedUser = { ...user, name: settings.name, avatar: settings.avatar };
-    sessionStorage.setItem('demo_session', JSON.stringify(updatedUser));
-
-    // Update cookie
-    document.cookie = `demo_auth=${JSON.stringify(updatedUser)};path=/;SameSite=Lax`;
-
-    // Notify auth state listeners (for UserMenu and other components)
-    notifyAuthChange(updatedUser);
 
     setSaving(false);
-    alert(t.saved);
   };
 
   const handleSignOut = async () => {
@@ -238,7 +244,8 @@ export default function EnhancedSettings({ locale = 'zh' }: { locale?: 'zh' | 'e
     if (!user) return;
 
     if (confirm(t.deleteConfirm)) {
-      // Remove user data from localStorage
+      // Remove user data from localStorage (demo mode cleanup)
+      const USERS_KEY = 'demo_users';
       const storedUsers = localStorage.getItem(USERS_KEY);
       if (storedUsers) {
         const users = JSON.parse(storedUsers);

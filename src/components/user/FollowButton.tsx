@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { initAuth, getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
-import { userStatsApi, type UserProfile } from '@/lib/userProfile';
+import { initAuth, getCurrentUser, onAuthStateChange, getAuthHeaders, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
 
 interface FollowButtonProps {
   targetUserId: string;
-  targetUser?: UserProfile;
   locale?: 'zh' | 'en';
   size?: 'sm' | 'md' | 'lg';
   showCount?: boolean;
@@ -32,7 +30,6 @@ const translations = {
 
 export default function FollowButton({
   targetUserId,
-  targetUser,
   locale = 'zh',
   size = 'md',
   showCount = false,
@@ -41,6 +38,7 @@ export default function FollowButton({
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [hovering, setHovering] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
   const t = translations[locale];
 
   useEffect(() => {
@@ -55,11 +53,28 @@ export default function FollowButton({
     return unsubscribe;
   }, []);
 
+  // Check follow status via API
   useEffect(() => {
-    if (user) {
-      setIsFollowing(userStatsApi.isFollowing(user.id, targetUserId));
+    if (user && user.id !== targetUserId) {
+      checkFollowStatus();
     }
   }, [user, targetUserId]);
+
+  const checkFollowStatus = async () => {
+    if (!user) return;
+    try {
+      const authHeaders = await getAuthHeaders();
+      const res = await fetch(`/api/follows?type=following&user_id=${user.id}`, {
+        headers: authHeaders,
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setIsFollowing(data.data.some((f: { following_id: string }) => f.following_id === targetUserId));
+      }
+    } catch {
+      // Ignore errors
+    }
+  };
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -77,13 +92,33 @@ export default function FollowButton({
     setLoading(true);
 
     try {
+      const authHeaders = await getAuthHeaders();
+
       if (isFollowing) {
-        userStatsApi.unfollowUser(user.id, targetUserId);
-        setIsFollowing(false);
+        // Unfollow
+        const res = await fetch('/api/follows', {
+          method: 'DELETE',
+          headers: { ...authHeaders, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ following_id: targetUserId }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setIsFollowing(false);
+        }
       } else {
-        userStatsApi.followUser(user.id, targetUserId);
-        setIsFollowing(true);
+        // Follow
+        const res = await fetch('/api/follows', {
+          method: 'POST',
+          headers: { ...authHeaders, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ following_id: targetUserId }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          setIsFollowing(true);
+        }
       }
+    } catch (e) {
+      console.error('[FollowButton] Error:', e);
     } finally {
       setLoading(false);
     }
@@ -175,9 +210,9 @@ export default function FollowButton({
         {getButtonContent()}
       </button>
 
-      {showCount && targetUser && (
+      {showCount && followerCount > 0 && (
         <span className="text-sm text-gray-500">
-          {targetUser.followers?.length || 0}
+          {followerCount}
         </span>
       )}
     </div>
@@ -190,16 +225,34 @@ interface FollowStatsProps {
 }
 
 export function FollowStats({ userId, locale = 'zh' }: FollowStatsProps) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [followers, setFollowers] = useState(0);
+  const [following, setFollowing] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userProfile = userStatsApi.getProfile(userId);
-    setProfile(userProfile);
-    setLoading(false);
+    async function load() {
+      try {
+        const [followersRes, followingRes] = await Promise.all([
+          fetch(`/api/follows?type=followers&user_id=${userId}`),
+          fetch(`/api/follows?type=following&user_id=${userId}`),
+        ]);
+
+        const followersData = await followersRes.json();
+        const followingData = await followingRes.json();
+
+        setFollowers(followersData.success ? (followersData.data?.length || 0) : 0);
+        setFollowing(followingData.success ? (followingData.data?.length || 0) : 0);
+      } catch {
+        // Ignore
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
   }, [userId]);
 
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="flex gap-4">
         <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
@@ -213,11 +266,11 @@ export function FollowStats({ userId, locale = 'zh' }: FollowStatsProps) {
   return (
     <div className="flex gap-4 text-sm">
       <div>
-        <span className="font-semibold text-gray-900">{profile.followers?.length || 0}</span>
+        <span className="font-semibold text-gray-900">{followers}</span>
         <span className="text-gray-500 ml-1">{t.followers}</span>
       </div>
       <div>
-        <span className="font-semibold text-gray-900">{profile.followees?.length || 0}</span>
+        <span className="font-semibold text-gray-900">{following}</span>
         <span className="text-gray-500 ml-1">{t.followees}</span>
       </div>
     </div>

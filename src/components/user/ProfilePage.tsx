@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { initAuth, onAuthStateChange, type DemoUser } from '@/lib/auth';
 import { getAuthHeaders } from '@/lib/auth';
-import { getBadgesWithStatus, getLevelProgress } from '@/lib/userProfile';
-import type { UserProfile } from '@/lib/userProfile';
+import { getBadgesWithStatus, getLevelProgress, getPointsHistory as getDemoPointsHistory } from '@/lib/userProfile';
+import type { UserProfile, PointsHistoryEntry, RealUserStats } from '@/lib/userProfile';
+import { isDemoMode } from '@/lib/supabase';
 import { getAuthLoginHref } from '@/lib/i18n';
 import UserProfileCard from './UserProfileCard';
 import { BadgeGrid } from './Badge';
@@ -145,6 +146,15 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
     ? { ...localProfile, points: userStats.points, level: getLevelFromPoints(userStats.points) }
     : localProfile;
 
+  // Derive real stats for badge computation
+  const realBadgeStats: RealUserStats | null = userStats ? {
+    points: userStats.points,
+    totalEarned: userStats.totalEarned,
+    totalSpent: userStats.totalSpent,
+    postsCount: userStats.postsCount,
+    commentsCount: userStats.commentsCount,
+  } : null;
+
   const loadUserData = useCallback(async () => {
     if (!user) return;
 
@@ -163,7 +173,20 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
 
       const historyData = await historyRes.json();
       if (historyData.success && historyData.data) {
-        setPointsHistory(historyData.data);
+        // In demo mode, also merge localStorage history
+        if (historyData.demo || (isDemoMode() && historyData.data.length === 0)) {
+          const demoHistory = getDemoPointsHistory(user.id, 50);
+          const mapped = demoHistory.map((h: PointsHistoryEntry) => ({
+            id: h.id,
+            amount: h.points,
+            type: h.action,
+            description: h.description,
+            createdAt: h.createdAt,
+          }));
+          setPointsHistory(mapped);
+        } else {
+          setPointsHistory(historyData.data);
+        }
       }
 
       const leaderboardData = await leaderboardRes.json();
@@ -251,7 +274,7 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
     );
   }
 
-  const badgesWithStatus = getBadgesWithStatus(mergedProfile);
+  const badgesWithStatus = getBadgesWithStatus(mergedProfile, realBadgeStats);
   const earnedBadges = badgesWithStatus.filter(b => b.earned);
   const progress = getLevelProgress(mergedProfile.points);
   const level = getLevelFromPoints(mergedProfile.points);
@@ -384,7 +407,7 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
             <h2 className="text-xl font-bold text-gray-900 mb-6">
               {locale === 'zh' ? '我的徽章' : 'My Badges'} ({earnedBadges.length}/{badgesWithStatus.length})
             </h2>
-            <BadgeGrid profile={mergedProfile} size="lg" locale={locale} showLocked={true} />
+            <BadgeGrid profile={mergedProfile} realStats={realBadgeStats} size="lg" locale={locale} showLocked={true} />
           </div>
         )}
 

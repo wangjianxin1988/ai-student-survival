@@ -1,8 +1,5 @@
 import type { APIRoute } from 'astro';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = import.meta.env.SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.SUPABASE_ANON_KEY;
+import { supabase } from '@/lib/supabase';
 
 export const prerender = false;
 
@@ -14,9 +11,7 @@ export const GET: APIRoute = async ({ url }) => {
     return new Response(JSON.stringify({ error: 'target_type and target_id are required' }), { status: 400 });
   }
 
-  const client = createClient(supabaseUrl, supabaseAnonKey);
-
-  const { data: ratings, error } = await client
+  const { data: ratings, error } = await supabase
     .from('ratings')
     .select('rating, created_at')
     .eq('target_type', targetType)
@@ -44,11 +39,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const token = authHeader.replace('Bearer ', '');
-  const client = createClient(supabaseUrl, supabaseAnonKey, {
-    global: { headers: { Authorization: `Bearer ${token}` } },
-  });
-
-  const { data: { user }, error: authError } = await client.auth.getUser(token);
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
   if (authError || !user) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
@@ -64,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Rating must be between 1 and 5' }), { status: 400 });
   }
 
-  const { data, error } = await client
+  const { data, error } = await supabase
     .from('ratings')
     .upsert(
       { user_id: user.id, target_type, target_id, rating },

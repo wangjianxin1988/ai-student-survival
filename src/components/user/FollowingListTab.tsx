@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { userStatsApi, type UserProfile } from '@/lib/userProfile';
+import { getAuthHeaders } from '@/lib/auth';
 import FollowButton from './FollowButton';
+
+interface FollowingUser {
+  id: string;
+  name: string;
+  avatar: string;
+  points: number;
+  level: number;
+}
 
 interface FollowingListTabProps {
   userId: string;
@@ -22,27 +30,84 @@ const translations = {
   },
 };
 
+// Calculate level from points
+function getLevelFromPoints(points: number): number {
+  if (points >= 10000) return 10;
+  if (points >= 5000) return 9;
+  if (points >= 2000) return 8;
+  if (points >= 1000) return 7;
+  if (points >= 500) return 6;
+  if (points >= 200) return 5;
+  if (points >= 100) return 4;
+  if (points >= 50) return 3;
+  if (points >= 20) return 2;
+  return 1;
+}
+
 export function FollowingListTab({ userId, locale = 'zh' }: FollowingListTabProps) {
-  const [followingIds, setFollowingIds] = useState<string[]>([]);
-  const [followingProfiles, setFollowingProfiles] = useState<UserProfile[]>([]);
+  const [following, setFollowing] = useState<FollowingUser[]>([]);
   const [loading, setLoading] = useState(true);
   const t = translations[locale];
 
   useEffect(() => {
-    const ids = userStatsApi.getFollowing(userId);
-    setFollowingIds(ids);
-
-    const profiles: UserProfile[] = [];
-    for (const id of ids) {
-      const profile = userStatsApi.getProfile(id);
-      if (profile) profiles.push(profile);
-    }
-    setFollowingProfiles(profiles);
-    setLoading(false);
+    loadFollowing();
   }, [userId]);
 
+  const loadFollowing = async () => {
+    setLoading(true);
+    try {
+      // Get following list from API
+      const authHeaders = await getAuthHeaders();
+      const res = await fetch(`/api/follows?type=following&user_id=${userId}`, {
+        headers: authHeaders,
+      });
+      const data = await res.json();
+
+      if (data.success && data.data && data.data.length > 0) {
+        const followingIds = data.data.map((f: { following_id: string }) => f.following_id);
+
+        // Fetch profile info for each followed user
+        const profiles = await Promise.all(
+          followingIds.map(async (id: string) => {
+            try {
+              const statsRes = await fetch(`/api/community/user/${id}/stats`);
+              const statsData = await statsRes.json();
+              if (statsData.success && statsData.data) {
+                return {
+                  id,
+                  name: statsData.data.name,
+                  avatar: statsData.data.avatar,
+                  points: statsData.data.points || 0,
+                  level: getLevelFromPoints(statsData.data.points || 0),
+                };
+              }
+            } catch {
+              // Fallback
+            }
+            return {
+              id,
+              name: `用户${id.substring(0, 8)}`,
+              avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${id.substring(0, 8)}`,
+              points: 0,
+              level: 1,
+            };
+          })
+        );
+
+        setFollowing(profiles);
+      } else {
+        setFollowing([]);
+      }
+    } catch (e) {
+      console.error('[FollowingListTab] Failed to load following:', e);
+      setFollowing([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleUnfollow = (unfollowedId: string) => {
-    setFollowingProfiles(prev => prev.filter(p => p.id !== unfollowedId));
+    setFollowing(prev => prev.filter(p => p.id !== unfollowedId));
   };
 
   if (loading) {
@@ -55,7 +120,7 @@ export function FollowingListTab({ userId, locale = 'zh' }: FollowingListTabProp
     );
   }
 
-  if (followingProfiles.length === 0) {
+  if (following.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
         <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -76,7 +141,7 @@ export function FollowingListTab({ userId, locale = 'zh' }: FollowingListTabProp
 
   return (
     <div className="space-y-4">
-      {followingProfiles.map(profile => (
+      {following.map(profile => (
         <div
           key={profile.id}
           className="bg-white rounded-xl border border-gray-200 p-4 hover:border-primary-200 transition-colors"
@@ -104,7 +169,6 @@ export function FollowingListTab({ userId, locale = 'zh' }: FollowingListTabProp
 
             <FollowButton
               targetUserId={profile.id}
-              targetUser={profile}
               locale={locale}
               size="sm"
             />
