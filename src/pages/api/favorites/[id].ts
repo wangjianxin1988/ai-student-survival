@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
+import { getServerUser } from '@/lib/server-auth';
 
 export const prerender = false;
 
@@ -8,25 +9,18 @@ export function getStaticPaths() {
 }
 
 export const DELETE: APIRoute = async ({ request, params }) => {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  const client = supabase;
-  const { data: { user }, error: authError } = await client.auth.getUser(token);
-  if (authError || !user) {
+  const serverUser = await getServerUser(request);
+  if (!serverUser) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
 
   const { id } = params;
 
-  const { error } = await client
+  const { error } = await supabaseAdmin
     .from('user_favorites')
     .delete()
     .eq('id', id)
-    .eq('user_id', user.id);
+    .eq('user_id', serverUser.id);
 
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });

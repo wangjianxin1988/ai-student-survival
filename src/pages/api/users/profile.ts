@@ -4,7 +4,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 
 // GET /api/users/profile - get current user's profile
@@ -17,8 +17,8 @@ export const GET: APIRoute = async ({ request }) => {
     );
   }
 
-  // Get profile from profiles table
-  const { data: profile } = await supabase
+  // Get profile from profiles table using admin client (bypasses RLS)
+  const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('*')
     .eq('user_id', serverUser.id)
@@ -82,8 +82,8 @@ export const PUT: APIRoute = async ({ request }) => {
   const body = await request.json();
   const { name, bio, avatar_url, privacy, notifications, language } = body;
 
-  // Get existing profile
-  const { data: existingProfile } = await supabase
+  // Get existing profile using admin client (bypasses RLS)
+  const { data: existingProfile } = await supabaseAdmin
     .from('profiles')
     .select('preferences')
     .eq('user_id', serverUser.id)
@@ -108,7 +108,8 @@ export const PUT: APIRoute = async ({ request }) => {
   if (avatar_url !== undefined) updateData.avatar_url = avatar_url;
   if (language !== undefined) updateData.native_language = language;
 
-  const { data, error } = await supabase
+  // Upsert using admin client (bypasses RLS)
+  const { data, error } = await supabaseAdmin
     .from('profiles')
     .upsert(updateData, { onConflict: 'user_id' })
     .select()

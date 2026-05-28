@@ -3,7 +3,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 
 // GET /api/follows?type=following|followers&user_id=xxx
@@ -22,7 +22,7 @@ export const GET: APIRoute = async ({ request, url }) => {
 
   if (type === 'following') {
     // Get users that targetUserId follows
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('user_follows')
       .select('following_id, created_at')
       .eq('follower_id', targetUserId)
@@ -42,7 +42,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     );
   } else {
     // Get followers of targetUserId
-    const { data, error } = await supabase
+    const { data, error } = await supabaseAdmin
       .from('user_follows')
       .select('follower_id, created_at')
       .eq('following_id', targetUserId)
@@ -90,7 +90,7 @@ export const POST: APIRoute = async ({ request }) => {
     );
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supabaseAdmin
     .from('user_follows')
     .insert({ follower_id: serverUser.id, following_id })
     .select()
@@ -136,7 +136,7 @@ export const DELETE: APIRoute = async ({ request }) => {
     );
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('user_follows')
     .delete()
     .eq('follower_id', serverUser.id)
