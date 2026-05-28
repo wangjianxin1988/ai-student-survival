@@ -21,6 +21,8 @@ const translations = {
     prompt: 'Prompt模板',
     policy: '大学政策',
     payment: '支付方案',
+    post: '收藏帖子',
+    liked_post: '点赞帖子',
   },
   en: {
     title: 'My Favorites',
@@ -32,6 +34,8 @@ const translations = {
     prompt: 'Prompt Template',
     policy: 'University Policy',
     payment: 'Payment Solution',
+    post: 'Saved Post',
+    liked_post: 'Liked Post',
   },
 };
 

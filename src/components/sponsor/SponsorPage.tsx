@@ -149,14 +149,6 @@ export default function SponsorPage({ locale = 'zh' }: SponsorPageProps) {
         const wallRes = await fetch('/api/sponsors/wall');
         const wallData = await wallRes.json();
         if (wallData.success) setSponsors(wallData.data || []);
-        // Open mailto after successful submission
-        const mailtoSubject = encodeURIComponent(locale === 'zh' ? `【赞助】来自 ${nickname.trim()} 的留言` : `[Sponsor] Message from ${nickname.trim()}`);
-        const mailtoBody = encodeURIComponent(
-          locale === 'zh'
-            ? `赞助者: ${nickname.trim()}\n金额: ${amount}元\n方式: ${activeTab === 'wechat' ? '微信' : '支付宝'}\n留言: ${message.trim() || '无'}\n个人主页: ${profileUrl.trim() || '无'}`
-            : `Sponsor: ${nickname.trim()}\nAmount: ${amount}CNY\nMethod: ${activeTab === 'wechat' ? 'WeChat' : 'Alipay'}\nMessage: ${message.trim() || 'None'}\nProfile: ${profileUrl.trim() || 'None'}`
-        );
-        window.location.href = `mailto:18801400211@163.com?subject=${mailtoSubject}&body=${mailtoBody}`;
       } else {
         setSubmitStatus('error');
         setSubmitMsg(data.error?.message || (locale === 'zh' ? '提交失败，请稍后重试' : 'Failed to submit'));

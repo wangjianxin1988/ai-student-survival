@@ -130,7 +130,7 @@ export function FollowingListTab({ userId, locale = 'zh' }: FollowingListTabProp
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">{t.noFollowing}</h3>
         <a
-          href={`/${locale === 'en' ? 'en/' : ''}user`}
+          href={`/${locale === 'en' ? 'en/' : ''}user?tab=leaderboard`}
           className="inline-block mt-4 px-6 py-2.5 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
         >
           {t.goExplore}

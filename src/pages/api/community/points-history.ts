@@ -19,7 +19,8 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   const url = new URL(request.url);
-  const limit = Math.min(parseInt(url.searchParams.get('limit') || '50'), 200);
+  const limit = Math.min(parseInt(url.searchParams.get('limit') || '20'), 200);
+  const offset = Math.max(parseInt(url.searchParams.get('offset') || '0'), 0);
 
   // Check if this is a demo user (demo IDs start with 'demo-' prefix)
   const isDemoUser = user.id.startsWith('demo-');
@@ -31,13 +32,14 @@ export const GET: APIRoute = async ({ request }) => {
       JSON.stringify({
         success: true,
         data: [],
+        meta: { total: 0 },
         demo: true,
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
-  const result = await getPointsHistory(user.id, { limit });
+  const result = await getPointsHistory(user.id, { limit, offset });
 
   return new Response(
     JSON.stringify({
@@ -50,6 +52,9 @@ export const GET: APIRoute = async ({ request }) => {
         referenceId: t.referenceId,
         createdAt: t.createdAt,
       })),
+      meta: {
+        total: result.total,
+      },
     }),
     { status: 200, headers: { 'Content-Type': 'application/json' } }
   );

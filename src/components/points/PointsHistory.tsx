@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { getAccessToken } from '@/lib/auth';
 
 interface Transaction {
@@ -37,47 +37,83 @@ const TYPE_COLORS: Record<string, string> = {
   spend_gift: 'text-red-600 bg-red-50',
 };
 
+const PAGE_SIZE = 20;
+
 export function PointsHistory({ userId }: PointsHistoryProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [total, setTotal] = useState(0);
-  const [page, setPage] = useState(0);
-  const limit = 20;
+  const [hasMore, setHasMore] = useState(true);
+  const observerRef = useRef<HTMLDivElement | null>(null);
+  const fetchingRef = useRef(false);
 
-  useEffect(() => {
-    fetchTransactions();
-  }, [userId, page]);
+  // Fetch a page of transactions
+  const fetchPage = useCallback(async (offset: number) => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
 
-  const fetchTransactions = async () => {
-    setLoading(true);
+    const isFirst = offset === 0;
+    if (isFirst) setLoading(true);
+    else setLoadingMore(true);
+
     try {
       const params = new URLSearchParams({
-        limit: limit.toString(),
-        offset: (page * limit).toString(),
+        limit: PAGE_SIZE.toString(),
+        offset: offset.toString(),
       });
       const accessToken = await getAccessToken();
-      const response = await fetch(`/api/points/transactions?${params}`, {
+      const response = await fetch(`/api/community/points-history?${params}`, {
         headers: {
           ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {}),
         },
       });
       const data = await response.json();
       if (data.success) {
-        setTransactions(data.data);
-        setTotal(data.meta.total);
+        const newTxs: Transaction[] = data.data || [];
+        setTransactions(prev => (isFirst ? newTxs : [...prev, ...newTxs]));
+        const serverTotal: number = data.meta?.total ?? 0;
+        setTotal(serverTotal);
+        setHasMore(offset + newTxs.length < serverTotal);
       }
     } catch (error) {
       console.error('Failed to fetch transactions:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
+      fetchingRef.current = false;
     }
-  };
+  }, []);
 
-  const totalPages = Math.ceil(total / limit);
+  // Initial load
+  useEffect(() => {
+    setTransactions([]);
+    setTotal(0);
+    setHasMore(true);
+    fetchPage(0);
+  }, [userId, fetchPage]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    if (!observerRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore && !fetchingRef.current) {
+          fetchPage(transactions.length);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(observerRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, transactions.length, fetchPage]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-4">积分记录</h3>
+      <h3 className="text-lg font-bold text-gray-900 mb-4">
+        积分记录
+        {total > 0 && <span className="text-sm font-normal text-gray-500 ml-2">共 {total} 条</span>}
+      </h3>
 
       {loading ? (
         <div className="flex items-center justify-center py-8">
@@ -112,27 +148,18 @@ export function PointsHistory({ userId }: PointsHistoryProps) {
             ))}
           </div>
 
-          {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 mt-4 pt-4 border-t border-gray-100">
-              <button
-                onClick={() => setPage(Math.max(0, page - 1))}
-                disabled={page === 0}
-                className="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                上一页
-              </button>
-              <span className="text-sm text-gray-600">
-                {page + 1} / {totalPages}
-              </span>
-              <button
-                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-                disabled={page >= totalPages - 1}
-                className="px-3 py-1 border border-gray-200 rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                下一页
-              </button>
-            </div>
-          )}
+          {/* Infinite scroll sentinel */}
+          <div ref={observerRef} className="py-4">
+            {loadingMore && (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-2"></div>
+                <span className="text-sm text-gray-500">加载更多...</span>
+              </div>
+            )}
+            {!hasMore && transactions.length > 0 && (
+              <p className="text-center text-sm text-gray-400">已加载全部记录</p>
+            )}
+          </div>
         </>
       )}
     </div>

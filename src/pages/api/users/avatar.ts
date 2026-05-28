@@ -57,12 +57,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (uploadError) {
       console.error('[avatar] Upload error:', uploadError);
-      // Fallback: store as base64 data URL if storage fails
-      const base64 = Buffer.from(arrayBuffer).toString('base64');
-      const dataUrl = `data:${file.type};base64,${base64}`;
       return new Response(
-        JSON.stringify({ success: true, url: dataUrl }),
-        { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+        JSON.stringify({ success: false, error: { message: '头像上传失败，请稍后重试' } }),
+        { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
       );
     }
 

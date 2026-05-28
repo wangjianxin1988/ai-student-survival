@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 export const GET: APIRoute = async ({ params }) => {
   const userId = params.id;
@@ -14,23 +14,23 @@ export const GET: APIRoute = async ({ params }) => {
     );
   }
 
-  // Get user points balance
-  const { data: balanceData } = await supabase
+  // Get user points balance (use supabaseAdmin to bypass RLS)
+  const { data: balanceData } = await supabaseAdmin
     .from('user_points_balance')
     .select('*')
     .eq('user_id', userId)
     .single();
 
-  // Get post count
-  const { count: postsCount } = await supabase
+  // Get post count (use supabaseAdmin to bypass RLS)
+  const { count: postsCount } = await supabaseAdmin
     .from('community_posts')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
     .eq('status', 'published');
 
-  // Get comments count
+  // Get comments count (use supabaseAdmin to bypass RLS)
   let commentsCount = 0;
-  const { count } = await supabase
+  const { count } = await supabaseAdmin
     .from('post_comments')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId);
@@ -53,9 +53,9 @@ export const GET: APIRoute = async ({ params }) => {
     console.warn('[stats] get_user_metadata RPC failed, falling back:', e);
   }
 
-  // Source 2: public_leaderboard view
+  // Source 2: public_leaderboard view (use supabaseAdmin to bypass RLS)
   if (!userName) {
-    const { data: lbRow } = await supabase
+    const { data: lbRow } = await supabaseAdmin
       .from('public_leaderboard')
       .select('name, avatar')
       .eq('user_id', userId)
@@ -67,9 +67,9 @@ export const GET: APIRoute = async ({ params }) => {
     }
   }
 
-  // Source 3: profiles table
+  // Source 3: profiles table (use supabaseAdmin to bypass RLS)
   if (!userName) {
-    const { data: profile } = await supabase
+    const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('display_name, avatar_url')
       .eq('user_id', userId)

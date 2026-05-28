@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { demoAuthApi, getCurrentUser, onAuthStateChange, notifyAuthChange, getAuthHeaders, type DemoUser } from '@/lib/auth';
+import { demoAuthApi, getCurrentUser, onAuthStateChange, notifyAuthChange, getAuthHeaders, saveDemoSession, type DemoUser } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
 
 interface UserSettings {
@@ -371,7 +371,7 @@ export default function EnhancedSettings({ locale = 'zh' }: { locale?: 'zh' | 'e
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept="image/jpeg,image/png,image/jpg"
+                  accept="image/jpeg,image/png,image/webp"
                   onChange={handleAvatarChange}
                   className="hidden"
                 />

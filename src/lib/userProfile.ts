@@ -331,7 +331,7 @@ function getDefaultProfile(user: DemoUser): UserProfile {
     id: user.id,
     email: user.email,
     name: user.name,
-    avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`,
+    avatar: user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`,
     points: POINTS_CONFIG.ACTIONS.REGISTER,
     level: 1,
     badges: ['newcomer'],
@@ -411,6 +411,16 @@ export function getOrCreateProfile(user: DemoUser): UserProfile {
   const profiles = getAllProfiles();
 
   if (profiles[user.id]) {
+    // Sync avatar from auth user if user has a real avatar (not DiceBear default)
+    // This ensures uploaded avatars are reflected in the profile
+    if (user.avatar && !profiles[user.id].avatar.startsWith('data:') &&
+        profiles[user.id].avatar.includes('dicebear.com')) {
+      profiles[user.id].avatar = user.avatar;
+    }
+    // Update name if changed
+    if (user.name && user.name !== profiles[user.id].name) {
+      profiles[user.id].name = user.name;
+    }
     // Update last active
     profiles[user.id].lastActive = new Date().toISOString();
     saveProfiles(profiles);
