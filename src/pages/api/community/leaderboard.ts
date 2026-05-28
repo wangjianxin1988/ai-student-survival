@@ -128,7 +128,7 @@ export const GET: APIRoute = async ({ request }) => {
       console.error('[leaderboard] Error fetching period transactions:', txError);
       return new Response(
         JSON.stringify({ success: false, error: { message: 'Failed to fetch leaderboard' } }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
       );
     }
 
@@ -146,7 +146,7 @@ export const GET: APIRoute = async ({ request }) => {
     if (sorted.length === 0) {
       return new Response(
         JSON.stringify({ success: true, data: [], period, message: 'No leaderboard data yet' }),
-        { status: 200, headers: { 'Content-Type': 'application/json' } }
+        { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
       );
     }
 
@@ -172,7 +172,7 @@ export const GET: APIRoute = async ({ request }) => {
 
     return new Response(
       JSON.stringify({ success: true, data: leaderboard, period }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -187,14 +187,14 @@ export const GET: APIRoute = async ({ request }) => {
     console.error('[leaderboard] Error fetching balances:', balanceError);
     return new Response(
       JSON.stringify({ success: false, error: { message: 'Failed to fetch leaderboard' } }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
   if (!balances || balances.length === 0) {
     return new Response(
       JSON.stringify({ success: true, data: [], period: 'total', message: 'No leaderboard data yet' }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -224,6 +224,6 @@ export const GET: APIRoute = async ({ request }) => {
       data: leaderboard,
       period: 'total',
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
   );
 };

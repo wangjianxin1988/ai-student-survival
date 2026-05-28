@@ -10,7 +10,7 @@ export const GET: APIRoute = async ({ params }) => {
   if (!userId) {
     return new Response(
       JSON.stringify({ success: false, error: { message: 'User ID is required' } }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -118,6 +118,6 @@ export const GET: APIRoute = async ({ params }) => {
         joinDate: new Date().toISOString(),
       },
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
   );
 };

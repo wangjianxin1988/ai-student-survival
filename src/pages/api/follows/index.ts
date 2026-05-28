@@ -16,7 +16,7 @@ export const GET: APIRoute = async ({ request, url }) => {
   if (!targetUserId) {
     return new Response(
       JSON.stringify({ success: false, error: { message: 'user_id is required' } }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -32,13 +32,13 @@ export const GET: APIRoute = async ({ request, url }) => {
       console.error('[follows] Error fetching following:', error);
       return new Response(
         JSON.stringify({ success: false, error: { message: error.message } }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
       );
     }
 
     return new Response(
       JSON.stringify({ success: true, data: data || [] }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   } else {
     // Get followers of targetUserId
@@ -52,13 +52,13 @@ export const GET: APIRoute = async ({ request, url }) => {
       console.error('[follows] Error fetching followers:', error);
       return new Response(
         JSON.stringify({ success: false, error: { message: error.message } }),
-        { status: 500, headers: { 'Content-Type': 'application/json' } }
+        { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
       );
     }
 
     return new Response(
       JSON.stringify({ success: true, data: data || [] }),
-      { status: 200, headers: { 'Content-Type': 'application/json' } }
+      { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 };
@@ -69,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
   if (!serverUser) {
     return new Response(
       JSON.stringify({ success: false, error: { message: '请先登录' } }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
+      { status: 401, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -79,14 +79,14 @@ export const POST: APIRoute = async ({ request }) => {
   if (!following_id) {
     return new Response(
       JSON.stringify({ success: false, error: { message: 'following_id is required' } }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
   if (following_id === serverUser.id) {
     return new Response(
       JSON.stringify({ success: false, error: { message: '不能关注自己' } }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -100,19 +100,19 @@ export const POST: APIRoute = async ({ request }) => {
     if (error.code === '23505') {
       return new Response(
         JSON.stringify({ success: false, error: { message: '已经关注了' } }),
-        { status: 409, headers: { 'Content-Type': 'application/json' } }
+        { status: 409, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
       );
     }
     console.error('[follows] Error creating follow:', error);
     return new Response(
       JSON.stringify({ success: false, error: { message: error.message } }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
   return new Response(
     JSON.stringify({ success: true, data }),
-    { status: 201, headers: { 'Content-Type': 'application/json' } }
+    { status: 201, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
   );
 };
 
@@ -122,7 +122,7 @@ export const DELETE: APIRoute = async ({ request }) => {
   if (!serverUser) {
     return new Response(
       JSON.stringify({ success: false, error: { message: '请先登录' } }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
+      { status: 401, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -132,7 +132,7 @@ export const DELETE: APIRoute = async ({ request }) => {
   if (!following_id) {
     return new Response(
       JSON.stringify({ success: false, error: { message: 'following_id is required' } }),
-      { status: 400, headers: { 'Content-Type': 'application/json' } }
+      { status: 400, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -146,12 +146,12 @@ export const DELETE: APIRoute = async ({ request }) => {
     console.error('[follows] Error deleting follow:', error);
     return new Response(
       JSON.stringify({ success: false, error: { message: error.message } }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
   return new Response(
     JSON.stringify({ success: true }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
   );
 };

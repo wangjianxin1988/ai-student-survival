@@ -13,7 +13,7 @@ export const GET: APIRoute = async ({ request }) => {
   if (!serverUser) {
     return new Response(
       JSON.stringify({ success: false, error: { message: '请先登录' } }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
+      { status: 401, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -65,7 +65,7 @@ export const GET: APIRoute = async ({ request }) => {
         badges: profile?.badges || [],
       },
     }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
   );
 };
 
@@ -75,7 +75,7 @@ export const PUT: APIRoute = async ({ request }) => {
   if (!serverUser) {
     return new Response(
       JSON.stringify({ success: false, error: { message: '请先登录' } }),
-      { status: 401, headers: { 'Content-Type': 'application/json' } }
+      { status: 401, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
@@ -118,12 +118,12 @@ export const PUT: APIRoute = async ({ request }) => {
     console.error('[users/profile] Error updating profile:', error);
     return new Response(
       JSON.stringify({ success: false, error: { message: error.message } }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
+      { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
 
   return new Response(
     JSON.stringify({ success: true, data }),
-    { status: 200, headers: { 'Content-Type': 'application/json' } }
+    { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
   );
 };

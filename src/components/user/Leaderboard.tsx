@@ -225,7 +225,6 @@ export default function Leaderboard({
                 {!isCurrentUser && currentUserId && (
                   <FollowButton
                     targetUserId={entry.userId}
-                    targetUser={{ id: entry.userId, name: entry.name, avatar: entry.avatar, level, badges: [], joinDate: entry.updatedAt, points: entry.points, email: '', followees: [], followers: [], lastActive: entry.updatedAt, favoritesCount: 0, ratingsCount: 0, reviewsCount: 0 }}
                     locale={locale}
                     size="sm"
                   />
