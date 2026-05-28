@@ -90,7 +90,22 @@ const { locale = 'zh' } = Astro.props;
   }
 </style>
 
-<script>
+<script is:inline>
+  // Listen for search button click (event delegation)
+  document.addEventListener('click', function(e) {
+    var target = e.target.closest('[data-search-trigger]');
+    if (target) {
+      var modal = document.getElementById('search-modal');
+      var input = document.getElementById('search-input');
+      if (modal) {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        if (input) input.focus();
+        document.body.style.overflow = 'hidden';
+      }
+    }
+  });
+
   // Search data sources
   const searchData = {
     tools: [
@@ -118,8 +133,8 @@ const { locale = 'zh' } = Astro.props;
       { name: '工具对比', url: '/compare', description: '横向对比多个AI工具' },
     ],
     // Dynamically loaded on first search
-    community: null as Array<{name: string; url: string; description: string}> | null,
-    policies: null as Array<{name: string; url: string; description: string}> | null,
+    community: null,
+    policies: null,
   };
 
   // Lazy-load community posts and policies
@@ -204,7 +219,7 @@ const { locale = 'zh' } = Astro.props;
     // Add click handlers
     historyList.querySelectorAll('.search-history-item').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const text = (e.target as HTMLElement).textContent;
+        const text = e.target.textContent;
         if (input) input.value = text;
         search(text);
       });
@@ -213,7 +228,7 @@ const { locale = 'zh' } = Astro.props;
 
   // DOM Elements
   const modal = document.getElementById('search-modal');
-  const input = document.getElementById('search-input') as HTMLInputElement;
+  const input = document.getElementById('search-input');
   const backdrop = document.getElementById('search-backdrop');
   const initialState = document.getElementById('search-initial');
   const loadingState = document.getElementById('search-loading');
@@ -425,7 +440,7 @@ const { locale = 'zh' } = Astro.props;
         updateSelection();
       } else if (e.key === 'Enter' && selectedIndex >= 0) {
         e.preventDefault();
-        (items[selectedIndex] as HTMLAnchorElement)?.click();
+        items[selectedIndex]?.click();
       }
     }
   });
@@ -441,7 +456,7 @@ const { locale = 'zh' } = Astro.props;
 
   // Search input handler
   input?.addEventListener('input', (e) => {
-    search((e.target as HTMLInputElement).value);
+    search(e.target.value);
   });
 
   // Trending search clicks
@@ -454,5 +469,5 @@ const { locale = 'zh' } = Astro.props;
   });
 
   // Expose open function for other components
-  (window as any).openSearch = openModal;
+  window.openSearch = openModal;
 </script>
