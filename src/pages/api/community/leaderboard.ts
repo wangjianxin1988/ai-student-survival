@@ -3,7 +3,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 
 /**
  * Resolve user display names via the get_user_metadata RPC function.
@@ -38,7 +38,7 @@ async function resolveUserNames(
   // Source 2: public_leaderboard view for users still missing
   const stillMissing1 = remainingIds.filter((id) => !nameMap[id]?.name);
   if (stillMissing1.length > 0) {
-    const { data: lbRows } = await supabase
+    const { data: lbRows } = await supabaseAdmin
       .from('public_leaderboard')
       .select('user_id, name, avatar')
       .in('user_id', stillMissing1);
@@ -56,7 +56,7 @@ async function resolveUserNames(
   // Source 3: profiles table for users still missing
   const stillMissing2 = remainingIds.filter((id) => !nameMap[id]?.name);
   if (stillMissing2.length > 0) {
-    const { data: profiles } = await supabase
+    const { data: profiles } = await supabaseAdmin
       .from('profiles')
       .select('user_id, display_name, avatar_url')
       .in('user_id', stillMissing2);
@@ -118,7 +118,7 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     // Aggregate points earned in the period
-    const { data: transactions, error: txError } = await supabase
+    const { data: transactions, error: txError } = await supabaseAdmin
       .from('points_transactions')
       .select('user_id, amount')
       .gte('created_at', startDate.toISOString())
@@ -177,7 +177,7 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   // Default: total period - use user_points_balance table
-  const { data: balances, error: balanceError } = await supabase
+  const { data: balances, error: balanceError } = await supabaseAdmin
     .from('user_points_balance')
     .select('user_id, balance, total_earned, updated_at')
     .order('balance', { ascending: false })
