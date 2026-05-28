@@ -114,7 +114,7 @@ export const POST: APIRoute = async ({ request }) => {
     .insert({
       user_id: userId,
       nickname: nickname.trim().substring(0, 50),
-      amount,
+      amount: Math.round(amount),
       tier: resolvedTier,
       payment_method: paymentMethod,
       message: message?.trim().substring(0, 200) || null,
