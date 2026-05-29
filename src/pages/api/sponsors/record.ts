@@ -13,8 +13,10 @@ async function sendSponsorEmail(params: {
   paymentMethod: string;
   message: string | null;
   profileUrl: string | null;
+  resendApiKey?: string;
 }) {
-  const resendApiKey = (import.meta.env.RESEND_API_KEY as string)
+  const resendApiKey = params.resendApiKey
+    || (import.meta.env.RESEND_API_KEY as string)
     || (typeof process !== 'undefined' ? process.env.RESEND_API_KEY : undefined)
     || '';
 
@@ -68,6 +70,8 @@ async function sendSponsorEmail(params: {
 
 export const POST: APIRoute = async ({ request, locals }) => {
   const admin = getSupabaseAdminForRequest(locals);
+  // Read RESEND_API_KEY from Cloudflare runtime env
+  const cfResendKey = (locals as any)?.runtime?.env?.RESEND_API_KEY || '';
   // Verify auth using server-side helper (handles both demo and real auth)
   const serverUser = await getServerUser(request);
 
@@ -158,6 +162,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     paymentMethod,
     message: message?.trim() || null,
     profileUrl: profileUrl?.trim() || null,
+    resendApiKey: cfResendKey,
   }).catch(err => console.error('[sponsors/record] Email notification error:', err));
 
   return new Response(

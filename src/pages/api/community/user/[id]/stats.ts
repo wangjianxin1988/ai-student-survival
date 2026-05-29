@@ -36,6 +36,35 @@ export const GET: APIRoute = async ({ params }) => {
     .eq('user_id', userId);
   if (count !== null) commentsCount = count;
 
+  // Get favorites count (use supabaseAdmin to bypass RLS)
+  let favoritesCount = 0;
+  const { count: favCount } = await supabaseAdmin
+    .from('user_favorites')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  if (favCount !== null) favoritesCount += favCount;
+  const { count: postFavCount } = await supabaseAdmin
+    .from('post_favorites')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  if (postFavCount !== null) favoritesCount += postFavCount;
+
+  // Get ratings count (use supabaseAdmin to bypass RLS)
+  let ratingsCount = 0;
+  const { count: ratCount } = await supabaseAdmin
+    .from('ratings')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  if (ratCount !== null) ratingsCount = ratCount;
+
+  // Get likes given count
+  let likesCount = 0;
+  const { count: likeCount } = await supabaseAdmin
+    .from('post_likes')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+  if (likeCount !== null) likesCount = likeCount;
+
   // Resolve real user name from multiple sources
   let userName = '';
   let userAvatar = '';
@@ -115,6 +144,9 @@ export const GET: APIRoute = async ({ params }) => {
         totalSpent: balanceData?.total_spent || 0,
         postsCount: postsCount || 0,
         commentsCount: commentsCount || 0,
+        favoritesCount: favoritesCount || 0,
+        ratingsCount: ratingsCount || 0,
+        likesCount: likesCount || 0,
         joinDate: new Date().toISOString(),
       },
     }),

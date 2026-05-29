@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { demoAuthApi, onAuthStateChange, type DemoUser } from "@/lib/auth";
+import { demoAuthApi, onAuthStateChange, getAuthHeaders, type DemoUser } from "@/lib/auth";
 
 interface UserMenuProps {
   locale?: "zh" | "en";
@@ -73,6 +73,27 @@ export default function UserMenu({ locale = "zh" }: UserMenuProps) {
     const unsubscribe = onAuthStateChange((demoUser) => {
       setUser(demoUser);
     });
+
+    // Fetch latest avatar from profiles API (uploaded avatars persist here)
+    async function fetchLatestAvatar() {
+      try {
+        const headers = await getAuthHeaders();
+        if (!headers.Authorization && !headers['X-Demo-User-Id']) return;
+        const res = await fetch('/api/users/profile', {
+          headers: { ...headers, 'Content-Type': 'application/json' },
+        });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data?.avatar) {
+            setUser(prev => {
+              if (!prev || prev.avatar === json.data.avatar) return prev;
+              return { ...prev, avatar: json.data.avatar };
+            });
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    fetchLatestAvatar();
 
     // Click outside to close menu
     function handleClickOutside(event: MouseEvent) {

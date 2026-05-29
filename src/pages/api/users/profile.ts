@@ -123,6 +123,17 @@ export const PUT: APIRoute = async ({ request }) => {
     );
   }
 
+  // Sync avatar_url to auth user metadata so it persists across page refreshes
+  if (avatar_url) {
+    try {
+      await supabaseAdmin.auth.admin.updateUserById(serverUser.id, {
+        user_metadata: { avatar_url },
+      });
+    } catch (e) {
+      console.warn('[users/profile] Failed to sync avatar to auth metadata:', e);
+    }
+  }
+
   return new Response(
     JSON.stringify({ success: true, data }),
     { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }

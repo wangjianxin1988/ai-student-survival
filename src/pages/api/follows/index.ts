@@ -5,6 +5,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { supabaseAdmin, getSupabaseAdminForRequest } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
+import { earnPoints } from '@/lib/points/service';
 
 // GET /api/follows?type=following|followers&user_id=xxx
 export const GET: APIRoute = async ({ request, url, locals }) => {
@@ -111,6 +112,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
       { status: 500, headers: { 'Content-Type': 'application/json; charset=utf-8' } }
     );
   }
+
+  // Award points for following (non-blocking)
+  earnPoints(supabaseAdmin, serverUser.id, {
+    amount: 5,
+    type: 'follow',
+    description: '关注用户',
+    referenceId: following_id,
+  }).catch(e => console.warn('[follows] Failed to award points:', e));
 
   return new Response(
     JSON.stringify({ success: true, data }),

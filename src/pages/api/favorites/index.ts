@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
+import { earnPoints } from '@/lib/points/service';
 
 export const prerender = false;
 
@@ -92,6 +93,14 @@ export const POST: APIRoute = async ({ request }) => {
     }
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
+
+  // Award points for favoriting (non-blocking)
+  earnPoints(supabaseAdmin, serverUser.id, {
+    amount: 5,
+    type: 'favorite',
+    description: `收藏 ${target_type}`,
+    referenceId: target_id,
+  }).catch(e => console.warn('[favorites] Failed to award points:', e));
 
   return new Response(JSON.stringify({ favorite: data }), { status: 201 });
 };

@@ -30,6 +30,9 @@ interface SupabaseUserStats {
   totalSpent: number;
   postsCount: number;
   commentsCount: number;
+  favoritesCount: number;
+  ratingsCount: number;
+  likesCount: number;
 }
 
 const translations = {
@@ -383,15 +386,15 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.stats}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{mergedProfile.favoritesCount}</div>
+                    <div className="text-2xl font-bold text-gray-900">{userStats?.favoritesCount ?? mergedProfile.favoritesCount}</div>
                     <div className="text-sm text-gray-500">{t.favorites}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{mergedProfile.ratingsCount}</div>
+                    <div className="text-2xl font-bold text-gray-900">{userStats?.ratingsCount ?? mergedProfile.ratingsCount}</div>
                     <div className="text-sm text-gray-500">{t.ratings}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{mergedProfile.reviewsCount}</div>
+                    <div className="text-2xl font-bold text-gray-900">{userStats?.commentsCount ?? mergedProfile.reviewsCount}</div>
                     <div className="text-sm text-gray-500">{t.reviews}</div>
                   </div>
                   <div className="text-center">

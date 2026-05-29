@@ -204,6 +204,14 @@ export const POST: APIRoute = async ({ params, request }) => {
       referenceId: postId,
     });
 
+    // 给评论者增加积分
+    earnPoints(supabase, user.id, {
+      amount: 5,
+      type: 'comment',
+      description: '发表评论',
+      referenceId: postId,
+    }).catch(e => console.warn('[comments] Failed to award commenter points:', e));
+
     // 检查自动推送规则
     await checkAndPromote(postId);
 

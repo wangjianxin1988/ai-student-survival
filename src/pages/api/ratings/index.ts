@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { getServerUser } from '@/lib/server-auth';
+import { earnPoints } from '@/lib/points/service';
 
 export const prerender = false;
 
@@ -33,14 +35,8 @@ export const GET: APIRoute = async ({ url }) => {
 };
 
 export const POST: APIRoute = async ({ request }) => {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-  }
-
-  const token = authHeader.replace('Bearer ', '');
-  const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !user) {
+  const serverUser = await getServerUser(request);
+  if (!serverUser) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
 
@@ -55,10 +51,11 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: 'Rating must be between 1 and 5' }), { status: 400 });
   }
 
-  const { data, error } = await supabase
+  // Use admin client to bypass RLS
+  const { data, error } = await supabaseAdmin
     .from('ratings')
     .upsert(
-      { user_id: user.id, target_type, target_id, rating },
+      { user_id: serverUser.id, target_type, target_id, rating },
       { onConflict: 'user_id,target_type,target_id' }
     )
     .select()
@@ -67,6 +64,14 @@ export const POST: APIRoute = async ({ request }) => {
   if (error) {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
+
+  // Award points for rating (non-blocking)
+  earnPoints(supabaseAdmin, serverUser.id, {
+    amount: 5,
+    type: 'rating',
+    description: `评分 ${target_type}`,
+    referenceId: target_id,
+  }).catch(e => console.warn('[ratings] Failed to award points:', e));
 
   return new Response(JSON.stringify({ rating: data }), { status: 201 });
 };

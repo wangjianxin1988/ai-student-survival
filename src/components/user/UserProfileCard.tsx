@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { initAuth, getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
+import { initAuth, getCurrentUser, onAuthStateChange, getAuthHeaders, type DemoUser } from '@/lib/auth';
 import {
   userStatsApi,
   getLevelProgress,
@@ -74,6 +74,7 @@ const levelBgColors = [
 export default function UserProfileCard({ locale = 'zh', showStats = true, size = 'md' }: UserProfileCardProps) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [apiAvatar, setApiAvatar] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const t = translations[locale];
 
@@ -83,6 +84,17 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
       if (currentUser) {
         const userProfile = userStatsApi.getOrCreateProfile(currentUser);
         setProfile(userProfile);
+        // Fetch latest avatar from profiles API
+        getAuthHeaders().then(headers => {
+          fetch('/api/users/profile', {
+            headers: { ...headers, 'Content-Type': 'application/json' },
+          }).then(res => res.ok ? res.json() : null)
+            .then(json => {
+              if (json?.success && json.data?.avatar) {
+                setApiAvatar(json.data.avatar);
+              }
+            }).catch(() => {});
+        });
       }
     });
 
@@ -140,7 +152,7 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <img
-          src={profile.avatar}
+          src={apiAvatar || profile.avatar}
           alt={profile.name}
           className={`${sizeClasses[size].avatar} rounded-full bg-gray-100`}
         />

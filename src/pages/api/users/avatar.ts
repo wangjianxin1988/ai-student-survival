@@ -79,6 +79,15 @@ export const POST: APIRoute = async ({ request, locals }) => {
         { onConflict: 'user_id' }
       );
 
+    // Sync avatar to auth user metadata so it persists across page refreshes
+    try {
+      await admin.auth.admin.updateUserById(serverUser.id, {
+        user_metadata: { avatar_url: avatarUrl },
+      });
+    } catch (e) {
+      console.warn('[avatar] Failed to sync avatar to auth metadata:', e);
+    }
+
     return new Response(
       JSON.stringify({ success: true, url: avatarUrl }),
       { status: 200, headers: { 'Content-Type': 'application/json; charset=utf-8' } }

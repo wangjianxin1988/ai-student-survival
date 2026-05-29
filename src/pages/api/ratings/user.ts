@@ -1,27 +1,20 @@
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
+import { getServerUser } from '@/lib/server-auth';
 
 export const prerender = false;
 
 export const GET: APIRoute = async ({ request }) => {
+  const serverUser = await getServerUser(request);
+  if (!serverUser) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  }
+
   try {
-    const authHeader = request.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-    }
-
-    const token = authHeader.replace('Bearer ', '');
-    const client = supabase;
-    const { data: { user }, error: authError } = await client.auth.getUser(token);
-
-    if (authError || !user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-    }
-
-    const { data: ratings, error } = await client
+    const { data: ratings, error } = await supabaseAdmin
       .from('ratings')
       .select('rating, target_type, target_id, created_at')
-      .eq('user_id', user.id)
+      .eq('user_id', serverUser.id)
       .order('created_at', { ascending: false });
 
     if (error) {
