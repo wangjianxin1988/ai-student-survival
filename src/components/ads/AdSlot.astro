@@ -1,0 +1,54 @@
+---
+/**
+ * Google AdSense Ad Slot Component
+ *
+ * Renders a responsive ad unit. Before AdSense approval, shows a placeholder.
+ * Replace ca-pub-XXXXXXXXXX and ad-slot values with real IDs after approval.
+ *
+ * Props:
+ *  - format: 'auto' | 'horizontal' | 'vertical' | 'rectangle' (default: 'auto')
+ *  - className: extra CSS classes
+ *  - slot: ad slot ID (default: uses a generic placeholder)
+ */
+
+interface Props {
+  format?: 'auto' | 'horizontal' | 'vertical' | 'rectangle';
+  className?: string;
+  slot?: string;
+}
+
+const {
+  format = 'auto',
+  className = '',
+  slot = '0000000000', // Replace with real ad slot ID after AdSense approval
+} = Astro.props;
+
+// AdSense publisher ID — replace after approval
+const AD_CLIENT = 'ca-pub-XXXXXXXXXX';
+const isProduction = import.meta.env.PROD;
+---
+
+{isProduction && AD_CLIENT !== 'ca-pub-XXXXXXXXXX' ? (
+  <!-- Real AdSense ad unit (shown after approval) -->
+  <div class={`adsense-container ${className}`}>
+    <ins
+      class="adsbygoogle"
+      style="display:block"
+      data-ad-client={AD_CLIENT}
+      data-ad-slot={slot}
+      data-ad-format={format}
+      data-full-width-responsive="true"
+    />
+    <script is:inline>
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+) : (
+  <!-- Placeholder (shown before AdSense approval or in dev mode) -->
+  <div class={`adsense-placeholder bg-gray-100 border border-dashed border-gray-300 rounded-lg flex items-center justify-center py-6 ${className}`}>
+    <div class="text-center">
+      <p class="text-xs text-gray-400 font-medium">广告位</p>
+      <p class="text-[10px] text-gray-300 mt-1">Ad Space — AdSense Pending</p>
+    </div>
+  </div>
+)}

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Tool } from '@/lib/supabase';
 import { staticTools } from '@/data/static-tools';
 import { getLocaleHref } from '@/lib/i18n';
+import AdSlot from '@/components/ads/AdSlotReact';
 
 interface CommunityTool {
   id: string;
@@ -232,66 +233,74 @@ export default function ToolsPageClient({ initialLocale, translations }: ToolsPa
       {/* Tools Grid */}
       {filteredTools.length > 0 ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTools.map(tool => (
-            <article key={tool.id} className="tool-card group">
-              <div className="tool-card-image">
-                <img
-                  src={tool.imageUrl}
-                  alt={tool.name}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-              </div>
-              <div className="tool-card-body">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="text-lg font-semibold group-hover:text-primary-600 transition-colors">
-                    <a href={getLocaleHref(`/tools/${tool.slug}`, locale)}>{tool.name}</a>
-                  </h3>
-                  {tool.isNew && (
-                    <span className="badge bg-red-100 text-red-700">{translations.new || '新'}</span>
-                  )}
+          {filteredTools.map((tool, index) => (
+            <>
+              <article key={tool.id} className="tool-card group">
+                <div className="tool-card-image">
+                  <img
+                    src={tool.imageUrl}
+                    alt={tool.name}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
                 </div>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{tool.description}</p>
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {tool.tags.slice(0, 3).map(tag => (
-                    <span key={tag} className="tag">{tag}</span>
-                  ))}
-                </div>
-                <div className="mt-auto">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="rating">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <svg
-                          key={star}
-                          className={`rating-star ${star <= Math.round(tool.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
+                <div className="tool-card-body">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="text-lg font-semibold group-hover:text-primary-600 transition-colors">
+                      <a href={getLocaleHref(`/tools/${tool.slug}`, locale)}>{tool.name}</a>
+                    </h3>
+                    {tool.isNew && (
+                      <span className="badge bg-red-100 text-red-700">{translations.new || '新'}</span>
+                    )}
+                  </div>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{tool.description}</p>
+                  <div className="flex flex-wrap gap-1 mb-4">
+                    {tool.tags.slice(0, 3).map(tag => (
+                      <span key={tag} className="tag">{tag}</span>
+                    ))}
+                  </div>
+                  <div className="mt-auto">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="rating">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <svg
+                            key={star}
+                            className={`rating-star ${star <= Math.round(tool.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <span className="text-sm font-medium">{tool.rating}</span>
+                      <span className="text-xs text-gray-500">({tool.ratingCount})</span>
                     </div>
-                    <span className="text-sm font-medium">{tool.rating}</span>
-                    <span className="text-xs text-gray-500">({tool.ratingCount})</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className={`badge ${
-                      tool.pricing === 'free' ? 'badge-free' :
-                      tool.pricing === 'paid' ? 'badge-paid' : 'badge-freemium'
-                    }`}>
-                      {tool.pricing === 'free' ? translations.free :
-                       tool.pricing === 'paid' ? `$${tool.priceDetail.monthly}/mo` : translations.freePlus}
-                    </span>
-                    <a
-                      href={getLocaleHref(`/tools/${tool.slug}`, locale)}
-                      className="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                    >
-                      {translations.viewDetails || '查看详情'}
-                    </a>
+                    <div className="flex items-center justify-between">
+                      <span className={`badge ${
+                        tool.pricing === 'free' ? 'badge-free' :
+                        tool.pricing === 'paid' ? 'badge-paid' : 'badge-freemium'
+                      }`}>
+                        {tool.pricing === 'free' ? translations.free :
+                         tool.pricing === 'paid' ? `$${tool.priceDetail.monthly}/mo` : translations.freePlus}
+                      </span>
+                      <a
+                        href={getLocaleHref(`/tools/${tool.slug}`, locale)}
+                        className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                      >
+                        {translations.viewDetails || '查看详情'}
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
+              </article>
+              {/* Ad after every 6 tools */}
+              {(index + 1) % 6 === 0 && index < filteredTools.length - 1 && (
+                <div className="sm:col-span-2 lg:col-span-3 adsense-in-feed">
+                  <AdSlot format="horizontal" className="w-full" />
+                </div>
+              )}
+            </>
           ))}
         </div>
       ) : (

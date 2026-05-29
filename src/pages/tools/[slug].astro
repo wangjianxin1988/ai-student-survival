@@ -15,6 +15,7 @@ import ShareButton from '@/components/common/ShareButton';
 import CommentSection from '@/components/user/CommentSection';
 import ToolPricingRealtime from '@/components/tools/ToolPricingRealtime';
 import UpdateNotesClient from '@/components/tools/UpdateNotesClient';
+import AdSlot from '@/components/ads/AdSlot.astro';
 
 const { slug } = Astro.params;
 
@@ -2209,6 +2210,11 @@ const jsonLd = [
           </div>
         </section>
 
+        <!-- Ad Slot: between tips and related tools -->
+        <div class="mt-8">
+          <AdSlot format="horizontal" className="w-full" />
+        </div>
+
         <!-- Related Tools (More Comprehensive) -->
         {(() => {
           // Get tools in same category
@@ -2240,6 +2246,54 @@ const jsonLd = [
             </section>
           );
         })()}
+
+        <!-- FAQ Section -->
+        <section class="mt-8">
+          <h2 class="text-xl font-semibold mb-4">常见问题</h2>
+          <div class="space-y-4">
+            <details class="bg-white rounded-xl border border-gray-200 group">
+              <summary class="flex items-center justify-between p-5 cursor-pointer font-medium text-gray-900 hover:text-primary-600">
+                <span>{tool.name}免费版和付费版有什么区别？</span>
+                <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="px-5 pb-5 text-sm text-gray-600">
+                {tool.pricing === 'free'
+                  ? `${tool.name}目前完全免费使用。`
+                  : tool.pricing === 'freemium'
+                    ? `${tool.name}提供免费版和付费版。免费版包含基础功能，付费版（$${tool.priceDetail.monthly}/月起）解锁更多高级特性，包括更强的模型能力、更高的使用额度和优先访问权。`
+                    : `${tool.name}是付费工具，$${tool.priceDetail.monthly}/月起，提供完整功能体验。`
+                }
+              </div>
+            </details>
+            <details class="bg-white rounded-xl border border-gray-200 group">
+              <summary class="flex items-center justify-between p-5 cursor-pointer font-medium text-gray-900 hover:text-primary-600">
+                <span>留学生可以使用{tool.name}吗？</span>
+                <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="px-5 pb-5 text-sm text-gray-600">
+                是的，留学生可以使用{tool.name}。但请注意你所在大学的AI使用政策，部分课程可能限制AI工具的使用。建议查看学校的具体规定，在允许的范围内合理使用。
+              </div>
+            </details>
+            <details class="bg-white rounded-xl border border-gray-200 group">
+              <summary class="flex items-center justify-between p-5 cursor-pointer font-medium text-gray-900 hover:text-primary-600">
+                <span>{tool.name}的支付方式有哪些？</span>
+                <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div class="px-5 pb-5 text-sm text-gray-600">
+                {tool.pricing === 'free'
+                  ? `${tool.name}免费使用，无需支付。`
+                  : `订阅${tool.name}可使用国际信用卡、虚拟卡（如Depay、Noble）、礼品卡等支付方式。中国用户还可通过低价区注册享受更优惠的价格。详见我们的<a href="/payment" class="text-primary-600 hover:underline">支付解决方案</a>页面。`
+                }
+              </div>
+            </details>
+          </div>
+        </section>
       </div>
 
       <!-- Sidebar -->
@@ -2345,6 +2399,13 @@ const jsonLd = [
             <a href="/policies" class="bg-green-600 text-white btn w-full text-center text-sm hover:bg-green-700">
               查询政策
             </a>
+          </div>
+
+          <!-- Sidebar Ad Slot -->
+          <div class="adsense-sidebar">
+            <div class="bg-gray-50 border border-dashed border-gray-300 rounded-xl flex items-center justify-center py-8 text-xs text-gray-400">
+              <span>广告位 · Ad Space</span>
+            </div>
           </div>
         </div>
       </aside>

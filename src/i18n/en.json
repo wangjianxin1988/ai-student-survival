@@ -25,12 +25,19 @@
   },
   "footer": {
     "tagline": "#1 AI tools hub for Chinese international students - from tool selection to successful payment, one-stop solution for all your AI challenges abroad",
+    "coreFeatures": "Core Features",
     "toolsCategory": "Tool Categories",
     "resources": "Resources",
     "writing": "Writing Tools",
     "coding": "Coding Tools",
     "design": "Design Tools",
-    "research": "Research Tools"
+    "research": "Research Tools",
+    "descTools": "100+ AI Tools",
+    "descPayment": "Virtual Cards · Gift Cards · Regional Pricing",
+    "descPolicies": "University AI Policies",
+    "descPrompts": "Quality Template Library",
+    "descOffers": "Application Experiences",
+    "descQuestions": "Student Community"
   },
   "common": {
     "search": "Search",
@@ -448,12 +455,19 @@
   },
   "footer": {
     "tagline": "#1 AI tools hub for Chinese international students - from tool selection to successful payment, one-stop solution for all your AI challenges abroad",
+    "coreFeatures": "Core Features",
     "toolsCategory": "Tool Categories",
     "resources": "Resources",
     "writing": "Writing Tools",
     "coding": "Coding Tools",
     "design": "Design Tools",
-    "research": "Research Tools"
+    "research": "Research Tools",
+    "descTools": "100+ AI Tools",
+    "descPayment": "Virtual Cards · Gift Cards · Regional Pricing",
+    "descPolicies": "University AI Policies",
+    "descPrompts": "Quality Template Library",
+    "descOffers": "Application Experiences",
+    "descQuestions": "Student Community"
   },
   "chatbot": {
     "title": "AI Assistant",

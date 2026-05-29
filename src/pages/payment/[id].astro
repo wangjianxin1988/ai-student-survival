@@ -6,6 +6,7 @@ import { paymentSolutionsData, getPaymentSolutionById, getRelatedSolutions, paym
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import ShareButton from '@/components/common/ShareButton';
 import CommentSection from '@/components/user/CommentSection';
+import AdSlot from '@/components/ads/AdSlot.astro';
 
 // Get solution ID from URL params
 const { id } = Astro.params;
@@ -241,6 +242,11 @@ const renderedContent = renderMarkdown(solution.content);
           <div class="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
             <div set:html={renderedContent} />
           </div>
+        </div>
+
+        <!-- Ad Slot: after article content -->
+        <div class="mb-8">
+          <AdSlot format="horizontal" className="w-full" />
         </div>
 
         <!-- Related Tools -->

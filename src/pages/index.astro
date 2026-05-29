@@ -167,12 +167,12 @@ const modules = [
 // Footer links with locale-aware hrefs
 const footerLinks = {
   coreFeatures: [
-    { href: getLocaleHref('/tools'), label: translate(locale, 'nav.aiTools'), desc: '100+ AI工具收录' },
-    { href: getLocaleHref('/payment'), label: translate(locale, 'nav.payment'), desc: '虚拟卡·礼品卡·地区定价' },
-    { href: getLocaleHref('/policies'), label: translate(locale, 'nav.policies'), desc: '各校AI使用政策' },
-    { href: getLocaleHref('/prompts'), label: translate(locale, 'nav.prompts'), desc: '高质量模板库' },
-    { href: getLocaleHref('/offers'), label: translate(locale, 'nav.offers'), desc: '申请经验分享' },
-    { href: getLocaleHref('/questions'), label: translate(locale, 'nav.questions'), desc: '留学生互助社区' },
+    { href: getLocaleHref('/tools'), label: translate(locale, 'nav.aiTools'), desc: translate(locale, 'footer.descTools') },
+    { href: getLocaleHref('/payment'), label: translate(locale, 'nav.payment'), desc: translate(locale, 'footer.descPayment') },
+    { href: getLocaleHref('/policies'), label: translate(locale, 'nav.policies'), desc: translate(locale, 'footer.descPolicies') },
+    { href: getLocaleHref('/prompts'), label: translate(locale, 'nav.prompts'), desc: translate(locale, 'footer.descPrompts') },
+    { href: getLocaleHref('/offers'), label: translate(locale, 'nav.offers'), desc: translate(locale, 'footer.descOffers') },
+    { href: getLocaleHref('/questions'), label: translate(locale, 'nav.questions'), desc: translate(locale, 'footer.descQuestions') },
   ],
   toolCategories: [
     { href: getLocaleHref('/tools?category=writing'), label: translate(locale, 'footer.writing') },
@@ -369,7 +369,7 @@ const footerLinks = {
 
         <!-- Core Features -->
         <div>
-          <h4 class="font-semibold mb-4 text-white">{translate(locale, 'footer.coreFeatures') || '核心功能'}</h4>
+          <h4 class="font-semibold mb-4 text-white">{translate(locale, 'footer.coreFeatures')}</h4>
           <ul class="space-y-2 text-sm">
             {footerLinks.coreFeatures.map(link => (
               <li><a href={link.href} class="text-gray-400 hover:text-white transition-colors">{link.label}</a></li>
@@ -379,7 +379,7 @@ const footerLinks = {
 
         <!-- Resources -->
         <div>
-          <h4 class="font-semibold mb-4 text-white">{translate(locale, 'footer.resources') || '资源'}</h4>
+          <h4 class="font-semibold mb-4 text-white">{translate(locale, 'footer.resources')}</h4>
           <ul class="space-y-2 text-sm">
             {footerLinks.resources.map(link => (
               <li><a href={link.href} class="text-gray-400 hover:text-white transition-colors">{link.label}</a></li>

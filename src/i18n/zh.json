@@ -25,12 +25,19 @@
   },
   "footer": {
     "tagline": "中国留学生AI工具第一站 - 从工具选择到成功支付，一站式解决留学路上的所有AI难题",
+    "coreFeatures": "核心功能",
     "toolsCategory": "工具分类",
     "resources": "资源",
     "writing": "写作工具",
     "coding": "编程工具",
     "design": "设计工具",
-    "research": "研究工具"
+    "research": "研究工具",
+    "descTools": "100+ AI工具收录",
+    "descPayment": "虚拟卡·礼品卡·地区定价",
+    "descPolicies": "各校AI使用政策",
+    "descPrompts": "高质量模板库",
+    "descOffers": "申请经验分享",
+    "descQuestions": "留学生互助社区"
   },
   "common": {
     "search": "搜索",
@@ -421,12 +428,19 @@
   },
   "footer": {
     "tagline": "中国留学生AI工具第一站 - 从工具选择到成功支付，一站式解决留学路上的所有AI难题",
+    "coreFeatures": "核心功能",
     "toolsCategory": "工具分类",
     "resources": "资源",
     "writing": "写作工具",
     "coding": "编程工具",
     "design": "设计工具",
-    "research": "研究工具"
+    "research": "研究工具",
+    "descTools": "100+ AI工具收录",
+    "descPayment": "虚拟卡·礼品卡·地区定价",
+    "descPolicies": "各校AI使用政策",
+    "descPrompts": "高质量模板库",
+    "descOffers": "申请经验分享",
+    "descQuestions": "留学生互助社区"
   },
   "chatbot": {
     "title": "AI助手",

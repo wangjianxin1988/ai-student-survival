@@ -173,6 +173,20 @@ function getAlternatePath(loc: Locale): string {
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    <!-- Google AdSense (activated after approval — replace ca-pub-XXXXXXXXXX with real ID) -->
+    <script is:inline>
+      (function() {
+        var AD_CLIENT = 'ca-pub-XXXXXXXXXX'; // Replace with real publisher ID
+        if (AD_CLIENT !== 'ca-pub-XXXXXXXXXX') {
+          var s = document.createElement('script');
+          s.async = true;
+          s.crossOrigin = 'anonymous';
+          s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + AD_CLIENT;
+          document.head.appendChild(s);
+        }
+      })();
+    </script>
+
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
