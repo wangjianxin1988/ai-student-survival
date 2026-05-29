@@ -26,11 +26,18 @@ function getServiceRoleKey(): string {
   if (_cloudflareEnv?.SUPABASE_SERVICE_ROLE_KEY) {
     return _cloudflareEnv.SUPABASE_SERVICE_ROLE_KEY;
   }
-  // Source 2: process.env (populated at runtime by Cloudflare adapter)
+  // Source 2: import.meta.env (Vite/Astro loads .env at dev/build time)
+  // In local dev, Vite reads .env and makes vars available here.
+  // In CF Pages build, the build step injects env vars.
+  try {
+    const viteKey = (import.meta as any).env?.SUPABASE_SERVICE_ROLE_KEY;
+    if (viteKey && typeof viteKey === 'string' && viteKey.length > 10) return viteKey;
+  } catch { /* ignore */ }
+  // Source 3: process.env (populated at runtime by Cloudflare adapter)
   if (typeof process !== 'undefined' && process.env?.SUPABASE_SERVICE_ROLE_KEY) {
     return process.env.SUPABASE_SERVICE_ROLE_KEY;
   }
-  // Source 3: globalThis env bindings
+  // Source 4: globalThis env bindings
   try {
     const cf = (globalThis as any).__env__;
     if (cf?.SUPABASE_SERVICE_ROLE_KEY) return cf.SUPABASE_SERVICE_ROLE_KEY;
@@ -120,6 +127,7 @@ function getSupabaseAdminClient(): SupabaseClient {
 
   if (!serviceKey || !supabaseUrl.includes('supabase.co')) {
     // Fallback to anon client if service key not configured
+    // DO NOT cache — the key may become available later (e.g., after .env update)
     console.warn('SUPABASE_SERVICE_ROLE_KEY not configured, using anon client for admin operations');
     return getSupabaseClient();
   }

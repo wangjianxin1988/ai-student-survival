@@ -1,7 +1,9 @@
 // 自动推送服务
 import type { CommunityPost, CommunityCategory } from '@/lib/community/types';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
 import { DEFAULT_AUTO_PROMOTE_RULES, type AutoPromoteRule } from './rules';
+
+// 自动推送使用 supabaseAdmin 绕过 RLS（服务端操作，需要更新任意帖子）
 
 // 获取活跃规则
 export async function getActiveRules(): Promise<AutoPromoteRule[]> {
@@ -11,6 +13,13 @@ export async function getActiveRules(): Promise<AutoPromoteRule[]> {
 // 评估规则
 function evaluateRule(post: CommunityPost, rule: AutoPromoteRule): boolean {
   const { type, thresholds, timeWindowMinutes } = rule.trigger;
+
+  // 检查分类过滤
+  if (rule.categoryFilter && rule.categoryFilter.length > 0) {
+    if (!rule.categoryFilter.includes(post.category)) {
+      return false;
+    }
+  }
 
   // 检查时间窗口
   if (timeWindowMinutes) {
@@ -82,7 +91,7 @@ async function executePromotion(
     updateData.is_pinned = true;
   }
 
-  await supabase
+  await supabaseAdmin
     .from('community_posts')
     .update(updateData)
     .eq('id', postId);
@@ -93,7 +102,7 @@ async function executePromotion(
 // 检查并执行推送
 export async function checkAndPromote(postId: string): Promise<void> {
   // 获取帖子
-  const { data: post, error } = await supabase
+  const { data: post, error } = await supabaseAdmin
     .from('community_posts')
     .select('*')
     .eq('id', postId)
@@ -152,32 +161,55 @@ export async function checkAllPendingPromotions(): Promise<void> {
   // Get all unpublished posts within 72 hours
   const cutoffTime = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString();
 
-  const { data: posts, error } = await supabase
+  console.log('[auto-promote] checkAllPendingPromotions called');
+  console.log('[auto-promote] cutoffTime:', cutoffTime);
+
+  const { data: posts, error } = await supabaseAdmin
     .from('community_posts')
     .select('*')
     .eq('auto_promoted', false)
     .eq('status', 'published')
     .gte('created_at', cutoffTime);
 
-  if (error || !posts) {
-    console.error('Error fetching posts for auto-promote:', error);
+  if (error) {
+    console.error('[auto-promote] Query error:', JSON.stringify(error));
     return;
   }
+  if (!posts) {
+    console.error('[auto-promote] No posts returned (null)');
+    return;
+  }
+
+  console.log(`[auto-promote] Found ${posts.length} pending posts`);
+  if (posts.length > 0) {
+    console.log('[auto-promote] First post:', JSON.stringify({
+      id: posts[0].id,
+      title: posts[0].title,
+      category: posts[0].category,
+      likes: posts[0].likes_count,
+      comments: posts[0].comments_count,
+      auto_promoted: posts[0].auto_promoted,
+    }));
+  }
+
+  const rules = await getActiveRules();
+  rules.sort((a, b) => b.priority - a.priority);
+  console.log(`[auto-promote] ${rules.length} active rules`);
 
   for (const post of posts) {
     const communityPost = mapDbToCommunityPost(post);
 
-    // 使用与 checkAndPromote 相同的 evaluateRule 逻辑
-    const rules = await getActiveRules();
-    rules.sort((a, b) => b.priority - a.priority);
-
     for (const rule of rules) {
-      if (evaluateRule(communityPost, rule)) {
+      const matches = evaluateRule(communityPost, rule);
+      if (matches) {
+        console.log(`[auto-promote] Post "${post.title}" matched rule "${rule.name}", promoting...`);
         await executePromotion(post.id, rule);
-        break; // 只推送一次
+        console.log(`[auto-promote] Post "${post.title}" promoted successfully`);
+        break;
       }
     }
   }
+  console.log('[auto-promote] checkAllPendingPromotions done');
 }
 
 // Execute promotion from service (用于积分直接推送)
@@ -186,7 +218,7 @@ export async function executePromotionFromService(
   source: 'auto' | 'points',
   score: number
 ): Promise<boolean> {
-  const { data: post, error } = await supabase
+  const { data: post, error } = await supabaseAdmin
     .from('community_posts')
     .select('category')
     .eq('id', postId)
@@ -210,7 +242,7 @@ export async function executePromotionFromService(
     updated_at: new Date().toISOString(),
   };
 
-  const { error: updateError } = await supabase
+  const { error: updateError } = await supabaseAdmin
     .from('community_posts')
     .update(updateData)
     .eq('id', postId);
