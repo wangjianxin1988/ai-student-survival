@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabase, supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
+import { earnPoints } from '@/lib/points/service';
 
 export const prerender = false;
 
@@ -45,6 +46,28 @@ export const POST: APIRoute = async ({ request }) => {
       console.error('[upsert-user] error:', error);
       return new Response(JSON.stringify({ success: false, error: error.message }),
         { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+
+    // After successful upsert, check if user needs registration points (retroactive)
+    try {
+      const { data: existingBalance } = await supabaseAdmin
+        .from('user_points_balance')
+        .select('user_id')
+        .eq('user_id', id)
+        .single();
+
+      if (!existingBalance) {
+        // User doesn't have a balance record - award registration points
+        await earnPoints(supabaseAdmin, id, {
+          amount: 10,
+          type: 'register',
+          description: '注册奖励',
+        });
+        console.log(`[upsert-user] Awarded registration points to user ${id}`);
+      }
+    } catch (pointsErr) {
+      // Don't fail the upsert if points award fails
+      console.warn('[upsert-user] Failed to check/award registration points:', pointsErr);
     }
 
     return new Response(JSON.stringify({ success: true }),

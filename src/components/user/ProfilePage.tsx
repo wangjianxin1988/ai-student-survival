@@ -281,8 +281,10 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
 
   const badgesWithStatus = getBadgesWithStatus(mergedProfile, realBadgeStats);
   const earnedBadges = badgesWithStatus.filter(b => b.earned);
-  const progress = getLevelProgress(mergedProfile.points);
-  const level = getLevelFromPoints(mergedProfile.points);
+  // Always use API points when available, not localStorage fallback
+  const displayPoints = userStats?.points ?? mergedProfile.points;
+  const progress = getLevelProgress(displayPoints);
+  const level = getLevelFromPoints(displayPoints);
 
   return (
     <div className="min-h-[calc(100vh-200px)] py-12 px-4">
@@ -438,7 +440,7 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
                     <span className={`text-4xl font-bold bg-gradient-to-r ${levelColors[level - 1]} bg-clip-text text-transparent`}>
                       Lv{level}
                     </span>
-                    <span className="text-gray-500">{mergedProfile.points} {t.points}</span>
+                    <span className="text-gray-500">{displayPoints} {t.points}</span>
                   </div>
                 </div>
                 <div className="text-right">

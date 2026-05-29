@@ -94,13 +94,20 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(JSON.stringify({ error: error.message }), { status: 500 });
   }
 
-  // Award points for favoriting (non-blocking)
-  earnPoints(supabaseAdmin, serverUser.id, {
-    amount: 5,
-    type: 'favorite',
-    description: `收藏 ${target_type}`,
-    referenceId: target_id,
-  }).catch(e => console.warn('[favorites] Failed to award points:', e));
+  // Award points for favoriting
+  try {
+    const pointsResult = await earnPoints(supabaseAdmin, serverUser.id, {
+      amount: 5,
+      type: 'favorite',
+      description: `收藏 ${target_type}`,
+      referenceId: target_id,
+    });
+    if (!pointsResult.success) {
+      console.warn('[favorites] earnPoints returned success=false for user', serverUser.id);
+    }
+  } catch (e) {
+    console.error('[favorites] Failed to award points:', e);
+  }
 
   return new Response(JSON.stringify({ favorite: data }), { status: 201 });
 };

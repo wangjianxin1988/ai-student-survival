@@ -113,13 +113,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
     );
   }
 
-  // Award points for following (non-blocking)
-  earnPoints(supabaseAdmin, serverUser.id, {
-    amount: 5,
-    type: 'follow',
-    description: '关注用户',
-    referenceId: following_id,
-  }).catch(e => console.warn('[follows] Failed to award points:', e));
+  // Award points for following
+  try {
+    const pointsResult = await earnPoints(supabaseAdmin, serverUser.id, {
+      amount: 5,
+      type: 'follow',
+      description: '关注用户',
+      referenceId: following_id,
+    });
+    if (!pointsResult.success) {
+      console.warn('[follows] earnPoints returned success=false for user', serverUser.id);
+    }
+  } catch (e) {
+    console.error('[follows] Failed to award points:', e);
+  }
 
   return new Response(
     JSON.stringify({ success: true, data }),

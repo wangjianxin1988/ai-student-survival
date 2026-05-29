@@ -1,7 +1,7 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 import { getServerUser } from '@/lib/server-auth';
 import { getPostById } from '@/lib/community/storage';
 import { earnPoints } from '@/lib/points/service';
@@ -197,20 +197,28 @@ export const POST: APIRoute = async ({ params, request }) => {
     try { await supabase.rpc('increment_comments_count', { post_id: postId }); } catch { /* ignore */ }
 
     // 给帖子作者增加积分（被评论）
-    await earnPoints(supabase, post.userId, {
-      amount: 3,
-      type: 'earn_comment',
-      description: '帖子被评论',
-      referenceId: postId,
-    });
+    try {
+      await earnPoints(supabaseAdmin, post.userId, {
+        amount: 3,
+        type: 'earn_comment',
+        description: '帖子被评论',
+        referenceId: postId,
+      });
+    } catch (e) {
+      console.error('[comments] Failed to award post author points:', e);
+    }
 
     // 给评论者增加积分
-    earnPoints(supabase, user.id, {
-      amount: 5,
-      type: 'comment',
-      description: '发表评论',
-      referenceId: postId,
-    }).catch(e => console.warn('[comments] Failed to award commenter points:', e));
+    try {
+      await earnPoints(supabaseAdmin, user.id, {
+        amount: 5,
+        type: 'comment',
+        description: '发表评论',
+        referenceId: postId,
+      });
+    } catch (e) {
+      console.error('[comments] Failed to award commenter points:', e);
+    }
 
     // 检查自动推送规则
     await checkAndPromote(postId);
