@@ -1739,18 +1739,20 @@ const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": `${tool.name} 深度评测`,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://mi-to-ai.com/tools/${tool.slug}`
+    },
+    "headline": `${tool.name} - AI工具完全指南`,
     "description": tool.description,
     "author": {
-      "@type": "Organization",
-      "name": "MI TO AI"
+      "@type": "Person",
+      "name": "MI TO AI编辑团队"
     },
-    "datePublished": tool.createdAt || "2026-05-01",
-    "dateModified": tool.updatedAt || new Date().toISOString().split('T')[0],
+    "datePublished": tool.createdAt || "2025-01-15",
+    "dateModified": tool.updatedAt || "2026-05-29",
     "publisher": {
-      "@type": "Organization",
-      "name": "MI TO AI留学生存指南",
-      "url": "https://mi-to-ai.com"
+      "@id": "https://mi-to-ai.com/#org"
     },
     "about": {
       "@type": "Product",
@@ -1758,7 +1760,64 @@ const jsonLd = [
       "description": tool.description
     },
     "image": tool.imageUrl
-  }
+  },
+  // FAQPage Schema
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": `${tool.name}免费版和付费版有什么区别？`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": tool.pricing === 'free'
+            ? `${tool.name}目前完全免费使用。`
+            : tool.pricing === 'freemium'
+              ? `${tool.name}提供免费版和付费版。免费版包含基础功能，付费版（$${tool.priceDetail.monthly}/月起）解锁更多高级特性，包括更强的模型能力、更高的使用额度和优先访问权。`
+              : `${tool.name}是付费工具，$${tool.priceDetail.monthly}/月起，提供完整功能体验。`
+        }
+      },
+      {
+        "@type": "Question",
+        "name": `留学生可以使用${tool.name}吗？`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": `是的，留学生可以使用${tool.name}。但请注意你所在大学的AI使用政策，部分课程可能限制AI工具的使用。建议查看学校的具体规定，在允许的范围内合理使用。`
+        }
+      },
+      {
+        "@type": "Question",
+        "name": `${tool.name}的支付方式有哪些？`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": tool.pricing === 'free'
+            ? `${tool.name}免费使用，无需支付。`
+            : `订阅${tool.name}可使用国际信用卡、虚拟卡（如Depay、Noble）、礼品卡等支付方式。中国用户还可通过低价区注册享受更优惠的价格。详见我们的支付解决方案页面。`
+        }
+      }
+    ]
+  },
+  // HowTo Schema
+  ...(tool.details?.howToUse ? [{
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": `如何使用${tool.name}`,
+    "description": `一步步教你使用${tool.name}的完整指南`,
+    "totalTime": "PT15M",
+    "tool": [
+      {
+        "@type": "HowToTool",
+        "name": tool.name
+      }
+    ],
+    "step": tool.details.howToUse.map((step: {step: number; title: string; description: string}) => ({
+      "@type": "HowToStep",
+      "position": step.step,
+      "name": step.title,
+      "text": step.description
+    }))
+  }] : [])
 ];
 ---
 

@@ -318,6 +318,8 @@ export interface PaymentSolution {
   viewCount: number;
   createdAt: string;
   updatedAt: string;
+  /** Referral / affiliate link for this payment platform. */
+  referralUrl?: string;
 }
 
 export interface UniversityPolicy {

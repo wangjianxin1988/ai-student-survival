@@ -1,0 +1,34 @@
+# MI TO AI留学生存指南
+> 中国留学生AI工具第一站。一站式解决工具选择、支付难题、大学政策、申请经验。收录500+ AI工具、200+ 大学AI政策、20+ 支付方案、1000+ Prompt模板。
+
+## 核心页面
+- [AI工具库](https://mi-to-ai.com/tools): 500+主流AI工具数据库，多维对比评分
+- [支付解决方案](https://mi-to-ai.com/payment): 20+留学生AI工具支付方案
+- [大学AI政策](https://mi-to-ai.com/policies): 200+海外大学AI使用政策
+- [Prompt模板库](https://mi-to-ai.com/prompts): 1000+精选Prompt模板
+- [防坑指南](https://mi-to-ai.com/survival): 留学生防坑防骗指南
+- [社区](https://mi-to-ai.com/community): 留学生AI工具交流社区
+- [关于我们](https://mi-to-ai.com/about): 平台介绍和团队信息
+
+## 热门工具
+- [ChatGPT](https://mi-to-ai.com/tools/chatgpt): OpenAI AI对话助手，支持写作、编程、分析
+- [Claude](https://mi-to-ai.com/tools/claude): Anthropic AI助手，长文本处理能力强
+- [Gemini](https://mi-to-ai.com/tools/gemini): Google AI助手，与Google服务深度集成
+- [Midjourney](https://mi-to-ai.com/tools/midjourney): AI图像生成工具
+- [GitHub Copilot](https://mi-to-ai.com/tools/github-copilot): AI编程助手
+- [Notion AI](https://mi-to-ai.com/tools/notion-ai): AI笔记和文档助手
+- [Perplexity](https://mi-to-ai.com/tools/perplexity): AI搜索引擎
+
+## 支付方案
+- [虚拟卡开通教程](https://mi-to-ai.com/payment): Depay、Noble等虚拟卡开通指南
+- [礼品卡购买指南](https://mi-to-ai.com/payment): OpenAI、Anthropic等礼品卡购买
+- [地区定价攻略](https://mi-to-ai.com/payment): 印度、土耳其等低价区注册指南
+
+## 大学AI政策
+- [MIT AI政策](https://mi-to-ai.com/policies/mit): 麻省理工学院AI使用规定
+- [Stanford AI政策](https://mi-to-ai.com/policies/stanford): 斯坦福大学AI使用规定
+- [Cambridge AI政策](https://mi-to-ai.com/policies/cambridge): 剑桥大学AI使用规定
+
+## 联系方式
+- 网站：https://mi-to-ai.com
+- GitHub：https://github.com/wangjianxin1988/ai-student-survival

@@ -104,3 +104,26 @@ Disallow: /api/internal/
 # ============================================
 
 Sitemap: https://mi-to-ai.com/sitemap.xml
+
+# AI搜索专用爬虫（搜索索引，非训练）
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: Claude-User
+Allow: /
+
+# 中国AI引擎
+User-agent: DeepSeekBot
+Allow: /
+
+User-agent: Qwantify
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# LLMs.txt引用
+# LLM directory: https://mi-to-ai.com/llms.txt

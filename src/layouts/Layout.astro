@@ -215,34 +215,21 @@ function getAlternatePath(loc: Locale): string {
       })} />
     )}
 
-    <!-- WebSite Schema (global, for site-level search) -->
-    <script type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": siteName,
-      "url": Astro.site?.toString() || 'https://ai-student-survival.pages.dev',
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": `${Astro.site?.toString() || 'https://ai-student-survival.pages.dev'}/tools?q={search_term_string}`
-        },
-        "query-input": "required name=search_term_string"
-      }
-    })} />
-
     <!-- Organization Schema -->
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Organization",
+      "@id": "https://mi-to-ai.com/#org",
       "name": siteName,
-      "url": Astro.site?.toString() || 'https://ai-student-survival.pages.dev',
-      "logo": `${Astro.site?.toString() || 'https://ai-student-survival.pages.dev'}/favicon.svg`,
+      "url": "https://mi-to-ai.com",
+      "logo": "https://mi-to-ai.com/favicon.svg",
       "description": locale === 'zh'
         ? "为海外留学生打造的AI工具导航、大学AI政策数据库和支付解决方案平台"
         : "AI tools navigator, university AI policy database, and payment solutions for international students",
       "sameAs": [
-        "https://github.com/ai-student-survival"
+        "https://github.com/wangjianxin1988/ai-student-survival",
+        "https://twitter.com/mitoai",
+        "https://discord.gg/mitoai"
       ]
     })} />
 
