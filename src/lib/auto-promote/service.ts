@@ -1,17 +1,14 @@
 // 自动推送服务
+import type { CommunityPost, CommunityCategory } from '@/lib/community/types';
 import { supabase } from '@/lib/supabase';
 import { DEFAULT_AUTO_PROMOTE_RULES, type AutoPromoteRule } from './rules';
-import type { CommunityPost, CommunityCategory } from '@/lib/community';
-import { checkPromotionEligibility } from '@/lib/community/types';
 
-// 获取活跃的推送规则
+// 获取活跃规则
 export async function getActiveRules(): Promise<AutoPromoteRule[]> {
-  // TODO: 从数据库读取规则
-  // 目前使用默认规则
-  return DEFAULT_AUTO_PROMOTE_RULES.filter((rule) => rule.isActive);
+  return DEFAULT_AUTO_PROMOTE_RULES.filter(rule => rule.isActive);
 }
 
-// 评估规则是否满足
+// 评估规则
 function evaluateRule(post: CommunityPost, rule: AutoPromoteRule): boolean {
   const { type, thresholds, timeWindowMinutes } = rule.trigger;
 
@@ -120,7 +117,7 @@ export async function checkAndPromote(postId: string): Promise<void> {
     title: post.title,
     content: post.content,
     excerpt: post.excerpt,
-    category: post.category,
+    category: post.category as CommunityCategory,
     tags: post.tags || [],
     images: post.images || [],
     likesCount: post.likes_count || 0,
@@ -169,15 +166,21 @@ export async function checkAllPendingPromotions(): Promise<void> {
 
   for (const post of posts) {
     const communityPost = mapDbToCommunityPost(post);
-    const result = checkPromotionEligibility(communityPost);
 
-    if (result.canPromote) {
-      await executePromotionFromService(post.id, 'auto', result.score);
+    // 使用与 checkAndPromote 相同的 evaluateRule 逻辑
+    const rules = await getActiveRules();
+    rules.sort((a, b) => b.priority - a.priority);
+
+    for (const rule of rules) {
+      if (evaluateRule(communityPost, rule)) {
+        await executePromotion(post.id, rule);
+        break; // 只推送一次
+      }
     }
   }
 }
 
-// Execute promotion from service
+// Execute promotion from service (用于积分直接推送)
 export async function executePromotionFromService(
   postId: string,
   source: 'auto' | 'points',
@@ -195,7 +198,7 @@ export async function executePromotionFromService(
   }
 
   const reason = source === 'auto'
-    ? `auto-promoted by heat score (score: ${score})`
+    ? `auto-promoted by rules (score: ${score})`
     : `direct publish via points (score: ${score})`;
 
   const updateData = {
