@@ -5,13 +5,29 @@ import { earnPoints } from '@/lib/points/service';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ request }) => {
+export const GET: APIRoute = async ({ request, url }) => {
   const serverUser = await getServerUser(request);
   if (!serverUser) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
   }
 
-  // Fetch tool/prompt/policy/payment favorites from user_favorites
+  // If target_type and target_id are provided, check if specific item is favorited
+  const targetType = url.searchParams.get('target_type');
+  const targetId = url.searchParams.get('target_id');
+
+  if (targetType && targetId) {
+    const { data } = await supabaseAdmin
+      .from('user_favorites')
+      .select('id')
+      .eq('user_id', serverUser.id)
+      .eq('target_type', targetType)
+      .eq('target_id', targetId)
+      .single();
+
+    return new Response(JSON.stringify({ isFavorited: !!data }), { status: 200 });
+  }
+
+  // Otherwise, return all favorites
   const { data: favorites, error } = await supabaseAdmin
     .from('user_favorites')
     .select(`
@@ -110,4 +126,31 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   return new Response(JSON.stringify({ favorite: data }), { status: 201 });
+};
+
+export const DELETE: APIRoute = async ({ request }) => {
+  const serverUser = await getServerUser(request);
+  if (!serverUser) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
+  }
+
+  const body = await request.json();
+  const { target_type, target_id } = body;
+
+  if (!target_type || !target_id) {
+    return new Response(JSON.stringify({ error: 'target_type and target_id are required' }), { status: 400 });
+  }
+
+  const { error } = await supabaseAdmin
+    .from('user_favorites')
+    .delete()
+    .eq('user_id', serverUser.id)
+    .eq('target_type', target_type)
+    .eq('target_id', target_id);
+
+  if (error) {
+    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+  }
+
+  return new Response(JSON.stringify({ success: true }), { status: 200 });
 };

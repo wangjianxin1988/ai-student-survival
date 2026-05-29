@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { getCurrentUser, onAuthStateChange } from "@/lib/auth";
+import { getCurrentUser, onAuthStateChange, getAuthHeaders } from "@/lib/auth";
 import { getAuthLoginHref } from "@/lib/i18n";
 import { userStatsApi } from "@/lib/userProfile";
+import { isDemoMode } from "@/lib/supabase";
 
 interface FavoriteButtonProps {
   targetType: "tool" | "prompt" | "policy" | "payment_solution" | "question";
@@ -64,9 +65,21 @@ export default function FavoriteButton({
 
   useEffect(() => {
     // Check if this item is favorited
-    const favorites = getDemoFavorites();
-    const key = `${targetType}_${targetId}`;
-    setIsFavorited(favorites[user?.id || "anonymous"]?.includes(key) || false);
+    if (isDemoMode()) {
+      const favorites = getDemoFavorites();
+      const key = `${targetType}_${targetId}`;
+      setIsFavorited(favorites[user?.id || "anonymous"]?.includes(key) || false);
+    } else if (user) {
+      // For real users, check via API
+      getAuthHeaders().then(headers => {
+        fetch(`/api/favorites?target_type=${targetType}&target_id=${targetId}`, { headers })
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (data?.isFavorited) setIsFavorited(true);
+          })
+          .catch(() => {});
+      });
+    }
   }, [user, targetType, targetId]);
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -82,30 +95,53 @@ export default function FavoriteButton({
 
     setIsLoading(true);
 
-    const favorites = getDemoFavorites();
-    const key = `${targetType}_${targetId}`;
-    const userId = currentUser.id;
+    const demo = isDemoMode();
 
-    if (isFavorited) {
-      // Remove favorite
-      if (favorites[userId]) {
-        favorites[userId] = favorites[userId].filter((k) => k !== key);
-        if (favorites[userId].length === 0) {
-          delete favorites[userId];
+    if (demo) {
+      // Demo mode: use localStorage
+      const favorites = getDemoFavorites();
+      const key = `${targetType}_${targetId}`;
+      const userId = currentUser.id;
+
+      if (isFavorited) {
+        if (favorites[userId]) {
+          favorites[userId] = favorites[userId].filter((k) => k !== key);
+          if (favorites[userId].length === 0) delete favorites[userId];
         }
+        saveDemoFavorites(favorites);
+        userStatsApi.recordUnfavorite(userId);
+        setIsFavorited(false);
+      } else {
+        if (!favorites[userId]) favorites[userId] = [];
+        favorites[userId].push(key);
+        saveDemoFavorites(favorites);
+        userStatsApi.recordFavorite(userId);
+        setIsFavorited(true);
       }
-      saveDemoFavorites(favorites);
-      userStatsApi.recordUnfavorite(userId);
-      setIsFavorited(false);
     } else {
-      // Add favorite
-      if (!favorites[userId]) {
-        favorites[userId] = [];
+      // Real mode: call API
+      try {
+        const headers = await getAuthHeaders();
+        if (isFavorited) {
+          // Remove favorite via DELETE
+          const res = await fetch('/api/favorites', {
+            method: 'DELETE',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_type: targetType, target_id: targetId }),
+          });
+          if (res.ok) setIsFavorited(false);
+        } else {
+          // Add favorite via POST
+          const res = await fetch('/api/favorites', {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_type: targetType, target_id: targetId }),
+          });
+          if (res.ok) setIsFavorited(true);
+        }
+      } catch (e) {
+        console.error('[FavoriteButton] API call failed:', e);
       }
-      favorites[userId].push(key);
-      saveDemoFavorites(favorites);
-      userStatsApi.recordFavorite(userId);
-      setIsFavorited(true);
     }
 
     setIsLoading(false);
