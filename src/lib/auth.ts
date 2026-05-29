@@ -439,7 +439,10 @@ export const demoAuthApi = {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { name } },
+        options: {
+          data: { name },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
       });
       if (error) {
         if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
@@ -559,9 +562,70 @@ export const demoAuthApi = {
       return { success: false, error: '发生未知错误' };
     }
   },
+  async sendEmailOtp(email: string, shouldCreateUser: boolean = false): Promise<{ success: boolean; error?: string }> {
+    if (!isSupabaseConfigured) {
+      return { success: false, error: 'Demo mode: OTP not available' };
+    }
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          shouldCreateUser,
+          ...(shouldCreateUser ? {} : {}),
+        },
+      });
+      if (error) {
+        if (error.message.toLowerCase().includes('user not found') ||
+            error.message.toLowerCase().includes('invalid')) {
+          return { success: false, error: '该邮箱尚未注册，请先注册账号' };
+        }
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error('[auth] sendEmailOtp error:', err);
+      return { success: false, error: err?.message || '发送验证码失败' };
+    }
+  },
 
-  async verifyAndLogin(_email: string, _code: string): Promise<AuthResult> {
-    return { success: true };
+  async verifyEmailOtp(email: string, token: string, type: 'email' | 'signup' | 'recovery' = 'email'): Promise<AuthResult> {
+    if (!isSupabaseConfigured) {
+      return { success: false, error: 'Demo mode: OTP not available' };
+    }
+    try {
+      const { data, error } = await supabase.auth.verifyOtp({
+        email,
+        token,
+        type,
+      } as any);
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error('[auth] verifyEmailOtp error:', err);
+      return { success: false, error: err?.message || '验证码验证失败' };
+    }
+  },
+
+  async updatePassword(newPassword: string): Promise<{ success: boolean; error?: string }> {
+    if (!isSupabaseConfigured) {
+      return { success: false, error: 'Demo mode: not available' };
+    }
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      return { success: true };
+    } catch (err: any) {
+      console.error('[auth] updatePassword error:', err);
+      return { success: false, error: err?.message || '密码更新失败' };
+    }
+  },
+
+  async verifyAndLogin(email: string, code: string): Promise<AuthResult> {
+    return this.verifyEmailOtp(email, code, 'email');
   },
 };
 

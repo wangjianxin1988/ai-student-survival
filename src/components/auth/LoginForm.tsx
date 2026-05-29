@@ -31,6 +31,11 @@ const translations = {
     sendMagicLink: "发送验证码",
     magicLinkSent: "验证码已发送，请查收邮箱",
     verifyHuman: "请先完成人机验证",
+    otpSent: "验证码已发送，请查看邮箱",
+    otpPlaceholder: "请输入6位验证码",
+    verifyCode: "验证",
+    resendCode: "重新发送",
+    verifySuccess: "验证成功，正在跳转...",
   },
   en: {
     title: "Sign In",
@@ -53,6 +58,11 @@ const translations = {
     sendMagicLink: "Send Link",
     magicLinkSent: "Check your email for the login link",
     verifyHuman: "Please complete verification first",
+    otpSent: "Verification code sent, check your email",
+    otpPlaceholder: "Enter 6-digit code",
+    verifyCode: "Verify",
+    resendCode: "Resend",
+    verifySuccess: "Verified, redirecting...",
   },
 };
 
@@ -72,6 +82,9 @@ export default function LoginForm({
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [forgotPasswordSent, setForgotPasswordSent] = useState(false);
   const [magicLinkToken, setMagicLinkToken] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
   const [forgotToken, setForgotToken] = useState("");
   const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -205,22 +218,20 @@ export default function LoginForm({
     if (result.error) setError(result.error);
   };
 
-  const handleMagicLink = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const handleSendMagicLink = async () => {
+    if (!magicLinkEmail) return;
     setIsLoading(true);
-
+    setError("");
     try {
-      const result = await demoAuthApi.signInWithMagicLink(magicLinkEmail);
+      const result = await demoAuthApi.sendEmailOtp(magicLinkEmail, false);
       if (result.success) {
-        setMagicLinkSent(true);
+        setOtpSent(true);
       } else {
-        setError(result.error || "发送失败");
+        setError(result.error || t.error);
       }
     } catch {
-      setError("发送失败");
+      setError(t.error);
     }
-
     setIsLoading(false);
   };
 
@@ -373,64 +384,111 @@ export default function LoginForm({
       )}
 
       {showMagicLink ? (
-        <form onSubmit={handleMagicLink} className="space-y-4">
-          <div>
-            <label
-              htmlFor="magicEmail"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              {t.email}
-            </label>
-            <input
-              type="email"
-              id="magicEmail"
-              value={magicLinkEmail}
-              onChange={(e) => setMagicLinkEmail(e.target.value)}
-              required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
-              placeholder="email@example.com"
-            />
-          </div>
-
-          {/* Turnstile Verification */}
-          <div className="mt-4">
-            <TurnstileWidget
-              onVerify={(token) => setMagicLinkToken(token)}
-              onExpire={() => setMagicLinkToken("")}
-            />
-            {!magicLinkToken && (
-              <p className="text-xs text-gray-500 mt-1">
-                {t.verifyHuman}
-              </p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={!magicLinkToken || isLoading}
-            className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? t.loading : t.sendMagicLink}
-          </button>
-
-          {magicLinkSent && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
-              {t.magicLinkSent}
-            </div>
+        <div className="space-y-4">
+          {!otpSent ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t.email}</label>
+                <input
+                  type="email"
+                  value={magicLinkEmail}
+                  onChange={(e) => setMagicLinkEmail(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+                  placeholder="your@email.com"
+                />
+              </div>
+              <button
+                onClick={async () => {
+                  if (!magicLinkEmail) return;
+                  setIsLoading(true);
+                  setError("");
+                  try {
+                    const result = await demoAuthApi.sendEmailOtp(magicLinkEmail, false);
+                    if (result.success) {
+                      setOtpSent(true);
+                    } else {
+                      setError(result.error || t.error);
+                    }
+                  } catch {
+                    setError(t.error);
+                  }
+                  setIsLoading(false);
+                }}
+                disabled={!magicLinkEmail || isLoading}
+                className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? t.loading : t.sendMagicLink}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm">
+                ✉️ {t.otpSent}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {locale === "zh" ? "验证码" : "Verification Code"}
+                </label>
+                <input
+                  type="text"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center text-2xl tracking-[0.5em] font-mono"
+                  placeholder="000000"
+                  maxLength={6}
+                  autoComplete="one-time-code"
+                />
+              </div>
+              <button
+                onClick={async () => {
+                  if (otpCode.length !== 6) return;
+                  setOtpVerifying(true);
+                  setError("");
+                  try {
+                    const result = await demoAuthApi.verifyEmailOtp(magicLinkEmail, otpCode, "email");
+                    if (result.success) {
+                      window.location.href = returnTo || "/user";
+                    } else {
+                      setError(result.error || t.error);
+                    }
+                  } catch {
+                    setError(t.error);
+                  }
+                  setOtpVerifying(false);
+                }}
+                disabled={otpCode.length !== 6 || otpVerifying}
+                className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {otpVerifying ? (locale === "zh" ? "验证中..." : "Verifying...") : t.verifyCode}
+              </button>
+              <button
+                onClick={async () => {
+                  setIsLoading(true);
+                  try {
+                    await demoAuthApi.sendEmailOtp(magicLinkEmail, false);
+                    setOtpCode("");
+                  } catch {}
+                  setIsLoading(false);
+                }}
+                disabled={isLoading}
+                className="w-full text-sm text-primary-600 hover:text-primary-700 underline"
+              >
+                {t.resendCode}
+              </button>
+            </>
           )}
-
           <button
-            type="button"
             onClick={() => {
               setShowMagicLink(false);
-              setMagicLinkToken("");
+              setOtpSent(false);
+              setOtpCode("");
               setError("");
             }}
-            className="w-full text-sm text-gray-600 hover:text-gray-900"
+            className="w-full text-sm text-gray-600 hover:text-gray-800 mt-2"
           >
-            ← {locale === "zh" ? "返回邮箱密码登录" : "Back to email login"}
+            ← {locale === "zh" ? "返回密码登录" : "Back to password login"}
           </button>
-        </form>
+        </div>
       ) : (
         <>
           <form onSubmit={handleSubmit} className="space-y-4">
