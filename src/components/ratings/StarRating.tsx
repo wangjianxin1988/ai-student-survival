@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { getCurrentUser, onAuthStateChange } from '@/lib/auth';
+import { getCurrentUser, onAuthStateChange, getAuthHeaders } from '@/lib/auth';
 import { getAuthLoginHref } from '@/lib/i18n';
-import { userStatsApi } from '@/lib/userProfile';
+import { isDemoMode, isSupabaseConfigured } from '@/lib/supabase';
 
 interface StarRatingProps {
   targetType: 'tool' | 'payment_solution' | 'policy' | 'prompt';
@@ -68,9 +68,8 @@ export default function StarRating({ targetType, targetId, locale = 'zh', size =
     return unsubscribe;
   }, []);
 
+  // Load ratings from API (real mode) or localStorage (demo mode)
   useEffect(() => {
-    // Initial load: fetch all ratings from demo storage
-    // Don't overwrite userRating if user just rated (to prevent UI flicker)
     if (justRatedRef.current) {
       justRatedRef.current = false;
       setIsInitialized(true);
@@ -79,74 +78,134 @@ export default function StarRating({ targetType, targetId, locale = 'zh', size =
 
     if (isInitialized) return;
 
-    const ratings = getDemoRatings();
-    const key = `${targetType}_${targetId}`;
-    let totalRating = 0;
-    let ratingCount = 0;
-    let userR = 0;
+    async function loadRatings() {
+      const useDemo = !isSupabaseConfigured || isDemoMode();
 
-    Object.entries(ratings).forEach(([userId, userRatings]) => {
-      if (userRatings[key]) {
-        totalRating += userRatings[key];
-        ratingCount++;
-        if (user && userId === user.id) {
-          userR = userRatings[key];
+      if (useDemo) {
+        // Demo mode: load from localStorage
+        const ratings = getDemoRatings();
+        const key = `${targetType}_${targetId}`;
+        let totalRating = 0;
+        let ratingCount = 0;
+        let userR = 0;
+
+        Object.entries(ratings).forEach(([userId, userRatings]) => {
+          if (userRatings[key]) {
+            totalRating += userRatings[key];
+            ratingCount++;
+            const currentUser = getCurrentUser();
+            if (currentUser && userId === currentUser.id) {
+              userR = userRatings[key];
+            }
+          }
+        });
+
+        if (ratingCount > 0) {
+          setAverage(Math.round((totalRating / ratingCount) * 10) / 10);
+          setCount(ratingCount);
+        }
+        setRating(userR);
+        setUserRating(userR);
+      } else {
+        // Real mode: load from Supabase API
+        try {
+          const res = await fetch(`/api/ratings?target_type=${targetType}&target_id=${targetId}`);
+          if (res.ok) {
+            const data = await res.json();
+            setAverage(data.average || 0);
+            setCount(data.count || 0);
+
+            // Find current user's rating
+            const currentUser = getCurrentUser();
+            if (currentUser && data.ratings) {
+              const userR = data.ratings.find((r: { user_id?: string }) => r.user_id === currentUser.id);
+              if (userR) {
+                setRating(userR.rating);
+                setUserRating(userR.rating);
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[StarRating] Failed to load ratings from API:', e);
         }
       }
-    });
 
-    if (ratingCount > 0) {
-      setAverage(Math.round((totalRating / ratingCount) * 10) / 10);
-      setCount(ratingCount);
+      setIsInitialized(true);
     }
-    setRating(userR);
-    setUserRating(userR);
-    setIsInitialized(true);
+
+    loadRatings();
   }, [user, targetType, targetId, isInitialized]);
 
   const handleClick = async (value: number) => {
     // Use getCurrentUser() directly to avoid stale closure issue
-    // where React state 'user' hasn't been set via useEffect yet
     const currentUser = getCurrentUser();
     if (!currentUser) {
       window.location.href = getAuthLoginHref();
       return;
     }
 
-    const ratings = getDemoRatings();
-    const key = `${targetType}_${targetId}`;
-    const isNewRating = !ratings[currentUser.id]?.[key];
+    const useDemo = !isSupabaseConfigured || isDemoMode();
 
-    if (!ratings[currentUser.id]) {
-      ratings[currentUser.id] = {};
-    }
-    ratings[currentUser.id][key] = value;
-    saveDemoRatings(ratings);
+    if (useDemo) {
+      // Demo mode: save to localStorage
+      const ratings = getDemoRatings();
+      const key = `${targetType}_${targetId}`;
+      const isNewRating = !ratings[currentUser.id]?.[key];
 
-    // Record points for new ratings only
-    if (isNewRating) {
-      userStatsApi.recordRating(currentUser.id);
+      if (!ratings[currentUser.id]) {
+        ratings[currentUser.id] = {};
+      }
+      ratings[currentUser.id][key] = value;
+      saveDemoRatings(ratings);
+
+      // Recalculate average
+      let totalRating = 0;
+      let ratingCount = 0;
+      Object.values(ratings).forEach((userRatings) => {
+        if (userRatings[key]) {
+          totalRating += userRatings[key];
+          ratingCount++;
+        }
+      });
+
+      if (ratingCount > 0) {
+        setAverage(Math.round((totalRating / ratingCount) * 10) / 10);
+        setCount(ratingCount);
+      }
+    } else {
+      // Real mode: save to Supabase API
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch('/api/ratings', {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            target_type: targetType,
+            target_id: targetId,
+            rating: value,
+          }),
+        });
+
+        if (res.ok) {
+          // Reload ratings from API to get updated average
+          const loadRes = await fetch(`/api/ratings?target_type=${targetType}&target_id=${targetId}`);
+          if (loadRes.ok) {
+            const data = await loadRes.json();
+            setAverage(data.average || 0);
+            setCount(data.count || 0);
+          }
+        } else {
+          console.error('[StarRating] Failed to save rating:', await res.text());
+        }
+      } catch (e) {
+        console.error('[StarRating] Rating API error:', e);
+      }
     }
 
     // Mark that user just rated to prevent useEffect from overwriting
     justRatedRef.current = true;
     setRating(value);
     setUserRating(value);
-
-    // Recalculate average
-    let totalRating = 0;
-    let ratingCount = 0;
-    Object.values(ratings).forEach((userRatings) => {
-      if (userRatings[key]) {
-        totalRating += userRatings[key];
-        ratingCount++;
-      }
-    });
-
-    if (ratingCount > 0) {
-      setAverage(Math.round((totalRating / ratingCount) * 10) / 10);
-      setCount(ratingCount);
-    }
   };
 
   return (
@@ -182,7 +241,7 @@ export default function StarRating({ targetType, targetId, locale = 'zh', size =
           {average} ({count}{t.ratingsCount})
         </span>
       )}
-      {count === 0 && user && (
+      {count === 0 && !user && (
         <span className="text-sm text-gray-400">{t.loginToRate}</span>
       )}
     </div>

@@ -230,12 +230,17 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
-      // Use magic link flow for password reset
-      const result = await demoAuthApi.signInWithMagicLink(forgotPasswordEmail);
-      if (result.success) {
+      // Call the forgot-password API which uses supabase.auth.resetPasswordForEmail
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotPasswordEmail }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
         setForgotPasswordSent(true);
       } else {
-        setError(result.error || "发送失败");
+        setError(data.message || "发送失败");
       }
     } catch {
       setError("发送失败");
