@@ -63,6 +63,7 @@ const toolsData: Record<string, Tool> = {
     },
     updateSourceUrl: 'https://help.openai.com/en/articles/6825453-chatgpt-release-notes',
     updateSourceType: 'changelog',
+    affiliateUrl: 'https://chat.openai.com/?ref=mi-to-ai',
   },
   'claude': {
     id: '2',
@@ -106,6 +107,7 @@ const toolsData: Record<string, Tool> = {
     },
     updateSourceUrl: 'https://docs.anthropic.com/en/release-notes/overview',
     updateSourceType: 'changelog',
+    affiliateUrl: 'https://claude.ai/?ref=mi-to-ai',
   },
   'midjourney': {
     id: '3',
@@ -149,6 +151,7 @@ const toolsData: Record<string, Tool> = {
     },
     updateSourceUrl: 'https://docs.midjourney.com/',
     updateSourceType: 'changelog',
+    affiliateUrl: 'https://midjourney.com/?ref=mi-to-ai',
   },
   'github-copilot': {
     id: '4',
@@ -192,6 +195,7 @@ const toolsData: Record<string, Tool> = {
     },
     updateSourceUrl: 'https://github.com/github/copilot-release-notes/releases',
     updateSourceType: 'github',
+    affiliateUrl: 'https://github.com/features/copilot?ref=mi-to-ai',
   },
   'notion-ai': {
     id: '5',
@@ -214,6 +218,7 @@ const toolsData: Record<string, Tool> = {
     createdAt: '2024-03-01',
     updatedAt: '2024-05-01',
     updateSourceUrl: 'https://www.notion.so/updates',
+    affiliateUrl: 'https://notion.so/?ref=mi-to-ai',
     updateSourceType: 'changelog',
   },
   'perplexity': {
@@ -257,6 +262,7 @@ const toolsData: Record<string, Tool> = {
       updateNotes: '2026年5月：Perplexity Enterprise Pro发布，支持团队协作和共享Spaces；新增图片理解功能；Sonar模型升级支持更长的上下文；API支持自定义知识库集成'
     },
     updateSourceUrl: 'https://www.perplexity.ai/changelog/',
+    affiliateUrl: 'https://perplexity.ai/?ref=mi-to-ai',
     updateSourceType: 'changelog',
   },
   'jasper': {
@@ -280,6 +286,7 @@ const toolsData: Record<string, Tool> = {
     createdAt: '2024-01-20',
     updatedAt: '2024-05-01',
     updateSourceUrl: 'https://www.jasper.ai/changelog',
+    affiliateUrl: 'https://jasper.ai/?ref=mi-to-ai',
     updateSourceType: 'changelog',
   },
   'copyai': {
@@ -326,6 +333,7 @@ const toolsData: Record<string, Tool> = {
     createdAt: '2024-01-01',
     updatedAt: '2024-05-01',
     updateSourceUrl: 'https://www.grammarly.com/updates',
+    affiliateUrl: 'https://grammarly.com/?ref=mi-to-ai',
     updateSourceType: 'changelog',
   },
   'quillbot': {
@@ -435,6 +443,7 @@ const toolsData: Record<string, Tool> = {
       updateNotes: '2026年更新包括Cursor 0.5支持Claude 3.5 Sonnet和GPT-4o模型选项，增强的Composer支持拖放文件管理，改进的代码库索引3倍加速与语义搜索，新的PR分析Review模式，以及包括SSO和SOC 2合规的企业功能。'
     },
     updateSourceUrl: 'https://cursor.com/changelog',
+    affiliateUrl: 'https://cursor.sh/?ref=mi-to-ai',
     updateSourceType: 'changelog',
   },
   'replit': {
@@ -478,6 +487,7 @@ const toolsData: Record<string, Tool> = {
       updateNotes: '2026年更新包括Replit Agent 2.0，复杂功能开发的多步骤推理改进，新的iOS和Android移动应用具有完整IDE功能，增强的部署支持serverless功能和自动扩展，以及扩展的模板库包括Next.js、FastAPI和Django模板。'
     },
     updateSourceUrl: 'https://docs.replit.com/updates',
+    affiliateUrl: 'https://replit.com/?ref=mi-to-ai',
     updateSourceType: 'changelog',
   },
   'figma': {
@@ -521,6 +531,7 @@ const toolsData: Record<string, Tool> = {
       updateNotes: 'Figma AI功能持续更新，新增AI生成Wireframe模式、文本生成Icons、图片生成Icons功能。2025年引入更智能的Design Token同步和变量管理。Dev Mode全新改版，支持代码片段收藏和组件状态预览。FigJam集成AI脑暴功能。'
     },
     updateSourceUrl: 'https://www.figma.com/changelog/',
+    affiliateUrl: 'https://figma.com/?ref=mi-to-ai',
     updateSourceType: 'changelog',
   },
   'dalle-3': {
@@ -2033,12 +2044,15 @@ const jsonLd = [
               </div>
             )}
             <div class="mt-6 pt-6 border-t border-gray-200">
-              <a href={tool.url} target="_blank" rel="noopener noreferrer" class="btn-primary inline-flex items-center gap-2">
-                <span>立即开始使用</span>
+              <a href={tool.affiliateUrl || tool.url} target="_blank" rel="noopener noreferrer nofollow" class="btn-primary inline-flex items-center gap-2">
+                <span>{tool.affiliateUrl ? '官方注册/下载' : '立即开始使用'}</span>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                 </svg>
               </a>
+              {tool.affiliateUrl && (
+                <p class="text-xs text-gray-400 mt-2">此链接为推荐链接，我们可能获得佣金（不影响您的价格）</p>
+              )}
             </div>
           </div>
         </section>
@@ -2184,15 +2198,17 @@ const jsonLd = [
               </span>
             </div>
             <a
-              href={tool.url}
+              href={tool.affiliateUrl || tool.url}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener noreferrer nofollow"
               class="btn-primary w-full text-center"
             >
-              访问官网
+              {tool.affiliateUrl ? '🎁 官方注册' : '访问官网'}
             </a>
             <p class="text-xs text-gray-500 text-center mt-3">
-              链接为官方地址，点击后离开本站
+              {tool.affiliateUrl
+                ? '推荐链接 · 我们可能获得佣金（不影响您的价格）'
+                : '链接为官方地址，点击后离开本站'}
             </p>
           </div>
 

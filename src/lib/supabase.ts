@@ -299,6 +299,8 @@ export interface Tool {
   };
   updateSourceUrl?: string;
   updateSourceType?: 'github' | 'changelog' | 'blog' | 'none';
+  /** Affiliate link – if present, the "访问官网" button uses this URL (with tracking params). */
+  affiliateUrl?: string;
 }
 
 export interface PaymentSolution {
