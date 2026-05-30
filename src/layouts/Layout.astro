@@ -289,6 +289,43 @@ function getAlternatePath(loc: Locale): string {
 
     <!-- Monetag In-Page Push (全站浮动广告) -->
     <script is:inline>(function(s){s.dataset.zone='11076692',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+    <!-- 移动 Monetag 广告到左下角 -->
+    <script is:inline>
+    (function moveMonetagAd() {
+      function tryMove() {
+        // 找到 Monetag 创建的固定定位元素（通常是右下角的浮动广告）
+        var fixedEls = document.querySelectorAll('div[style*="position: fixed"], div[style*="position:fixed"]');
+        for (var i = 0; i < fixedEls.length; i++) {
+          var el = fixedEls[i];
+          var style = el.getAttribute('style') || '';
+          // 匹配右下或右上定位的元素
+          if ((style.indexOf('right') !== -1 || style.indexOf('bottom') !== -1) && 
+              style.indexOf('z-index') !== -1 &&
+              el.querySelector('img, a[href*="offer"], a[href*="click"]')) {
+            el.style.right = 'auto';
+            el.style.left = '16px';
+            el.style.bottom = '16px';
+            el.style.top = 'auto';
+            return true;
+          }
+        }
+        return false;
+      }
+      // 延迟执行，等广告加载
+      setTimeout(function() {
+        if (!tryMove()) {
+          setTimeout(tryMove, 2000);
+        }
+      }, 1000);
+      // 也监听 DOM 变化
+      var observer = new MutationObserver(function() {
+        tryMove();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+      // 5秒后停止监听
+      setTimeout(function() { observer.disconnect(); }, 5000);
+    })();
+    </script>
 
   </body>
 </html>
