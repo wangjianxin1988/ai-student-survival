@@ -1,39 +1,68 @@
 /**
- * Monetag In-Page Push Ad Slot Component (React version)
+ * Ad Slot Component (React version)
  * 
- * Renders a Monetag in-page push banner ad in existing ad slots.
- * Zone ID: 11076692 (In-Page Push format)
+ * Placeholder for future AdSense ads. Shows a clean placeholder until AdSense is approved.
+ * Replace ca-pub-XXXXXXXXXX with real publisher ID after approval.
  *
  * Props:
+ *  - format: 'auto' | 'horizontal' | 'vertical' | 'rectangle' (default: 'auto')
  *  - className: extra CSS classes
- *  - label: optional label text above the ad
+ *  - slot: ad slot ID
  */
 
 import { useEffect, useRef } from 'react';
 
 interface AdSlotProps {
+  format?: 'auto' | 'horizontal' | 'vertical' | 'rectangle';
   className?: string;
-  label?: string;
+  slot?: string;
 }
 
-export default function AdSlot({ className = '', label }: AdSlotProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+export default function AdSlot({
+  format = 'auto',
+  className = '',
+  slot = '0000000000',
+}: AdSlotProps) {
+  const adRef = useRef<HTMLModElement>(null);
+
+  // AdSense publisher ID — replace after approval
+  const AD_CLIENT = 'ca-pub-XXXXXXXXXX';
+  const isProduction = import.meta.env.PROD;
+  const isAdSenseReady = isProduction && AD_CLIENT !== 'ca-pub-XXXXXXXXXX';
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    
-    // Check if script already loaded to avoid duplicates
-    if (containerRef.current.querySelector('script[src*="nap5k.com"]')) return;
+    if (isAdSenseReady && adRef.current) {
+      try {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      } catch (e) {
+        console.warn('AdSense push failed:', e);
+      }
+    }
+  }, [isAdSenseReady]);
 
-    const script = document.createElement('script');
-    script.dataset.zone = '11076692';
-    script.src = 'https://nap5k.com/tag.min.js';
-    containerRef.current.appendChild(script);
-  }, []);
+  if (isAdSenseReady) {
+    return (
+      <div className={`adsense-container ${className}`}>
+        <ins
+          ref={adRef}
+          className="adsbygoogle"
+          style={{ display: 'block' }}
+          data-ad-client={AD_CLIENT}
+          data-ad-slot={slot}
+          data-ad-format={format}
+          data-full-width-responsive="true"
+        />
+      </div>
+    );
+  }
 
+  // Placeholder (shown before AdSense approval)
   return (
-    <div ref={containerRef} className={`monetag-ad-container ${className}`}>
-      {label && <p className="text-xs text-gray-400 mb-2 text-center">{label}</p>}
+    <div className={`ad-placeholder bg-gray-50 border border-dashed border-gray-200 rounded-lg flex items-center justify-center py-8 ${className}`}>
+      <div className="text-center">
+        <p className="text-xs text-gray-300 font-medium">广告位</p>
+        <p className="text-[10px] text-gray-200 mt-1">Ad Space</p>
+      </div>
     </div>
   );
 }
