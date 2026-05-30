@@ -2,7 +2,7 @@
  * Ad Slot Component (React version)
  * 
  * Placeholder for future AdSense ads. Shows a clean placeholder until AdSense is approved.
- * Replace ca-pub-XXXXXXXXXX with real publisher ID after approval.
+ * Replace ca-pub-2380757804889093 with real publisher ID after approval.
  *
  * Props:
  *  - format: 'auto' | 'horizontal' | 'vertical' | 'rectangle' (default: 'auto')
@@ -26,9 +26,9 @@ export default function AdSlot({
   const adRef = useRef<HTMLModElement>(null);
 
   // AdSense publisher ID — replace after approval
-  const AD_CLIENT = 'ca-pub-XXXXXXXXXX';
+  const AD_CLIENT = 'ca-pub-2380757804889093';
   const isProduction = import.meta.env.PROD;
-  const isAdSenseReady = isProduction && AD_CLIENT !== 'ca-pub-XXXXXXXXXX';
+  const isAdSenseReady = isProduction && AD_CLIENT !== 'ca-pub-2380757804889093';
 
   useEffect(() => {
     if (isAdSenseReady && adRef.current) {
