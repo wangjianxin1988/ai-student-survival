@@ -289,41 +289,63 @@ function getAlternatePath(loc: Locale): string {
 
     <!-- Monetag In-Page Push (全站浮动广告) -->
     <script is:inline>(function(s){s.dataset.zone='11076692',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-    <!-- 移动 Monetag 广告到左下角 -->
+    <!-- 精确移动 Monetag 广告到左下角（只动 Monetag 注入的元素） -->
     <script is:inline>
-    (function moveMonetagAd() {
-      function tryMove() {
-        // 找到 Monetag 创建的固定定位元素（通常是右下角的浮动广告）
-        var fixedEls = document.querySelectorAll('div[style*="position: fixed"], div[style*="position:fixed"]');
-        for (var i = 0; i < fixedEls.length; i++) {
-          var el = fixedEls[i];
-          var style = el.getAttribute('style') || '';
-          // 匹配右下或右上定位的元素
-          if ((style.indexOf('right') !== -1 || style.indexOf('bottom') !== -1) && 
-              style.indexOf('z-index') !== -1 &&
-              el.querySelector('img, a[href*="offer"], a[href*="click"]')) {
-            el.style.right = 'auto';
-            el.style.left = '16px';
-            el.style.bottom = '16px';
-            el.style.top = 'auto';
-            return true;
+    (function() {
+      // 已处理的元素集合，防止重复操作
+      var handled = new WeakSet();
+      
+      function isMonetagAd(el) {
+        // 检查是否是 Monetag 注入的元素（排除已知非广告元素）
+        var tag = el.tagName;
+        if (tag !== 'DIV' && tag !== 'IFRAME') return false;
+        var s = el.style;
+        if (!s || !s.position || s.position.indexOf('fixed') === -1) return false;
+        // 排除 Chatbot、SearchModal 等已知元素
+        var id = el.id || '';
+        if (id === 'chatbot-panel' || id === 'search-modal' || id === 'ask-ai-modal') return false;
+        var cls = el.className || '';
+        if (cls.indexOf('chatbot') !== -1 || cls.indexOf('search-modal') !== -1) return false;
+        // 只处理 z-index >= 100000 的高层级元素（Monetag 特征）
+        var zi = parseInt(s.zIndex) || 0;
+        if (zi < 50000) return false;
+        return true;
+      }
+      
+      function moveToBottomLeft(el) {
+        if (handled.has(el)) return;
+        handled.add(el);
+        el.style.setProperty('left', '16px', 'important');
+        el.style.setProperty('bottom', '16px', 'important');
+        el.style.setProperty('right', 'auto', 'important');
+        el.style.setProperty('top', 'auto', 'important');
+      }
+      
+      function scan() {
+        var all = document.querySelectorAll('body > div, body > iframe, body > ins');
+        for (var i = 0; i < all.length; i++) {
+          if (isMonetagAd(all[i])) moveToBottomLeft(all[i]);
+        }
+      }
+      
+      // 延迟扫描（等 Monetag 加载）
+      setTimeout(scan, 1500);
+      setTimeout(scan, 3000);
+      setTimeout(scan, 5000);
+      
+      // 持续监控新元素（Monetag 会动态注入）
+      var observer = new MutationObserver(function(mutations) {
+        for (var i = 0; i < mutations.length; i++) {
+          var added = mutations[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            var node = added[j];
+            if (node.nodeType === 1 && isMonetagAd(node)) {
+              moveToBottomLeft(node);
+            }
           }
         }
-        return false;
-      }
-      // 延迟执行，等广告加载
-      setTimeout(function() {
-        if (!tryMove()) {
-          setTimeout(tryMove, 2000);
-        }
-      }, 1000);
-      // 也监听 DOM 变化
-      var observer = new MutationObserver(function() {
-        tryMove();
       });
-      observer.observe(document.body, { childList: true, subtree: true });
-      // 5秒后停止监听
-      setTimeout(function() { observer.disconnect(); }, 5000);
+      observer.observe(document.body, { childList: true, subtree: false });
     })();
     </script>
 
@@ -335,31 +357,7 @@ function getAlternatePath(loc: Locale): string {
   @tailwind components;
   @tailwind utilities;
 
-  /* Monetag: 强制所有fixed元素移到左下角 */
-  iframe[style*="position"],
-  iframe[style*="fixed"],
-  div[style*="position: fixed"],
-  div[style*="position:fixed"],
-  div[style*="z-index"][style*="fixed"],
-  [style*="position"][style*="fixed"] {
-    position: fixed !important;
-    right: auto !important;
-    left: 16px !important;
-    bottom: 16px !important;
-    top: auto !important;
-    z-index: 99999 !important;
-  }
-  /* 额外覆盖: 监控Monetag动态插入的元素 */
-  body > div:last-child[style*="position"],
-  body > div:last-child[style*="z-index"],
-  body > iframe:last-child {
-    position: fixed !important;
-    right: auto !important;
-    left: 16px !important;
-    bottom: 16px !important;
-    top: auto !important;
-  }
-
+  /* Scrollbar styles */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
