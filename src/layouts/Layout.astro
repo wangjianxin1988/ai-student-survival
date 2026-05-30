@@ -287,53 +287,8 @@ function getAlternatePath(loc: Locale): string {
       });
     </script>
 
-    <!-- Monetag In-Page Push (全站浮动广告) -->
+    <!-- Monetag In-Page Push 浮动广告 -->
     <script is:inline>(function(s){s.dataset.zone='11076692',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-    <!-- 强制移动广告到左下角 + 去重（只处理 body 直接子元素） -->
-    <script is:inline>
-    (function() {
-      var adKept = false;
-      // 已知的本站固定元素（不动）
-      var SAFE_IDS = /^chatbot|^search-modal|^ask-ai|^__next|^__layout|^astro/;
-      var SAFE_CLS = /chatbot|search-modal|react-header|astro-island|language-switcher/i;
-      
-      function tryRelocate() {
-        var kids = document.body.children;
-        for (var i = 0; i < kids.length; i++) {
-          var el = kids[i];
-          var tag = el.tagName;
-          // 只看 div/iframe/ins
-          if (tag !== 'DIV' && tag !== 'IFRAME' && tag !== 'INS') continue;
-          // 必须是 fixed
-          var s = el.getAttribute('style') || '';
-          if (s.indexOf('fixed') === -1 && s.indexOf('Fixed') === -1) continue;
-          // 排除已知元素
-          if (SAFE_IDS.test(el.id || '')) continue;
-          if (SAFE_CLS.test(el.className && el.className.toString ? el.className.toString() : '')) continue;
-          
-          if (adKept) {
-            el.style.setProperty('display', 'none', 'important');
-            continue;
-          }
-          adKept = true;
-          // 强制左下角
-          el.style.setProperty('left', '16px', 'important');
-          el.style.setProperty('bottom', '16px', 'important');
-          el.style.setProperty('right', 'auto', 'important');
-          el.style.setProperty('top', 'auto', 'important');
-          // transform 兜底
-          var rect = el.getBoundingClientRect();
-          var dx = 16 - rect.left;
-          var dy = window.innerHeight - rect.bottom - 16;
-          el.style.setProperty('transform', 'translate(' + dx + 'px,' + dy + 'px)', 'important');
-        }
-      }
-      
-      // 定时扫描
-      var timer = setInterval(tryRelocate, 500);
-      setTimeout(function() { clearInterval(timer); }, 15000);
-    })();
-    </script>
 
   </body>
 </html>
@@ -356,17 +311,6 @@ function getAlternatePath(loc: Locale): string {
   ::-webkit-scrollbar-thumb {
     background: #c1c1c1;
     border-radius: 4px;
-  }
-
-  /* Monetag 广告兜底：transform 绕过 inline style */
-  /* 注意：如果 Monetag 用 iframe，这不会生效 */
-  div[style*="position"][style*="fixed"][style*="z-index"],
-  div[style*="position:fixed"][style*="z-index"],
-  ins[style*="fixed"] {
-    left: 16px !important;
-    bottom: 16px !important;
-    right: auto !important;
-    top: auto !important;
   }
 
   ::-webkit-scrollbar-thumb:hover {
