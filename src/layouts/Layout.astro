@@ -289,63 +289,96 @@ function getAlternatePath(loc: Locale): string {
 
     <!-- Monetag In-Page Push (全站浮动广告) -->
     <script is:inline>(function(s){s.dataset.zone='11076692',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-    <!-- 精确移动 Monetag 广告到左下角（只动 Monetag 注入的元素） -->
+    <!-- 拦截 Monetag 注入：移动到左下角 + 去重（只留1条） -->
     <script is:inline>
     (function() {
-      // 已处理的元素集合，防止重复操作
-      var handled = new WeakSet();
+      var adShown = false;
+      var KNOWN_IDS = {'chatbot-panel':1,'search-modal':1,'ask-ai-modal':1,'chatbot-fab':1,'chatbot-window':1};
+      var KNOWN_CLS = ['chatbot','search-modal','react-header','toast','modal-backdrop'];
       
-      function isMonetagAd(el) {
-        // 检查是否是 Monetag 注入的元素（排除已知非广告元素）
-        var tag = el.tagName;
-        if (tag !== 'DIV' && tag !== 'IFRAME') return false;
-        var s = el.style;
-        if (!s || !s.position || s.position.indexOf('fixed') === -1) return false;
-        // 排除 Chatbot、SearchModal 等已知元素
-        var id = el.id || '';
-        if (id === 'chatbot-panel' || id === 'search-modal' || id === 'ask-ai-modal') return false;
-        var cls = el.className || '';
-        if (cls.indexOf('chatbot') !== -1 || cls.indexOf('search-modal') !== -1) return false;
-        // 只处理 z-index >= 100000 的高层级元素（Monetag 特征）
-        var zi = parseInt(s.zIndex) || 0;
-        if (zi < 50000) return false;
-        return true;
+      function isOurElement(el) {
+        if (el.id && KNOWN_IDS[el.id]) return true;
+        var cls = (el.className || '').toString();
+        for (var i = 0; i < KNOWN_CLS.length; i++) {
+          if (cls.indexOf(KNOWN_CLS[i]) !== -1) return true;
+        }
+        // 排除 astro-island 等 Astro 框架元素
+        if (el.tagName && el.tagName.indexOf('ASTRO') !== -1) return true;
+        return false;
       }
       
-      function moveToBottomLeft(el) {
-        if (handled.has(el)) return;
-        handled.add(el);
+      function handleElement(el) {
+        if (el.nodeType !== 1) return;
+        var tag = el.tagName;
+        // 只处理可能是广告的标签
+        if (tag !== 'DIV' && tag !== 'IFRAME' && tag !== 'INS' && tag !== 'A') return;
+        // 必须有 fixed 定位
+        var s = el.getAttribute('style') || '';
+        if (s.indexOf('fixed') === -1 && s.indexOf('Fixed') === -1) return;
+        // 排除我们的元素
+        if (isOurElement(el)) return;
+        
+        // 这是广告元素
+        if (adShown) {
+          // 已有广告，隐藏多余的
+          el.style.setProperty('display', 'none', 'important');
+          el.remove();
+          return;
+        }
+        adShown = true;
+        // 强制移到左下角
         el.style.setProperty('left', '16px', 'important');
         el.style.setProperty('bottom', '16px', 'important');
         el.style.setProperty('right', 'auto', 'important');
         el.style.setProperty('top', 'auto', 'important');
       }
       
-      function scan() {
-        var all = document.querySelectorAll('body > div, body > iframe, body > ins');
-        for (var i = 0; i < all.length; i++) {
-          if (isMonetagAd(all[i])) moveToBottomLeft(all[i]);
+      // 拦截 appendChild
+      var origAppend = Element.prototype.appendChild;
+      Element.prototype.appendChild = function(child) {
+        var result = origAppend.call(this, child);
+        if (this === document.body || this === document.documentElement) {
+          handleElement(child);
         }
-      }
+        return result;
+      };
       
-      // 延迟扫描（等 Monetag 加载）
-      setTimeout(scan, 1500);
-      setTimeout(scan, 3000);
-      setTimeout(scan, 5000);
+      // 拦截 insertBefore
+      var origInsert = Element.prototype.insertBefore;
+      Element.prototype.insertBefore = function(child, ref) {
+        var result = origInsert.call(this, child, ref);
+        if (this === document.body || this === document.documentElement) {
+          handleElement(child);
+        }
+        return result;
+      };
       
-      // 持续监控新元素（Monetag 会动态注入）
-      var observer = new MutationObserver(function(mutations) {
-        for (var i = 0; i < mutations.length; i++) {
-          var added = mutations[i].addedNodes;
-          for (var j = 0; j < added.length; j++) {
-            var node = added[j];
-            if (node.nodeType === 1 && isMonetagAd(node)) {
-              moveToBottomLeft(node);
-            }
+      // 兜底：定期扫描（防止漏网）
+      var scanTimer = setInterval(function() {
+        var all = document.body.children;
+        var foundAds = [];
+        for (var i = 0; i < all.length; i++) {
+          var el = all[i];
+          var s = el.getAttribute('style') || '';
+          if ((s.indexOf('fixed') !== -1 || s.indexOf('Fixed') !== -1) && !isOurElement(el)) {
+            foundAds.push(el);
           }
         }
-      });
-      observer.observe(document.body, { childList: true, subtree: false });
+        // 只保留第一个，隐藏其余
+        for (var i = 1; i < foundAds.length; i++) {
+          foundAds[i].style.setProperty('display', 'none', 'important');
+        }
+        // 确保第一个在左下角
+        if (foundAds.length > 0) {
+          foundAds[0].style.setProperty('left', '16px', 'important');
+          foundAds[0].style.setProperty('bottom', '16px', 'important');
+          foundAds[0].style.setProperty('right', 'auto', 'important');
+          foundAds[0].style.setProperty('top', 'auto', 'important');
+        }
+      }, 2000);
+      
+      // 10秒后停止扫描
+      setTimeout(function() { clearInterval(scanTimer); }, 10000);
     })();
     </script>
 
