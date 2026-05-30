@@ -1655,6 +1655,94 @@ WildCard（ wildcad.com）是一款专门为国内用户设计的虚拟信用卡
 5. **保持账户活跃**：长期不使用可能被暂停`
   },
 
+  {
+    id: 'redotpay-virtual-card',
+    title: 'RedotPay虚拟卡申请教程 - 支持USDT充值全球消费',
+    category: 'virtual_card',
+    excerpt: 'RedotPay是支持USDT充值的加密虚拟卡，可在130+国家4400万商户消费，适合留学生订阅ChatGPT、Claude等AI工具',
+    toolIds: ['chatgpt', 'midjourney', 'claude', 'cursor', 'jasper', 'copyai', 'grammarly', 'perplexity', 'notion-ai', 'figma', 'replit'],
+    difficulty: 'easy',
+    reliability: 'high',
+    tags: ['RedotPay', '虚拟卡', 'USDT', '加密货币', 'ChatGPT', 'Mastercard', '留学生'],
+    rating: 4.6,
+    ratingCount: 8500,
+    viewCount: 95000,
+    createdAt: '2024-06-01T00:00:00Z',
+    updatedAt: '2026-05-29T00:00:00Z',
+    referralUrl: 'https://wap.redotpay.com/en/invite/affiliates-2?utm_id=thp9sj&utm_source=union&utm_uid=16062&utm_s=83f435b475fa9740d21e75f619566991ebe88480',
+    content: `## 一、RedotPay简介
+
+RedotPay是一张支持加密货币（USDT/USDT/BTC/ETH）充值的虚拟Mastercard卡，可在130+国家、4400万+商户消费。特别适合留学生订阅海外AI工具。
+
+### 核心优势
+
+- **加密货币充值**：支持USDT、BTC、ETH充值，无需传统银行账户
+- **全球消费**：Mastercard网络，130+国家通用
+- **即时开卡**：虚拟卡秒开，实体卡可选
+- **无年费**：无年费、无月费
+- **KYC简单**：基础认证即可使用
+
+## 二、注册与申请步骤
+
+### 第一步：注册RedotPay账户
+
+1. 访问RedotPay官网或下载App
+2. 点击"注册"并填写邮箱/手机号
+3. 完成基础KYC认证（身份证/护照）
+4. 验证邮箱
+
+### 第二步：充值USDT
+
+1. 在App内获取USDT充值地址（TRC20或ERC20）
+2. 从交易所（如OKX、Binance）提币到该地址
+3. 等待到账（TRC20通常几分钟）
+
+### 第三步：申请虚拟卡
+
+1. 进入"Card"页面
+2. 选择"Virtual Card"
+3. 填写个人信息
+4. 从余额中扣费开卡
+
+### 第四步：绑定AI工具订阅
+
+1. 复制RedotPay虚拟卡的卡号、有效期、CVV
+2. 在ChatGPT/Claude等平台的支付页面填入
+3. 完成订阅
+
+## 三、适用AI工具
+
+| 工具 | 月费 | 能否订阅 |
+|------|------|---------|
+| ChatGPT Plus | $20/月 | ✅ |
+| Claude Pro | $20/月 | ✅ |
+| Cursor Pro | $20/月 | ✅ |
+| Midjourney | $10-30/月 | ✅ |
+| Grammarly | $12/月 | ✅ |
+| Jasper | $49/月 | ✅ |
+
+## 四、常见问题
+
+**Q: RedotPay和Depay有什么区别？**
+A: RedotPay是Mastercard网络，Depay是Visa网络。RedotPay无年费，Depay部分卡有年费。
+
+**Q: 充值多久到账？**
+A: TRC20通常1-5分钟，ERC20可能需要10-30分钟。
+
+**Q: 被平台拒绝怎么办？**
+A: 部分平台可能风控虚拟卡，建议：1）确保余额充足 2）使用美国IP 3）尝试其他虚拟卡。
+
+**Q: 提现怎么操作？**
+A: 卖出USDT → 交易所C2C → 支付宝/银行卡。或直接用RedotPay在全球ATM取现。
+
+## 五、安全建议
+
+1. **不要泄露卡号CVV**：与实体卡同样保护
+2. **设置消费通知**：开启每笔消费提醒
+3. **充值适量**：不要一次性充太多
+4. **保留截图**：订阅确认截图备用`
+  },
+
   // ==================== GIFT CARDS ====================
   {
     id: 'openai-gift-card',
