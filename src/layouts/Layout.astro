@@ -335,22 +335,31 @@ function getAlternatePath(loc: Locale): string {
   @tailwind components;
   @tailwind utilities;
 
-  /* Monetag In-Page Push: 强制移到左下角 */
-  div[style*="position: fixed"][style*="z-index"],
-  div[style*="position:fixed"][style*="z-index"] {
+  /* Monetag: 强制所有fixed元素移到左下角 */
+  iframe[style*="position"],
+  iframe[style*="fixed"],
+  div[style*="position: fixed"],
+  div[style*="position:fixed"],
+  div[style*="z-index"][style*="fixed"],
+  [style*="position"][style*="fixed"] {
+    position: fixed !important;
+    right: auto !important;
+    left: 16px !important;
+    bottom: 16px !important;
+    top: auto !important;
+    z-index: 99999 !important;
+  }
+  /* 额外覆盖: 监控Monetag动态插入的元素 */
+  body > div:last-child[style*="position"],
+  body > div:last-child[style*="z-index"],
+  body > iframe:last-child {
+    position: fixed !important;
     right: auto !important;
     left: 16px !important;
     bottom: 16px !important;
     top: auto !important;
   }
-  /* 备用: 覆盖所有高层级固定元素 */
-  [style*="position"][style*="fixed"][style*="right: 0"],
-  [style*="position"][style*="fixed"][style*="right:0"] {
-    right: auto !important;
-    left: 16px !important;
-  }
 
-  /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
