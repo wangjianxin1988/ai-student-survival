@@ -8,5 +8,5 @@ const locale = 'en';
 ---
 
 <Layout title={locale === 'zh' ? '留学生问答社区' : 'Q&A Community'} locale={locale}>
-  <QuestionsClient locale={locale} client:only="react" />
+  <QuestionsClient locale={locale} client:load />
 </Layout>

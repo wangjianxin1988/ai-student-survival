@@ -1509,7 +1509,7 @@ const jsonLd = [
               <h1 class="text-3xl font-bold">{tool.name}</h1>
               {tool.isNew && <span class="badge bg-red-100 text-red-700">New</span>}
             </div>
-            <FavoriteButton client:load targetType="tool" targetId={tool.id} locale="en" />
+            <FavoriteButton client:load targetType="tool" targetId={tool.slug} locale="en" />
             <ShareButton client:load title={tool.name} description={tool.description} />
             <button
               id="copy-link-btn"
@@ -1549,7 +1549,7 @@ const jsonLd = [
               <div class="text-5xl font-bold text-primary-600">{tool.rating}</div>
               <div>
                 <div class="rating mb-2">
-                  <StarRating client:load targetType="tool" targetId={tool.id} size="lg" />
+                  <StarRating client:load targetType="tool" targetId={tool.slug} size="lg" />
                 </div>
                 <p class="text-sm text-gray-500">{tool.ratingCount} reviews</p>
               </div>
@@ -1611,7 +1611,7 @@ const jsonLd = [
 
         {/* Comments Section */}
         <section class="mt-12">
-          <CommentSection client:load targetType="tool" targetId={tool.id} locale="en" showRating={true} />
+          <CommentSection client:load targetType="tool" targetId={tool.slug} locale="en" showRating={true} />
         </section>
 
         <!-- Capability Expansion -->

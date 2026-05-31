@@ -19,5 +19,5 @@ const locale: Locale = 'en';
     { name: 'Offer Details' }
   ]}
 >
-  <OfferDetailClient offerId={Astro.params.id} locale={locale} client:only="react" />
+  <OfferDetailClient offerId={Astro.params.id} locale={locale} client:load />
 </Layout>

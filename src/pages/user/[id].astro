@@ -12,5 +12,5 @@ const locale = 'zh';
   title={locale === 'zh' ? '用户主页' : 'User Profile'}
   description={locale === 'zh' ? '查看用户主页和公开内容' : 'View user profile and public content'}
 >
-  <UserPublicProfile userId={id} locale={locale} client:only="react" />
+  <UserPublicProfile userId={id} locale={locale} client:load />
 </Layout>

@@ -24,6 +24,6 @@ const locale: Locale = getLocaleFromUrl(Astro.url);
   </section>
 
   <section class="py-16 bg-white">
-    <SponsorPage locale={locale} client:only="react" />
+    <SponsorPage locale={locale} client:load />
   </section>
 </Layout>

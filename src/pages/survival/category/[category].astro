@@ -23,5 +23,5 @@ const categoryTitle = locale === 'zh' ? categoryInfo.label : categoryInfo.labelE
   title={`${categoryTitle} - ${locale === 'zh' ? '防坑防骗指南' : 'Survival Guides'}`}
   description={categoryInfo.description}
 >
-  <SurvivalClient locale={locale} client:only="react" />
+  <SurvivalClient locale={locale} client:load />
 </Layout>

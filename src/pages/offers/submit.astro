@@ -22,7 +22,7 @@ const locale = 'zh';
         </svg>
         {locale === 'zh' ? '返回列表' : 'Back to List'}
       </a>
-      <SubmitOfferForm locale={locale} client:only="react" />
+      <SubmitOfferForm locale={locale} client:load />
     </div>
   </div>
 </Layout>

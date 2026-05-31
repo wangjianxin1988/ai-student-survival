@@ -254,18 +254,17 @@ function getAlternatePath(loc: Locale): string {
   </head>
   <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
 
-    <!-- AuthProvider wraps ALL components that need auth context. client:only skips SSR to avoid hydration mismatch. -->
-    <!-- NOTE: ReactHeader has NO client directive so it renders inline within AuthProvider's island, -->
-    <!-- sharing the same React context. UserMenu (inside ReactHeader) can access AuthProvider's auth state. -->
-    <!-- Language switcher is rendered inside ReactHeader's top bar (not floating) for clean UX on all pages. -->
-    <AuthProvider client:only="react">
+    <!-- AuthProvider wraps ALL components that need auth context. client:load enables SSR + client hydration. -->
+    <!-- Initial state (user=null, loading=true) is identical on server and client, so no hydration mismatch. -->
+    <!-- Actual user data is loaded asynchronously via useEffect after hydration. -->
+    <AuthProvider client:load>
       <ReactHeader
         locale={locale}
         currentPath={Astro.url.pathname}
         siteName={siteName}
         languageSwitcher={languageSwitcher}
         getAlternateUrl={getAlternatePath}
-        client:only="react"
+        client:load
       />
       <!-- Astro components and slot content -->
       <slot />

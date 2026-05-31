@@ -8,5 +8,5 @@ const locale = 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '我的评分' : 'My Ratings'}>
-  <RatingsList locale={locale} client:only="react" />
+  <RatingsList locale={locale} client:load />
 </Layout>

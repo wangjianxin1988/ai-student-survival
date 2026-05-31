@@ -35,7 +35,7 @@ const categories = [...new Set(mapMarkers.map(m => m.category))];
 
     <!-- Map Page with Filters -->
     <MapPage
-      client:only="react"
+      client:load
       markers={mapMarkers}
       universities={universities}
       height="600px"

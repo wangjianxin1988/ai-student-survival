@@ -8,5 +8,5 @@ const locale = 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '个人中心' : 'Profile'}>
-  <ProfilePage locale={locale} client:only="react" />
+  <ProfilePage locale={locale} client:load />
 </Layout>

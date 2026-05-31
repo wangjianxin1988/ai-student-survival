@@ -20,5 +20,5 @@ if (!id) {
     { name: locale === 'zh' ? '问题详情' : 'Question Details' }
   ]}
 >
-  <QuestionPostDetail postId={id} locale={locale} client:only="react" />
+  <QuestionPostDetail postId={id} locale={locale} client:load />
 </Layout>

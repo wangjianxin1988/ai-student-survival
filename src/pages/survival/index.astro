@@ -12,5 +12,5 @@ const locale: Locale = getLocaleFromUrl(Astro.url);
   title={locale === 'zh' ? '防坑防骗指南' : 'Survival Guides'}
   description={locale === 'zh' ? '留学生生存必备知识分享，包括租房防骗、兼职陷阱、文化禁忌、安全提醒等' : 'Essential knowledge for international students including scam prevention, cultural etiquette, and safety tips'}
 >
-  <SurvivalClient locale={locale} client:only="react" />
+  <SurvivalClient locale={locale} client:load />
 </Layout>

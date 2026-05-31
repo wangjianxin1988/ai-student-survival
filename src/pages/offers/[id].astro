@@ -18,5 +18,5 @@ const locale: Locale = getLocaleFromUrl(Astro.url);
     { name: locale === 'zh' ? 'Offer详情' : 'Offer Details' }
   ]}
 >
-  <OfferDetailClient offerId={id} locale={locale} client:only="react" />
+  <OfferDetailClient offerId={id} locale={locale} client:load />
 </Layout>

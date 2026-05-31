@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 
 interface TurnstileWidgetProps {
   onVerify: (token: string) => void;
@@ -54,7 +54,9 @@ export function TurnstileWidget({
   useEffect(() => { onVerifyRef.current = onVerify; }, [onVerify]);
   useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
 
-  useEffect(() => {
+  // Use useLayoutEffect so test-key token fires synchronously before paint,
+  // preventing the register button from flashing as disabled on initial render.
+  useLayoutEffect(() => {
     if (renderedRef.current) return;
     renderedRef.current = true;
 

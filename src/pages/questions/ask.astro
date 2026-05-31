@@ -8,5 +8,5 @@ const locale = 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '发布帖子 - 留学生问答社区' : 'Create Post - Q&A Community'}>
-  <CreatePostPage client:only="react" />
+  <CreatePostPage client:load />
 </Layout>

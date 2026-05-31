@@ -23,5 +23,5 @@ const locale: Locale = getLocaleFromUrl(Astro.url);
     { name: locale === 'zh' ? '指南详情' : 'Guide Details' }
   ]}
 >
-  <SurvivalDetailClient guideId={id} locale={locale} client:only="react" />
+  <SurvivalDetailClient guideId={id} locale={locale} client:load />
 </Layout>

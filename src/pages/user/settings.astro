@@ -8,5 +8,5 @@ const locale = 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '账户设置' : 'Account Settings'}>
-  <EnhancedSettings locale={locale} client:only="react" />
+  <EnhancedSettings locale={locale} client:load />
 </Layout>

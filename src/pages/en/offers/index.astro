@@ -14,5 +14,5 @@ const locale: Locale = 'en';
   description={translate(locale, 'offers.description')}
   locale={locale}
 >
-  <OffersClient locale={locale} client:only="react" />
+  <OffersClient locale={locale} client:load />
 </Layout>
