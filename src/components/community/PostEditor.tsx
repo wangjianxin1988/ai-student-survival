@@ -928,17 +928,10 @@ export function PostEditor({
 
     // Honeypot check - if filled, it's a bot
     if (honeypot) {
-      // Silently show success to fool bots
+      // Silently show success to fool bots — do NOT call onSubmit
       setLoading(true);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       setLoading(false);
-      onSubmit?.({
-        title: title.trim(),
-        content: content.trim(),
-        category,
-        tags: [],
-        meta,
-      });
       return;
     }
 

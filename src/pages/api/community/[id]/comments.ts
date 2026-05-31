@@ -7,6 +7,7 @@ import { getPostById } from '@/lib/community/storage';
 import { earnPoints } from '@/lib/points/service';
 import { checkAndPromote } from '@/lib/auto-promote/service';
 import { contentModerationApi } from '@/lib/content-moderation';
+import { notifyMentionedUsers } from '@/lib/notifications/service';
 
 export const GET: APIRoute = async ({ params }) => {
   const postId = params.id;
@@ -222,6 +223,13 @@ export const POST: APIRoute = async ({ params, request }) => {
 
     // 检查自动推送规则
     await checkAndPromote(postId);
+
+    // 通知被 @提及 的用户（异步，不阻塞响应）
+    try {
+      const commenterName = user.name || '匿名用户';
+      notifyMentionedUsers(content.trim(), postId, post.title, commenterName, 'community')
+        .catch((err) => console.error('[comments] Failed to notify mentioned users:', err));
+    } catch { /* ignore */ }
 
     const formattedComment = {
       id: newComment.id,

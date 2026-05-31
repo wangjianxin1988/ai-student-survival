@@ -112,6 +112,9 @@ export interface CommunityPost {
   promoteScore?: number;
   promotedToCategory?: string;
 
+  // AI摘要（仅已关闭帖子显示）
+  aiSummary?: string;
+
   status: 'draft' | 'published' | 'deleted';
   createdAt: string;
   updatedAt: string;

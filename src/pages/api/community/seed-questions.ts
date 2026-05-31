@@ -25,6 +25,14 @@ function mapQuestionCategoryToCommunity(qCat: string): CommunityCategory {
 }
 
 export const POST: APIRoute = async () => {
+
+    // Production guard: disable seed/migration APIs
+    if (import.meta.env.PROD) {
+      return new Response(JSON.stringify({ error: 'Forbidden in production' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
   // Get service role key from Cloudflare Workers runtime env
   // @ts-ignore
   const rawKey = (cfEnv as Record<string, unknown>)['SUPABASE_SERVICE_ROLE_KEY'];

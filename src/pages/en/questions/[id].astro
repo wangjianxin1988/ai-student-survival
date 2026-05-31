@@ -1,6 +1,6 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import QuestionDetailClient from '@/components/questions/QuestionDetailClient';
+import QuestionPostDetail from '@/components/questions/QuestionPostDetail';
 
 export const prerender = false;
 
@@ -12,11 +12,13 @@ if (!id) {
 }
 ---
 
-<Layout title="Question Details" locale={locale} breadcrumbs={[
+<Layout
+  title="Question Details"
+  breadcrumbs={[
     { name: 'Home', href: '/en/' },
     { name: 'Q&A Community', href: '/en/questions' },
     { name: 'Question Details' }
   ]}
 >
-  <QuestionDetailClient questionId={id} locale={locale} client:load />
+  <QuestionPostDetail postId={id} locale={locale} client:load />
 </Layout>

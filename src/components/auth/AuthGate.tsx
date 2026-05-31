@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getLocaleHref } from "@/lib/i18n";
 import { initAuth, onAuthStateChange, type DemoUser } from "@/lib/auth";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 interface AuthGateProps {
   children: React.ReactNode;

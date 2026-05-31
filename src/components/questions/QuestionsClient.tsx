@@ -342,13 +342,19 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
 
   const handleLike = async (postId: string) => {
     if (!currentUserId) return;
+
+    // Save original state before optimistic update
+    const post = [...qaAllPosts, ...commAllPosts].find(p => p.id === postId);
+    const previousLiked = post?.isLiked ?? false;
+    const previousCount = post?.likesCount ?? 0;
+
     // Optimistic update on both lists
-    const toggleLike = (p: CommunityPost) =>
-      p.id === postId
-        ? { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) }
-        : p;
-    setQaAllPosts(prev => prev.map(toggleLike));
-    setCommAllPosts(prev => prev.map(toggleLike));
+    setQaAllPosts(prev => prev.map(p =>
+      p.id === postId ? { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) } : p
+    ));
+    setCommAllPosts(prev => prev.map(p =>
+      p.id === postId ? { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) } : p
+    ));
     try {
       const headers = await getAuthHeaders();
       const res = await fetch(`/api/questions/${postId}/like`, {
@@ -357,14 +363,23 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
       });
       const data = await res.json();
       if (!data.success) {
-        const revert = (p: CommunityPost) =>
-          p.id === postId
-            ? { ...p, isLiked: !p.isLiked, likesCount: (p.likesCount || 0) + (p.isLiked ? -1 : 1) }
-            : p;
-        setQaAllPosts(prev => prev.map(revert));
-        setCommAllPosts(prev => prev.map(revert));
+        // Rollback to original state
+        setQaAllPosts(prev => prev.map(p =>
+          p.id === postId ? { ...p, isLiked: previousLiked, likesCount: previousCount } : p
+        ));
+        setCommAllPosts(prev => prev.map(p =>
+          p.id === postId ? { ...p, isLiked: previousLiked, likesCount: previousCount } : p
+        ));
       }
-    } catch {}
+    } catch {
+      // Rollback to original state on error
+      setQaAllPosts(prev => prev.map(p =>
+        p.id === postId ? { ...p, isLiked: previousLiked, likesCount: previousCount } : p
+      ));
+      setCommAllPosts(prev => prev.map(p =>
+        p.id === postId ? { ...p, isLiked: previousLiked, likesCount: previousCount } : p
+      ));
+    }
   };
 
   const handleFavorite = async (postId: string) => {

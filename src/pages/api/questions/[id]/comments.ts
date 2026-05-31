@@ -2,7 +2,11 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { getServerUser } from '@/lib/server-auth';
-import { supabase } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { earnPoints } from '@/lib/points/service';
+import { checkAndPromote } from '@/lib/auto-promote/service';
+import { contentModerationApi } from '@/lib/content-moderation';
+import { notifyMentionedUsers } from '@/lib/notifications/service';
 
 export const GET: APIRoute = async ({ params }) => {
   const postId = params.id;
@@ -115,6 +119,29 @@ export const POST: APIRoute = async ({ params, request }) => {
       .eq('id', user.id)
       .single();
 
+    // Content moderation check
+    const modResult = contentModerationApi.moderate(content, user.id, 'comment');
+    if (!modResult.isAllowed) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: {
+            code: 'CONTENT_BLOCKED',
+            message: modResult.reason || 'Content moderation failed, please revise',
+            flags: modResult.flags,
+          },
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Get post author for points and title for notifications
+    const { data: postData } = await supabase
+      .from('community_posts')
+      .select('user_id, title')
+      .eq('id', postId)
+      .single();
+
     const { data: comment, error } = await supabase
       .from('post_comments')
       .insert({
@@ -134,7 +161,44 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
 
     // Increment comments count
-    await supabase.rpc('increment_comments_count', { post_id: postId });
+    try { await supabase.rpc('increment_comments_count', { post_id: postId }); } catch { /* ignore */ }
+
+    // Award points to post author (commented on post)
+    if (postData?.user_id && postData.user_id !== user.id) {
+      try {
+        await earnPoints(supabaseAdmin, postData.user_id, {
+          amount: 3,
+          type: 'earn_comment',
+          description: 'Post received a comment',
+          referenceId: postId,
+        });
+      } catch (e) {
+        console.error('[questions/comments] Failed to award post author points:', e);
+      }
+    }
+
+    // Award points to commenter
+    try {
+      await earnPoints(supabaseAdmin, user.id, {
+        amount: 5,
+        type: 'comment',
+        description: 'Posted a comment',
+        referenceId: postId,
+      });
+    } catch (e) {
+      console.error('[questions/comments] Failed to award commenter points:', e);
+    }
+
+    // Check auto-promote rules
+    try { await checkAndPromote(postId); } catch { /* ignore */ }
+
+    // 通知被 @提及 的用户（异步，不阻塞响应）
+    try {
+      const commenterName = (userData?.name as string) || 'Anonymous';
+      const postTitle = (postData?.title as string) || '帖子';
+      notifyMentionedUsers(content.trim(), postId, postTitle, commenterName, 'questions')
+        .catch((err) => console.error('[questions/comments] Failed to notify mentioned users:', err));
+    } catch { /* ignore */ }
 
     return new Response(
       JSON.stringify({

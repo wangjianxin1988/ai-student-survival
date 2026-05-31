@@ -241,6 +241,25 @@ export default function LoginForm({
     setIsLoading(true);
 
     try {
+      // Verify Turnstile token server-side before sending reset email
+      if (forgotToken) {
+        try {
+          const verifyRes = await fetch('/api/auth/verify-turnstile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: forgotToken }),
+          });
+          const verifyData = await verifyRes.json();
+          if (!verifyData.success) {
+            setError(locale === 'zh' ? '人机验证失败，请重试' : 'CAPTCHA verification failed, please retry');
+            setIsLoading(false);
+            return;
+          }
+        } catch {
+          console.warn('Turnstile verification request failed, proceeding...');
+        }
+      }
+
       // Call the forgot-password API which uses supabase.auth.resetPasswordForEmail
       const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',

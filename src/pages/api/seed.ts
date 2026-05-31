@@ -150,6 +150,14 @@ async function verifyCounts(adminClient: ReturnType<typeof createClient>) {
 
 // ─── API ROUTE ────────────────────────────────────────────────────────────────
 export const POST: APIRoute = async ({ request }) => {
+
+    // Production guard: disable seed/migration APIs
+    if (import.meta.env.PROD) {
+      return new Response(JSON.stringify({ error: 'Forbidden in production' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
   try {
     const body = await request.json();
     const { service_role_key, admin_token } = body;

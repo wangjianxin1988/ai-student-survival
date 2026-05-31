@@ -122,6 +122,9 @@ export async function toggleLike(
       description: '帖子被点赞',
       referenceId: postId,
     });
+
+    // SM2间隔重复奖励
+    await pointsService.awardSM2Bonus(postUserId, 'post_like', postId, 4);
   }
 
   // 检查自动推送规则
@@ -152,6 +155,9 @@ export async function toggleFavorite(
       description: '帖子被收藏',
       referenceId: postId,
     });
+
+    // SM2间隔重复奖励
+    await pointsService.awardSM2Bonus(postUserId, 'post_favorite', postId, 5);
   }
 
   // 检查自动推送规则

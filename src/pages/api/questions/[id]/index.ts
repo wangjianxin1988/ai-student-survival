@@ -67,6 +67,7 @@ export const GET: APIRoute = async ({ params, request }) => {
     isPinned: row.is_pinned as boolean || false,
     isLocked: row.is_locked as boolean || false,
     autoPromoted: row.auto_promoted as boolean || false,
+    aiSummary: row.ai_summary as string | undefined,
     status: row.status as string,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,

@@ -131,13 +131,13 @@ if (error || errorDescription) {
 
       // Ensure public.users row exists for this user (needed for points, favorites, ratings).
       // Use fetch with Authorization header to bypass RLS on users table.
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData?.user) {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
         const userData = {
-          id: sessionData.user.id,
-          email: sessionData.user.email || '',
-          name: (sessionData.user.user_metadata as Record<string, unknown>)?.name || null,
-          avatar_url: (sessionData.user.user_metadata as Record<string, unknown>)?.avatar_url || null,
+          id: session.user.id,
+          email: session.user.email || '',
+          name: (session.user.user_metadata as Record<string, unknown>)?.name || null,
+          avatar_url: (session.user.user_metadata as Record<string, unknown>)?.avatar_url || null,
         };
         const origin = window.location.origin;
         try {
@@ -145,7 +145,7 @@ if (error || errorDescription) {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${sessionData.session?.access_token || ''}`,
+              'Authorization': `Bearer ${session.access_token || ''}`,
             },
             body: JSON.stringify(userData),
           });

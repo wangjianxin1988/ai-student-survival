@@ -6,6 +6,8 @@ import { getPosts } from '@/lib/community';
 import { supabase } from '@/lib/supabase';
 import { createPost } from '@/lib/community/service';
 import { contentModerationApi } from '@/lib/content-moderation';
+import { sendToTelegram } from '@/lib/telegram/service';
+import { CATEGORY_PATHS } from '@/lib/community/types';
 
 export const GET: APIRoute = async ({ request }) => {
   const url = new URL(request.url);
@@ -54,7 +56,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   try {
     const body = await request.json();
-    const { title, content, category, tags, images, status, meta } = body;
+    const { title, content, category, tags, images, status, meta, pushToTelegram } = body;
 
     if (!title || !content || !category) {
       return new Response(
@@ -102,6 +104,15 @@ export const POST: APIRoute = async ({ request }) => {
         }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
+    }
+
+    // 如果用户选择了推送到Telegram，在后台执行（不阻塞响应）
+    if (pushToTelegram && result.post) {
+      const basePath = CATEGORY_PATHS[result.post.category] || '/community';
+      const postUrl = `https://mi-to-ai.com${basePath}/${result.post.id}`;
+      sendToTelegram(result.post.title, result.post.content, postUrl).catch(err => {
+        console.error('[community/create] Telegram push failed:', err);
+      });
     }
 
     return new Response(

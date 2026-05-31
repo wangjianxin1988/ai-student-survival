@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import type { CommunityPost, PostComment } from '@/lib/community/types';
 import { getAuthHeaders } from '@/lib/auth';
 import { isDemoMode } from '@/lib/supabase';
+import { MentionInput } from '@/components/ui/MentionInput';
 
 interface QuestionPostDetailProps {
   postId: string;
@@ -382,6 +383,65 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
           </div>
         </div>
 
+        {/* AI Summary for closed/locked posts */}
+        {post.isLocked && (
+          <div className="mb-8 p-5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border border-indigo-200">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                <svg
+                  className="w-5 h-5 text-indigo-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                  />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-sm font-semibold text-indigo-800 mb-2 flex items-center gap-2">
+                  AI 摘要
+                  <span className="text-xs font-normal text-indigo-500 bg-indigo-100 px-2 py-0.5 rounded-full">
+                    自动生成
+                  </span>
+                </h4>
+                {post.aiSummary ? (
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {post.aiSummary}
+                  </p>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-indigo-600">
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    AI摘要生成中...
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Action buttons: like, favorite, share */}
         <div className="flex items-center gap-3 mb-8">
           <button
@@ -490,10 +550,10 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
             {clientUserId ? (
               <form onSubmit={handleComment}>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.writeAnswer}</h3>
-                <textarea
+                <MentionInput
                   value={commentContent}
-                  onChange={(e) => setCommentContent(e.target.value)}
-                  placeholder={t.answerPlaceholder}
+                  onChange={(val) => setCommentContent(val)}
+                  placeholder={t.answerPlaceholder + '（输入 @ 可提及用户）'}
                   rows={6}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
                 />

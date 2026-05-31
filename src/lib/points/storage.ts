@@ -144,3 +144,113 @@ export async function ensureUserBalance(userId: string, accessToken?: string): P
     });
   }
 }
+
+// ============ SM2 Content Learning ============
+
+export interface ContentLearningRecord {
+  id: string;
+  userId: string;
+  contentType: string;
+  contentId: string;
+  easeFactor: number;
+  intervalDays: number;
+  repetitions: number;
+  nextReview: string | null;
+  lastQuality: number;
+  totalBonusPoints: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Get or create a content_learning record
+export async function getContentLearning(
+  userId: string,
+  contentType: string,
+  contentId: string
+): Promise<ContentLearningRecord | null> {
+  const { data, error } = await supabaseAdmin
+    .from('content_learning')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('content_type', contentType)
+    .eq('content_id', contentId)
+    .single();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    userId: data.user_id,
+    contentType: data.content_type,
+    contentId: data.content_id,
+    easeFactor: data.ease_factor,
+    intervalDays: data.interval_days,
+    repetitions: data.repetitions,
+    nextReview: data.next_review,
+    lastQuality: data.last_quality,
+    totalBonusPoints: data.total_bonus_points,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+  };
+}
+
+// Upsert a content_learning record with SM2 data
+export async function upsertContentLearning(
+  userId: string,
+  contentType: string,
+  contentId: string,
+  sm2Data: { easeFactor: number; interval: number; repetitions: number; nextReview: Date },
+  quality: number,
+  bonusPoints: number
+): Promise<boolean> {
+  const { error } = await supabaseAdmin
+    .from('content_learning')
+    .upsert({
+      user_id: userId,
+      content_type: contentType,
+      content_id: contentId,
+      ease_factor: sm2Data.easeFactor,
+      interval_days: sm2Data.interval,
+      repetitions: sm2Data.repetitions,
+      next_review: sm2Data.nextReview.toISOString(),
+      last_quality: quality,
+      total_bonus_points: bonusPoints,
+      updated_at: new Date().toISOString(),
+    }, {
+      onConflict: 'user_id,content_type,content_id',
+    });
+
+  if (error) {
+    console.error('Error upserting content_learning:', error);
+    return false;
+  }
+  return true;
+}
+
+// Ensure content_learning table exists (run once)
+export async function ensureContentLearningTable(): Promise<void> {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS content_learning (
+      id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      content_type TEXT NOT NULL,
+      content_id TEXT NOT NULL,
+      ease_factor DECIMAL(4,2) DEFAULT 2.50,
+      interval_days INTEGER DEFAULT 0,
+      repetitions INTEGER DEFAULT 0,
+      next_review TIMESTAMPTZ,
+      last_quality INTEGER DEFAULT 0,
+      total_bonus_points INTEGER DEFAULT 0,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, content_type, content_id)
+    );
+  `;
+  try {
+    await supabaseAdmin.rpc('exec_sql', { sql }).single();
+  } catch {
+    // Table may already exist, or exec_sql may not be available
+    // In Supabase, tables should be created via migrations
+    console.info('content_learning table: ensure it exists via Supabase migration');
+  }
+}

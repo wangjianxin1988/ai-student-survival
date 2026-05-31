@@ -58,17 +58,12 @@ export const isSupabaseConfigured = Boolean(
 // Set by: document.cookie = 'demo_auth=1' or localStorage.setItem('demo_auth', '1')
 export function isDemoMode(): boolean {
   if (typeof document === 'undefined') return false;
-  // Check URL param for demo mode (dev/testing)
-  if (typeof window !== 'undefined') {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('demo') === '1') return true;
-    } catch { /* ignore */ }
-    // Check localStorage flag
-    try {
-      if (localStorage.getItem('__demo_auth__') === '1') return true;
-    } catch { /* ignore */ }
-  }
+  if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('demo') === '1') return true;
+    if (localStorage.getItem('__demo_auth__') === '1') return true;
+  } catch { /* ignore */ }
   return false;
 }
 

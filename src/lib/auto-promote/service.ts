@@ -2,6 +2,8 @@
 import type { CommunityPost, CommunityCategory } from '@/lib/community/types';
 import { supabaseAdmin } from '@/lib/supabase';
 import { DEFAULT_AUTO_PROMOTE_RULES, type AutoPromoteRule } from './rules';
+import { sendToTelegram } from '@/lib/telegram/service';
+import { CATEGORY_PATHS } from '@/lib/community/types';
 
 // 自动推送使用 supabaseAdmin 绕过 RLS（服务端操作，需要更新任意帖子）
 
@@ -96,6 +98,26 @@ async function executePromotion(
     .update(updateData)
     .eq('id', postId);
 
+  // 推送到Telegram频道（不阻塞主流程）
+  try {
+    const { data: post } = await supabaseAdmin
+      .from('community_posts')
+      .select('id, title, content, category')
+      .eq('id', postId)
+      .single();
+
+    if (post) {
+      const basePath = CATEGORY_PATHS[post.category as CommunityCategory] || '/community';
+      const postUrl = `https://mi-to-ai.com${basePath}/${post.id}`;
+      // Fire-and-forget: don't await to avoid slowing down the response
+      sendToTelegram(post.title, post.content, postUrl).catch(err => {
+        console.error('[auto-promote] Telegram push failed:', err);
+      });
+    }
+  } catch (err) {
+    console.error('[auto-promote] Failed to send Telegram notification:', err);
+  }
+
   // TODO: 通知用户帖子被推送
 }
 
@@ -136,6 +158,7 @@ export async function checkAndPromote(postId: string): Promise<void> {
     isPinned: post.is_pinned || false,
     isLocked: post.is_locked || false,
     autoPromoted: post.auto_promoted || false,
+    aiSummary: post.ai_summary,
     status: post.status,
     createdAt: post.created_at,
     updatedAt: post.updated_at,
@@ -252,6 +275,25 @@ export async function executePromotionFromService(
     return false;
   }
 
+  // 推送到Telegram频道（积分直达发布时也推送）
+  try {
+    const { data: fullPost } = await supabaseAdmin
+      .from('community_posts')
+      .select('id, title, content, category')
+      .eq('id', postId)
+      .single();
+
+    if (fullPost) {
+      const basePath = CATEGORY_PATHS[fullPost.category as CommunityCategory] || '/community';
+      const postUrl = `https://mi-to-ai.com${basePath}/${fullPost.id}`;
+      sendToTelegram(fullPost.title, fullPost.content, postUrl).catch(err => {
+        console.error('[executePromotionFromService] Telegram push failed:', err);
+      });
+    }
+  } catch (err) {
+    console.error('[executePromotionFromService] Failed to send Telegram notification:', err);
+  }
+
   return true;
 }
 
@@ -284,6 +326,7 @@ function mapDbToCommunityPost(post: Record<string, unknown>): CommunityPost {
     directPublishCost: post.direct_publish_cost as number | undefined,
     isHotBoost: (post.is_hot_boost as boolean) || false,
     hotBoostExpiresAt: post.hot_boost_expires_at as string | undefined,
+    aiSummary: post.ai_summary as string | undefined,
     status: post.status as 'draft' | 'published' | 'deleted',
     createdAt: post.created_at as string,
     updatedAt: post.updated_at as string,
