@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { PaymentSolutionData } from '@/data/paymentSolutions';
 import { getLocaleHref } from '@/lib/i18n';
+import VirtualCardAd from '@/components/ads/VirtualCardAd';
 
 interface Props {
   solutions: PaymentSolutionData[];
@@ -250,9 +251,16 @@ export default function PaymentSolutionsFilter({ solutions, locale = 'zh' }: Pro
       {/* Solutions List */}
       {filteredSolutions.length > 0 ? (
         <div className="space-y-4">
-          {filteredSolutions.map(solution => (
+          {filteredSolutions.map((solution, index) => (
+            <React.Fragment key={solution.id}>
+              {index > 0 && index % 5 === 0 && (
+                <VirtualCardAd
+                  variant="auto"
+                  index={index}
+                  locale={locale}
+                />
+              )}
             <a
-              key={solution.id}
               href={getLocaleHref(`/payment/${solution.id}`, locale)}
               className="block bg-white p-5 rounded-xl border border-gray-200 hover:shadow-md hover:border-primary-200 transition-all group"
             >
@@ -329,6 +337,7 @@ export default function PaymentSolutionsFilter({ solutions, locale = 'zh' }: Pro
                 </div>
               </div>
             </a>
+            </React.Fragment>
           ))}
         </div>
       ) : (

@@ -288,7 +288,28 @@ const faqItems = [
     <!-- Template Grid -->
     {filteredTemplates.length > 0 ? (
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTemplates.map(template => (
+        {filteredTemplates.map((template, index) => (
+          <>
+            {index > 0 && index % 5 === 0 && (
+              <div class="col-span-full">
+                <a href={index % 2 === 0 ? 'https://wap.redotpay.com/en/invite/affiliates-2?utm_id=thp9sj&utm_source=union&utm_uid=16062&utm_s=83f435b475fa9740d21e75f619566991ebe88480' : 'https://onekey.so/r/5R2CVW'} target="_blank" rel="noopener noreferrer" class="block rounded-xl overflow-hidden hover:shadow-md transition-all group" data-ad="virtual-card">
+                  <div class={`p-4 sm:p-5 ${index % 2 === 0 ? 'bg-gradient-to-r from-blue-500 to-indigo-600' : 'bg-gradient-to-r from-emerald-500 to-teal-600'}`}>
+                    <div class="flex items-center gap-3">
+                      <span class="text-3xl">{index % 2 === 0 ? '💳' : '🔑'}</span>
+                      <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                          <span class="text-xs px-2 py-0.5 rounded-full bg-white/90 font-medium text-gray-700">{index % 2 === 0 ? 'RedotPay' : 'OneKey'}</span>
+                          <span class="text-xs text-white/70">推荐</span>
+                        </div>
+                        <h3 class="text-white font-semibold text-lg">{index % 2 === 0 ? '需要虚拟卡支付AI工具？' : '留学生必备虚拟卡'}</h3>
+                      </div>
+                      <span class={`shrink-0 px-4 py-2 rounded-lg text-white text-sm font-medium ${index % 2 === 0 ? 'bg-blue-700' : 'bg-emerald-700'} transition-colors`}>立即开通 →</span>
+                    </div>
+                    <p class="text-white/80 text-sm mt-2 ml-11">{index % 2 === 0 ? 'RedotPay - USDT充值，130+国家4400万商户消费，无年费' : 'OneKey - USDT充值，完美支持ChatGPT/OpenAI订阅'}</p>
+                  </div>
+                </a>
+              </div>
+            )}
           <article class="card overflow-hidden group flex flex-col" data-template-id={template.id}>
             <!-- Card Header -->
             <div class="p-5 border-b border-gray-100">
@@ -375,6 +396,7 @@ const faqItems = [
               </div>
             </div>
           </article>
+          </>
         ))}
       </div>
     ) : (

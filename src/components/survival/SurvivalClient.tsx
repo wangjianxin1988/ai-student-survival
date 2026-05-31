@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import VirtualCardAd from '@/components/ads/VirtualCardAd';
 import SurvivalCard from './SurvivalCard';
 import CategoryFilter from './CategoryFilter';
 import {
@@ -166,9 +167,16 @@ export default function SurvivalClient({ locale = 'zh' }: SurvivalClientProps) {
             {/* Guides Grid */}
             {filteredGuides.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredGuides.map((guide) => (
-                  <SurvivalCard key={guide.id} guide={guide} locale={locale} />
-                ))}
+                {filteredGuides.map((guide, index) => (
+                <React.Fragment key={guide.id}>
+                  {index > 0 && index % 5 === 0 && (
+                    <div className="col-span-full">
+                      <VirtualCardAd variant="auto" index={index} locale={locale} />
+                    </div>
+                  )}
+                  <SurvivalCard guide={guide} locale={locale} />
+                </React.Fragment>
+              ))}
               </div>
             ) : (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">

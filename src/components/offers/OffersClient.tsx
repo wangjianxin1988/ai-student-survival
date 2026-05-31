@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import VirtualCardAd from '@/components/ads/VirtualCardAd';
 import { getCurrentUser, onAuthStateChange, type DemoUser } from '@/lib/auth';
 import OfferCard from './OfferCard';
 import SubmitOfferForm from './SubmitOfferForm';
@@ -318,8 +319,14 @@ export default function OffersClient({ locale = 'zh' }: OffersClientProps) {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredOffers.map((offer) => (
-              <div key={offer.id} className="relative group">
+            {filteredOffers.map((offer, index) => (
+              <React.Fragment key={offer.id}>
+                {index > 0 && index % 5 === 0 && (
+                  <div className="col-span-full">
+                    <VirtualCardAd variant="auto" index={index} locale={locale} />
+                  </div>
+                )}
+              <div className="relative group">
                 <OfferCard offer={offer} locale={locale} />
                 <a
                   href={getLocaleHref(`/offers/${offer.id}`, locale)}
@@ -327,6 +334,7 @@ export default function OffersClient({ locale = 'zh' }: OffersClientProps) {
                   aria-label={t.viewDetails}
                 />
               </div>
+              </React.Fragment>
             ))}
           </div>
         )}
