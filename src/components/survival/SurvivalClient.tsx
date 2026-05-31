@@ -169,7 +169,7 @@ export default function SurvivalClient({ locale = 'zh' }: SurvivalClientProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredGuides.map((guide, index) => (
                 <React.Fragment key={guide.id}>
-                  {index > 0 && index % 5 === 0 && (
+                  {index > 0 && index % 6 === 0 && (
                     <div className="col-span-full">
                       <VirtualCardAd variant="auto" index={index} locale={locale} />
                     </div>

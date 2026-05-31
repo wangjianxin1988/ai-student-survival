@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import type { Tool } from '@/lib/supabase';
 import { staticTools } from '@/data/static-tools';
 import { getLocaleHref } from '@/lib/i18n';
-import AdSlot from '@/components/ads/AdSlotReact';
 
 interface CommunityTool {
   id: string;
@@ -294,12 +293,6 @@ export default function ToolsPageClient({ initialLocale, translations }: ToolsPa
                   </div>
                 </div>
               </article>
-              {/* Ad after every 6 tools */}
-              {(index + 1) % 6 === 0 && index < filteredTools.length - 1 && (
-                <div className="sm:col-span-2 lg:col-span-3 adsense-in-feed">
-                  <AdSlot format="horizontal" className="w-full" />
-                </div>
-              )}
             </>
           ))}
         </div>

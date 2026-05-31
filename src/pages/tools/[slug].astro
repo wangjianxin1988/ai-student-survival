@@ -15,7 +15,6 @@ import ShareButton from '@/components/common/ShareButton';
 import CommentSection from '@/components/user/CommentSection';
 import ToolPricingRealtime from '@/components/tools/ToolPricingRealtime';
 import UpdateNotesClient from '@/components/tools/UpdateNotesClient';
-import AdSlot from '@/components/ads/AdSlot.astro';
 
 const { slug } = Astro.params;
 
@@ -2210,11 +2209,6 @@ const jsonLd = [
           </div>
         </section>
 
-        <!-- Ad Slot: between tips and related tools -->
-        <div class="mt-8">
-          <AdSlot format="horizontal" className="w-full" />
-        </div>
-
         <!-- Related Tools (More Comprehensive) -->
         {(() => {
           // Get tools in same category
@@ -2299,7 +2293,17 @@ const jsonLd = [
       <!-- Sidebar -->
       <aside class="lg:col-span-1">
         <div class="sticky top-24 space-y-6">
-          <!-- CTA Card -->
+
+          <!-- Real-time Pricing -->
+          <ToolPricingRealtime
+            client:load
+            toolSlug={tool.slug}
+            toolName={tool.name}
+            officialUrl={tool.url}
+            locale="zh"
+          />
+
+          <!-- CTA Card: Promotion Link (below real-time pricing) -->
           <div class="bg-white rounded-xl border border-gray-200 p-6">
             <div class="text-center mb-6">
               <span class={`badge text-lg px-4 py-1 ${
@@ -2324,15 +2328,6 @@ const jsonLd = [
                 : '链接为官方地址，点击后离开本站'}
             </p>
           </div>
-
-          <!-- Real-time Pricing -->
-          <ToolPricingRealtime
-            client:load
-            toolSlug={tool.slug}
-            toolName={tool.name}
-            officialUrl={tool.url}
-            locale="zh"
-          />
 
           <!-- Compare Button -->
           <CompareButton
@@ -2401,12 +2396,6 @@ const jsonLd = [
             </a>
           </div>
 
-          <!-- Sidebar Ad Slot -->
-          <div class="adsense-sidebar">
-            <div class="bg-gray-50 border border-dashed border-gray-300 rounded-xl flex items-center justify-center py-8 text-xs text-gray-400">
-              <span>广告位 · Ad Space</span>
-            </div>
-          </div>
         </div>
       </aside>
     </div>

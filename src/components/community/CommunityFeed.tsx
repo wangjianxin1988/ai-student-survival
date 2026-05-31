@@ -5,6 +5,7 @@ import { CategoryFilter, type CommunityCategory } from "./CategoryFilter";
 import { getCurrentLocale, getLocaleHref } from "@/lib/i18n";
 import { getAuthHeaders } from "@/lib/auth";
 import { isDemoMode } from "@/lib/supabase";
+import VirtualCardAd from "@/components/ads/VirtualCardAd";
 
 const translations = {
   zh: {
@@ -372,14 +373,18 @@ export function CommunityFeed({ currentUserId: serverUserId, locale }: Community
       ) : (
         <>
           <div className="space-y-4">
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                currentUserId={currentUserId}
-                onLike={handleLike}
-                onFavorite={handleFavorite}
-              />
+            {posts.map((post, index) => (
+              <React.Fragment key={post.id}>
+                {index > 0 && index % 5 === 0 && (
+                  <VirtualCardAd variant="auto" index={index} locale={currentLocale} />
+                )}
+                <PostCard
+                  post={post}
+                  currentUserId={currentUserId}
+                  onLike={handleLike}
+                  onFavorite={handleFavorite}
+                />
+              </React.Fragment>
             ))}
           </div>
 

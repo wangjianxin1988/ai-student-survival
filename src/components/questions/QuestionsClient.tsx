@@ -4,6 +4,7 @@ import { CommunityFeed } from '@/components/community/CommunityFeed';
 import type { CommunityPost } from '@/lib/community/types';
 import { QUESTION_CATEGORIES, type QuestionCategory } from '@/data/questions';
 import { getAuthHeaders } from '@/lib/auth';
+import VirtualCardAd from '@/components/ads/VirtualCardAd';
 
 interface QuestionsClientProps {
   locale?: 'zh' | 'en';
@@ -596,15 +597,20 @@ export default function QuestionsClient({ locale = 'zh' }: QuestionsClientProps)
                 </div>
               ) : mergedPosts.length > 0 ? (
                 <>
-                  {mergedPosts.map((post) => (
-                    <div key={post.id} data-post-card>
-                      <PostCard
-                        post={post}
-                        currentUserId={currentUserId}
-                        onLike={handleLike}
-                        onFavorite={handleFavorite}
-                      />
-                    </div>
+                  {mergedPosts.map((post, index) => (
+                    <React.Fragment key={post.id}>
+                      {index > 0 && index % 5 === 0 && (
+                        <VirtualCardAd variant="auto" index={index} locale={locale} />
+                      )}
+                      <div data-post-card>
+                        <PostCard
+                          post={post}
+                          currentUserId={currentUserId}
+                          onLike={handleLike}
+                          onFavorite={handleFavorite}
+                        />
+                      </div>
+                    </React.Fragment>
                   ))}
                   {/* Sentinel for IntersectionObserver */}
                   <div ref={sentinelRef} className="h-4" />

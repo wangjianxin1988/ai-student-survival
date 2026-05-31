@@ -321,7 +321,7 @@ export default function OffersClient({ locale = 'zh' }: OffersClientProps) {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredOffers.map((offer, index) => (
               <React.Fragment key={offer.id}>
-                {index > 0 && index % 5 === 0 && (
+                {index > 0 && index % 6 === 0 && (
                   <div className="col-span-full">
                     <VirtualCardAd variant="auto" index={index} locale={locale} />
                   </div>
