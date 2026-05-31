@@ -2293,17 +2293,7 @@ const jsonLd = [
       <!-- Sidebar -->
       <aside class="lg:col-span-1">
         <div class="sticky top-24 space-y-6">
-
-          <!-- Real-time Pricing -->
-          <ToolPricingRealtime
-            client:load
-            toolSlug={tool.slug}
-            toolName={tool.name}
-            officialUrl={tool.url}
-            locale="zh"
-          />
-
-          <!-- CTA Card: Promotion Link (below real-time pricing) -->
+          <!-- CTA Card: 官方链接 -->
           <div class="bg-white rounded-xl border border-gray-200 p-6">
             <div class="text-center mb-6">
               <span class={`badge text-lg px-4 py-1 ${
@@ -2328,6 +2318,42 @@ const jsonLd = [
                 : '链接为官方地址，点击后离开本站'}
             </p>
           </div>
+
+          <!-- Real-time Pricing -->
+          <ToolPricingRealtime
+            client:load
+            toolSlug={tool.slug}
+            toolName={tool.name}
+            officialUrl={tool.url}
+            locale="zh"
+          />
+
+          {/* Virtual Card Ads */}
+          <a href="https://wap.redotpay.com/en/invite/affiliates-2?utm_id=thp9sj&utm_source=union&utm_uid=16062&utm_s=83f435b475fa9740d21e75f619566991ebe88480" target="_blank" rel="noopener noreferrer" class="block rounded-xl overflow-hidden hover:shadow-md transition-all group">
+            <div class="p-5 bg-gradient-to-r from-blue-500 to-indigo-600">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">💳</span>
+                <div>
+                  <h3 class="font-bold text-white">RedotPay 虚拟卡</h3>
+                  <p class="text-blue-100 text-sm mt-1">留学生订阅AI工具必备</p>
+                </div>
+              </div>
+              <div class="mt-3 text-xs text-blue-200">推荐链接 · 我们可能获得佣金</div>
+            </div>
+          </a>
+
+          <a href="https://onekey.so/r/5R2CVW" target="_blank" rel="noopener noreferrer" class="block rounded-xl overflow-hidden hover:shadow-md transition-all group">
+            <div class="p-5 bg-gradient-to-r from-emerald-500 to-teal-600">
+              <div class="flex items-center gap-3">
+                <span class="text-3xl">🔑</span>
+                <div>
+                  <h3 class="font-bold text-white">OneKey 虚拟卡</h3>
+                  <p class="text-emerald-100 text-sm mt-1">安全便捷 · 支持USDT充值</p>
+                </div>
+              </div>
+              <div class="mt-3 text-xs text-emerald-200">推荐链接 · 我们可能获得佣金</div>
+            </div>
+          </a>
 
           <!-- Compare Button -->
           <CompareButton
