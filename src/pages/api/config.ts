@@ -8,15 +8,12 @@ export const prerender = false;
  * The anon key is a public API key designed to be exposed to the browser.
  */
 export const GET: APIRoute = async ({ locals }) => {
-  const runtime = (locals as any)?.runtime;
-  
-  // Read directly from runtime.env (secrets have higher precedence than [vars])
-  const supabaseUrl = runtime?.env?.PUBLIC_SUPABASE_URL
-    || runtime?.env?.SUPABASE_URL 
+  // Use getCloudflareEnv() which reads from the injected Cloudflare env bindings.
+  // Direct runtime.env access returns empty values in some Cloudflare Pages configurations.
+  const supabaseUrl = getCloudflareEnv('PUBLIC_SUPABASE_URL')
     || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
     
-  const supabaseAnonKey = runtime?.env?.PUBLIC_SUPABASE_ANON_KEY
-    || runtime?.env?.SUPABASE_ANON_KEY 
+  const supabaseAnonKey = getCloudflareEnv('PUBLIC_SUPABASE_ANON_KEY')
     || '';
 
   return new Response(
