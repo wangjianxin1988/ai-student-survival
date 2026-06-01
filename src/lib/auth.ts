@@ -8,7 +8,7 @@
  * When demo mode is active, any credentials work without calling Supabase.
  */
 
-import { supabase, isSupabaseConfigured, isDemoMode, ensureSupabaseInitialized } from './supabase';
+import { supabase, isSupabaseConfigured, isDemoMode } from './supabase';
 import type { User } from '@supabase/supabase-js';
 
 export type DemoUser = {
@@ -227,9 +227,6 @@ export async function getAuthHeaders(): Promise<Record<string, string>> {
 export async function initAuth(): Promise<DemoUser | null> {
   if (typeof window === 'undefined') return null;
 
-  // Ensure Supabase client is initialized with runtime config from /api/config
-  await ensureSupabaseInitialized();
-
   // Already initialized — return cached (don't re-fetch)
   if (isInitialized) return currentUser;
 
@@ -376,7 +373,6 @@ export function notifyAuthChange(user: DemoUser | null): void {
 export const demoAuthApi = {
   async signIn(email: string, password: string): Promise<AuthResult> {
     // Demo mode: activated via ?demo=1 URL param or localStorage flag
-    await ensureSupabaseInitialized();
     if (!isSupabaseConfigured || isDemoMode()) {
       const demoUser: DemoUser = {
         id: 'demo-' + Math.random().toString(36).substring(2, 15),
@@ -416,7 +412,6 @@ export const demoAuthApi = {
   },
 
   async signUp(email: string, password: string, name: string): Promise<AuthResult> {
-    await ensureSupabaseInitialized();
     if (!isSupabaseConfigured || isDemoMode()) {
       const demoUser: DemoUser = {
         id: 'demo-' + Math.random().toString(36).substring(2, 15),

@@ -14,6 +14,9 @@ export default defineConfig({
       exclude: [
         "/_astro/*",
         "/images/*",
+        "/api/*",
+        "/auth/debug",
+        "/auth/test-register",
       ],
     },
   }),
