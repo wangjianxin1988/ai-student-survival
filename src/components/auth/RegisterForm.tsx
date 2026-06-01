@@ -72,6 +72,7 @@ export default function RegisterForm({
   const [resending, setResending] = useState(false);
   const [resendSent, setResendSent] = useState(false);
   const [signupUserId, setSignupUserId] = useState<string | null>(null);
+  const [otpSent, setOtpSent] = useState(false);
 
   const t = translations[locale];
 

@@ -60,28 +60,25 @@ export const POST: APIRoute = async ({ request }) => {
       }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Build our own verification URL with token_hash — bypasses Supabase verify endpoint
-    const hashedToken = linkData?.hashed_token || linkData?.properties?.hashed_token;
+    // Extract raw token from action_link URL (not hashed_token — verifyOtp hashes it again)
+    let rawToken = '';
+    try {
+      const actionUrl = new URL(rawActionLink);
+      rawToken = actionUrl.searchParams.get('token') || '';
+    } catch { /* ignore */ }
+
     let actionLink: string;
-    if (hashedToken) {
+    if (rawToken) {
       const verifyUrl = new URL(`${siteUrl}/auth/reset-password`);
-      verifyUrl.searchParams.set('token_hash', hashedToken);
+      verifyUrl.searchParams.set('token', rawToken);
       verifyUrl.searchParams.set('type', 'recovery');
       verifyUrl.searchParams.set('email', email);
       actionLink = verifyUrl.toString();
-      console.log('[forgot-password] Built custom verification URL');
+      console.log('[forgot-password] Built custom URL with raw token');
     } else {
-      // Fallback to Supabase action_link with redirect_to fix
-      console.warn('[forgot-password] No hashed_token, falling back to action_link');
-      let fixedLink = rawActionLink;
-      try {
-        const url = new URL(rawActionLink);
-        url.searchParams.set('redirect_to', `${siteUrl}/auth/reset-password`);
-        fixedLink = url.toString();
-      } catch (e) {
-        console.warn('[forgot-password] Failed to fix redirect_to:', e);
-      }
-      actionLink = fixedLink;
+      // Fallback: use action_link directly (may hit Supabase verify endpoint redirect issue)
+      console.warn('[forgot-password] No raw token, falling back to action_link');
+      actionLink = rawActionLink;
     }
 
     // Read Resend API key (Cloudflare runtime secret)
