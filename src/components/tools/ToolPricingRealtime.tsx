@@ -313,16 +313,16 @@ export default function ToolPricingRealtime({ toolSlug, toolName, officialUrl, i
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-6">
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4 sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
             <div className={`w-2 h-2 rounded-full ${loading ? 'bg-yellow-400 animate-pulse' : 'bg-green-500'}`}></div>
           </div>
-          <h3 className="text-lg font-semibold">{t.title}</h3>
+          <h3 className="text-base sm:text-lg font-semibold">{t.title}</h3>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-400">{t.lastUpdated}: {formatDate(lastRefresh)}</span>
+          <span className="text-xs text-gray-400 hidden sm:inline">{t.lastUpdated}: {formatDate(lastRefresh)}</span>
           <button
             onClick={fetchPricing}
             disabled={loading}

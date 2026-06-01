@@ -79,9 +79,9 @@ export default function ReactHeader({ locale = 'zh', currentPath = '/', siteName
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-14">
               {/* Left: Logo with site name */}
-              <a href={getLocaleHref('/', locale)} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <a href={getLocaleHref('/', locale)} className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity min-w-0">
                 <img src="/logo.svg" alt={siteName || (locale === 'en' ? 'AI Student Survival Guide' : 'MI TO AI留学生存指南')} className="w-10 h-10 rounded-lg flex-shrink-0" />
-                <span className="font-semibold text-base text-gray-900">{siteName || (locale === 'en' ? 'AI Student Survival Guide' : 'MI TO AI留学生存指南')}</span>
+                <span className="font-semibold text-sm sm:text-base text-gray-900 truncate">{siteName || (locale === 'en' ? 'AI Student Survival Guide' : 'MI TO AI留学生存指南')}</span>
               </a>
 
               {/* Right: Language Switcher, Search, Notifications & User Menu */}

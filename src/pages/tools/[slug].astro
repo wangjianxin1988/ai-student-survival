@@ -1837,18 +1837,18 @@ const jsonLd = [
   <!-- Breadcrumb -->
   <div class="bg-white border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <div class="flex items-center justify-between">
-        <nav class="flex items-center gap-2 text-sm">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <nav class="flex items-center gap-2 text-sm flex-wrap">
           <a href="/" class="text-gray-500 hover:text-gray-900">首页</a>
           <span class="text-gray-400">/</span>
           <a href="/tools" class="text-gray-500 hover:text-gray-900">AI工具库</a>
           <span class="text-gray-400">/</span>
-          <span class="text-gray-900 font-medium">{tool.name}</span>
+          <span class="text-gray-900 font-medium truncate max-w-[200px] sm:max-w-none">{tool.name}</span>
         </nav>
         <button
           id="back-to-tools"
           onclick="const isEn = window.location.pathname.startsWith('/en'); window.location.href = isEn ? '/en/tools' : '/tools';"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium flex-shrink-0"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -1860,9 +1860,9 @@ const jsonLd = [
   </div>
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <div class="grid lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Main Content -->
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-2 min-w-0">
         <!-- Hero Image -->
         <div class="rounded-xl overflow-hidden mb-8">
           <img src={tool.imageUrl} alt={tool.name} class="w-full h-auto" />
@@ -1870,34 +1870,36 @@ const jsonLd = [
 
         <!-- Title Section -->
         <div class="mb-8">
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-3">
-              <h1 class="text-3xl font-bold">{tool.name}</h1>
-              {tool.isNew && <span class="badge bg-red-100 text-red-700">新收录</span>}
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div class="flex items-center gap-3 min-w-0">
+              <h1 class="text-2xl sm:text-3xl font-bold truncate">{tool.name}</h1>
+              {tool.isNew && <span class="badge bg-red-100 text-red-700 flex-shrink-0">新收录</span>}
             </div>
-            <FavoriteButton client:load targetType="tool" targetId={tool.slug} locale="zh" />
-            <ShareButton client:load title={tool.name} description={tool.description} />
-            <button
-              id="copy-link-btn"
-              aria-label="复制链接"
-              onclick="navigator.clipboard.writeText(window.location.href).then(() => { const btn = document.getElementById('copy-link-btn'); if(btn) { btn.textContent = '已复制!'; setTimeout(() => { if(btn) btn.textContent = '复制链接'; }, 2000); } })"
-              class="p-2 rounded-lg text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
-              title="复制链接"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-            </button>
+            <div class="flex items-center gap-2 flex-shrink-0">
+              <FavoriteButton client:load targetType="tool" targetId={tool.slug} locale="zh" />
+              <ShareButton client:load title={tool.name} description={tool.description} />
+              <button
+                id="copy-link-btn"
+                aria-label="复制链接"
+                onclick="navigator.clipboard.writeText(window.location.href).then(() => { const btn = document.getElementById('copy-link-btn'); if(btn) { btn.textContent = '已复制!'; setTimeout(() => { if(btn) btn.textContent = '复制链接'; }, 2000); } })"
+                class="p-2 rounded-lg text-gray-400 hover:text-gray-600 bg-gray-50 hover:bg-gray-100 transition-colors"
+                title="复制链接"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+              </button>
+            </div>
           </div>
-          <p class="text-lg text-gray-600">{tool.description}</p>
+          <p class="text-base sm:text-lg text-gray-600">{tool.description}</p>
         </div>
 
         <!-- Features -->
         <section class="mb-8">
           <h2 class="text-xl font-semibold mb-4">核心功能</h2>
-          <div class="grid sm:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {tool.features.map(feature => (
-              <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg min-w-0">
                 <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                 </svg>
@@ -1984,7 +1986,7 @@ const jsonLd = [
         <section class="mt-8">
           <h2 class="text-xl font-semibold mb-4">能力拓展</h2>
           <div class="bg-gradient-to-r from-primary-50 to-blue-50 rounded-xl border border-primary-100 p-6">
-            <div class="grid sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {tool.features.slice(0, 4).map((feature, idx) => (
                 <div class="flex items-start gap-3">
                   <div class="w-8 h-8 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center flex-shrink-0">
@@ -2119,7 +2121,7 @@ const jsonLd = [
         <!-- Use Cases -->
         <section class="mt-8">
           <h2 class="text-xl font-semibold mb-4">适用场景</h2>
-          <div class="grid sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {tool.details?.useCases ? (
               tool.details.useCases.map((useCase) => (
                 <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-5 border border-gray-200 hover:border-primary-300 transition-colors">
@@ -2218,7 +2220,7 @@ const jsonLd = [
           return (
             <section class="mt-8">
               <h2 class="text-xl font-semibold mb-4">相关工具</h2>
-              <div class="grid sm:grid-cols-2 gap-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {sameCategoryTools.map(t => (
                   <a href={`/tools/${t.slug}`} class="block bg-white rounded-xl border border-gray-200 p-4 hover:border-primary-300 hover:shadow-md transition-all group">
                     <div class="flex items-center gap-3">
@@ -2291,8 +2293,8 @@ const jsonLd = [
       </div>
 
       <!-- Sidebar -->
-      <aside class="lg:col-span-1">
-        <div class="sticky top-24 space-y-6">
+      <aside class="lg:col-span-1 min-w-0">
+        <div class="lg:sticky lg:top-24 space-y-6">
           <!-- CTA Card: 官方链接 -->
           <div class="bg-white rounded-xl border border-gray-200 p-6">
             <div class="text-center mb-6">
