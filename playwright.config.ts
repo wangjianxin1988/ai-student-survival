@@ -4,13 +4,16 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  retries: process.env.CI ? 1 : 0,
   workers: 1,
   reporter: [['html'], ['list']],
   use: {
-    baseURL: 'http://localhost:4329',
+    baseURL: process.env.BASE_URL || 'http://localhost:4321',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    // Increase default navigation and action timeouts for auth flows
+    navigationTimeout: 30_000,
+    actionTimeout: 15_000,
   },
   projects: [
     {
@@ -18,8 +21,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  timeout: 60000,
+  // Global test timeout: 3 minutes (auth flows need to wait for emails)
+  timeout: 180_000,
   expect: {
-    timeout: 10000,
+    timeout: 15_000,
   },
+  // Uncomment to auto-start dev server (requires `pnpm dev` to listen on port 4321)
+  // webServer: {
+  //   command: 'pnpm dev',
+  //   port: 4321,
+  //   reuseExistingServer: true,
+  //   timeout: 120_000,
+  // },
 });
