@@ -14,5 +14,7 @@ export const GET: APIRoute = async ({ locals }) => {
     envKeys,
     resendKeyLength: resendKey.length,
     resendFromRuntimeLength: typeof resendFromRuntime === 'string' ? resendFromRuntime.length : typeof resendFromRuntime,
+    supabaseUrl: getCloudflareEnv('PUBLIC_SUPABASE_URL') || runtime?.env?.SUPABASE_URL || 'not set',
+    supabaseAnonKeyLength: (getCloudflareEnv('PUBLIC_SUPABASE_ANON_KEY') || runtime?.env?.SUPABASE_ANON_KEY || '').length,
   }), { headers: { 'Content-Type': 'application/json' } });
 };

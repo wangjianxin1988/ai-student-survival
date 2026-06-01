@@ -51,13 +51,39 @@ function getServiceRoleKey(): string {
   return '';
 }
 
+// ─── Runtime config fetch (solves build-time env var truncation) ─────────────
+// The Supabase anon key is a PUBLIC key (protected by RLS, not by secrecy).
+// We fetch it from /api/config at runtime so the client always has the correct
+// value, regardless of what was baked into the JS bundle at build time.
+let _runtimeConfig: { url: string; anonKey: string } | null = null;
+let _configFetchPromise: Promise<{ url: string; anonKey: string }> | null = null;
+
+async function getRuntimeConfig(): Promise<{ url: string; anonKey: string }> {
+  if (_runtimeConfig) return _runtimeConfig;
+
+  if (!_configFetchPromise) {
+    _configFetchPromise = fetch('/api/config')
+      .then(r => r.json())
+      .then(data => {
+        _runtimeConfig = { url: data.url || supabaseUrl, anonKey: data.anonKey || supabaseAnonKey };
+        return _runtimeConfig;
+      })
+      .catch(() => {
+        // Fallback to build-time values
+        _runtimeConfig = { url: supabaseUrl, anonKey: supabaseAnonKey };
+        return _runtimeConfig;
+      });
+  }
+
+  return _configFetchPromise;
+}
+
 // Check if Supabase is properly configured
 // FORCE_DEMO_AUTH env var: when true, bypasses Supabase even when configured (for demo/testing)
 // Note: Only available during SSR/build; for runtime check, use isDemoMode()
 export const isSupabaseConfigured = Boolean(
-  supabaseUrl && supabaseAnonKey &&
-  !supabaseUrl.includes('your-project') &&
-  !supabaseAnonKey.includes('your-anon-key')
+  supabaseUrl &&
+  !supabaseUrl.includes('your-project')
 );
 
 // Runtime demo mode check: checks for a cookie or localStorage flag
@@ -75,18 +101,26 @@ export function isDemoMode(): boolean {
 
 // Lazy-loaded Supabase client to avoid WebSocket initialization during build
 let _supabase: SupabaseClient | null = null;
+let _supabaseInitPromise: Promise<SupabaseClient> | null = null;
 
-function getSupabaseClient(): SupabaseClient {
+async function initSupabaseClient(): Promise<SupabaseClient> {
   if (_supabase) return _supabase;
 
-  if (!isSupabaseConfigured) {
-    return createClient('https://placeholder.supabase.co', 'placeholder-key', {
+  // Fetch config from server at runtime (anon key may not be in build-time env vars)
+  const config = await getRuntimeConfig();
+  const url = config.url || supabaseUrl;
+  const key = config.anonKey || supabaseAnonKey;
+
+  if (!url || !key || key.includes('your-anon-key')) {
+    // Return a dummy client that will fail on any operation
+    _supabase = createClient('https://placeholder.supabase.co', 'placeholder-key', {
       auth: { autoRefreshToken: false, persistSession: false },
       global: { fetch: () => Promise.reject(new Error('Supabase not configured')) },
     });
+    return _supabase;
   }
 
-  _supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  _supabase = createClient(url, key, {
     auth: {
       autoRefreshToken: true,     // ✅ Enable token auto-refresh
       persistSession: true,        // ✅ Enable session persistence (localStorage)
@@ -104,11 +138,22 @@ function getSupabaseClient(): SupabaseClient {
   return _supabase;
 }
 
-// Proxy that lazily initializes the client
-// This avoids importing/supabase-js during the build phase
+// Proxy that lazily initializes the client (async — fetches config from /api/config first)
+let _placeholderClient: SupabaseClient | null = null;
+function getPlaceholderClient() {
+  if (!_placeholderClient) {
+    _placeholderClient = createClient('https://placeholder.supabase.co', 'placeholder', {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+  }
+  return _placeholderClient;
+}
+
 export const supabase = new Proxy({} as SupabaseClient, {
   get(target, prop) {
-    const client = getSupabaseClient();
+    if (prop === 'then') return undefined;
+    
+    const client = _supabase || getPlaceholderClient();
     const value = (client as any)[prop];
     if (typeof value === 'function') {
       return value.bind(client);
@@ -116,6 +161,20 @@ export const supabase = new Proxy({} as SupabaseClient, {
     return value;
   },
 });
+
+/**
+ * Ensure Supabase client is initialized with runtime config.
+ * Call this early in the app lifecycle (e.g., in AuthProvider useEffect).
+ * After this resolves, `supabase` proxy will use the real client.
+ */
+export async function ensureSupabaseInitialized(): Promise<void> {
+  if (_supabase) return;
+  try {
+    await initSupabaseClient();
+  } catch (e) {
+    console.warn('[supabase] Failed to initialize:', e);
+  }
+}
 
 // Admin client with service role key (bypasses RLS) - for server-side operations only
 let _supabaseAdmin: SupabaseClient | null = null;
