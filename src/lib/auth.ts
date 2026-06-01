@@ -554,26 +554,17 @@ export const demoAuthApi = {
       return { success: false, error: 'Demo mode: OTP not available' };
     }
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser,
-          // Explicitly set type to 'email' so Supabase sends a 6-digit OTP code
-          // instead of a magic link (default behavior when type is omitted)
-          ...(shouldCreateUser ? {} : {}),
-        },
-        // CRITICAL: Without type: 'email', Supabase sends a magic link (no code).
-        // With type: 'email', Supabase sends a 6-digit OTP code via email.
-        type: 'email',
-      } as any);
-      if (error) {
-        if (error.message.toLowerCase().includes('user not found') ||
-            error.message.toLowerCase().includes('invalid')) {
-          return { success: false, error: '该邮箱尚未注册，请先注册账号' };
-        }
-        return { success: false, error: error.message };
+      // Use our Resend API to send OTP (Supabase built-in email is unreliable for Chinese providers)
+      const res = await fetch('/api/auth/send-auth-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'magiclink', email }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        return { success: true };
       }
-      return { success: true };
+      return { success: false, error: data.error || '发送验证码失败' };
     } catch (err: any) {
       console.error('[auth] sendEmailOtp error:', err);
       return { success: false, error: err?.message || '发送验证码失败' };
