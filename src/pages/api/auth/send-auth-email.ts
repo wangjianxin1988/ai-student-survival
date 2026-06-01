@@ -232,7 +232,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       if (linkError) {
         console.error('[send-auth-email] generateLink signup error:', linkError);
         return new Response(
-          JSON.stringify({ success: false, error: '生成验证码失败' }),
+          JSON.stringify({ success: false, error: `生成验证码失败: ${linkError.message || JSON.stringify(linkError)}` }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
       }
@@ -241,7 +241,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       if (!emailOtp) {
         console.error('[send-auth-email] No email_otp returned for signup');
         return new Response(
-          JSON.stringify({ success: false, error: '生成验证码失败' }),
+          JSON.stringify({ success: false, error: '生成验证码失败: 无OTP返回' }),
           { status: 500, headers: { 'Content-Type': 'application/json' } }
         );
       }
