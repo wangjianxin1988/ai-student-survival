@@ -214,8 +214,12 @@ export const POST: APIRoute = async ({ request }) => {
     // ─── SIGNUP: Directly confirm the user's email via Admin API ───
     if (type === 'signup') {
       // Generate signup OTP code via Supabase Admin API
+      // Use 'magiclink' type instead of 'signup' because:
+      // - 'signup' requires a password parameter (we don't have it here)
+      // - 'signup' fails for already-existing users (signUp() creates user first)
+      // - 'magiclink' works for both new and existing users
       const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: 'signup',
+        type: 'magiclink',
         email,
       });
 

@@ -364,7 +364,7 @@ export default function RegisterForm({
                 setIsLoading(true);
                 setError("");
                 try {
-                  const result = await demoAuthApi.verifyEmailOtp(email, otpCode, "signup");
+                  const result = await demoAuthApi.verifyEmailOtp(email, otpCode, "email");
                   if (result.success) {
                     setEmailVerified(true);
                   } else {
