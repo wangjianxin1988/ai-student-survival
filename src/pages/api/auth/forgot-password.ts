@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured, getCloudflareEnv } from '@/lib/supabase';
 
 export const prerender = false;
 
@@ -84,9 +84,8 @@ export const POST: APIRoute = async ({ request }) => {
       actionLink = fixedLink;
     }
 
-    // Read Resend API key
-    const resendApiKey = import.meta.env.RESEND_API_KEY
-      || (typeof process !== 'undefined' ? process.env.RESEND_API_KEY : '');
+    // Read Resend API key (Cloudflare runtime secret)
+    const resendApiKey = getCloudflareEnv('RESEND_API_KEY');
 
     if (!resendApiKey) {
       console.error('[forgot-password] RESEND_API_KEY not configured');

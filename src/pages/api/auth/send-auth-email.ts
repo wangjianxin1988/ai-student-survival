@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured, getCloudflareEnv } from '@/lib/supabase';
 
 export const prerender = false;
 
@@ -164,7 +164,7 @@ function getWelcomeEmailHtml(): string {
 </html>`;
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   if (!isSupabaseConfigured) {
     return new Response(
       JSON.stringify({ success: false, error: 'Supabase not configured' }),
@@ -199,14 +199,20 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Read Resend API key
-    const resendApiKey = import.meta.env.RESEND_API_KEY
-      || (typeof process !== 'undefined' ? process.env.RESEND_API_KEY : '');
+    // Read Resend API key (Cloudflare runtime secret)
+    const resendApiKey = getCloudflareEnv('RESEND_API_KEY');
 
     if (!resendApiKey) {
       console.error('[send-auth-email] RESEND_API_KEY not configured');
+      // Debug: check what's available in the env
+      const runtime = (locals as any)?.runtime;
+      const debugInfo = {
+        hasRuntime: !!runtime,
+        runtimeEnvKeys: runtime?.env ? Object.keys(runtime.env).slice(0, 20) : [],
+        getCloudflareEnvResult: resendApiKey,
+      };
       return new Response(
-        JSON.stringify({ success: false, error: '邮件服务未配置' }),
+        JSON.stringify({ success: false, error: '邮件服务未配置', debug: debugInfo }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }

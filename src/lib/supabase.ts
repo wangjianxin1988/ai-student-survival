@@ -20,6 +20,12 @@ export function setCloudflareEnv(env: Record<string, any>) {
   _cloudflareEnv = env;
 }
 
+/** Get a Cloudflare runtime env var by key. Returns '' if not set. */
+export function getCloudflareEnv(key: string): string {
+  const val = _cloudflareEnv?.[key];
+  return typeof val === 'string' && val.length > 0 ? val : '';
+}
+
 /** Lazily resolve the service role key — tries multiple sources at call time. */
 function getServiceRoleKey(): string {
   // Source 1: Cloudflare env bindings (set by middleware)
