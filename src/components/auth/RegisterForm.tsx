@@ -66,14 +66,12 @@ export default function RegisterForm({
   const [turnstileToken, setTurnstileToken] = useState<string>("");
   const [_authChecked, setAuthChecked] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [emailVerified, setEmailVerified] = useState(false);
   const [showOAuthHint, setShowOAuthHint] = useState(false);
   const [oauthProvider, setOauthProvider] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [resendSent, setResendSent] = useState(false);
   const [signupUserId, setSignupUserId] = useState<string | null>(null);
   const [otpSent, setOtpSent] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
 
   const t = translations[locale];
 
