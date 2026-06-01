@@ -10,7 +10,7 @@ interface EmailTemplate {
   html: string;
 }
 
-function getEmailTemplate(type: EmailType, actionLink: string): EmailTemplate {
+function getEmailTemplate(type: EmailType, actionLink: string, otpCode?: string): EmailTemplate {
   const baseStyle = `
     body { margin: 0; padding: 0; background-color: #f4f4f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
     .container { max-width: 560px; margin: 40px auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
@@ -105,6 +105,11 @@ function getEmailTemplate(type: EmailType, actionLink: string): EmailTemplate {
     <div style="text-align: center; margin: 32px 0;">
       <a href="${actionLink}" class="btn">登录</a>
     </div>
+    ${otpCode ? `<div style="text-align: center; margin: 24px 0;">
+      <p style="font-size: 14px; color: #52525b; margin-bottom: 12px;">或者输入验证码：</p>
+      <div style="display: inline-block; background: #f4f4f5; border: 2px solid #6366f1; border-radius: 12px; padding: 16px 32px; letter-spacing: 8px; font-size: 32px; font-weight: 700; color: #6366f1; font-family: 'Courier New', monospace;">${otpCode}</div>
+      <p style="font-size: 12px; color: #a1a1aa; margin-top: 8px;">验证码 5 分钟内有效</p>
+    </div>` : ''}
     <p style="font-size: 13px; color: #71717a;">如果按钮无法点击，请复制以下链接到浏览器地址栏：</p>
     <div class="link-box">${actionLink}</div>
     <div class="note">⚠️ 此链接将在 15 分钟后过期。如果您没有请求登录，请忽略此邮件。</div>
@@ -327,20 +332,41 @@ export const POST: APIRoute = async ({ request }) => {
       );
     }
 
-    // Supabase generateLink strips the path from redirect_to (only keeps domain).
-    // We must manually replace the redirect_to parameter with the full path.
-    let actionLink = rawActionLink;
-    try {
-      const url = new URL(rawActionLink);
-      url.searchParams.set('redirect_to', redirectTo);
-      actionLink = url.toString();
-      console.log('[send-auth-email] Fixed redirect_to in action_link:', redirectTo);
-    } catch (e) {
-      console.warn('[send-auth-email] Failed to fix redirect_to, using raw link:', e);
+    // ─── Build our own verification URL ───
+    // Supabase generateLink always strips the path from redirect_to, so we cannot
+    // use its action_link directly. Instead, extract the hashed_token from the
+    // response and build a URL pointing to OUR callback page.
+    const hashedToken = linkData?.hashed_token || linkData?.properties?.hashed_token;
+    const emailOtp = linkData?.email_otp || linkData?.properties?.email_otp;
+
+    let actionLink: string;
+    if (hashedToken) {
+      // Build our own URL with token_hash — bypasses Supabase verify endpoint entirely
+      const verifyUrl = new URL(redirectTo);
+      verifyUrl.searchParams.set('token_hash', hashedToken);
+      verifyUrl.searchParams.set('type', linkType);
+      verifyUrl.searchParams.set('email', email);
+      actionLink = verifyUrl.toString();
+      console.log('[send-auth-email] Built custom verification URL:', actionLink.substring(0, 120) + '...');
+      if (emailOtp) {
+        console.log('[send-auth-email] OTP code:', emailOtp);
+      }
+    } else {
+      // Fallback: use Supabase's action_link with manual redirect_to replacement
+      console.warn('[send-auth-email] No hashed_token, falling back to action_link with redirect_to fix');
+      let fixedLink = rawActionLink;
+      try {
+        const url = new URL(rawActionLink);
+        url.searchParams.set('redirect_to', redirectTo);
+        fixedLink = url.toString();
+      } catch (e) {
+        console.warn('[send-auth-email] Failed to fix redirect_to:', e);
+      }
+      actionLink = fixedLink;
     }
 
-    // Get email template
-    const template = getEmailTemplate(type, actionLink);
+    // Get email template (pass OTP code for magiclink type)
+    const template = getEmailTemplate(type, actionLink, emailOtp || undefined);
 
     // Send email via Resend API
     const resendResponse = await fetch('https://api.resend.com/emails', {

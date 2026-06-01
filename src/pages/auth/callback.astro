@@ -83,6 +83,26 @@ if (error || errorDescription) {
         }
       }
 
+      // Handle token_hash verification (custom URL format from our email templates).
+      // We build URLs like: /auth/callback?token_hash=HASH&type=magiclink&email=EMAIL
+      const tokenHash = params.get('token_hash');
+      const verifyType = params.get('type');
+      const verifyEmail = params.get('email');
+      if (tokenHash && verifyType && verifyEmail && !hashSessionSet) {
+        updateStatus(locale === 'zh' ? '正在验证...' : 'Verifying...');
+        const { error: verifyError } = await supabase.auth.verifyOtp({
+          type: verifyType as 'signup' | 'magiclink' | 'recovery' | 'email',
+          email: decodeURIComponent(verifyEmail),
+          token_hash: tokenHash,
+        });
+        if (verifyError) {
+          console.error('Token hash verification error:', verifyError);
+          window.location.href = `${loginUrl}?error=${encodeURIComponent(verifyError.message)}`;
+          return;
+        }
+        hashSessionSet = true;
+      }
+
       // Handle magic link / OTP token (token param + type=email)
       const token = params.get('token');
       const type = params.get('type');

@@ -60,16 +60,28 @@ export const POST: APIRoute = async ({ request }) => {
       }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Supabase generateLink strips the path from redirect_to (only keeps domain).
-    // Manually replace redirect_to with the full path.
-    let actionLink = rawActionLink;
-    try {
-      const url = new URL(rawActionLink);
-      url.searchParams.set('redirect_to', `${siteUrl}/auth/reset-password`);
-      actionLink = url.toString();
-      console.log('[forgot-password] Fixed redirect_to in action_link');
-    } catch (e) {
-      console.warn('[forgot-password] Failed to fix redirect_to, using raw link:', e);
+    // Build our own verification URL with token_hash — bypasses Supabase verify endpoint
+    const hashedToken = linkData?.hashed_token || linkData?.properties?.hashed_token;
+    let actionLink: string;
+    if (hashedToken) {
+      const verifyUrl = new URL(`${siteUrl}/auth/reset-password`);
+      verifyUrl.searchParams.set('token_hash', hashedToken);
+      verifyUrl.searchParams.set('type', 'recovery');
+      verifyUrl.searchParams.set('email', email);
+      actionLink = verifyUrl.toString();
+      console.log('[forgot-password] Built custom verification URL');
+    } else {
+      // Fallback to Supabase action_link with redirect_to fix
+      console.warn('[forgot-password] No hashed_token, falling back to action_link');
+      let fixedLink = rawActionLink;
+      try {
+        const url = new URL(rawActionLink);
+        url.searchParams.set('redirect_to', `${siteUrl}/auth/reset-password`);
+        fixedLink = url.toString();
+      } catch (e) {
+        console.warn('[forgot-password] Failed to fix redirect_to:', e);
+      }
+      actionLink = fixedLink;
     }
 
     // Read Resend API key
