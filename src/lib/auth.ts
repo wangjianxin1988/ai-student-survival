@@ -449,12 +449,11 @@ export const demoAuthApi = {
       }
 
       if (data.user) {
-        if (data.session) {
-          return { success: true };
-        }
+        // Always redirect to verify-email page for new registrations.
+        // Whether Supabase auto-confirms (returns session) or not, the user
+        // must verify their email via the OTP code we send via Resend.
         return {
-          success: false,
-          error: '请前往邮箱查收验证邮件，完成账号激活后再登录。验证邮件可能位于垃圾邮件文件夹。',
+          success: true,
           verificationRequired: true,
           userId: data.user.id,
         };
