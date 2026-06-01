@@ -31,6 +31,7 @@ export interface AuthResult {
   verificationRequired?: boolean;
   message?: string;
   oauthProvider?: string;
+  userId?: string;
 }
 
 export interface OAuthResult {
@@ -391,18 +392,8 @@ export const demoAuthApi = {
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
-          // Check if this email has an OAuth account
-          const provider = await getOAuthProviderForEmail(email);
-          if (provider === 'google') {
-            return { success: false, error: '此账号使用 Google 登录，请点击上方"Google"按钮直接登录，无需密码', oauthProvider: 'google' };
-          }
-          if (provider === 'github') {
-            return { success: false, error: '此账号使用 GitHub 登录，请点击上方"GitHub"按钮直接登录，无需密码', oauthProvider: 'github' };
-          }
-          if (provider === 'fallback') {
-            // RPC failed but user likely exists via OAuth — show generic hint
-            return { success: false, error: '该邮箱已通过第三方账号注册，请使用对应的登录方式', oauthProvider: 'oauth' };
-          }
+          // Don't check for OAuth accounts (stale identity issue in auth.identities
+          // can cause false positives). Just show a generic credential error.
           return { success: false, error: '邮箱或密码错误，请检查后重试' };
         }
         if (msg.includes('email not confirmed')) {
@@ -448,16 +439,11 @@ export const demoAuthApi = {
         if (error.status === 429 || error.code === 'over_email_send_rate_limit') {
           return { success: false, error: '操作过于频繁，请稍后再试（90秒后重试）' };
         }
-        // Email already registered — check if it's an OAuth account
+        // Email already registered — show generic message (don't check OAuth
+        // provider because stale auth.identities rows can cause false positives)
         const msg = error.message.toLowerCase();
         if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('user already')) {
-          const provider = await getOAuthProviderForEmail(email);
-          if (provider === 'google') {
-            return { success: false, error: '此邮箱已通过 Google 注册，请直接使用 Google 登录', oauthProvider: 'google' };
-          }
-          if (provider === 'github') {
-            return { success: false, error: '此邮箱已通过 GitHub 注册，请直接使用 GitHub 登录', oauthProvider: 'github' };
-          }
+          return { success: false, error: '该邮箱已被注册，请直接登录或使用其他邮箱' };
         }
         return { success: false, error: error.message };
       }
@@ -470,6 +456,7 @@ export const demoAuthApi = {
           success: false,
           error: '请前往邮箱查收验证邮件，完成账号激活后再登录。验证邮件可能位于垃圾邮件文件夹。',
           verificationRequired: true,
+          userId: data.user.id,
         };
       }
 

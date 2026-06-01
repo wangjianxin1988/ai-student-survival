@@ -71,6 +71,7 @@ export default function RegisterForm({
   const [oauthProvider, setOauthProvider] = useState<string | null>(null);
   const [resending, setResending] = useState(false);
   const [resendSent, setResendSent] = useState(false);
+  const [signupUserId, setSignupUserId] = useState<string | null>(null);
 
   const t = translations[locale];
 
@@ -237,6 +238,15 @@ export default function RegisterForm({
         redirectAfterRegister();
       } else if (result.verificationRequired) {
         setEmailVerified(true);
+        if (result.userId) {
+          setSignupUserId(result.userId);
+        }
+        // Directly confirm the user's email via Admin API (bypasses Supabase redirect URL whitelist)
+        fetch('/api/auth/send-auth-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: 'signup', email, userId: result.userId }),
+        }).catch((err) => console.warn('[RegisterForm] Failed to confirm email via Admin API:', err));
       } else {
         const errMsg = result.error || t.error;
         setError(errMsg);
@@ -257,16 +267,16 @@ export default function RegisterForm({
     setResendSent(false);
     try {
       const origin = window.location.origin;
-      const res = await fetch(`${origin}/api/auth/resend-confirmation`, {
+      const res = await fetch(`${origin}/api/auth/send-auth-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ type: 'signup', email, userId: signupUserId }),
       });
       const json = await res.json();
       if (json.success) {
         setResendSent(true);
       } else {
-        alert(json.error || (locale === 'zh' ? '重发失败，请稍后重试' : 'Resend failed, please try again later'));
+        alert(json.error || (locale === 'zh' ? '验证失败，请稍后重试' : 'Verification failed, please try again later'));
       }
     } catch {
       alert(locale === 'zh' ? '网络错误，请稍后重试' : 'Network error, please try again');
@@ -298,16 +308,13 @@ export default function RegisterForm({
         </h2>
         <p className="text-gray-600 mb-2">
           {locale === "zh"
-            ? `验证邮件已发送至 ${email}，请查收并点击邮件中的链接完成激活。`
-            : `A verification email has been sent to ${email}. Please check your inbox and click the link to activate your account.`}
-        </p>
-        <p className="text-sm text-gray-500 mb-2">
-          {locale === "zh" ? "邮件可能在垃圾邮件文件夹中" : "Check your spam folder if you don't see it"}
+            ? `邮箱已验证成功，您的账号已激活。请直接登录。`
+            : `Your email has been verified and your account is now active. Please sign in.`}
         </p>
 
         {resendSent ? (
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm mb-4">
-            {locale === "zh" ? "✅ 验证邮件已重新发送，请查收" : "✅ Verification email resent, please check your inbox"}
+            {locale === "zh" ? "✅ 邮箱已验证，请直接登录" : "✅ Email verified, please sign in"}
           </div>
         ) : (
           <button
@@ -316,8 +323,8 @@ export default function RegisterForm({
             className="text-sm text-primary-600 hover:text-primary-700 underline mb-4 disabled:opacity-50"
           >
             {resending
-              ? (locale === "zh" ? "发送中..." : "Sending...")
-              : (locale === "zh" ? "没收到邮件？重新发送" : "Didn't receive it? Resend email")}
+              ? (locale === "zh" ? "处理中..." : "Processing...")
+              : (locale === "zh" ? "重新验证邮箱" : "Re-verify email")}
           </button>
         )}
 

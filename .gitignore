@@ -103,3 +103,6 @@ P3_DESIGN.md
 # Astro local settings
 .astro/settings.json
 .supabase-schema/
+auth_test_results.json
+deep_auth_test_results.json
+deep_test_results_v3.json

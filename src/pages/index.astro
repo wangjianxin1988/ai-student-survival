@@ -424,4 +424,17 @@ const footerLinks = {
       </div>
     </div>
   </footer>
+
+  <!-- Auth callback detection: if Supabase redirects to homepage with auth params, forward to /auth/callback -->
+  <script is:inline>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var hash = window.location.hash;
+        if (params.get('code') || params.get('token') || (hash && hash.indexOf('access_token') !== -1)) {
+          window.location.href = '/auth/callback' + window.location.search + window.location.hash;
+        }
+      } catch(e) {}
+    })();
+  </script>
 </Layout>
