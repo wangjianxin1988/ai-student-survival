@@ -30,24 +30,38 @@ export const POST: APIRoute = async ({ request }) => {
       }), { status: 503, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Generate recovery link using Supabase Admin API
-    // Use production URL for redirectTo (Supabase only allows whitelisted URLs)
+    // Generate recovery link using direct fetch to Supabase Admin API
+    const supabaseUrl = getCloudflareEnv('PUBLIC_SUPABASE_URL') || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
+    const serviceKey = getCloudflareEnv('SUPABASE_SERVICE_ROLE_KEY');
+
+    if (!serviceKey) {
+      return new Response(JSON.stringify({
+        success: false, message: '服务端密钥未配置'
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    }
+
     const siteUrl = 'https://mi-to-ai.com';
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: 'recovery',
-      email,
-      options: {
-        redirectTo: `${siteUrl}/auth/reset-password`,
+    const genLinkResp = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        type: 'recovery',
+        email,
+        redirect_to: `${siteUrl}/auth/reset-password`,
+      }),
     });
 
-    if (linkError) {
-      console.error('[forgot-password] generateLink error:', linkError.message);
+    const linkData = await genLinkResp.json();
+
+    if (!genLinkResp.ok) {
+      console.error('[forgot-password] generateLink error:', linkData);
       return new Response(JSON.stringify({
         success: false,
-        message: linkError.message.includes('not found')
-          ? '该邮箱尚未注册'
-          : '发送失败，请稍后重试'
+        message: linkData.msg?.includes('not found') ? '该邮箱尚未注册' : '发送失败，请稍后重试'
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 

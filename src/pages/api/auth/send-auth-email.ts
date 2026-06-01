@@ -297,26 +297,42 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // ─── RECOVERY / MAGICLINK: Generate link and send via Resend ───
     const siteUrl = 'https://mi-to-ai.com';
+    const supabaseUrl = getCloudflareEnv('PUBLIC_SUPABASE_URL') || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
+    const serviceKey = getCloudflareEnv('SUPABASE_SERVICE_ROLE_KEY');
 
-    // Determine the redirectTo based on type
+    if (!serviceKey) {
+      return new Response(
+        JSON.stringify({ success: false, error: '服务端密钥未配置' }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     const redirectTo = type === 'recovery'
       ? `${siteUrl}/auth/reset-password`
       : `${siteUrl}/auth/callback`;
 
-    // Generate auth link using Supabase Admin API
-    const linkType = type === 'recovery' ? 'recovery' as const : 'magiclink' as const;
-    const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-      type: linkType,
-      email,
-      options: {
-        redirectTo,
+    const linkType = type === 'recovery' ? 'recovery' : 'magiclink';
+
+    const genLinkResp = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
+      method: 'POST',
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        type: linkType,
+        email,
+        redirect_to: redirectTo,
+      }),
     });
 
-    if (linkError) {
-      console.error('[send-auth-email] generateLink error:', linkError);
+    const linkData = await genLinkResp.json();
+
+    if (!genLinkResp.ok) {
+      console.error('[send-auth-email] generateLink error:', linkData);
       return new Response(
-        JSON.stringify({ success: false, error: linkError.message }),
+        JSON.stringify({ success: false, error: linkData.msg || '生成验证链接失败' }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
