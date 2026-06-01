@@ -217,24 +217,80 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    // ─── SIGNUP: Send verification email via inviteUserByEmail ───
+    // ─── SIGNUP: Send verification email ───
     if (type === 'signup') {
-      // Use inviteUserByEmail which sends a magic link to verify the email.
-      // This works even when generateLink is restricted.
-      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email);
-
-      if (inviteError) {
-        console.error('[send-auth-email] inviteUserByEmail error:', inviteError);
+      // Direct fetch to Supabase Admin API (bypass supabaseAdmin client which may have wrong key)
+      const supabaseUrl = getCloudflareEnv('PUBLIC_SUPABASE_URL') || 'https://giynvpfnzzelzwpmsgtf.supabase.co';
+      const serviceKey = getCloudflareEnv('SUPABASE_SERVICE_ROLE_KEY');
+      
+      if (!serviceKey) {
         return new Response(
-          JSON.stringify({ success: false, error: `发送验证邮件失败: ${inviteError.message || JSON.stringify(inviteError)}` }),
+          JSON.stringify({ success: false, error: '服务端密钥未配置' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Use generateLink to get OTP code, then send via Resend
+      const genLinkResp = await fetch(`${supabaseUrl}/auth/v1/admin/generate_link`, {
+        method: 'POST',
+        headers: {
+          'apikey': serviceKey,
+          'Authorization': `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ type: 'magiclink', email }),
+      });
+
+      const genLinkData = await genLinkResp.json();
+
+      if (!genLinkResp.ok) {
+        console.error('[send-auth-email] generateLink error:', genLinkData);
+        return new Response(
+          JSON.stringify({ success: false, error: `生成验证码失败: ${genLinkData.msg || genLinkData.message || JSON.stringify(genLinkData)}` }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
       }
 
-      console.log('[send-auth-email] Invite sent to:', email);
+      const emailOtp = genLinkData?.properties?.email_otp || genLinkData?.email_otp;
+      if (!emailOtp) {
+        console.error('[send-auth-email] No email_otp returned');
+        return new Response(
+          JSON.stringify({ success: false, error: '生成验证码失败: 无OTP返回' }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
+
+      // Send OTP code via Resend
+      const resendResponse = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'MiToAI <onboarding@resend.dev>',
+          to: email,
+          subject: '您的注册验证码 - MiToAI',
+          html: `<div style="font-family:sans-serif;padding:20px;text-align:center;">
+            <h2>注册验证码</h2>
+            <p>您的验证码是：</p>
+            <div style="font-size:36px;font-weight:bold;color:#6366f1;letter-spacing:10px;padding:20px;background:#f4f4f5;border-radius:12px;display:inline-block;">${emailOtp}</div>
+            <p style="color:#888;margin-top:16px;">验证码 5 分钟内有效</p>
+          </div>`,
+        }),
+      });
+
+      if (!resendResponse.ok) {
+        const resendError = await resendResponse.text();
+        console.error('[send-auth-email] Resend error:', resendError);
+        return new Response(
+          JSON.stringify({ success: false, error: '验证码发送失败，请稍后重试' }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } }
+        );
+      }
 
       return new Response(
-        JSON.stringify({ success: true, message: '验证邮件已发送到您的邮箱，请查收' }),
+        JSON.stringify({ success: true, message: '验证码已发送到您的邮箱' }),
         { status: 200, headers: { 'Content-Type': 'application/json' } }
       );
     }
