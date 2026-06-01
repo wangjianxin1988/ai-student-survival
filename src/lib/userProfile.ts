@@ -135,15 +135,15 @@ export const POINTS_CONFIG = {
   // Level thresholds (cumulative points needed)
   LEVELS: [
     0,      // Lv1
-    50,     // Lv2
-    150,    // Lv3
-    300,    // Lv4
-    500,    // Lv5
-    800,    // Lv6
-    1200,   // Lv7
-    1800,   // Lv8
-    2500,   // Lv9
-    3500,   // Lv10
+    20,     // Lv2
+    50,     // Lv3
+    100,    // Lv4
+    200,    // Lv5
+    500,    // Lv6
+    1000,   // Lv7
+    2000,   // Lv8
+    5000,   // Lv9
+    10000,  // Lv10
   ] as const,
 };
 

@@ -45,10 +45,10 @@ export default function PointsRulesTab({ locale = 'zh' }: PointsRulesTabProps) {
         { icon: '🎖️', title: locale === 'zh' ? '精选推荐' : 'Feature', amount: '100 ' + (locale === 'zh' ? '积分/次' : 'pts/time'), desc: locale === 'zh' ? '直接申请精选推荐，让优质内容获得官方认证' : 'Apply for featured recommendation, get official certification' },
       ],
       levels: [
-        { icon: '🌱', level: 'Lv.1', name: locale === 'zh' ? '新手用户' : 'New User', range: locale === 'zh' ? '0 - 49 积分' : '0 - 49 pts', desc: locale === 'zh' ? '基础发帖和评论功能' : 'Basic posting and comments' },
-        { icon: '🌿', level: 'Lv.2', name: locale === 'zh' ? '活跃用户' : 'Active User', range: locale === 'zh' ? '50 - 199 积分' : '50 - 199 pts', desc: locale === 'zh' ? '解锁置顶功能' : 'Unlock pin feature' },
-        { icon: '🌳', level: 'Lv.3', name: locale === 'zh' ? '资深用户' : 'Senior User', range: locale === 'zh' ? '200 - 499 积分' : '200 - 499 pts', desc: locale === 'zh' ? '解锁热门助推和精选推荐' : 'Unlock boost and feature' },
-        { icon: '⭐', level: 'Lv.4', name: locale === 'zh' ? '核心贡献者' : 'Core Contributor', range: locale === 'zh' ? '500+ 积分' : '500+ pts', desc: locale === 'zh' ? '全部特权 + 社区荣誉标识' : 'All privileges + community badge' },
+        { icon: '🌱', level: 'Lv.1-2', name: locale === 'zh' ? '新手用户' : 'New User', range: locale === 'zh' ? '0 - 49 积分' : '0 - 49 pts', desc: locale === 'zh' ? '基础发帖和评论功能' : 'Basic posting and comments' },
+        { icon: '🌿', level: 'Lv.3-4', name: locale === 'zh' ? '活跃用户' : 'Active User', range: locale === 'zh' ? '50 - 199 积分' : '50 - 199 pts', desc: locale === 'zh' ? '解锁置顶功能' : 'Unlock pin feature' },
+        { icon: '🌳', level: 'Lv.5-6', name: locale === 'zh' ? '资深用户' : 'Senior User', range: locale === 'zh' ? '200 - 999 积分' : '200 - 999 pts', desc: locale === 'zh' ? '解锁热门助推和精选推荐' : 'Unlock boost and feature' },
+        { icon: '⭐', level: 'Lv.7+', name: locale === 'zh' ? '核心贡献者' : 'Core Contributor', range: locale === 'zh' ? '1000+ 积分' : '1000+ pts', desc: locale === 'zh' ? '全部特权 + 社区荣誉标识' : 'All privileges + community badge' },
       ],
     },
   };

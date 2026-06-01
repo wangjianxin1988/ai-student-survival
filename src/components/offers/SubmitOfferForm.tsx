@@ -174,13 +174,60 @@ export default function SubmitOfferForm({ locale = 'zh', onSuccess, onCancel }: 
 
     setIsSubmitting(true);
 
-    // Simulate network delay
+    const isDemo = (await import('@/lib/supabase')).isDemoMode();
+
+    if (!isDemo) {
+      // Real mode: save to Supabase via API
+      try {
+        const { getAuthHeaders } = await import('@/lib/auth');
+        const headers = await getAuthHeaders();
+        const res = await fetch('/api/offers', {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            university_name: universityName,
+            university_slug: universityName.toLowerCase().replace(/\s+/g, '-'),
+            program: programName,
+            admission_result: admissionResult === 'admitted' ? 'accepted' : admissionResult,
+            background: JSON.stringify({
+              gpa: gpa || 'N/A',
+              gre: gre || 'N/A',
+              toefl: toefl || 'N/A',
+              ielts: ielts || 'N/A',
+              publications: parseInt(publications) || 0,
+              researchExperience: parseInt(researchExperience) || 0,
+              internships: parseInt(internships) || 0,
+              degree,
+              country,
+              scholarship: { amount: parseInt(scholarshipAmount) || 0, currency: scholarshipCurrency, type: scholarshipType },
+              aiToolsUsed: aiToolsUsed.split(',').map(t => t.trim()).filter(Boolean),
+              timeline,
+              advice,
+              isAnonymous,
+            }),
+            tools_used: aiToolsUsed.split(',').map(t => t.trim()).filter(Boolean),
+          }),
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setShowSuccess(true);
+          setIsSubmitting(false);
+          setTimeout(() => {
+            setShowSuccess(false);
+            onSuccess?.(json.data?.id || 'offer-' + Date.now());
+          }, 2000);
+          return;
+        }
+      } catch (e) {
+        console.error('[SubmitOfferForm] API call failed:', e);
+      }
+    }
+
+    // Demo mode or API fallback: save to localStorage
     await new Promise(resolve => setTimeout(resolve, 800));
 
     const offerId = 'offer-' + Date.now();
 
-    // In a real app, save to Supabase here
-    // For demo, save to localStorage
     if (typeof window !== 'undefined') {
       const offersKey = 'demo_offers';
       const stored = localStorage.getItem(offersKey);

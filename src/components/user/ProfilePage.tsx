@@ -42,7 +42,7 @@ const translations = {
     badges: '徽章成就',
     stats: '数据统计',
     favorites: '收藏',
-    ratings: '评分',
+    ratings: '评论',
     reviews: '评论',
     followers: '粉丝',
     following: '关注',
@@ -392,12 +392,12 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
                     <div className="text-sm text-gray-500">{t.favorites}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{userStats?.ratingsCount ?? mergedProfile.ratingsCount}</div>
+                    <div className="text-2xl font-bold text-gray-900">{(userStats?.commentsCount ?? mergedProfile.reviewsCount) + (userStats?.postsCount ?? 0)}</div>
                     <div className="text-sm text-gray-500">{t.ratings}</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{userStats?.commentsCount ?? mergedProfile.reviewsCount}</div>
-                    <div className="text-sm text-gray-500">{t.reviews}</div>
+                    <div className="text-2xl font-bold text-gray-900">{userStats?.postsCount ?? 0}</div>
+                    <div className="text-sm text-gray-500">{t.postsCount}</div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">{earnedBadges.length}</div>
