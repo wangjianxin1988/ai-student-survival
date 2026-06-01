@@ -61,6 +61,7 @@ if (error || errorDescription) {
       // Handle hash fragment tokens (magic link / OTP redirect format).
       // Supabase may put tokens in the hash fragment: #access_token=...&refresh_token=...
       const hash = window.location.hash;
+      let hashSessionSet = false;
       if (hash && hash.includes('access_token')) {
         updateStatus(locale === 'zh' ? '正在验证登录...' : 'Verifying sign in...');
         const hashParams = new URLSearchParams(hash.substring(1));
@@ -77,6 +78,7 @@ if (error || errorDescription) {
             window.location.href = `${loginUrl}?error=${encodeURIComponent(sessionError.message)}`;
             return;
           }
+          hashSessionSet = true;
           // Session set successfully — fall through to auth state change listener below
         }
       }
@@ -142,8 +144,8 @@ if (error || errorDescription) {
         }
       }
 
-      // No code/token — verify existing session
-      if (!code && !token) {
+      // No code/token — verify existing session (skip if we just set session from hash)
+      if (!code && !token && !hashSessionSet) {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !session) {
           unsubscribe();
