@@ -237,16 +237,25 @@ export default function RegisterForm({
       if (result.success) {
         redirectAfterRegister();
       } else if (result.verificationRequired) {
-        setEmailVerified(true);
+        // Send OTP code to email (not auto-confirm)
+        setOtpSent(true);
         if (result.userId) {
           setSignupUserId(result.userId);
         }
-        // Directly confirm the user's email via Admin API (bypasses Supabase redirect URL whitelist)
         fetch('/api/auth/send-auth-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ type: 'signup', email, userId: result.userId }),
-        }).catch((err) => console.warn('[RegisterForm] Failed to confirm email via Admin API:', err));
+          body: JSON.stringify({ type: 'signup', email }),
+        }).then(r => r.json()).then(data => {
+          if (!data.success) {
+            setError(data.error || '验证码发送失败');
+            setOtpSent(false);
+          }
+        }).catch((err) => {
+          console.warn('[RegisterForm] Failed to send signup OTP:', err);
+          setError('验证码发送失败，请重试');
+          setOtpSent(false);
+        });
       } else {
         const errMsg = result.error || t.error;
         setError(errMsg);
@@ -294,48 +303,104 @@ export default function RegisterForm({
     if (result.error) setError(result.error);
   };
 
-  // Show email verification success message
-  if (emailVerified) {
+  // Show OTP verification form after signup
+  if (otpSent) {
     return (
-      <div className="text-center py-8">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-        <h2 className="text-xl font-bold mb-2">
-          {locale === "zh" ? "注册成功！" : "Registration Successful!"}
+      <div className="w-full max-w-md mx-auto">
+        <h2 className="text-2xl font-bold text-center mb-6">
+          {locale === "zh" ? "验证邮箱" : "Verify Email"}
         </h2>
-        <p className="text-gray-600 mb-2">
-          {locale === "zh"
-            ? `邮箱已验证成功，您的账号已激活。请直接登录。`
-            : `Your email has been verified and your account is now active. Please sign in.`}
-        </p>
 
-        {resendSent ? (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-green-700 text-sm mb-4">
-            {locale === "zh" ? "✅ 邮箱已验证，请直接登录" : "✅ Email verified, please sign in"}
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {error}
           </div>
-        ) : (
-          <button
-            onClick={handleResendVerification}
-            disabled={resending}
-            className="text-sm text-primary-600 hover:text-primary-700 underline mb-4 disabled:opacity-50"
-          >
-            {resending
-              ? (locale === "zh" ? "处理中..." : "Processing...")
-              : (locale === "zh" ? "重新验证邮箱" : "Re-verify email")}
-          </button>
         )}
 
-        <div className="mt-2">
-          <a
-            href={locale === "zh" ? "/auth/login" : "/en/auth/login"}
-            className="inline-block px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors"
-          >
-            {locale === "zh" ? "前往登录" : "Go to Login"}
-          </a>
-        </div>
+        {emailVerified ? (
+          <div className="text-center py-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-bold mb-2">
+              {locale === "zh" ? "注册成功！" : "Registration Successful!"}
+            </h3>
+            <p className="text-gray-600 mb-4">
+              {locale === "zh" ? "邮箱已验证，账号已激活。请直接登录。" : "Email verified, account activated. Please sign in."}
+            </p>
+            <a
+              href={locale === "zh" ? "/auth/login" : "/en/auth/login"}
+              className="inline-block px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors"
+            >
+              {locale === "zh" ? "前往登录" : "Go to Login"}
+            </a>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-700 text-sm">
+              ✉️ {locale === "zh" ? `验证码已发送到 ${email}` : `Verification code sent to ${email}`}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {locale === "zh" ? "验证码" : "Verification Code"}
+              </label>
+              <input
+                type="text"
+                value={otpCode}
+                onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-center text-2xl tracking-[0.5em] font-mono"
+                placeholder="000000"
+                maxLength={6}
+                autoComplete="one-time-code"
+              />
+            </div>
+
+            <button
+              onClick={async () => {
+                if (otpCode.length !== 6) return;
+                setIsLoading(true);
+                setError("");
+                try {
+                  const result = await demoAuthApi.verifyEmailOtp(email, otpCode, "signup");
+                  if (result.success) {
+                    setEmailVerified(true);
+                  } else {
+                    setError(result.error || (locale === "zh" ? "验证失败" : "Verification failed"));
+                  }
+                } catch {
+                  setError(locale === "zh" ? "验证失败" : "Verification failed");
+                }
+                setIsLoading(false);
+              }}
+              disabled={otpCode.length !== 6 || isLoading}
+              className="w-full py-2.5 px-4 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isLoading ? (locale === "zh" ? "验证中..." : "Verifying...") : (locale === "zh" ? "验证" : "Verify")}
+            </button>
+
+            <button
+              onClick={async () => {
+                setResending(true);
+                try {
+                  await fetch('/api/auth/send-auth-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'signup', email }),
+                  });
+                  setOtpCode("");
+                } catch {}
+                setResending(false);
+              }}
+              disabled={resending}
+              className="w-full text-sm text-primary-600 hover:text-primary-700 underline disabled:opacity-50"
+            >
+              {resending ? (locale === "zh" ? "发送中..." : "Sending...") : (locale === "zh" ? "重新发送验证码" : "Resend Code")}
+            </button>
+          </div>
+        )}
       </div>
     );
   }
