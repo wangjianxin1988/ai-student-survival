@@ -571,9 +571,14 @@ export const demoAuthApi = {
         email,
         options: {
           shouldCreateUser,
+          // Explicitly set type to 'email' so Supabase sends a 6-digit OTP code
+          // instead of a magic link (default behavior when type is omitted)
           ...(shouldCreateUser ? {} : {}),
         },
-      });
+        // CRITICAL: Without type: 'email', Supabase sends a magic link (no code).
+        // With type: 'email', Supabase sends a 6-digit OTP code via email.
+        type: 'email',
+      } as any);
       if (error) {
         if (error.message.toLowerCase().includes('user not found') ||
             error.message.toLowerCase().includes('invalid')) {
