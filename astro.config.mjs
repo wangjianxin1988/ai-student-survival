@@ -6,6 +6,7 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   site: 'https://mi-to-ai.com',
   output: 'hybrid',
+  trailingSlash: 'always',
   adapter: cloudflare({
     platformProxy: {
       enabled: true,
@@ -14,14 +15,11 @@ export default defineConfig({
       exclude: [
         "/_astro/*",
         "/images/*",
-        "/api/*",
-        "/auth/debug",
-        "/auth/test-register",
       ],
     },
   }),
   image: {
-    service: {},
+    // Use Astro's default image optimization for Cloudflare
   },
   integrations: [
     react(),
@@ -47,12 +45,5 @@ export default defineConfig({
       prefixDefaultLocale: false,
     },
   },
-  schema: {
-    type: 'json',
-    required: ['title', 'description'],
-    properties: {
-      title: { type: 'string' },
-      description: { type: 'string' },
-    },
-  },
+
 });

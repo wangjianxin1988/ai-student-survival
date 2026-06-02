@@ -363,7 +363,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       actionLink = verifyUrl.toString();
       console.log('[send-auth-email] Built custom verification URL:', actionLink.substring(0, 120) + '...');
       if (emailOtp) {
-        console.log('[send-auth-email] OTP code:', emailOtp);
+        // OTP code must not be logged in production
       }
     } else {
       // Fallback: use Supabase's action_link with manual redirect_to replacement

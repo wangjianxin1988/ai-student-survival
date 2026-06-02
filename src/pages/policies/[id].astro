@@ -391,7 +391,7 @@ const prohibitedToolsList = availableTools.filter(tool => {
 
         <!-- Comments Section -->
         <div class="mt-8">
-          <CommentSection client:load targetType="policy" targetId={policy.id} locale={locale} />
+          <CommentSection client:visible targetType="policy" targetId={policy.id} locale={locale} />
         </div>
       </article>
 

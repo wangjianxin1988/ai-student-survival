@@ -277,7 +277,7 @@ const paymentCategoryLabels: Record<string, string> = {
         </div>
 
         <!-- Comments Section -->
-        <CommentSection client:load targetType="payment_solution" targetId={solution.id} locale="en" />
+        <CommentSection client:visible targetType="payment_solution" targetId={solution.id} locale="en" />
       </article>
 
       <!-- Sidebar -->

@@ -88,7 +88,7 @@ export const POST: APIRoute = async ({ request }) => {
       verifyUrl.searchParams.set('type', 'recovery');
       verifyUrl.searchParams.set('email', email);
       actionLink = verifyUrl.toString();
-      console.log('[forgot-password] Built custom URL with raw token');
+      // URL built successfully (token not logged for security)
     } else {
       // Fallback: use action_link directly (may hit Supabase verify endpoint redirect issue)
       console.warn('[forgot-password] No raw token, falling back to action_link');

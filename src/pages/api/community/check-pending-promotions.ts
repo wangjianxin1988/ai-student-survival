@@ -13,8 +13,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Admin auth check
     const authHeader = request.headers.get('authorization');
-    const adminPassword = import.meta.env.ADMIN_PASSWORD || 'admin123';
-    if (!authHeader || authHeader !== `Bearer ${adminPassword}`) {
+    const adminPassword = import.meta.env.ADMIN_PASSWORD;
+    if (!adminPassword || !authHeader || authHeader !== `Bearer ${adminPassword}`) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' }

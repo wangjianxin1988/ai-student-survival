@@ -15,16 +15,23 @@ export interface ServerUser {
 }
 
 export async function getServerUser(request: Request): Promise<ServerUser | null> {
-  // Check for demo mode: client sends demo user ID in special header
+  // Demo mode: ONLY allow on localhost (dev environment)
   const demoUserId = request.headers.get('X-Demo-User-Id');
-  const demoEmail = request.headers.get('X-Demo-User-Email');
-  const demoName = request.headers.get('X-Demo-User-Name');
   if (demoUserId) {
-    return {
-      id: demoUserId,
-      email: demoEmail || 'demo@example.com',
-      name: demoName || undefined,
-    };
+    const origin = request.headers.get('origin') || request.headers.get('host') || '';
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1');
+    if (!isLocalhost) {
+      // In production: ignore demo headers entirely
+      console.warn('[server-auth] Demo header blocked in production');
+    } else {
+      const demoEmail = request.headers.get('X-Demo-User-Email');
+      const demoName = request.headers.get('X-Demo-User-Name');
+      return {
+        id: demoUserId,
+        email: demoEmail || 'demo@example.com',
+        name: demoName || undefined,
+      };
+    }
   }
 
   if (!isSupabaseConfigured) {

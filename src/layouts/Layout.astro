@@ -26,7 +26,7 @@ interface Props {
 const {
   title,
   description,
-  image = '/og-image.png',
+  image = '/og-image.svg',
   type = 'website',
   canonicalUrl = Astro.url.href,
   jsonLd,
@@ -269,7 +269,7 @@ function getAlternatePath(loc: Locale): string {
       <!-- Astro components and slot content -->
       <slot />
       <SearchModal locale={locale} />
-      <Chatbot client:load locale={locale} />
+      <Chatbot client:idle locale={locale} />
     </AuthProvider>
 
     <script is:inline>

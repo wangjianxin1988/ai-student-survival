@@ -273,7 +273,7 @@ const renderedContent = renderMarkdown(solution.content);
         </div>
 
         <!-- Comments Section -->
-        <CommentSection client:load targetType="payment_solution" targetId={solution.id} locale="zh" />
+        <CommentSection client:visible targetType="payment_solution" targetId={solution.id} locale="zh" />
       </article>
 
       <!-- Sidebar -->

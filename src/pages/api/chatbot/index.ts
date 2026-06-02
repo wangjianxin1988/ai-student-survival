@@ -1,4 +1,6 @@
 import type { APIRoute } from 'astro';
+import { getServerUser } from '@/lib/server-auth';
+import { checkSensitiveEndpoint, SENSITIVE_ENDPOINTS } from '@/lib/rate-limit';
 
 export const prerender = false;
 
@@ -6,6 +8,24 @@ const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    // Rate limit: 10 requests per minute per IP
+    const { getClientIP } = await import('@/lib/rate-limit');
+    const forwarded = request.headers.get('x-forwarded-for');
+    const clientIP = forwarded ? forwarded.split(',')[0].trim() : (request.headers.get('x-real-ip') || 'unknown');
+    const rateLimitResult = checkSensitiveEndpoint('chatbot', clientIP);
+    if (!rateLimitResult.allowed) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: { message: 'Too many requests. Please try again later.' }
+      }), {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': (rateLimitResult.retryAfter || 60).toString(),
+        }
+      });
+    }
+
     const { message, context, locale = 'zh', conversationHistory = [] } = await request.json();
 
     if (!message || typeof message !== 'string') {

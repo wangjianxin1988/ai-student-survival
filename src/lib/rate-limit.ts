@@ -130,6 +130,10 @@ const SENSITIVE_LIMITS: Record<string, { windowMs: number; maxRequests: number }
   [SENSITIVE_ENDPOINTS.CONTACT]: { windowMs: 60 * 1000, maxRequests: 3 }, // 3 per minute
   [SENSITIVE_ENDPOINTS.COMMENT]: { windowMs: 60 * 1000, maxRequests: 10 }, // 10 per minute
   [SENSITIVE_ENDPOINTS.POST]: { windowMs: 60 * 1000, maxRequests: 5 }, // 5 per minute
+  ['chatbot']: { windowMs: 60 * 1000, maxRequests: 10 }, // 10 per minute
+  ['auth']: { windowMs: 60 * 1000, maxRequests: 5 }, // 5 per minute (login/register)
+  ['rating']: { windowMs: 60 * 1000, maxRequests: 10 }, // 10 per minute
+  ['favorite']: { windowMs: 60 * 1000, maxRequests: 20 }, // 20 per minute
 };
 
 // Per-endpoint rate limiter
