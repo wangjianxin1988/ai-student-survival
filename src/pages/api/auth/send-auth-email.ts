@@ -268,7 +268,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'MiToAI <onboarding@resend.dev>',
+          from: 'MiToAI <noreply@mi-to-ai.com>',
           to: email,
           subject: '您的注册验证码 - MiToAI',
           html: `<div style="font-family:sans-serif;padding:20px;text-align:center;">
@@ -390,7 +390,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MiToAI <onboarding@resend.dev>',
+        from: 'MiToAI <noreply@mi-to-ai.com>',
         to: email,
         subject: template.subject,
         html: template.html,

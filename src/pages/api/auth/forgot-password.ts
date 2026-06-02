@@ -114,7 +114,7 @@ export const POST: APIRoute = async ({ request }) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'MiToAI <onboarding@resend.dev>',
+        from: 'MiToAI <noreply@mi-to-ai.com>',
         to: email,
         subject: '重置您的密码 - MiToAI',
         html: `<!DOCTYPE html>
