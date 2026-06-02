@@ -6,7 +6,7 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   site: 'https://mi-to-ai.com',
   output: 'hybrid',
-  trailingSlash: 'always',
+  trailingSlash: 'ignore',
   adapter: cloudflare({
     platformProxy: {
       enabled: true,
@@ -15,6 +15,9 @@ export default defineConfig({
       exclude: [
         "/_astro/*",
         "/images/*",
+      ],
+      include: [
+        "/api/*",
       ],
     },
   }),
