@@ -249,6 +249,16 @@ function getAlternatePath(loc: Locale): string {
       ]
     })} />
 
+    <!-- Baidu Auto Push: auto-submit URLs to Baidu when user visits -->
+    <script is:inline>
+      (function(){
+        var bp = document.createElement('script');
+        bp.src = 'https://push.zhanzhang.baidu.com/push.js';
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(bp, s);
+      })();
+    </script>
+
   </head>
   <body class="min-h-screen bg-gray-50 text-gray-900 antialiased">
 
