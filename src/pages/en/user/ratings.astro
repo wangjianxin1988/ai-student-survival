@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import RatingsList from '@/components/user/RatingsList';
+
+export const prerender = false;
+
+const locale = 'en';
+---
+
+<Layout title='My Ratings'>
+  <RatingsList locale={locale} client:load />
+</Layout>

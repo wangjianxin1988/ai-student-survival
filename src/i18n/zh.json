@@ -380,7 +380,7 @@
   },
   "api": {
     "title": "开放API文档",
-    "description": "AI留学生存指南开放API文档，提供AI工具、支付解决方案、大学政策等数据接口，支持AI爬虫抓取",
+    "description": "说明",
     "aiSpiderFriendly": "AI爬虫友好",
     "tryEndpoint": "试用工具接口",
     "viewSitemap": "查看站点地图",
@@ -404,7 +404,6 @@
     "paramName": "参数名",
     "paramType": "类型",
     "required": "必填",
-    "description": "说明",
     "yes": "是",
     "no": "否",
     "contentType": "Content-Type:",
@@ -426,27 +425,15 @@
       "googleExtended": "Google-Extended"
     }
   },
-  "footer": {
-    "tagline": "中国留学生AI工具第一站 - 从工具选择到成功支付，一站式解决留学路上的所有AI难题",
-    "coreFeatures": "核心功能",
-    "toolsCategory": "工具分类",
-    "resources": "资源",
-    "writing": "写作工具",
-    "coding": "编程工具",
-    "design": "设计工具",
-    "research": "研究工具",
-    "descTools": "100+ AI工具收录",
-    "descPayment": "虚拟卡·礼品卡·地区定价",
-    "descPolicies": "各校AI使用政策",
-    "descPrompts": "高质量模板库",
-    "descOffers": "申请经验分享",
-    "descQuestions": "留学生互助社区"
-  },
   "chatbot": {
     "title": "AI助手",
     "placeholder": "问我任何关于AI工具的问题...",
     "welcome": "你好！我是AI助手，可以帮你找到合适的AI工具、了解支付方案、查询大学政策等。有什么可以帮你的？",
-    "suggestions": ["推荐一个写作AI工具", "哪个学校允许用ChatGPT？", "没有信用卡怎么订阅ChatGPT？"],
+    "suggestions": [
+      "推荐一个写作AI工具",
+      "哪个学校允许用ChatGPT？",
+      "没有信用卡怎么订阅ChatGPT？"
+    ],
     "send": "发送",
     "thinking": "思考中...",
     "suggestTry": "试试这样问："
@@ -538,7 +525,8 @@
       "notFound": "未找到该Offer",
       "relatedOffers": "相关Offer",
       "likes": "点赞"
-    }
+    },
+    "description": "留学生专属优惠 - AI工具折扣码、虚拟卡返现、留学服务优惠等独家福利"
   },
   "about": {
     "hero": {
@@ -631,7 +619,7 @@
     "info": {
       "email": {
         "title": "邮箱",
-        "desc": "support@mitoai.example.com"
+        "desc": "support@mi-to-ai.com"
       },
       "social": {
         "title": "社交媒体",

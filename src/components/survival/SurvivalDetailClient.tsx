@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import SurvivalCard from './SurvivalCard';
 import CommentSection from '@/components/user/CommentSection';
+import LikeButton from '@/components/common/LikeButton';
+import FavoriteButton from '@/components/favorites/FavoriteButton';
+import { getCurrentUser, getAuthHeaders } from '@/lib/auth';
 import {
   getSurvivalGuideById,
   getRelatedSurvivalGuides,
@@ -87,6 +90,18 @@ export default function SurvivalDetailClient({
     const url = window.location.href;
     try {
       await navigator.clipboard.writeText(url);
+      // Record share
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        try {
+          const headers = await getAuthHeaders();
+          await fetch('/api/content-shares', {
+            method: 'POST',
+            headers: { ...headers, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ target_type: 'survival', target_id: guide.id, platform: 'copy_link' }),
+          });
+        } catch {}
+      }
       alert(t.copied);
     } catch {
       // Fallback
@@ -145,6 +160,8 @@ export default function SurvivalDetailClient({
 
             {/* Share */}
             <div className="flex items-center gap-2">
+              <LikeButton targetType="survival" targetId={guide.id} locale={locale} />
+              <FavoriteButton targetType="survival" targetId={guide.id} locale={locale} />
               <button
                 onClick={handleShare}
                 className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"

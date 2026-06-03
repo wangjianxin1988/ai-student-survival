@@ -4,7 +4,7 @@ import { CreatePostPage } from '@/components/community/CreatePostPage';
 
 export const prerender = false;
 
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '发布帖子 - 留学生问答社区' : 'Create Post - Q&A Community'}>

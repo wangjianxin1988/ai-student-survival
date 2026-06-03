@@ -106,6 +106,7 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
   const [currentUser, setCurrentUser] = useState<DemoUser | null>(null);
   const [userStats, setUserStats] = useState<SupabaseUserStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [fetchDone, setFetchDone] = useState(false);
   const [activeTab, setActiveTab] = useState<'offers' | 'favorites' | 'ratings'>('offers');
   const [userOffers, setUserOffers] = useState<Offer[]>([]);
   const [userFavorites, setUserFavorites] = useState<any[]>([]);
@@ -133,7 +134,11 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
             });
           }
         })
-        .catch(e => console.error('[UserPublicProfile] Failed to fetch user stats:', e));
+        .catch(e => console.error('[UserPublicProfile] Failed to fetch user stats:', e))
+        .finally(() => {
+          setFetchDone(true);
+          setLoading(false);
+        });
 
       // Load localStorage-based offers/favorites/ratings
       if (typeof window !== 'undefined') {
@@ -176,8 +181,6 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
       }
     }
 
-    setLoading(false);
-
     const unsubscribe = onAuthStateChange((newUser) => {
       setCurrentUser(newUser);
     });
@@ -189,16 +192,16 @@ export default function UserPublicProfile({ userId, locale = 'zh' }: UserPublicP
     return (
       <div className="min-h-[calc(100vh-200px)] py-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="animate-pulse space-y-6">
-            <div className="h-32 bg-gray-200 rounded-xl" />
-            <div className="h-64 bg-gray-200 rounded-xl" />
+          <div className="flex flex-col items-center justify-center py-12">
+            <div className="w-10 h-10 border-3 border-primary-200 border-t-primary-500 rounded-full animate-spin mb-4" style={{ borderWidth: "3px" }} />
+            <p className="text-sm text-gray-500">{t.loading}</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!userStats) {
+  if (fetchDone && !userStats) {
     return (
       <div className="min-h-[calc(100vh-200px)] py-12 px-4">
         <div className="max-w-4xl mx-auto text-center">

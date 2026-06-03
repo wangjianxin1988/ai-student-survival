@@ -5,6 +5,7 @@ import Layout from '@/layouts/Layout.astro';
 import { paymentSolutionsData, getPaymentSolutionById, getRelatedSolutions, paymentCategories } from '@/data/paymentSolutions';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import ShareButton from '@/components/common/ShareButton';
+import LikeButton from '@/components/common/LikeButton';
 import CommentSection from '@/components/user/CommentSection';
 
 // Get solution ID from URL params
@@ -92,7 +93,7 @@ const jsonLd = {
   "@type": ["Article", "HowTo"],
   "name": solution.title,
   "description": `Tutorial: ${solution.title}. Category: ${categoryLabels[solution.category]}.`,
-  "url": `https://ai-student-survival.example.com/en/payment/${solution.id}`,
+  "url": `https://www.mi-to-ai.com/en/payment/${solution.id}`,
   "totalTime": difficultyTimeMap[solution.difficulty] || 'PT30M',
   "step": steps.map((step, index) => ({
     "@type": "HowToStep",
@@ -223,7 +224,8 @@ const paymentCategoryLabels: Record<string, string> = {
             <h1 class="text-3xl font-bold">{solution.title}</h1>
             <div class="flex items-center gap-2">
               <FavoriteButton client:load targetType="payment_solution" targetId={solution.id} locale="en" />
-              <ShareButton client:load title={solution.title} description={solution.excerpt} />
+              <LikeButton client:load targetType="payment_solution" targetId={solution.id} locale="en" />
+              <ShareButton client:load title={solution.title} description={solution.excerpt} targetType="payment_solution" targetId={solution.id} />
             </div>
           </div>
           <p class="text-gray-600 mb-4">{solution.excerpt}</p>
@@ -272,8 +274,8 @@ const paymentCategoryLabels: Record<string, string> = {
             <button onclick="navigator.clipboard.writeText(window.location.href)" class="btn-outline text-sm">
               Copy Link
             </button>
-            <ShareButton client:load title={solution.title} description={solution.excerpt} />
-          </div>
+<ShareButton client:load title={solution.title} description={solution.excerpt} targetType="payment_solution" targetId={solution.id} />
+            <CommentSection
         </div>
 
         <!-- Comments Section -->

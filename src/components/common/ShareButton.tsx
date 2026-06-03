@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { getCurrentUser, getAuthHeaders } from "@/lib/auth";
 
 const translations = {
   zh: {
@@ -39,6 +40,8 @@ interface ShareButtonProps {
   showWechat?: boolean;
   showQq?: boolean;
   size?: "sm" | "md" | "lg";
+  targetType?: string;
+  targetId?: string;
 }
 
 export default function ShareButton({
@@ -51,6 +54,8 @@ export default function ShareButton({
   showWechat = true,
   showQq = true,
   size = "md",
+  targetType,
+  targetId,
 }: ShareButtonProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -67,9 +72,23 @@ export default function ShareButton({
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description || "");
 
+  const recordShare = async (platform: string) => {
+    const currentUser = getCurrentUser();
+    if (!currentUser || !targetType || !targetId) return;
+    try {
+      const headers = await getAuthHeaders();
+      await fetch('/api/content-shares', {
+        method: 'POST',
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target_type: targetType, target_id: targetId, platform }),
+      });
+    } catch {}
+  };
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
+      await recordShare('copy_link');
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -108,6 +127,7 @@ export default function ShareButton({
 
     if (shareUrl) {
       window.open(shareUrl, "_blank", "width=600,height=400");
+      recordShare(platform);
     }
     setShowMenu(false);
   };
@@ -312,3 +332,4 @@ export default function ShareButton({
     </div>
   );
 }
+

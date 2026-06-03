@@ -18,13 +18,13 @@ function getLocaleHref(path: string): string {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
-  "@id": "https://mi-to-ai.com/#website",
+  "@id": "https://www.mi-to-ai.com/#website",
   "name": translate(locale, 'site.name'),
   "description": translate(locale, 'site.description'),
-  "url": "https://mi-to-ai.com",
+  "url": "https://www.mi-to-ai.com",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "https://mi-to-ai.com/tools?q={search_term_string}",
+    "target": "https://www.mi-to-ai.com/tools?q={search_term_string}",
     "query-input": "required name=search_term_string"
   },
   "hasOfferCatalog": {
@@ -34,76 +34,145 @@ const jsonLd = {
   }
 };
 
-// Homepage FAQPage Schema for GEO - AI Overviews boost
+// Homepage FAQPage Schema for GEO - AI Overviews boost (bilingual)
+const zhFaqItems = [
+  {
+    "@type": "Question",
+    "name": "留学生可以用哪些AI工具？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "本平台提供500+AI工具数据库，包括GPT-4、Claude、Midjourney等，专门为留学生整理了价格、支付方式、中国可用性和学术使用场景等信息。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "在中国怎么使用ChatGPT等海外AI工具？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "留学生可以通过虚拟卡（如RedotPay、OneKey）、礼品卡、免翻墙的网页工具，以及专为中国用户设计的支付方案来使用海外AI工具。我们的支付方案板块提供详细教程。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "大学对AI工具有什么政策规定？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "各大学对AI工具的政策不同。我们的政策数据库涵盖200+大学的AI使用规定，包括ChatGPT使用限制、学术诚信要求和允许使用的工具清单。使用AI工具前请务必查看你所在大学的具体政策。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "怎么选择适合自己的AI工具？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "平台提供AI工具的详细对比，涵盖写作、研究、编程、图像生成和语言学习等类别。每个工具都包含价格、核心功能、中国可用性评分和用户评价。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "订阅AI工具用什么支付方式？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "支付方式包括国际信用卡、虚拟卡（RedotPay、OneKey）、支付宝/微信绑定外卡、加密货币和地区礼品卡。支付方案数据库提供留学生实测有效的支付方法。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "写论文可以用AI工具吗？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "各大学政策不同。许多大学允许将AI作为学习辅助工具但要求注明，部分大学禁止在考试或评分作业中使用。我们的大学政策数据库涵盖全球200+高校的具体规定。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "有没有不需要信用卡的免费AI工具？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "不需要信用卡的免费AI工具包括：Claude免费版、Copilot（微软账号免费使用）、Gemini、Poe以及各种开源模型。工具数据库支持按「免费」和「中国可用」筛选。"
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "留学生怎么交流AI工具使用经验？",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "平台设有社区板块，留学生可以分享工具评测、生存指南、提问互助，从面临同样挑战的同学那里获取推荐和建议。"
+    }
+  },
+];
+
+const enFaqItems = [
+  {
+    "@type": "Question",
+    "name": "What AI tools are available for international students?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "This platform provides a comprehensive database of 500+ AI tools including GPT-4, Claude, Midjourney, and many others, specifically curated for international students with information about pricing, payment methods, accessibility in China, and academic use cases."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "How can students in China access Western AI tools?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Students in China can access Western AI tools through virtual cards (like RedotPay, OneKey), gift cards, web-based tools that bypass restrictions, and specific China-friendly payment solutions. Our payment solutions section provides step-by-step guides."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "What university policies should international students know about AI tool usage?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "University policies on AI tools vary by institution. Our policy database covers 200+ university AI guidelines, including restrictions on ChatGPT usage, academic integrity requirements, and approved tool lists. Always check your specific university's policy before using AI tools in coursework."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "How do I choose the right AI tool for my academic needs?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Our platform provides detailed comparisons of AI tools across categories including writing, research, coding, image generation, and language learning. Each tool listing includes pricing, key features, China accessibility rating, and student reviews."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "What payment methods work for international students subscribing to AI tools?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Payment methods include international credit cards, virtual cards (RedotPay, OneKey), Alipay/WeChat Pay with foreign card linking, cryptocurrency, and region-specific gift cards. Our payment solutions database provides working methods tested by real international students."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "Are AI tools allowed in academic work?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Policies vary by university and country. Many universities allow AI as a learning aid but require disclosure. Some prohibit it for exams or graded assignments. Our university policy database covers specific guidelines for 200+ institutions worldwide."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "What AI tools work well without credit card verification?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Free AI tools that don't require credit card include Claude (free tier), Copilot (free with Microsoft account), Gemini, Poe, and various open-source models. Our tools database filters for free-accessibility in China and no-credit-card requirements."
+    }
+  },
+  {
+    "@type": "Question",
+    "name": "How can students share and discover AI tool recommendations?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "This platform includes a community section where students can share tool reviews, survival guides, ask questions, and discover recommendations from fellow international students facing similar challenges."
+    }
+  },
+];
+
 const faqSchema = {
   "@context": "https://schema.org",
   "@type": "FAQPage",
-  "mainEntity": [
-    {
-      "@type": "Question",
-      "name": "What AI tools are available for international students?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "This platform provides a comprehensive database of 500+ AI tools including GPT-4, Claude, Midjourney, and many others, specifically curated for international students with information about pricing, payment methods, accessibility in China, and academic use cases."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How can students in China access Western AI tools?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Students in China can access Western AI tools through virtual cards (like Depax, AssistCard), gift cards, web-based tools that bypass restrictions, and specific China-friendly payment solutions. Our payment solutions section provides step-by-step guides."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What university policies should international students know about AI tool usage?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "University policies on AI tools vary by institution. Our policy database covers 200+ university AI guidelines, including restrictions on ChatGPT usage, academic integrity requirements, and approved tool lists. Always check your specific university's policy before using AI tools in coursework."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How do I choose the right AI tool for my academic needs?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Our platform provides detailed comparisons of AI tools across categories including writing, research, coding, image generation, and language learning. Each tool listing includes pricing, key features, China accessibility rating, and student reviews."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What payment methods work for international students subscribing to AI tools?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Payment methods include international credit cards, virtual cards (Depax, Wenjin virtual card), Alipay/WeChat Pay with foreign card linking, cryptocurrency, and region-specific gift cards. Our payment solutions database provides working methods tested by real international students."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Are AI tools allowed in academic work?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Policies vary by university and country. Many universities allow AI as a learning aid but require disclosure. Some prohibit it for exams or graded assignments. Our university policy database covers specific guidelines for 200+ institutions worldwide."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "What AI tools work well without credit card verification?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Free AI tools that don't require credit card include Claude (free tier), Copilot (free with Microsoft account), Gemini, Poe, and various open-source models. Our tools database filters for free-accessibility in China and no-credit-card requirements."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "How can students share and discover AI tool recommendations?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "This platform includes a community section where students can share tool reviews, survival guides, ask questions, and discover recommendations from fellow international students facing similar challenges."
-      }
-    }
-  ]
+  "mainEntity": locale === 'zh' ? zhFaqItems : enFaqItems,
 };
 
 // BreadcrumbList Schema
@@ -115,7 +184,7 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       "position": 1,
       "name": "Home",
-      "item": "https://mi-to-ai.com"
+      "item": "https://www.mi-to-ai.com"
     }
   ]
 };

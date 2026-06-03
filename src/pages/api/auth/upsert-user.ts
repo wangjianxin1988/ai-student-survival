@@ -63,7 +63,6 @@ export const POST: APIRoute = async ({ request }) => {
           type: 'register',
           description: '注册奖励',
         });
-        console.log(`[upsert-user] Awarded registration points to user ${id}`);
       }
     } catch (pointsErr) {
       // Don't fail the upsert if points award fails

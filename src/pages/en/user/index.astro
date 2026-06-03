@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import ProfilePage from '@/components/user/ProfilePage';
+
+export const prerender = false;
+
+const locale = 'en';
+---
+
+<Layout title='Profile'>
+  <ProfilePage locale={locale} client:load />
+</Layout>

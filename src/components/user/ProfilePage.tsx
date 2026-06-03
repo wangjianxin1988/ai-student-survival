@@ -357,7 +357,7 @@ export default function ProfilePage({ locale = 'zh' }: ProfilePageProps) {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Profile Card */}
             <div className="md:col-span-2">
-              <UserProfileCard locale={locale} size="lg" />
+              <UserProfileCard locale={locale} size="lg" apiStats={userStats ? { points: userStats.points, postsCount: userStats.postsCount, commentsCount: userStats.commentsCount, favoritesCount: userStats.favoritesCount, likesCount: userStats.likesCount, name: userStats.name, avatar: userStats.avatar } : null} />
             </div>
 
             {/* Quick Stats */}

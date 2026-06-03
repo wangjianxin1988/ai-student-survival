@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import EnhancedSettings from '@/components/user/EnhancedSettings';
+
+export const prerender = false;
+
+const locale = 'en';
+---
+
+<Layout title='Settings'>
+  <EnhancedSettings locale={locale} client:load />
+</Layout>

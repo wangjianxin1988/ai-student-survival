@@ -5,6 +5,7 @@ import Layout from '@/layouts/Layout.astro';
 import { paymentSolutionsData, getPaymentSolutionById, getRelatedSolutions, paymentCategories } from '@/data/paymentSolutions';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import ShareButton from '@/components/common/ShareButton';
+import LikeButton from '@/components/common/LikeButton';
 import CommentSection from '@/components/user/CommentSection';
 
 // Virtual card ad links
@@ -96,7 +97,7 @@ const jsonLd = {
   "@type": ["Article", "HowTo"],
   "name": solution.title,
   "description": `详细教程：${solution.title}。${categoryLabels[solution.category]}类别。`,
-  "url": `https://ai-student-survival.example.com/payment/${solution.id}`,
+  "url": `https://www.mi-to-ai.com/payment/${solution.id}`,
   "totalTime": difficultyTimeMap[solution.difficulty] || 'PT30M',
   "step": steps.map((step, index) => ({
     "@type": "HowToStep",
@@ -219,7 +220,8 @@ const renderedContent = renderMarkdown(solution.content);
             <h1 class="text-3xl font-bold">{solution.title}</h1>
             <div class="flex items-center gap-2">
               <FavoriteButton client:load targetType="payment_solution" targetId={solution.id} locale="zh" />
-              <ShareButton client:load title={solution.title} description={solution.excerpt} />
+              <LikeButton client:load targetType="payment_solution" targetId={solution.id} locale="zh" />
+              <ShareButton client:load title={solution.title} description={solution.excerpt} targetType="payment_solution" targetId={solution.id} />
             </div>
           </div>
           <p class="text-gray-600 mb-4">{solution.excerpt}</p>
@@ -268,8 +270,7 @@ const renderedContent = renderMarkdown(solution.content);
             <button onclick="navigator.clipboard.writeText(window.location.href)" class="btn-outline text-sm">
               复制链接
             </button>
-            <ShareButton client:load title={solution.title} description={solution.excerpt} />
-          </div>
+<ShareButton client:load title={solution.title} description={solution.excerpt} targetType="payment_solution" targetId={solution.id} />
         </div>
 
         <!-- Comments Section -->

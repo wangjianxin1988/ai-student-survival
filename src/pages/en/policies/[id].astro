@@ -11,6 +11,7 @@ import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
 import CommentSection from '@/components/user/CommentSection';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import ShareButton from '@/components/common/ShareButton';
+import LikeButton from '@/components/common/LikeButton';
 
 // Force English locale for this page
 const locale: Locale = 'en';
@@ -38,11 +39,11 @@ const jsonLd = {
   "@type": "EducationalOccupationalProgram",
   "name": `${policy.universityNameEn} AI Policy`,
   "description": `${policy.universityNameEn}'s AI usage policy`,
-  "url": `https://ai-student-survival.example.com/en/policies/${policy.id}`,
+  "url": `https://www.mi-to-ai.com/en/policies/${policy.id}`,
   "provider": {
     "@type": "Organization",
     "name": policy.universityNameEn,
-    "url": `https://ai-student-survival.example.com/en/policies/${policy.id}`
+    "url": `https://www.mi-to-ai.com/en/policies/${policy.id}`
   },
   "hasCourse": {
     "@type": "Course",
@@ -171,7 +172,8 @@ const prohibitedToolsList = availableTools.filter(tool => {
             </div>
             <div class="flex items-center gap-2">
               <FavoriteButton client:load targetType="policy" targetId={policy.id} locale={locale} />
-              <ShareButton client:load title={policy.universityNameEn} description={policy.overallSummary || ''} />
+              <LikeButton client:load targetType="policy" targetId={policy.id} locale={locale} />
+              <ShareButton client:load title={policy.universityNameEn} description={policy.overallSummary || ''} targetType="policy" targetId={policy.id} />
             </div>
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">

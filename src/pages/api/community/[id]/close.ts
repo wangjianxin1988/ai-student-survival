@@ -198,8 +198,6 @@ async function generateAiSummary(
 
     if (updateError) {
       console.error('[close] Error storing AI summary:', updateError);
-    } else {
-      console.log(`[close] AI summary generated for post ${postId}`);
     }
   } catch (err) {
     console.error('[close] AI summary generation exception:', err);

@@ -11,6 +11,7 @@ import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
 import CommentSection from '@/components/user/CommentSection';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import ShareButton from '@/components/common/ShareButton';
+import LikeButton from '@/components/common/LikeButton';
 
 // Virtual card ad links
 const redotpayUrl = 'https://wap.redotpay.com/en/invite/affiliates-2?utm_id=thp9sj&utm_source=union&utm_uid=16062&utm_s=83f435b475fa9740d21e75f619566991ebe88480';
@@ -41,11 +42,11 @@ const jsonLd = {
   "@type": "EducationalOccupationalProgram",
   "name": `${policy.universityName} AI ${locale === 'en' ? 'Policy' : '政策'}`,
   "description": `${policy.universityName}${locale === 'en' ? "'s AI usage policy" : '的AI使用政策'}`,
-  "url": `https://ai-student-survival.example.com/policies/${policy.id}`,
+  "url": `https://www.mi-to-ai.com/policies/${policy.id}`,
   "provider": {
     "@type": "Organization",
     "name": policy.universityName,
-    "url": `https://ai-student-survival.example.com/policies/${policy.id}`
+    "url": `https://www.mi-to-ai.com/policies/${policy.id}`
   },
   "hasCourse": {
     "@type": "Course",
@@ -174,7 +175,8 @@ const prohibitedToolsList = availableTools.filter(tool => {
             </div>
             <div class="flex items-center gap-2">
               <FavoriteButton client:load targetType="policy" targetId={policy.id} locale={locale} />
-              <ShareButton client:load title={policy.universityName} description={policy.overallSummary || ''} />
+              <LikeButton client:load targetType="policy" targetId={policy.id} locale={locale} />
+              <ShareButton client:load title={policy.universityName} description={policy.overallSummary || ''} targetType="policy" targetId={policy.id} />
             </div>
           </div>
           <div class="flex items-center gap-2 text-sm text-gray-500 flex-wrap">

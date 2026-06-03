@@ -50,28 +50,76 @@ export const GET: APIRoute = async ({ params }) => {
     const userIds = [...new Set((rawComments || []).map((c) => c.user_id).filter(Boolean))];
     let usersMap: Record<string, { id: string; name: string; avatar_url: string }> = {};
     if (userIds.length > 0) {
-      const { data: users } = await supabase
+      // Try users table first
+      const { data: users } = await supabaseAdmin
         .from('users')
         .select('id, name, avatar_url')
         .in('id', userIds);
       if (users) {
-        usersMap = Object.fromEntries(users.map((u) => [u.id, u]));
+        for (const u of users) {
+          if (u.name) {
+            usersMap[u.id] = { id: u.id, name: u.name, avatar_url: u.avatar_url || '' };
+          }
+        }
+      }
+
+      // For users still missing names, try auth admin API
+      const missingNameIds = userIds.filter(id => !usersMap[id]?.name);
+      if (missingNameIds.length > 0) {
+        try {
+          const { data: metaRows } = await supabaseAdmin.rpc('get_user_metadata', {
+            user_ids: missingNameIds,
+          });
+          if (metaRows) {
+            for (const row of metaRows) {
+              if (row.display_name) {
+                usersMap[row.user_id] = {
+                  id: row.user_id,
+                  name: row.display_name,
+                  avatar_url: row.avatar_url || usersMap[row.user_id]?.avatar_url || '',
+                };
+              }
+            }
+          }
+        } catch { /* RPC might not exist */ }
+
+        // Final fallback: try auth admin API for remaining
+        const stillMissing = missingNameIds.filter(id => !usersMap[id]?.name);
+        for (const uid of stillMissing.slice(0, 10)) {
+          try {
+            const { data: userData } = await supabaseAdmin.auth.admin.getUserById(uid);
+            if (userData?.user) {
+              const meta = userData.user.user_metadata || {};
+              const name = (meta.name as string) || (meta.full_name as string) || '';
+              const avatar = (meta.avatar_url as string) || '';
+              if (name) {
+                usersMap[uid] = { id: uid, name, avatar_url: avatar };
+              }
+            }
+          } catch { /* ignore */ }
+        }
       }
     }
 
-    const formattedComments = (rawComments || []).map((c) => ({
-      id: c.id,
-      postId: c.post_id,
-      userId: c.user_id,
-      content: c.content,
-      status: c.status,
-      createdAt: c.created_at,
-      author: {
-        id: c.user_id,
-        name: usersMap[c.user_id]?.name || '匿名用户',
-        avatar: usersMap[c.user_id]?.avatar_url || '',
-      },
-    }));
+    const formattedComments = (rawComments || []).map((c) => {
+      const userInfo = usersMap[c.user_id];
+      const displayName = userInfo?.name || '匿名用户';
+      return {
+        id: c.id,
+        postId: c.post_id,
+        userId: c.user_id,
+        content: c.content,
+        status: c.status,
+        likesCount: c.likes_count || 0,
+        parentId: c.parent_id || null,
+        createdAt: c.created_at,
+        author: {
+          id: c.user_id,
+          name: displayName,
+          avatar: userInfo?.avatar_url || '',
+        },
+      };
+    });
 
     return new Response(
       JSON.stringify({
@@ -88,6 +136,8 @@ export const GET: APIRoute = async ({ params }) => {
     userId: c.user_id,
     content: c.content,
     status: c.status,
+    likesCount: c.likes_count || 0,
+    parentId: c.parent_id || null,
     createdAt: c.created_at,
     author: {
       id: c.user_id,
@@ -143,7 +193,7 @@ export const POST: APIRoute = async ({ params, request }) => {
 
   try {
     const body = await request.json();
-    const { content } = body;
+    const { content, parentId } = body;
 
     if (!content || !content.trim()) {
       return new Response(
@@ -172,13 +222,40 @@ export const POST: APIRoute = async ({ params, request }) => {
       );
     }
 
-    // 创建评论
-    const { data: newComment, error } = await supabase
+    // Resolve user name from users table or auth metadata
+    let authorName = user.name || '';
+    if (!authorName) {
+      try {
+        const { data: userRow } = await supabaseAdmin
+          .from('users')
+          .select('name')
+          .eq('id', user.id)
+          .single();
+        if (userRow?.name) authorName = userRow.name;
+      } catch { /* ignore */ }
+    }
+    if (!authorName) {
+      try {
+        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(user.id);
+        if (userData?.user) {
+          const meta = userData.user.user_metadata || {};
+          authorName = (meta.name as string) || (meta.full_name as string) || '';
+        }
+      } catch { /* ignore */ }
+    }
+    if (!authorName && user.email) {
+      authorName = user.email.split('@')[0];
+    }
+    if (!authorName) authorName = '匿名用户';
+
+    // 创建评论 (use supabaseAdmin to bypass RLS)
+    const { data: newComment, error } = await supabaseAdmin
       .from('post_comments')
       .insert({
         post_id: postId,
         user_id: user.id,
         content: content.trim(),
+        parent_id: parentId || null,
         status: 'published',
       })
       .select('*')
@@ -226,8 +303,7 @@ export const POST: APIRoute = async ({ params, request }) => {
 
     // 通知被 @提及 的用户（异步，不阻塞响应）
     try {
-      const commenterName = user.name || '匿名用户';
-      notifyMentionedUsers(content.trim(), postId, post.title, commenterName, 'community')
+      notifyMentionedUsers(content.trim(), postId, post.title, authorName, 'community')
         .catch((err) => console.error('[comments] Failed to notify mentioned users:', err));
     } catch { /* ignore */ }
 
@@ -237,10 +313,12 @@ export const POST: APIRoute = async ({ params, request }) => {
       userId: newComment.user_id,
       content: newComment.content,
       status: newComment.status,
+      likesCount: 0,
+      parentId: newComment.parent_id || null,
       createdAt: newComment.created_at,
       author: {
         id: user.id,
-        name: user.name || '匿名用户',
+        name: authorName,
         avatar: '',
       },
     };

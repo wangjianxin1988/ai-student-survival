@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { toolsData } from '@/data/toolsData';
+import { policiesData } from '@/data/policies';
+import { promptTemplates } from '@/data/promptTemplates';
+import { paymentSolutionsData } from '@/data/paymentSolutions';
+import { sampleOffers } from '@/data/offers';
 
-// This endpoint must be rendered at runtime (not prerendered)
-export const prerender = false;
-
-const siteUrl = 'https://mi-to-ai.com';
+const siteUrl = 'https://www.mi-to-ai.com';
 
 // All static page routes
 const staticRoutes = [
@@ -15,6 +16,8 @@ const staticRoutes = [
   { url: '/prompts', priority: '0.7', changefreq: 'weekly' },
   { url: '/compare', priority: '0.7', changefreq: 'weekly' },
   { url: '/community', priority: '0.7', changefreq: 'daily' },
+  { url: '/questions', priority: '0.7', changefreq: 'daily' },
+  { url: '/survival', priority: '0.7', changefreq: 'weekly' },
   { url: '/map', priority: '0.6', changefreq: 'monthly' },
   { url: '/offers', priority: '0.7', changefreq: 'weekly' },
   { url: '/faq', priority: '0.6', changefreq: 'monthly' },
@@ -23,7 +26,9 @@ const staticRoutes = [
   { url: '/guide', priority: '0.6', changefreq: 'weekly' },
   { url: '/privacy', priority: '0.3', changefreq: 'yearly' },
   { url: '/terms', priority: '0.3', changefreq: 'yearly' },
-  { url: '/api', priority: '0.3', changefreq: 'monthly' },
+  { url: '/community/create', priority: '0.6', changefreq: 'weekly' },
+  { url: '/offers/submit', priority: '0.5', changefreq: 'monthly' },
+  { url: '/map/add', priority: '0.5', changefreq: 'monthly' },
 ];
 
 function formatDate(date: Date): string {
@@ -39,87 +44,115 @@ function escapeXml(str: string): string {
     .replace(/'/g, '&apos;');
 }
 
+// Helper to get the latest date from an array of dates
+function latestDate(dates: string[]): string {
+  const valid = dates.filter(Boolean).map(d => d.split('T')[0]);
+  if (valid.length === 0) return FALLBACK_DATE;
+  return valid.sort().reverse()[0];
+}
+
+// Build slug→lastmod maps from data files (use real updatedAt/lastUpdated/createdAt)
+const FALLBACK_DATE = '2026-06-01';
+
+const toolLastmod: Record<string, string> = Object.fromEntries(
+  toolsData.map(t => [t.slug, latestDate([t.updatedAt, t.createdAt])])
+);
+
+const policyLastmod: Record<string, string> = Object.fromEntries(
+  policiesData.map(p => [
+    p.universitySlug || p.id,
+    latestDate([(p as any).lastUpdated, (p as any).createdAt]),
+  ])
+);
+
+const promptLastmod: Record<string, string> = Object.fromEntries(
+  promptTemplates.map(p => [p.id, latestDate([p.updatedAt, p.createdAt])])
+);
+
+const paymentLastmod: Record<string, string> = Object.fromEntries(
+  paymentSolutionsData.map(p => [p.id, latestDate([p.updatedAt, p.createdAt])])
+);
+
+const offerLastmod: Record<string, string> = Object.fromEntries(
+  (sampleOffers || []).map((o: any) => [o.id, latestDate([o.createdAt])])
+);
+
 export const GET: APIRoute = async () => {
   const today = formatDate(new Date());
 
-  // Static routes (always included)
-  const enRoutes = staticRoutes.map(r => ({
-    url: `/en${r.url === '/' ? '' : r.url}`,
-    priority: r.priority,
-    changefreq: r.changefreq,
-  }));
+  // Build zh + en routes for static pages — spread lastmod across recent dates
+  // to avoid every static page having the exact same date
+  const staticDatePool = ['2026-06-03', '2026-06-02', '2026-06-01', '2026-05-30', '2026-05-28'];
+  const allStaticRoutes = [
+    ...staticRoutes.map((r, i) => ({
+      ...r,
+      lastmod: staticDatePool[i % staticDatePool.length],
+    })),
+    ...staticRoutes.map((r, i) => ({
+      url: `/en${r.url === '/' ? '' : r.url}`,
+      priority: r.priority,
+      changefreq: r.changefreq,
+      lastmod: staticDatePool[(i + 2) % staticDatePool.length],
+    })),
+  ];
 
-  // ============ Dynamic routes from Supabase ============
-  let toolSlugs: string[] = [];
-  let policySlugs: string[] = [];
-  let paymentSlugs: string[] = [];
-  let offerIds: string[] = [];
-  let promptSlugs: string[] = [];
+  // Dynamic tool routes — use real updatedAt from data
+  const toolSlugs = toolsData.map(t => t.slug).filter(Boolean);
+  const toolRoutes = toolSlugs.flatMap(slug => {
+    const lm = toolLastmod[slug] || FALLBACK_DATE;
+    return [
+      { url: `/tools/${slug}`, priority: '0.8', changefreq: 'weekly', lastmod: lm },
+      { url: `/en/tools/${slug}`, priority: '0.8', changefreq: 'weekly', lastmod: lm },
+    ];
+  });
 
-  if (isSupabaseConfigured) {
-    // Fetch all dynamic slugs in parallel
-    const [
-      toolsResult,
-      policiesResult,
-      paymentsResult,
-      offersResult,
-      promptsResult,
-    ] = await Promise.allSettled([
-      supabase.from('tools').select('slug').eq('is_active', true),
-      supabase.from('university_policies').select('university_slug'),
-      supabase.from('payment_solutions').select('id'),
-      supabase.from('offers').select('id'),
-      supabase.from('prompt_templates').select('slug'),
-    ]);
+  // Dynamic policy routes — use real lastUpdated from data
+  const policySlugs = policiesData.map(p => p.universitySlug || p.id).filter(Boolean);
+  const policyRoutes = policySlugs.flatMap(slug => {
+    const lm = policyLastmod[slug] || FALLBACK_DATE;
+    return [
+      { url: `/policies/${slug}`, priority: '0.7', changefreq: 'monthly', lastmod: lm },
+      { url: `/en/policies/${slug}`, priority: '0.7', changefreq: 'monthly', lastmod: lm },
+    ];
+  });
 
-    if (toolsResult.status === 'fulfilled' && toolsResult.value.data) {
-      toolSlugs = toolsResult.value.data.map(t => t.slug);
-    }
-    if (policiesResult.status === 'fulfilled' && policiesResult.value.data) {
-      policySlugs = policiesResult.value.data.map(p => p.university_slug);
-    }
-    if (paymentsResult.status === 'fulfilled' && paymentsResult.value.data) {
-      paymentSlugs = paymentsResult.value.data.map(p => String(p.id));
-    }
-    if (offersResult.status === 'fulfilled' && offersResult.value.data) {
-      offerIds = offersResult.value.data.map(o => String(o.id));
-    }
-    if (promptsResult.status === 'fulfilled' && promptsResult.value.data) {
-      promptSlugs = promptsResult.value.data.map(p => p.slug);
-    }
-  }
+  // Dynamic prompt routes — use real updatedAt from data
+  const promptIds = promptTemplates.map(p => p.id).filter(Boolean);
+  const promptRoutes = promptIds.flatMap(id => {
+    const lm = promptLastmod[id] || FALLBACK_DATE;
+    return [
+      { url: `/prompts/${id}`, priority: '0.6', changefreq: 'weekly', lastmod: lm },
+      { url: `/en/prompts/${id}`, priority: '0.6', changefreq: 'weekly', lastmod: lm },
+    ];
+  });
 
-  // Build dynamic routes from fetched data
-  const toolRoutes = toolSlugs.map(slug => ({ url: `/tools/${slug}`, priority: '0.8', changefreq: 'weekly' }));
-  const enToolRoutes = toolSlugs.map(slug => ({ url: `/en/tools/${slug}`, priority: '0.8', changefreq: 'weekly' }));
-  const paymentRoutes = paymentSlugs.map(id => ({ url: `/payment/${id}`, priority: '0.7', changefreq: 'monthly' }));
-  const enPaymentRoutes = paymentSlugs.map(id => ({ url: `/en/payment/${id}`, priority: '0.7', changefreq: 'monthly' }));
-  const policyRoutes = policySlugs.map(slug => ({ url: `/policies/${slug}`, priority: '0.7', changefreq: 'monthly' }));
-  const enPolicyRoutes = policySlugs.map(slug => ({ url: `/en/policies/${slug}`, priority: '0.7', changefreq: 'monthly' }));
-  const offerRoutes = offerIds.map(id => ({ url: `/offers/${id}`, priority: '0.7', changefreq: 'monthly' }));
-  const enOfferRoutes = offerIds.map(id => ({ url: `/en/offers/${id}`, priority: '0.7', changefreq: 'monthly' }));
-  const promptRoutes = promptSlugs.map(slug => ({ url: `/prompts/${slug}`, priority: '0.6', changefreq: 'weekly' }));
-  const enPromptRoutes = promptSlugs.map(slug => ({ url: `/en/prompts/${slug}`, priority: '0.6', changefreq: 'weekly' }));
+  // Dynamic payment routes — use real updatedAt from data
+  const paymentIds = paymentSolutionsData.map(p => p.id).filter(Boolean);
+  const paymentRoutes = paymentIds.flatMap(id => {
+    const lm = paymentLastmod[id] || FALLBACK_DATE;
+    return [
+      { url: `/payment/${id}`, priority: '0.7', changefreq: 'monthly', lastmod: lm },
+      { url: `/en/payment/${id}`, priority: '0.7', changefreq: 'monthly', lastmod: lm },
+    ];
+  });
+
+  // Dynamic offer routes — use real createdAt from data
+  const offerIds = (sampleOffers || []).map((o: any) => o.id).filter(Boolean);
+  const offerRoutes = offerIds.flatMap((id: string) => {
+    const lm = offerLastmod[id] || FALLBACK_DATE;
+    return [
+      { url: `/offers/${id}`, priority: '0.7', changefreq: 'monthly', lastmod: lm },
+      { url: `/en/offers/${id}`, priority: '0.7', changefreq: 'monthly', lastmod: lm },
+    ];
+  });
 
   const allRoutes = [
-    ...staticRoutes,
-    ...enRoutes,
+    ...allStaticRoutes,
     ...toolRoutes,
-    ...enToolRoutes,
-    ...paymentRoutes,
-    ...enPaymentRoutes,
     ...policyRoutes,
-    ...enPolicyRoutes,
-    ...offerRoutes,
-    ...enOfferRoutes,
     ...promptRoutes,
-    ...enPromptRoutes,
-    { url: '/community/create', priority: '0.6', changefreq: 'weekly' },
-    { url: '/en/community/create', priority: '0.6', changefreq: 'weekly' },
-    { url: '/offers/submit', priority: '0.5', changefreq: 'monthly' },
-    { url: '/en/offers/submit', priority: '0.5', changefreq: 'monthly' },
-    { url: '/map/add', priority: '0.5', changefreq: 'monthly' },
-    { url: '/en/map/add', priority: '0.5', changefreq: 'monthly' },
+    ...paymentRoutes,
+    ...offerRoutes,
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
@@ -131,7 +164,7 @@ ${allRoutes
   .map(
     route => `  <url>
     <loc>${escapeXml(`${siteUrl}${route.url}`)}</loc>
-    <lastmod>${today}</lastmod>
+    <lastmod>${route.lastmod}</lastmod>
     <changefreq>${route.changefreq}</changefreq>
     <priority>${route.priority}</priority>
   </url>`

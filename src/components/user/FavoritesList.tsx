@@ -136,12 +136,14 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
   const [user, setUser] = useState<DemoUser | null>(null);
   const [favorites, setFavorites] = useState<{ type: string; id: string; name: string; description?: string; href: string; dbId?: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [authReady, setAuthReady] = useState(false);
   const t = translations[locale];
 
   useEffect(() => {
     // Initialize auth first so OAuth sessions are detected synchronously
     initAuth().then(user => {
       setUser(user);
+      setAuthReady(true);
     });
 
     const unsubscribe = onAuthStateChange((newUser) => {
@@ -152,31 +154,53 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
   }, []);
 
   useEffect(() => {
+    if (!authReady) return;
     if (!user) {
       setLoading(false);
       return;
     }
 
     async function loadFavorites() {
-      // Try Supabase API first
+      // Fetch content favorites (tools, prompts, policies, payment solutions)
       const apiFavorites = await fetchFavoritesFromApi();
-      if (apiFavorites.length > 0) {
-        const parsed = apiFavorites.map((fav: { id: string; target_type: string; target_id: string }) => {
-          const item = getFavoriteItem(fav.target_type, fav.target_id);
-          return {
-            type: fav.target_type,
-            id: fav.target_id,
-            name: item?.name || `${fav.target_type} #${fav.target_id}`,
-            description: item?.description,
-            href: item?.href || `/${fav.target_type}s/${fav.target_id}`,
-            dbId: fav.id,
-          };
-        });
-        setFavorites(parsed);
+      const contentFavs = apiFavorites.map((fav: { id: string; target_type: string; target_id: string }) => {
+        const item = getFavoriteItem(fav.target_type, fav.target_id);
+        return {
+          type: fav.target_type,
+          id: fav.target_id,
+          name: item?.name || `${fav.target_type} #${fav.target_id}`,
+          description: item?.description,
+          href: item?.href || `/${fav.target_type}s/${fav.target_id}`,
+          dbId: fav.id,
+        };
+      });
+
+      // Fetch community post favorites from activity API
+      let communityFavs: any[] = [];
+      try {
+        const headers = await getAuthHeaders();
+        const res = await fetch('/api/user/activity', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          const favItems = (data.items || []).filter((i: any) => i.type === 'favorite');
+          communityFavs = favItems.map((item: any) => ({
+            type: 'community',
+            id: item.id,
+            name: item.title || '社区帖子',
+            description: item.snippet,
+            href: item.href,
+          }));
+        }
+      } catch {}
+
+      const allFavs = [...contentFavs, ...communityFavs];
+
+      if (allFavs.length > 0) {
+        setFavorites(allFavs);
       } else {
         // Fall back to localStorage
         const allFavorites = getFavorites();
-        const userFavorites = allFavorites[user.id] || [];
+        const userFavorites = allFavorites[user!.id] || [];
         const parsed = userFavorites.map((key: string) => {
           const [type, id] = key.split('_');
           const item = getFavoriteItem(type, id);
@@ -212,6 +236,8 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
       case 'prompt': return '📝';
       case 'policy': return '📄';
       case 'payment_solution': return '💳';
+      case 'community': return '💬';
+      case 'question': return '❓';
       default: return '📌';
     }
   };
@@ -222,6 +248,8 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
       case 'prompt': return t.prompt;
       case 'policy': return t.policy;
       case 'payment_solution': return t.payment;
+      case 'community': return t.post;
+      case 'question': return t.post;
       default: return type;
     }
   };
@@ -238,7 +266,7 @@ export default function FavoritesList({ locale = 'zh' }: { locale?: 'zh' | 'en' 
       <div className="min-h-[calc(100vh-200px)] py-12 px-4">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-gray-900 mb-8">{t.title}</h1>
-          <div className="text-center py-12 text-gray-500">{t.loading}</div>
+          <div className="flex flex-col items-center justify-center py-12"><div className="w-8 h-8 border-3 border-primary-200 border-t-primary-500 rounded-full animate-spin mb-3" style={{ borderWidth: "3px" }} /><p className="text-sm text-gray-500">{t.loading}</p></div>
         </div>
       </div>
     );

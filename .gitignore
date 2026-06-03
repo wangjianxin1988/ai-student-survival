@@ -135,3 +135,4 @@ deep_test_results_v3.json
 *.png
 !public/**/*.png
 !src/**/*.png
+.service_role_key.txt

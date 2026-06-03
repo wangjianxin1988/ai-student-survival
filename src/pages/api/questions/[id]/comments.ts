@@ -35,31 +35,77 @@ export const GET: APIRoute = async ({ params }) => {
     );
   }
 
-  // Get user info for comments
+  // Get user info for comments with better name resolution
   const userIds = [...new Set((comments || []).map(c => c.user_id))];
-  const { data: usersData } = await supabase
-    .from('users')
-    .select('id, name, avatar_url')
-    .in('id', userIds);
-
   const userMap: Record<string, { name: string; avatar: string }> = {};
-  (usersData || []).forEach((u: Record<string, unknown>) => {
-    userMap[u.id as string] = {
-      name: (u.name as string) || 'Anonymous',
-      avatar: (u.avatar_url as string) || '',
-    };
-  });
+
+  if (userIds.length > 0) {
+    // Try users table first
+    const { data: usersData } = await supabaseAdmin
+      .from('users')
+      .select('id, name, avatar_url')
+      .in('id', userIds);
+
+    (usersData || []).forEach((u: Record<string, unknown>) => {
+      if (u.name) {
+        userMap[u.id as string] = {
+          name: u.name as string,
+          avatar: (u.avatar_url as string) || '',
+        };
+      }
+    });
+
+    // For users still missing names, try auth metadata
+    const missingNameIds = userIds.filter(id => !userMap[id]?.name);
+    if (missingNameIds.length > 0) {
+      try {
+        const { data: metaRows } = await supabaseAdmin.rpc('get_user_metadata', {
+          user_ids: missingNameIds,
+        });
+        if (metaRows) {
+          for (const row of metaRows) {
+            if (row.display_name) {
+              userMap[row.user_id] = {
+                name: row.display_name,
+                avatar: row.avatar_url || userMap[row.user_id]?.avatar || '',
+              };
+            }
+          }
+        }
+      } catch { /* RPC might not exist */ }
+
+      // Final fallback: auth admin API
+      const stillMissing = missingNameIds.filter(id => !userMap[id]?.name);
+      for (const uid of stillMissing.slice(0, 10)) {
+        try {
+          const { data: userData } = await supabaseAdmin.auth.admin.getUserById(uid);
+          if (userData?.user) {
+            const meta = userData.user.user_metadata || {};
+            const name = (meta.name as string) || (meta.full_name as string) || '';
+            if (name) {
+              userMap[uid] = {
+                name,
+                avatar: (meta.avatar_url as string) || '',
+              };
+            }
+          }
+        } catch { /* ignore */ }
+      }
+    }
+  }
 
   const formattedComments = (comments || []).map((c: Record<string, unknown>) => {
-    const userInfo = userMap[c.user_id as string] || { name: 'Anonymous', avatar: '' };
+    const userInfo = userMap[c.user_id as string];
     return {
       id: c.id as string,
       postId: c.post_id as string,
       userId: c.user_id as string,
-      userName: userInfo.name,
-      userAvatar: userInfo.avatar,
+      userName: userInfo?.name || '匿名用户',
+      userAvatar: userInfo?.avatar || '',
       content: c.content as string,
-      likes: 0,
+      likes: (c.likes_count as number) || 0,
+      likesCount: (c.likes_count as number) || 0,
+      parentId: (c.parent_id as string) || null,
       likedBy: [],
       createdAt: c.created_at as string,
     };
@@ -100,7 +146,7 @@ export const POST: APIRoute = async ({ params, request }) => {
 
   try {
     const body = await request.json();
-    const { content } = body;
+    const { content, parentId } = body;
 
     if (!content || !content.trim()) {
       return new Response(
@@ -112,12 +158,42 @@ export const POST: APIRoute = async ({ params, request }) => {
       );
     }
 
-    // Get user info
-    const { data: userData } = await supabase
-      .from('users')
-      .select('name, avatar_url')
-      .eq('id', user.id)
-      .single();
+    // Resolve user name from multiple sources
+    let authorName = user.name || '';
+    let authorAvatar = '';
+
+    // Try users table
+    if (!authorName) {
+      try {
+        const { data: userRow } = await supabaseAdmin
+          .from('users')
+          .select('name, avatar_url')
+          .eq('id', user.id)
+          .single();
+        if (userRow?.name) {
+          authorName = userRow.name;
+          authorAvatar = userRow.avatar_url || '';
+        }
+      } catch { /* ignore */ }
+    }
+
+    // Try auth admin API
+    if (!authorName) {
+      try {
+        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(user.id);
+        if (userData?.user) {
+          const meta = userData.user.user_metadata || {};
+          authorName = (meta.name as string) || (meta.full_name as string) || '';
+          authorAvatar = (meta.avatar_url as string) || '';
+        }
+      } catch { /* ignore */ }
+    }
+
+    // Fallback to email prefix
+    if (!authorName && user.email) {
+      authorName = user.email.split('@')[0];
+    }
+    if (!authorName) authorName = '匿名用户';
 
     // Content moderation check
     const modResult = contentModerationApi.moderate(content, user.id, 'comment');
@@ -142,12 +218,14 @@ export const POST: APIRoute = async ({ params, request }) => {
       .eq('id', postId)
       .single();
 
-    const { data: comment, error } = await supabase
+    // Use supabaseAdmin to bypass RLS for INSERT
+    const { data: comment, error } = await supabaseAdmin
       .from('post_comments')
       .insert({
         post_id: postId,
         user_id: user.id,
         content: content.trim(),
+        parent_id: parentId || null,
         status: 'published',
       })
       .select()
@@ -194,9 +272,8 @@ export const POST: APIRoute = async ({ params, request }) => {
 
     // 通知被 @提及 的用户（异步，不阻塞响应）
     try {
-      const commenterName = (userData?.name as string) || 'Anonymous';
       const postTitle = (postData?.title as string) || '帖子';
-      notifyMentionedUsers(content.trim(), postId, postTitle, commenterName, 'questions')
+      notifyMentionedUsers(content.trim(), postId, postTitle, authorName, 'questions')
         .catch((err) => console.error('[questions/comments] Failed to notify mentioned users:', err));
     } catch { /* ignore */ }
 
@@ -207,8 +284,8 @@ export const POST: APIRoute = async ({ params, request }) => {
           id: comment.id as string,
           postId: comment.post_id as string,
           userId: comment.user_id as string,
-          userName: (userData?.name as string) || 'Anonymous',
-          userAvatar: (userData?.avatar_url as string) || '',
+          userName: authorName,
+          userAvatar: authorAvatar,
           content: comment.content as string,
           likes: 0,
           likedBy: [],

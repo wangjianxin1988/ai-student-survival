@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import OffersList from '@/components/user/OffersList';
+
+export const prerender = false;
+
+const locale = 'en';
+---
+
+<Layout title='My Offers'>
+  <OffersList locale={locale} client:load />
+</Layout>

@@ -1,34 +1,108 @@
 # MI TO AI留学生存指南
-> 中国留学生AI工具第一站。一站式解决工具选择、支付难题、大学政策、申请经验。收录500+ AI工具、200+ 大学AI政策、20+ 支付方案、1000+ Prompt模板。
+
+> 中国留学生AI工具第一站。一站式解决工具选择、支付难题、大学政策、申请经验。收录500+ AI工具、200+ 大学AI政策、20+ 支付方案、1000+ Prompt模板。覆盖ChatGPT、Claude、Gemini、Midjourney等主流AI工具的订阅支付、免费替代方案和中国区使用指南。
 
 ## 核心页面
-- [AI工具库](https://mi-to-ai.com/tools): 500+主流AI工具数据库，多维对比评分
-- [支付解决方案](https://mi-to-ai.com/payment): 20+留学生AI工具支付方案
-- [大学AI政策](https://mi-to-ai.com/policies): 200+海外大学AI使用政策
-- [Prompt模板库](https://mi-to-ai.com/prompts): 1000+精选Prompt模板
-- [防坑指南](https://mi-to-ai.com/survival): 留学生防坑防骗指南
-- [社区](https://mi-to-ai.com/community): 留学生AI工具交流社区
-- [关于我们](https://mi-to-ai.com/about): 平台介绍和团队信息
 
-## 热门工具
-- [ChatGPT](https://mi-to-ai.com/tools/chatgpt): OpenAI AI对话助手，支持写作、编程、分析
-- [Claude](https://mi-to-ai.com/tools/claude): Anthropic AI助手，长文本处理能力强
-- [Gemini](https://mi-to-ai.com/tools/gemini): Google AI助手，与Google服务深度集成
-- [Midjourney](https://mi-to-ai.com/tools/midjourney): AI图像生成工具
-- [GitHub Copilot](https://mi-to-ai.com/tools/github-copilot): AI编程助手
-- [Notion AI](https://mi-to-ai.com/tools/notion-ai): AI笔记和文档助手
-- [Perplexity](https://mi-to-ai.com/tools/perplexity): AI搜索引擎
+- [AI工具库](https://www.mi-to-ai.com/tools): 500+主流AI工具数据库，涵盖写作、编程、设计、研究、沟通、Agent等8大类别，多维对比评分
+- [支付解决方案](https://www.mi-to-ai.com/payment): 20+留学生AI工具支付方案，推荐RedotPay和OneKey虚拟卡
+- [大学AI政策](https://www.mi-to-ai.com/policies): 200+海外大学AI使用政策，覆盖MIT、Stanford、Cambridge等顶级院校
+- [Prompt模板库](https://www.mi-to-ai.com/prompts): 1000+精选Prompt模板，覆盖学术写作、编程、设计等场景
+- [防坑指南](https://www.mi-to-ai.com/survival): 留学生防坑防骗指南
+- [社区](https://www.mi-to-ai.com/community): 留学生AI工具交流社区
+- [关于我们](https://www.mi-to-ai.com/about): 平台介绍和团队信息
+- [常见问题](https://www.mi-to-ai.com/faq): 常见问题解答
+- [工具对比](https://www.mi-to-ai.com/compare): AI工具多维对比
+- [优惠信息](https://www.mi-to-ai.com/offers): AI工具优惠和折扣信息
+
+## 热门AI对话工具
+
+- [ChatGPT](https://www.mi-to-ai.com/tools/chatgpt): OpenAI AI对话助手，支持写作、编程、分析，月费$20
+- [Claude](https://www.mi-to-ai.com/tools/claude): Anthropic AI助手，长文本处理能力强，支持100K上下文
+- [Gemini](https://www.mi-to-ai.com/tools/gemini): Google AI助手，与Google服务深度集成，免费使用
+- [DeepSeek](https://www.mi-to-ai.com/tools/deepseek): 中国深度求索AI，低成本高性能，适合学术研究
+- [Kimi](https://www.mi-to-ai.com/tools/kimi): Moonshot AI助手，支持超长文本，中文能力强
+- [文心一言](https://www.mi-to-ai.com/tools/wenxin-yiyan): 百度AI助手，中文理解能力强
+- [通义千问](https://www.mi-to-ai.com/tools/tongyi-qianwen): 阿里AI助手，支持多模态
+
+## AI编程工具
+
+- [GitHub Copilot](https://www.mi-to-ai.com/tools/github-copilot): AI编程助手，代码补全和生成，月费$10
+- [Cursor](https://www.mi-to-ai.com/tools/cursor): AI代码编辑器，基于GPT-4，月费$20
+- [Replit](https://www.mi-to-ai.com/tools/replit): 在线AI编程平台，支持多种语言
+- [Tabnine](https://www.mi-to-ai.com/tools/tabnine): AI代码补全工具，支持本地运行
+
+## AI写作工具
+
+- [Notion AI](https://www.mi-to-ai.com/tools/notion-ai): AI笔记和文档助手，智能摘要和续写
+- [Jasper](https://www.mi-to-ai.com/tools/jasper): 企业级AI写作助手，营销文案生成
+- [Grammarly](https://www.mi-to-ai.com/tools/grammarly): AI语法检查和写作改进
+- [QuillBot](https://www.mi-to-ai.com/tools/quillbot): AI改写和释义工具
+- [Copy.ai](https://www.mi-to-ai.com/tools/copyai): AI营销文案生成
+
+## AI研究工具
+
+- [Perplexity](https://www.mi-to-ai.com/tools/perplexity): AI搜索引擎，实时网络检索
+- [Elicit](https://www.mi-to-ai.com/tools/elicit): AI学术研究助手
+- [WebPilot](https://www.mi-to-ai.com/tools/webpilot): AI网页阅读和总结
+
+## AI设计工具
+
+- [Midjourney](https://www.mi-to-ai.com/tools/midjourney): AI图像生成工具，高质量艺术风格
+- [DALL-E 3](https://www.mi-to-ai.com/tools/dalle-3): OpenAI图像生成，精确文字渲染
+- [Stable Diffusion](https://www.mi-to-ai.com/tools/stable-diffusion): 开源AI绘图，免费本地运行
+- [Figma](https://www.mi-to-ai.com/tools/figma): AI辅助UI设计工具
+
+## AI Agent框架
+
+- [Dify](https://www.mi-to-ai.com/tools/dify): 低代码AI应用平台，可视化构建AI工作流
+- [Coze](https://www.mi-to-ai.com/tools/coze): 扣子AI Bot平台，快速构建AI应用
+- [LangChain](https://www.mi-to-ai.com/tools/langchain): AI应用开发框架，构建LLM应用
+- [AutoGPT](https://www.mi-to-ai.com/tools/autogpt): 自主AI Agent框架
+- [CrewAI](https://www.mi-to-ai.com/tools/crewai): 多Agent协作框架
+
+## 本地AI工具
+
+- [Ollama](https://www.mi-to-ai.com/tools/ollama): 本地大模型运行工具，一键部署
+- [LM Studio](https://www.mi-to-ai.com/tools/lm-studio): 本地LLM运行和管理
+- [AnythingLLM](https://www.mi-to-ai.com/tools/anything-llm): 本地RAG知识库系统
 
 ## 支付方案
-- [虚拟卡开通教程](https://mi-to-ai.com/payment): Depay、Noble等虚拟卡开通指南
-- [礼品卡购买指南](https://mi-to-ai.com/payment): OpenAI、Anthropic等礼品卡购买
-- [地区定价攻略](https://mi-to-ai.com/payment): 印度、土耳其等低价区注册指南
+
+### 推荐虚拟卡（当前可用）
+
+- [RedotPay虚拟卡](https://www.mi-to-ai.com/payment): Mastercard网络，支持USDT充值，无年费，130+国家4400万商户消费，适合订阅ChatGPT、Claude等AI工具
+- [OneKey虚拟卡](https://www.mi-to-ai.com/payment): 由知名硬件钱包品牌推出，安全性高，USDT充值，完美支持ChatGPT/OpenAI订阅
+
+### 其他支付方式
+
+- [礼品卡购买指南](https://www.mi-to-ai.com/payment): OpenAI、Anthropic、Midjourney等礼品卡购买教程
+- [学生折扣汇总](https://www.mi-to-ai.com/payment): AI工具学生优惠计划，教育邮箱可享折扣
+- [地区定价攻略](https://www.mi-to-ai.com/payment): 低价区注册指南，节省订阅费用
+- [支付问题解决](https://www.mi-to-ai.com/payment): 信用卡被拒、支付失败等常见问题解决方案
 
 ## 大学AI政策
-- [MIT AI政策](https://mi-to-ai.com/policies/mit): 麻省理工学院AI使用规定
-- [Stanford AI政策](https://mi-to-ai.com/policies/stanford): 斯坦福大学AI使用规定
-- [Cambridge AI政策](https://mi-to-ai.com/policies/cambridge): 剑桥大学AI使用规定
+
+### 美国大学
+
+- [MIT AI政策](https://www.mi-to-ai.com/policies/mit): 麻省理工学院AI使用规定
+- [Stanford AI政策](https://www.mi-to-ai.com/policies/stanford): 斯坦福大学AI使用规定
+- [Harvard AI政策](https://www.mi-to-ai.com/policies/harvard): 哈佛大学AI使用规定
+- [Caltech AI政策](https://www.mi-to-ai.com/policies/caltech): 加州理工学院AI使用规定
+
+### 英国大学
+
+- [Cambridge AI政策](https://www.mi-to-ai.com/policies/cambridge): 剑桥大学AI使用规定
+- [Oxford AI政策](https://www.mi-to-ai.com/policies/oxford): 牛津大学AI使用规定
+- [Imperial AI政策](https://www.mi-to-ai.com/policies/imperial): 帝国理工学院AI使用规定
+
+### 其他地区
+
+- [多伦多大学AI政策](https://www.mi-to-ai.com/policies/toronto): 加拿大多伦多大学AI规定
+- [墨尔本大学AI政策](https://www.mi-to-ai.com/policies/melbourne): 澳大利亚墨尔本大学AI规定
+- [ETH Zurich AI政策](https://www.mi-to-ai.com/policies/eth): 瑞士苏黎世联邦理工AI规定
 
 ## 联系方式
-- 网站：https://mi-to-ai.com
+
+- 网站：https://www.mi-to-ai.com
 - GitHub：https://github.com/wangjianxin1988/ai-student-survival

@@ -4,7 +4,7 @@ import ProfilePage from '@/components/user/ProfilePage';
 
 export const prerender = false;
 
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '个人中心' : 'Profile'}>

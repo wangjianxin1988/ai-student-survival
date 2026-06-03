@@ -361,7 +361,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       verifyUrl.searchParams.set('type', linkType);
       verifyUrl.searchParams.set('email', email);
       actionLink = verifyUrl.toString();
-      console.log('[send-auth-email] Built custom verification URL:', actionLink.substring(0, 120) + '...');
       if (emailOtp) {
         // OTP code must not be logged in production
       }
@@ -407,7 +406,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
     }
 
     const resendData = await resendResponse.json();
-    console.log('[send-auth-email] Email sent successfully:', resendData);
 
     return new Response(
       JSON.stringify({ success: true }),

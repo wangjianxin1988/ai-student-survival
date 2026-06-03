@@ -4,7 +4,7 @@ import EnhancedSettings from '@/components/user/EnhancedSettings';
 
 export const prerender = false;
 
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '账户设置' : 'Account Settings'}>

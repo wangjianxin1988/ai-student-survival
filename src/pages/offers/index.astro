@@ -4,9 +4,9 @@ import OffersClient from '@/components/offers/OffersClient';
 
 export const prerender = false;
 
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 ---
 
-<Layout title={locale === 'zh' ? 'Offer展示' : 'Offers'}>
+<Layout title={locale === 'zh' ? 'Offer展示' : 'Offers'} description={locale === 'zh' ? '留学生专属优惠 - AI工具折扣码、虚拟卡返现、留学服务优惠等独家福利' : 'Exclusive offers for international students - AI tool discounts, virtual card cashback, and study abroad service deals'}>
   <OffersClient locale={locale} client:load />
 </Layout>

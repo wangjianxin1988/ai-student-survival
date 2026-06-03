@@ -152,7 +152,6 @@ ${data.message}
       return { success: false, error: result.error?.message || response.statusText };
     }
 
-    console.log('Email sent successfully:', result.id);
     return { success: true };
   } catch (err) {
     console.error('Failed to send email:', err);
@@ -288,18 +287,10 @@ export const POST: APIRoute = async ({ request }) => {
         console.error('Failed to save contact message to database:', dbError);
       } else {
         dbRecordId = dbData?.id || null;
-        console.log('Contact message saved to database:', dbRecordId);
       }
     } catch (dbErr) {
       console.error('Database save error:', dbErr);
     }
-
-    console.log('Contact form submission processed:', JSON.stringify({
-      id: dbRecordId || contactData.id,
-      emailSent: emailResult.success,
-      dbSaved: !!dbRecordId,
-      timestamp: contactData.createdAt,
-    }));
 
     return new Response(
       JSON.stringify({

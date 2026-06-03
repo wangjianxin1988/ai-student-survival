@@ -326,6 +326,10 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
   const [likesCount, setLikesCount] = useState(0);
   const [favoritesCount, setFavoritesCount] = useState(0);
   const [commentContent, setCommentContent] = useState("");
+  const [commentSort, setCommentSort] = useState<"latest" | "popular">("latest");
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
+  const [commentLikes, setCommentLikes] = useState<Record<string, boolean>>({});
+  const [commentLikesCount, setCommentLikesCount] = useState<Record<string, number>>({});
   // Client-side user detection: starts with server prop, updates on client
   const [clientUserId, setClientUserId] = useState<string | undefined>(serverUserId);
 
@@ -435,17 +439,22 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
     e.preventDefault();
     if (!clientUserId || !commentContent.trim()) return;
 
+    const currentUser = getCurrentClientUser();
     const newComment = {
       id: 'temp-' + Date.now(),
       content: commentContent,
       userId: clientUserId,
-      userName: '匿名用户',
+      userName: currentUser?.name || '你',
+      author: { id: clientUserId, name: currentUser?.name || '你', avatar: '' },
+      likesCount: 0,
+      parentId: replyTo?.id || null,
       createdAt: new Date().toISOString(),
     };
 
     // Optimistic update
     setComments([...comments, newComment]);
     setCommentContent("");
+    setReplyTo(null);
 
     // In demo mode, skip API
     if (isDemoMode()) return;
@@ -458,7 +467,7 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
           "Content-Type": "application/json",
           ...headers,
         },
-        body: JSON.stringify({ content: commentContent }),
+        body: JSON.stringify({ content: commentContent, parentId: replyTo?.id || null }),
       });
       const data = await response.json();
       if (data.success) {
@@ -473,6 +482,97 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
       console.error("Failed to comment:", error);
     }
   };
+
+  const handleShare = async () => {
+    const qaCategories = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other', 'qa']);
+    const basePath = qaCategories.has(post?.category || '') ? '/questions' : '/community';
+    const shareUrl = `${window.location.origin}${basePath}/${postId}`;
+    const platform = navigator.share ? 'native' : 'copy_link';
+
+    const showToast = (msg: string) => {
+      const toast = document.createElement('div');
+      toast.textContent = msg;
+      toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;opacity:1;transition:opacity 0.3s;';
+      document.body.appendChild(toast);
+      setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: post?.title, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        showToast('链接已复制到剪贴板');
+      }
+
+      // Record share via API (fire-and-forget, don't block UI)
+      if (!isDemoMode() && clientUserId) {
+        getAuthHeaders().then(headers => {
+          fetch('/api/content-shares', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              target_type: 'community',
+              target_id: postId,
+              platform,
+            }),
+          }).catch(() => {}); // silent fail
+        });
+      }
+    } catch {
+      if (!navigator.share) showToast('分享失败');
+    }
+  };
+
+  const handleCommentLike = async (commentId: string) => {
+    if (!clientUserId) return;
+
+    const wasLiked = commentLikes[commentId] || false;
+    const prevCount = commentLikesCount[commentId] || 0;
+
+    // Optimistic update
+    setCommentLikes(prev => ({ ...prev, [commentId]: !wasLiked }));
+    setCommentLikesCount(prev => ({ ...prev, [commentId]: wasLiked ? prevCount - 1 : prevCount + 1 }));
+
+    if (isDemoMode()) return;
+
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/community/comments/${commentId}/like`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...headers },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setCommentLikes(prev => ({ ...prev, [commentId]: data.data.liked }));
+        setCommentLikesCount(prev => ({ ...prev, [commentId]: data.data.likesCount ?? prevCount }));
+      }
+    } catch (error) {
+      // Revert on error
+      setCommentLikes(prev => ({ ...prev, [commentId]: wasLiked }));
+      setCommentLikesCount(prev => ({ ...prev, [commentId]: prevCount }));
+    }
+  };
+
+  // Organize comments: top-level + nested replies
+  const topLevelComments = comments.filter(c => !c.parentId);
+  const repliesMap: Record<string, PostComment[]> = {};
+  comments.forEach(c => {
+    if (c.parentId) {
+      if (!repliesMap[c.parentId]) repliesMap[c.parentId] = [];
+      repliesMap[c.parentId].push(c);
+    }
+  });
+
+  // Sort comments
+  const sortedComments = [...topLevelComments].sort((a, b) => {
+    if (commentSort === "popular") {
+      const aLikes = commentLikesCount[a.id] ?? (a as any).likesCount ?? 0;
+      const bLikes = commentLikesCount[b.id] ?? (b as any).likesCount ?? 0;
+      return bLikes - aLikes;
+    }
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
 
   if (loading) {
     return (
@@ -507,9 +607,9 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
         <h1 className="text-2xl font-bold text-gray-900 mb-4">{post.title}</h1>
 
         <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 pb-6 border-b border-gray-100">
-          <span className="font-medium text-gray-700">
+          <a href={`/user/${post.userId || ''}`} className="font-medium text-gray-700 hover:text-primary-600 transition-colors">
             {post.userName || "匿名用户"}
-          </span>
+          </a>
           <span>{new Date(post.createdAt).toLocaleDateString("zh-CN")}</span>
           <span>阅读 {post.viewsCount || 0}</span>
         </div>
@@ -705,23 +805,7 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
           </button>
 
           <button
-            onClick={() => {
-              const qaCategories = new Set(['academic', 'life', 'visa', 'job', 'study_life', 'job_recruitment', 'policy', 'payment', 'other', 'qa']);
-              const basePath = qaCategories.has(post.category) ? '/questions' : '/community';
-              const shareUrl = `${window.location.origin}${basePath}/${postId}`;
-              const showToast = (msg: string) => {
-                const toast = document.createElement('div');
-                toast.textContent = msg;
-                toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;opacity:1;transition:opacity 0.3s;';
-                document.body.appendChild(toast);
-                setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
-              };
-              if (navigator.share) {
-                navigator.share({ title: post.title, url: shareUrl }).catch(() => showToast('分享失败'));
-              } else {
-                navigator.clipboard.writeText(shareUrl).then(() => showToast('链接已复制到剪贴板')).catch(() => showToast('复制失败'));
-              }
-            }}
+            onClick={handleShare}
             className="flex items-center gap-2 px-4 py-2 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
           >
             <svg
@@ -743,16 +827,38 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
       </article>
 
       <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-4">
-          评论 ({comments.length})
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-900">
+            评论 ({comments.length})
+          </h3>
+          <div className="flex items-center gap-2 text-sm">
+            <button
+              onClick={() => setCommentSort("latest")}
+              className={`px-3 py-1 rounded-full transition-colors ${commentSort === "latest" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-500 hover:text-gray-700"}`}
+            >
+              最新
+            </button>
+            <button
+              onClick={() => setCommentSort("popular")}
+              className={`px-3 py-1 rounded-full transition-colors ${commentSort === "popular" ? "bg-blue-100 text-blue-700 font-medium" : "text-gray-500 hover:text-gray-700"}`}
+            >
+              最热
+            </button>
+          </div>
+        </div>
 
         {clientUserId ? (
           <form onSubmit={handleComment} className="mb-6">
+            {replyTo && (
+              <div className="mb-2 flex items-center gap-2 text-sm text-blue-600">
+                <span>回复 @{replyTo.name}</span>
+                <button type="button" onClick={() => setReplyTo(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+              </div>
+            )}
             <MentionInput
               value={commentContent}
               onChange={(val) => setCommentContent(val)}
-              placeholder="写下你的评论...（输入 @ 可提及用户）"
+              placeholder={replyTo ? `回复 @${replyTo.name}...` : "写下你的评论...（输入 @ 可提及用户）"}
               rows={3}
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-3"
             />
@@ -762,7 +868,7 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
                 disabled={!commentContent.trim()}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
-                发布评论
+                {replyTo ? "回复" : "发布评论"}
               </button>
             </div>
           </form>
@@ -773,21 +879,89 @@ export function PostDetail({ postId, currentUserId: serverUserId }: PostDetailPr
         )}
 
         <div className="space-y-4">
-          {comments.map((comment) => (
-            <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="font-medium text-gray-900">
-                  {comment.author?.name ||
-                    comment.userName ||
-                    "匿名用户"}
-                </span>
-                <span className="text-xs text-gray-500">
-                  {new Date(comment.createdAt).toLocaleDateString("zh-CN")}
-                </span>
+          {sortedComments.map((comment) => {
+            const cLikes = commentLikesCount[comment.id] ?? (comment as any).likesCount ?? 0;
+            const cLiked = commentLikes[comment.id] || false;
+            const replies = repliesMap[comment.id] || [];
+            const authorName = comment.author?.name || comment.userName || "匿名用户";
+            const authorId = comment.author?.id || comment.userId;
+            return (
+              <div key={comment.id} className="space-y-2">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <a href={`/user/${authorId}`} className="font-medium text-gray-900 hover:text-primary-600 transition-colors">
+                        {authorName}
+                      </a>
+                      <span className="text-xs text-gray-500">
+                        {new Date(comment.createdAt).toLocaleDateString("zh-CN")}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-gray-700 mb-3">{comment.content}</p>
+                  <div className="flex items-center gap-4 text-sm">
+                    <button
+                      onClick={() => handleCommentLike(comment.id)}
+                      disabled={!clientUserId}
+                      className={`flex items-center gap-1.5 transition-colors disabled:opacity-50 ${cLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"}`}
+                    >
+                      <svg className="w-4 h-4" fill={cLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      {cLikes > 0 ? cLikes : "赞"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (!clientUserId) return;
+                        setReplyTo({ id: comment.id, name: authorName });
+                        setCommentContent("");
+                      }}
+                      disabled={!clientUserId}
+                      className="text-gray-500 hover:text-blue-500 transition-colors disabled:opacity-50"
+                    >
+                      回复
+                    </button>
+                  </div>
+                </div>
+                {/* Replies */}
+                {replies.length > 0 && (
+                  <div className="ml-8 space-y-2">
+                    {replies.map((reply) => {
+                      const rLikes = commentLikesCount[reply.id] ?? (reply as any).likesCount ?? 0;
+                      const rLiked = commentLikes[reply.id] || false;
+                      const replyAuthorName = reply.author?.name || reply.userName || "匿名用户";
+                      const replyAuthorId = reply.author?.id || reply.userId;
+                      return (
+                        <div key={reply.id} className="p-3 bg-gray-100 rounded-lg">
+                          <div className="flex items-center gap-2 mb-1">
+                            <a href={`/user/${replyAuthorId}`} className="font-medium text-gray-900 text-sm hover:text-primary-600 transition-colors">
+                              {replyAuthorName}
+                            </a>
+                            <span className="text-xs text-gray-500">
+                              {new Date(reply.createdAt).toLocaleDateString("zh-CN")}
+                            </span>
+                          </div>
+                          <p className="text-gray-700 text-sm mb-2">{reply.content}</p>
+                          <div className="flex items-center gap-3 text-xs">
+                            <button
+                              onClick={() => handleCommentLike(reply.id)}
+                              disabled={!clientUserId}
+                              className={`flex items-center gap-1 transition-colors disabled:opacity-50 ${rLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"}`}
+                            >
+                              <svg className="w-3.5 h-3.5" fill={rLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                              </svg>
+                              {rLikes > 0 ? rLikes : "赞"}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
-              <p className="text-gray-700">{comment.content}</p>
-            </div>
-          ))}
+            );
+          })}
           {comments.length === 0 && (
             <p className="text-center text-gray-500 py-4">暂无评论</p>
           )}

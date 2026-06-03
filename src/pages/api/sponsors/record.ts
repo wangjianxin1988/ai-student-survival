@@ -61,7 +61,6 @@ async function sendSponsorEmail(params: {
       const errText = await res.text();
       console.error('[sponsors/record] Email send failed:', res.status, errText);
     } else {
-      console.log('[sponsors/record] Notification email sent to 18801400211@163.com');
     }
   } catch (err) {
     console.error('[sponsors/record] Email send error:', err);

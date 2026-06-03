@@ -6,6 +6,7 @@ import { promptTemplates, categoryInfo, getPromptTemplateById, type PromptTempla
 import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
 import FavoriteButton from '@/components/favorites/FavoriteButton';
 import ShareButton from '@/components/common/ShareButton';
+import LikeButton from '@/components/common/LikeButton';
 import CommentSection from '@/components/user/CommentSection';
 
 const locale: Locale = 'en';
@@ -120,7 +121,8 @@ const jsonLd = {
             </h1>
             <div class="flex items-center gap-2">
               <FavoriteButton client:load targetType="prompt" targetId={template.id} locale="en" />
-              <ShareButton client:load title={template.title} description={template.description} />
+              <LikeButton client:load targetType="prompt" targetId={template.id} locale="en" />
+              <ShareButton client:load title={template.title} description={template.description} targetType="prompt" targetId={template.id} />
             </div>
           </div>
           <p class="text-gray-600 text-lg">

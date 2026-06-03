@@ -1,0 +1,16 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import UserPublicProfile from '@/components/user/UserPublicProfile';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+const locale = 'en';
+---
+
+<Layout
+  title='User Profile'
+  description='View user profile and public content'
+>
+  <UserPublicProfile userId={id} locale={locale} client:load />
+</Layout>

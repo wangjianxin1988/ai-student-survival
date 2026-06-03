@@ -4,7 +4,7 @@ import OffersList from '@/components/user/OffersList';
 
 export const prerender = false;
 
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 ---
 
 <Layout title={locale === 'zh' ? '我的Offer' : 'My Offers'}>

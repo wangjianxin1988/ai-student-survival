@@ -296,7 +296,8 @@
     "askCommunity": "If you can't find a solution here, ask in the community and we'll respond quickly"
   },
   "survival": {
-    "title": "Survival Guides"
+    "title": "Survival Guides",
+    "description": "Survival guides for international students - payment safety, housing tips, academic integrity and more"
   },
   "policies": {
     "title": "University AI Policy Database",
@@ -407,7 +408,7 @@
   },
   "api": {
     "title": "Open API Documentation",
-    "description": "AI Student Survival Guide open API documentation with data endpoints for AI tools, payment solutions, and university policies",
+    "description": "Description",
     "aiSpiderFriendly": "AI Spider Friendly",
     "tryEndpoint": "Try Tools API",
     "viewSitemap": "View Sitemap",
@@ -431,7 +432,6 @@
     "paramName": "Parameter",
     "paramType": "Type",
     "required": "Required",
-    "description": "Description",
     "yes": "Yes",
     "no": "No",
     "contentType": "Content-Type:",
@@ -453,27 +453,15 @@
       "googleExtended": "Google-Extended"
     }
   },
-  "footer": {
-    "tagline": "#1 AI tools hub for Chinese international students - from tool selection to successful payment, one-stop solution for all your AI challenges abroad",
-    "coreFeatures": "Core Features",
-    "toolsCategory": "Tool Categories",
-    "resources": "Resources",
-    "writing": "Writing Tools",
-    "coding": "Coding Tools",
-    "design": "Design Tools",
-    "research": "Research Tools",
-    "descTools": "100+ AI Tools",
-    "descPayment": "Virtual Cards · Gift Cards · Regional Pricing",
-    "descPolicies": "University AI Policies",
-    "descPrompts": "Quality Template Library",
-    "descOffers": "Application Experiences",
-    "descQuestions": "Student Community"
-  },
   "chatbot": {
     "title": "AI Assistant",
     "placeholder": "Ask me anything about AI tools...",
     "welcome": "Hello! I'm your AI assistant. I can help you find the right AI tools, understand payment solutions, and check university policies. How can I help you?",
-    "suggestions": ["Recommend a writing AI tool", "Which universities allow ChatGPT?", "How to subscribe to ChatGPT without credit card?"],
+    "suggestions": [
+      "Recommend a writing AI tool",
+      "Which universities allow ChatGPT?",
+      "How to subscribe to ChatGPT without credit card?"
+    ],
     "send": "Send",
     "thinking": "Thinking...",
     "suggestTry": "Try asking:"
@@ -565,7 +553,8 @@
       "notFound": "Offer not found",
       "relatedOffers": "Related Offers",
       "likes": "Likes"
-    }
+    },
+    "description": "Exclusive offers for international students - AI tool discounts, virtual card cashback, and study abroad service deals"
   },
   "about": {
     "hero": {
@@ -658,7 +647,7 @@
     "info": {
       "email": {
         "title": "Email",
-        "desc": "support@mitoai.example.com"
+        "desc": "support@mi-to-ai.com"
       },
       "social": {
         "title": "Social Media",

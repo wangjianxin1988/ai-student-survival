@@ -7,15 +7,15 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ request, url }) => {
   const serverUser = await getServerUser(request);
-  if (!serverUser) {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-  }
 
   // If target_type and target_id are provided, check if specific item is favorited
   const targetType = url.searchParams.get('target_type');
   const targetId = url.searchParams.get('target_id');
 
   if (targetType && targetId) {
+    if (!serverUser) {
+      return new Response(JSON.stringify({ isFavorited: false }), { status: 200 });
+    }
     const { data } = await supabaseAdmin
       .from('user_favorites')
       .select('id')
@@ -28,6 +28,10 @@ export const GET: APIRoute = async ({ request, url }) => {
   }
 
   // Otherwise, return all favorites
+  if (!serverUser) {
+    return new Response(JSON.stringify({ favorites: [] }), { status: 200 });
+  }
+
   const { data: favorites, error } = await supabaseAdmin
     .from('user_favorites')
     .select(`

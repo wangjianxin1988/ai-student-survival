@@ -26,9 +26,9 @@ interface Props {
 const {
   title,
   description,
-  image = '/og-image.svg',
+  image = 'https://www.mi-to-ai.com/og-image.svg',
   type = 'website',
-  canonicalUrl = Astro.url.href,
+  canonicalUrl = `https://www.mi-to-ai.com${Astro.url.pathname}`,
   jsonLd,
   faqItems,
   locale = defaultLocale,
@@ -145,8 +145,6 @@ function getAlternatePath(loc: Locale): string {
     <meta name="title" content={fullTitle} />
     <meta name="description" content={description} />
     <meta name="keywords" content={translate(locale, 'meta.keywords')} />
-    <!-- Impact.com Site Verification -->
-    <meta name="impact-site-verification" content="dfc72a07-7a08-4d08-b256-36c35a67bbd0" />
     <!-- Google AdSense Account Verification -->
     <meta name="google-adsense-account" content="ca-pub-2380757804889093" />
 
@@ -237,10 +235,10 @@ function getAlternatePath(loc: Locale): string {
     <script type="application/ld+json" set:html={JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Organization",
-      "@id": "https://mi-to-ai.com/#org",
+      "@id": "https://www.mi-to-ai.com/#org",
       "name": siteName,
-      "url": "https://mi-to-ai.com",
-      "logo": "https://mi-to-ai.com/favicon.svg",
+      "url": "https://www.mi-to-ai.com",
+      "logo": "https://www.mi-to-ai.com/favicon.svg",
       "description": locale === 'zh'
         ? "为海外留学生打造的AI工具导航、大学AI政策数据库和支付解决方案平台"
         : "AI tools navigator, university AI policy database, and payment solutions for international students",

@@ -4,7 +4,7 @@ import SubmitOfferForm from '@/components/offers/SubmitOfferForm';
 
 export const prerender = false;
 
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 ---
 
 <Layout

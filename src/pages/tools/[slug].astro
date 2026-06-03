@@ -12,6 +12,7 @@ import FavoriteButton from '@/components/favorites/FavoriteButton';
 import StarRating from '@/components/ratings/StarRating';
 import CompareButton from '@/components/compare/CompareButton';
 import ShareButton from '@/components/common/ShareButton';
+import LikeButton from '@/components/common/LikeButton';
 import CommentSection from '@/components/user/CommentSection';
 import ToolPricingRealtime from '@/components/tools/ToolPricingRealtime';
 import UpdateNotesClient from '@/components/tools/UpdateNotesClient';
@@ -1741,7 +1742,7 @@ const jsonLd = [
     "@type": "Article",
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://mi-to-ai.com/tools/${tool.slug}`
+      "@id": `https://www.mi-to-ai.com/tools/${tool.slug}`
     },
     "headline": `${tool.name} - AI工具完全指南`,
     "description": tool.description,
@@ -1752,7 +1753,7 @@ const jsonLd = [
     "datePublished": tool.createdAt || "2025-01-15",
     "dateModified": tool.updatedAt || "2026-05-29",
     "publisher": {
-      "@id": "https://mi-to-ai.com/#org"
+      "@id": "https://www.mi-to-ai.com/#org"
     },
     "about": {
       "@type": "Product",
@@ -1877,7 +1878,8 @@ const jsonLd = [
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
               <FavoriteButton client:load targetType="tool" targetId={tool.slug} locale="zh" />
-              <ShareButton client:load title={tool.name} description={tool.description} />
+              <LikeButton client:load targetType="tool" targetId={tool.slug} locale="zh" />
+              <ShareButton client:load title={tool.name} description={tool.description} targetType="tool" targetId={tool.slug} />
               <button
                 id="copy-link-btn"
                 aria-label="复制链接"

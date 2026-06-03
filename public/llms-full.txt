@@ -1,0 +1,73 @@
+# MI TO AI留学生存指南 - 完整站点信息
+
+> 中国留学生AI工具第一站。一站式解决工具选择、支付难题、大学政策、申请经验。
+> 收录500+ AI工具、200+ 大学AI政策、20+ 支付方案、1000+ Prompt模板。
+
+## 平台简介
+
+MI TO AI (www.mi-to-ai.com) 是专为中国海外留学生打造的AI工具导航和信息平台。
+核心价值：帮助留学生选择合适的AI工具、解决支付难题、了解大学AI政策、获取申请经验。
+
+## 核心功能模块
+
+### 1. AI工具库 (500+工具)
+涵盖8大类别：对话AI、写作工具、编程工具、设计工具、研究工具、Agent框架、本地AI、效率工具。
+每个工具包含：详细评测、多维评分、定价信息、使用教程、替代工具推荐。
+
+热门工具：
+- ChatGPT (OpenAI) - AI对话助手，月费$20
+- Claude (Anthropic) - 长文本处理，月费$20
+- Gemini (Google) - 免费使用，Google生态集成
+- GitHub Copilot - AI编程助手，月费$10
+- Cursor - AI代码编辑器，月费$20
+- Midjourney - AI图像生成
+- Perplexity - AI搜索引擎
+
+### 2. 支付解决方案 (20+方案)
+解决留学生没有信用卡、国内银行卡被拒等问题。
+
+推荐虚拟卡：
+- RedotPay: USDT充值，Mastercard网络，无年费，130+国家消费
+- OneKey: USDT充值，知名硬件钱包品牌，安全可靠
+
+其他方案：礼品卡、地区定价、学生折扣等。
+
+### 3. 大学AI政策库 (200+大学)
+首家全面收录海外大学AI使用政策的中文数据库。
+覆盖美国、英国、加拿大、澳大利亚、欧洲等地区的顶级院校。
+帮助留学生了解学校对AI工具的使用规定，避免学术违规。
+
+### 4. Prompt模板库 (1000+模板)
+精选Prompt模板，覆盖：学术写作、编程开发、设计创意、求职面试、日常生活等场景。
+每个模板包含：使用说明、适用场景、示例输出。
+
+### 5. 留学社区
+问答社区：留学生互助，涵盖学业、生活、签证、求职等话题。
+积分系统：发帖、评论、点赞可获得积分。
+Offer展示：分享和查看留学申请经验。
+
+### 6. 其他功能
+- 防坑指南：留学生常见骗局和防范措施
+- 校园地图：基于PostGIS的校园标注系统
+- 工具对比：多维度AI工具对比功能
+- 赞助商墙：合作伙伴展示
+
+## 网站架构
+
+- 技术栈：Astro 4.x + React 18 + TailwindCSS + Supabase + Cloudflare Pages
+- 部署：Cloudflare Pages全球边缘加速
+- 数据库：Supabase (PostgreSQL + PostGIS)
+- 认证：Supabase Auth (邮箱密码、OTP、Google OAuth、GitHub OAuth)
+- 邮件：Resend (noreply@mi-to-ai.com)
+- 安全：Cloudflare Turnstile CAPTCHA、JWT轮换、RLS策略
+
+## 多语言支持
+
+- 中文版：https://www.mi-to-ai.com/
+- 英文版：https://www.mi-to-ai.com/en/
+
+## 联系方式
+
+- 网站：https://www.mi-to-ai.com
+- GitHub：https://github.com/wangjianxin1988/ai-student-survival
+- 联系页面：https://www.mi-to-ai.com/contact

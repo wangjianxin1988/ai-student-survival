@@ -1,0 +1,12 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import FavoritesList from '@/components/user/FavoritesList';
+
+export const prerender = false;
+
+const locale = 'en';
+---
+
+<Layout title='My Favorites'>
+  <FavoritesList locale={locale} client:load />
+</Layout>

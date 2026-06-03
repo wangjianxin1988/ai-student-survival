@@ -74,12 +74,11 @@ export const POST: APIRoute = async ({ request }) => {
       }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // Extract raw token from action_link URL (not hashed_token — verifyOtp hashes it again)
-    let rawToken = '';
-    try {
-      const actionUrl = new URL(rawActionLink);
-      rawToken = actionUrl.searchParams.get('token') || '';
-    } catch { /* ignore */ }
+    // Get the RAW token from the generate_link response.
+    // IMPORTANT: action_link contains the HASHED token — if we pass it to verifyOtp,
+    // it gets hashed again (double hash) and verification fails.
+    // The raw token is at linkData.token or linkData.properties?.token.
+    const rawToken = linkData?.token || linkData?.properties?.token || '';
 
     let actionLink: string;
     if (rawToken) {
@@ -90,8 +89,8 @@ export const POST: APIRoute = async ({ request }) => {
       actionLink = verifyUrl.toString();
       // URL built successfully (token not logged for security)
     } else {
-      // Fallback: use action_link directly (may hit Supabase verify endpoint redirect issue)
-      console.warn('[forgot-password] No raw token, falling back to action_link');
+      // Fallback: use Supabase's verify endpoint directly (redirects to our page with hash tokens)
+      console.warn('[forgot-password] No raw token in response, using action_link directly');
       actionLink = rawActionLink;
     }
 
@@ -171,7 +170,6 @@ export const POST: APIRoute = async ({ request }) => {
       }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
 
-    console.log('[forgot-password] Recovery email sent via Resend to:', email);
 
     return new Response(JSON.stringify({
       success: true,

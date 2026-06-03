@@ -131,6 +131,10 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
   const [commentContent, setCommentContent] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [commentSort, setCommentSort] = useState<'latest' | 'popular'>('latest');
+  const [replyTo, setReplyTo] = useState<{ id: string; name: string } | null>(null);
+  const [commentLikes, setCommentLikes] = useState<Record<string, boolean>>({});
+  const [commentLikesCount, setCommentLikesCount] = useState<Record<string, number>>({});
   const [clientUserId, setClientUserId] = useState<string | undefined>(undefined);
 
   // Poll for session changes
@@ -233,20 +237,24 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
     if (!clientUserId || !commentContent.trim()) return;
     setSubmitting(true);
 
+    const currentUser = getCurrentClientUser();
     const tempComment: PostComment = {
       id: 'temp-' + Date.now(),
       postId,
       userId: clientUserId,
-      userName: '你',
+      userName: currentUser?.name || '你',
       userAvatar: '',
       content: commentContent,
       likes: 0,
+      likesCount: 0,
+      parentId: replyTo?.id || null,
       likedBy: [],
       createdAt: new Date().toISOString(),
     };
 
     setComments([...comments, tempComment]);
     setCommentContent('');
+    setReplyTo(null);
     setSubmitSuccess(true);
     setTimeout(() => setSubmitSuccess(false), 3000);
 
@@ -260,7 +268,7 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
       const response = await fetch(`/api/questions/${postId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...headers },
-        body: JSON.stringify({ content: commentContent }),
+        body: JSON.stringify({ content: commentContent, parentId: replyTo?.id || null }),
       });
       const data = await response.json();
       if (data.success) {
@@ -276,18 +284,66 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
     }
   };
 
+  const handleCommentLike = async (commentId: string) => {
+    if (!clientUserId) return;
+    const wasLiked = commentLikes[commentId] || false;
+    const prevCount = commentLikesCount[commentId] || 0;
+    setCommentLikes(prev => ({ ...prev, [commentId]: !wasLiked }));
+    setCommentLikesCount(prev => ({ ...prev, [commentId]: wasLiked ? prevCount - 1 : prevCount + 1 }));
+    if (isDemoMode()) return;
+    try {
+      const headers = await getAuthHeaders();
+      const response = await fetch(`/api/community/comments/${commentId}/like`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setCommentLikes(prev => ({ ...prev, [commentId]: data.data.liked }));
+        setCommentLikesCount(prev => ({ ...prev, [commentId]: data.data.likesCount ?? prevCount }));
+      }
+    } catch {
+      setCommentLikes(prev => ({ ...prev, [commentId]: wasLiked }));
+      setCommentLikesCount(prev => ({ ...prev, [commentId]: prevCount }));
+    }
+  };
+
   const handleShare = async () => {
     const url = `${window.location.origin}/questions/${postId}`;
-    if (navigator.share) {
-      navigator.share({ title: post?.title, text: post?.content?.substring(0, 100), url });
-    } else {
-      await navigator.clipboard.writeText(url);
-      // Show toast
+    const platform = navigator.share ? 'native' : 'copy_link';
+
+    const showToast = (msg: string) => {
       const toast = document.createElement('div');
-      toast.textContent = '链接已复制到剪贴板';
+      toast.textContent = msg;
       toast.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:8px;font-size:14px;z-index:9999;pointer-events:none;opacity:1;transition:opacity 0.3s;';
       document.body.appendChild(toast);
       setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 2000);
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: post?.title, text: post?.content?.substring(0, 100), url });
+      } else {
+        await navigator.clipboard.writeText(url);
+        showToast('链接已复制到剪贴板');
+      }
+
+      // Record share via API (fire-and-forget)
+      if (!isDemoMode() && clientUserId) {
+        getAuthHeaders().then(headers => {
+          fetch('/api/content-shares', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              target_type: 'question',
+              target_id: postId,
+              platform,
+            }),
+          }).catch(() => {});
+        });
+      }
+    } catch {
+      // User cancelled or error
     }
   };
 
@@ -353,7 +409,9 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
                   {post.userAvatar && (
                     <img src={post.userAvatar} alt={post.userName} className="w-5 h-5 rounded-full" />
                   )}
-                  <span className="text-gray-700">{post.userName || '匿名用户'}</span>
+                  <a href={`/user/${post.userId || ''}`} className="text-gray-700 hover:text-primary-600 transition-colors">
+                    {post.userName || '匿名用户'}
+                  </a>
                 </div>
                 <span className="text-gray-400">·</span>
                 <span className="text-gray-500">{formatDate(post.createdAt)}</span>
@@ -512,32 +570,99 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
             <h2 className="text-xl font-bold text-gray-900">
               {t.answers} ({comments.length})
             </h2>
+            <div className="flex items-center gap-2 text-sm">
+              <button onClick={() => setCommentSort('latest')} className={`px-3 py-1 rounded-full transition-colors ${commentSort === 'latest' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-500 hover:text-gray-700'}`}>最新</button>
+              <button onClick={() => setCommentSort('popular')} className={`px-3 py-1 rounded-full transition-colors ${commentSort === 'popular' ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-500 hover:text-gray-700'}`}>最热</button>
+            </div>
           </div>
 
-          {/* Comments list */}
-          {comments.length > 0 ? (
-            <div className="space-y-4 mb-8">
-              {comments.map((comment) => (
-                <div key={comment.id} className="bg-white rounded-lg border border-gray-200 p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    {comment.userAvatar && (
-                      <img src={comment.userAvatar} alt={comment.userName} className="w-5 h-5 rounded-full" />
-                    )}
-                    <span className="font-medium text-gray-900 text-sm">
-                      {comment.userName || '匿名用户'}
-                    </span>
-                    <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
-                  </div>
-                  <p className="text-gray-700 whitespace-pre-wrap">{comment.content}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg border border-gray-200 p-8 text-center mb-8">
-              <p className="text-gray-600 mb-2">{t.noAnswers}</p>
-              <p className="text-gray-500 text-sm">{t.beFirstToAnswer}</p>
-            </div>
-          )}
+          {/* Organize: top-level + replies */}
+          {(() => {
+            const topLevel = comments.filter(c => !(c as any).parentId);
+            const repliesMap: Record<string, PostComment[]> = {};
+            comments.forEach(c => {
+              const pid = (c as any).parentId;
+              if (pid) {
+                if (!repliesMap[pid]) repliesMap[pid] = [];
+                repliesMap[pid].push(c);
+              }
+            });
+            const sorted = [...topLevel].sort((a, b) => {
+              if (commentSort === 'popular') {
+                return (commentLikesCount[b.id] ?? (b as any).likesCount ?? 0) - (commentLikesCount[a.id] ?? (a as any).likesCount ?? 0);
+              }
+              return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+            });
+
+            return sorted.length > 0 ? (
+              <div className="space-y-4 mb-8">
+                {sorted.map((comment) => {
+                  const cLikes = commentLikesCount[comment.id] ?? (comment as any).likesCount ?? 0;
+                  const cLiked = commentLikes[comment.id] || false;
+                  const replies = repliesMap[comment.id] || [];
+                  const authorName = comment.userName || '匿名用户';
+                  const authorId = comment.userId;
+                  return (
+                    <div key={comment.id} className="space-y-2">
+                      <div className="bg-white rounded-lg border border-gray-200 p-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          {comment.userAvatar && (
+                            <img src={comment.userAvatar} alt={authorName} className="w-5 h-5 rounded-full" />
+                          )}
+                          <a href={`/user/${authorId}`} className="font-medium text-gray-900 text-sm hover:text-primary-600 transition-colors">
+                            {authorName}
+                          </a>
+                          <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
+                        </div>
+                        <p className="text-gray-700 whitespace-pre-wrap mb-3">{comment.content}</p>
+                        <div className="flex items-center gap-4 text-sm">
+                          <button onClick={() => handleCommentLike(comment.id)} disabled={!clientUserId} className={`flex items-center gap-1.5 transition-colors disabled:opacity-50 ${cLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}>
+                            <svg className="w-4 h-4" fill={cLiked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            {cLikes > 0 ? cLikes : '赞'}
+                          </button>
+                          <button onClick={() => { if (!clientUserId) return; setReplyTo({ id: comment.id, name: authorName }); setCommentContent(''); }} disabled={!clientUserId} className="text-gray-500 hover:text-blue-500 transition-colors disabled:opacity-50">回复</button>
+                        </div>
+                      </div>
+                      {replies.length > 0 && (
+                        <div className="ml-8 space-y-2">
+                          {replies.map((reply) => {
+                            const rLikes = commentLikesCount[reply.id] ?? (reply as any).likesCount ?? 0;
+                            const rLiked = commentLikes[reply.id] || false;
+                            const replyAuthorName = reply.userName || '匿名用户';
+                            const replyAuthorId = reply.userId;
+                            return (
+                              <div key={reply.id} className="bg-gray-50 rounded-lg border border-gray-200 p-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <a href={`/user/${replyAuthorId}`} className="font-medium text-gray-900 text-sm hover:text-primary-600 transition-colors">
+                                    {replyAuthorName}
+                                  </a>
+                                  <span className="text-xs text-gray-500">{formatDate(reply.createdAt)}</span>
+                                </div>
+                                <p className="text-gray-700 text-sm mb-2">{reply.content}</p>
+                                <button onClick={() => handleCommentLike(reply.id)} disabled={!clientUserId} className={`flex items-center gap-1 text-xs transition-colors disabled:opacity-50 ${rLiked ? 'text-red-500' : 'text-gray-500 hover:text-red-500'}`}>
+                                  <svg className="w-3.5 h-3.5" fill={rLiked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                  </svg>
+                                  {rLikes > 0 ? rLikes : '赞'}
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="bg-white rounded-lg border border-gray-200 p-8 text-center mb-8">
+                <p className="text-gray-600 mb-2">{t.noAnswers}</p>
+                <p className="text-gray-500 text-sm">{t.beFirstToAnswer}</p>
+              </div>
+            );
+          })()}
 
           {/* Comment form */}
           <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -549,11 +674,17 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
 
             {clientUserId ? (
               <form onSubmit={handleComment}>
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">{t.writeAnswer}</h3>
+                {replyTo && (
+                  <div className="mb-2 flex items-center gap-2 text-sm text-blue-600">
+                    <span>回复 @{replyTo.name}</span>
+                    <button type="button" onClick={() => setReplyTo(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+                  </div>
+                )}
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">{replyTo ? '回复' : t.writeAnswer}</h3>
                 <MentionInput
                   value={commentContent}
                   onChange={(val) => setCommentContent(val)}
-                  placeholder={t.answerPlaceholder + '（输入 @ 可提及用户）'}
+                  placeholder={replyTo ? `回复 @${replyTo.name}...` : t.answerPlaceholder + '（输入 @ 可提及用户）'}
                   rows={6}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 resize-none"
                 />
@@ -563,7 +694,7 @@ export default function QuestionPostDetail({ postId, locale = 'zh' }: QuestionPo
                     disabled={submitting || !commentContent.trim()}
                     className="px-6 py-2.5 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {submitting ? '提交中...' : t.submitAnswer}
+                    {submitting ? '提交中...' : (replyTo ? '回复' : t.submitAnswer)}
                   </button>
                 </div>
               </form>

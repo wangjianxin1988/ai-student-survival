@@ -5,7 +5,7 @@ import UserPublicProfile from '@/components/user/UserPublicProfile';
 export const prerender = false;
 
 const { id } = Astro.params;
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 ---
 
 <Layout

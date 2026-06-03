@@ -12,6 +12,16 @@ interface UserProfileCardProps {
   locale?: 'zh' | 'en';
   showStats?: boolean;
   size?: 'sm' | 'md' | 'lg';
+  // Optional real API stats to override localStorage data
+  apiStats?: {
+    points?: number;
+    postsCount?: number;
+    commentsCount?: number;
+    favoritesCount?: number;
+    likesCount?: number;
+    name?: string;
+    avatar?: string;
+  } | null;
 }
 
 const translations = {
@@ -28,6 +38,8 @@ const translations = {
     pointsNeeded: '积分',
     badges: '徽章',
     joinDate: '加入于',
+    posts: '帖子',
+    comments: '评论',
   },
   en: {
     level: 'Level',
@@ -42,6 +54,8 @@ const translations = {
     pointsNeeded: 'points',
     badges: 'Badges',
     joinDate: 'Joined',
+    posts: 'Posts',
+    comments: 'Comments',
   },
 };
 
@@ -71,7 +85,20 @@ const levelBgColors = [
   'bg-yellow-50 text-yellow-600',
 ];
 
-export default function UserProfileCard({ locale = 'zh', showStats = true, size = 'md' }: UserProfileCardProps) {
+function getLevelFromPoints(points: number): number {
+  if (points >= 10000) return 10;
+  if (points >= 5000) return 9;
+  if (points >= 2000) return 8;
+  if (points >= 1000) return 7;
+  if (points >= 500) return 6;
+  if (points >= 200) return 5;
+  if (points >= 100) return 4;
+  if (points >= 50) return 3;
+  if (points >= 20) return 2;
+  return 1;
+}
+
+export default function UserProfileCard({ locale = 'zh', showStats = true, size = 'md', apiStats }: UserProfileCardProps) {
   const [user, setUser] = useState<DemoUser | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [apiAvatar, setApiAvatar] = useState<string>('');
@@ -135,9 +162,30 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
     return null;
   }
 
-  const progress = getLevelProgress(profile.points);
-  const nextLevelInfo = getPointsForNextLevel(profile.points);
-  const badgesWithStatus = getBadgesWithStatus(profile);
+  // Use API stats when available, fall back to localStorage profile
+  const displayPoints = apiStats?.points ?? profile.points;
+  const displayLevel = getLevelFromPoints(displayPoints);
+  const displayName = apiStats?.name || profile.name;
+  const displayAvatar = apiStats?.avatar || apiAvatar || profile.avatar;
+  const displayPostsCount = apiStats?.postsCount ?? 0;
+  const displayCommentsCount = apiStats?.commentsCount ?? profile.reviewsCount;
+  const displayFavoritesCount = apiStats?.favoritesCount ?? profile.favoritesCount;
+  const displayLikesCount = apiStats?.likesCount ?? 0;
+
+  const progress = getLevelProgress(displayPoints);
+  const nextLevelInfo = getPointsForNextLevel(displayPoints);
+
+  // Create a merged profile for badge computation using API stats
+  const mergedProfile: UserProfile = {
+    ...profile,
+    points: displayPoints,
+    level: displayLevel,
+    favoritesCount: displayFavoritesCount,
+    reviewsCount: displayCommentsCount,
+  };
+
+  const badgesWithStatus = getBadgesWithStatus(mergedProfile);
+  const earnedBadges = badgesWithStatus.filter(b => b.earned);
 
   const sizeClasses = {
     sm: { avatar: 'w-10 h-10', title: 'text-lg', badge: 'w-6 h-6 text-xs' },
@@ -145,24 +193,22 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
     lg: { avatar: 'w-24 h-24', title: 'text-2xl', badge: 'w-10 h-10 text-base' },
   };
 
-  const earnedBadges = badgesWithStatus.filter(b => b.earned);
-
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       {/* Header */}
       <div className="flex items-start gap-4 mb-6">
         <img
-          src={apiAvatar || profile.avatar}
-          alt={profile.name}
+          src={displayAvatar}
+          alt={displayName}
           className={`${sizeClasses[size].avatar} rounded-full bg-gray-100`}
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h2 className={`${sizeClasses[size].title} font-bold text-gray-900 truncate`}>
-              {profile.name}
+              {displayName}
             </h2>
-            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelBgColors[profile.level - 1]}`}>
-              Lv{profile.level}
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${levelBgColors[displayLevel - 1]}`}>
+              Lv{displayLevel}
             </span>
           </div>
           <p className="text-sm text-gray-500">
@@ -174,7 +220,7 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
       {/* Level Progress */}
       <div className="mb-6">
         <div className="flex justify-between text-sm mb-1">
-          <span className="text-gray-600">{t.points}: {profile.points}</span>
+          <span className="text-gray-600">{t.points}: {displayPoints}</span>
           {nextLevelInfo ? (
             <span className="text-gray-500">
               {nextLevelInfo.pointsNeeded} {t.pointsNeeded} {t.nextLevel}
@@ -185,7 +231,7 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
         </div>
         <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
           <div
-            className={`h-full bg-gradient-to-r ${levelColors[profile.level - 1]} transition-all duration-500`}
+            className={`h-full bg-gradient-to-r ${levelColors[displayLevel - 1]} transition-all duration-500`}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -209,24 +255,24 @@ export default function UserProfileCard({ locale = 'zh', showStats = true, size 
         </div>
       )}
 
-      {/* Stats */}
+      {/* Stats - show real API data */}
       {showStats && (
         <div className="grid grid-cols-4 gap-2 text-center">
           <div className="p-2 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{profile.favoritesCount}</div>
+            <div className="text-lg font-bold text-gray-900">{displayPostsCount}</div>
+            <div className="text-xs text-gray-500">{t.posts}</div>
+          </div>
+          <div className="p-2 bg-gray-50 rounded-lg">
+            <div className="text-lg font-bold text-gray-900">{displayCommentsCount}</div>
+            <div className="text-xs text-gray-500">{t.comments}</div>
+          </div>
+          <div className="p-2 bg-gray-50 rounded-lg">
+            <div className="text-lg font-bold text-gray-900">{displayFavoritesCount}</div>
             <div className="text-xs text-gray-500">{t.favorites}</div>
           </div>
           <div className="p-2 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{profile.ratingsCount}</div>
+            <div className="text-lg font-bold text-gray-900">{displayLikesCount}</div>
             <div className="text-xs text-gray-500">{t.ratings}</div>
-          </div>
-          <div className="p-2 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{profile.followers.length}</div>
-            <div className="text-xs text-gray-500">{t.followers}</div>
-          </div>
-          <div className="p-2 bg-gray-50 rounded-lg">
-            <div className="text-lg font-bold text-gray-900">{profile.followees.length}</div>
-            <div className="text-xs text-gray-500">{t.following}</div>
           </div>
         </div>
       )}

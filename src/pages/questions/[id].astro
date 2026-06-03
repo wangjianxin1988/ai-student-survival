@@ -5,7 +5,7 @@ import QuestionPostDetail from '@/components/questions/QuestionPostDetail';
 export const prerender = false;
 
 const { id } = Astro.params;
-const locale = 'zh';
+const locale = Astro.url.pathname.startsWith('/en/') ? 'en' : 'zh';
 
 if (!id) {
   return Astro.redirect('/questions');

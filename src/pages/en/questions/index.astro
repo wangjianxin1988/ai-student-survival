@@ -7,6 +7,6 @@ export const prerender = false;
 const locale = 'en';
 ---
 
-<Layout title={locale === 'zh' ? '留学生问答社区' : 'Q&A Community'} locale={locale}>
+<Layout title={locale === 'zh' ? '留学生问答社区' : 'Q&A Community'} description={locale === 'zh' ? '留学生问答社区 - 留学生活、学术、签证、求职等热门问题解答，AI工具使用经验分享' : 'Q&A Community - Hot questions about study abroad life, academics, visas, jobs, and AI tool experiences'} locale={locale}>
   <QuestionsClient locale={locale} client:load />
 </Layout>

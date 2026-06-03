@@ -1,5 +1,5 @@
 # AI留学生存指南 - robots.txt
-# https://mi-to-ai.com
+# https://www.mi-to-ai.com
 
 # ============================================
 # AI搜索引擎爬虫 - 全部允许，最大化AI搜索可见性
@@ -103,7 +103,7 @@ Disallow: /api/internal/
 # Sitemap
 # ============================================
 
-Sitemap: https://mi-to-ai.com/sitemap.xml
+Sitemap: https://www.mi-to-ai.com/sitemap.xml
 
 # AI搜索专用爬虫（搜索索引，非训练）
 User-agent: OAI-SearchBot
