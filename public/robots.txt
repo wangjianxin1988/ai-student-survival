@@ -119,6 +119,12 @@ Allow: /
 User-agent: DeepSeekBot
 Allow: /
 
+User-agent: YouBot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
 User-agent: Qwantify
 Allow: /
 

@@ -156,6 +156,10 @@ const allTools = [
     : `全面收录${totalCount}所海外大学AI使用政策的数据库`}
   jsonLd={pageJsonLd}
   faqItems={faqItems}
+  breadcrumbs={[
+    { name: locale === 'en' ? 'Home' : '首页', href: '/' },
+    { name: locale === 'en' ? 'University AI Policies' : '大学AI政策' }
+  ]}
 >
   <!-- Header -->
   <div class="bg-gradient-to-br from-green-600 to-teal-600 text-white">
@@ -292,6 +296,60 @@ const allTools = [
         <span id="visibleCount">{totalCount}</span> {locale === 'en' ? 'results' : '所大学'}
       </div>
     </div>
+
+
+    {/* University AI Policy Summary Table */}
+    <section class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">{locale === 'en' ? 'Policy Summary Table' : '大学AI政策汇总表'}</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="text-left p-3 font-semibold">{locale === 'en' ? 'University' : '大学名称'}</th>
+              <th class="text-left p-3 font-semibold">{locale === 'en' ? 'Country' : '国家'}</th>
+              <th class="text-left p-3 font-semibold">{locale === 'en' ? 'Policy' : '政策态度'}</th>
+              <th class="text-left p-3 font-semibold">{locale === 'en' ? 'Allowed' : '允许使用'}</th>
+              <th class="text-left p-3 font-semibold">{locale === 'en' ? 'Restrictions' : '限制说明'}</th>
+              <th class="text-left p-3 font-semibold">{locale === 'en' ? 'Updated' : '最后更新'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {policies.slice(0, 20).map((policy: UniversityPolicy) => (
+              <tr class="border-t border-gray-100 hover:bg-gray-50">
+                <td class="p-3">
+                  <a href={`/policies/${policy.id}`} class="text-primary-600 hover:underline font-medium">
+                    {policy.universityName}
+                  </a>
+                </td>
+                <td class="p-3 text-gray-600">{policy.flagEmoji} {policy.country}</td>
+                <td class="p-3">
+                  <span class={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${getPolicyBadgeBg(policy.overallPolicy)}`}>
+                    <span class={`w-1.5 h-1.5 rounded-full ${getPolicyColor(policy.overallPolicy)}`}></span>
+                    {getPolicyLabel(policy.overallPolicy)}
+                  </span>
+                </td>
+                <td class="p-3 text-xs text-gray-600">
+                  {policy.allowedTools.slice(0, 3).join(', ')}
+                  {policy.allowedTools.length > 3 && ` +${policy.allowedTools.length - 3}`}
+                </td>
+                <td class="p-3 text-xs text-gray-600">
+                  {policy.prohibitedTools.length > 0 && (
+                    <span class="text-red-600">禁止: {policy.prohibitedTools.slice(0, 2).join(', ')}</span>
+                  )}
+                  {policy.restrictedTools.length > 0 && (
+                    <span class="text-yellow-600 ml-1">限制: {policy.restrictedTools.slice(0, 2).join(', ')}</span>
+                  )}
+                </td>
+                <td class="p-3 text-xs text-gray-500">{policy.lastUpdated}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">
+        {locale === 'en' ? 'Showing top 20 universities. Use filters above for more.' : '显示前20所大学，使用上方筛选查看更多'}
+      </p>
+    </section>
 
     <!-- University List -->
     <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="policyList">

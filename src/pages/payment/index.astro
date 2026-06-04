@@ -46,6 +46,10 @@ const pageJsonLd = {
   jsonLd={pageJsonLd}
   faqItems={faqItems}
   locale={locale}
+  breadcrumbs={[
+    { name: locale === 'en' ? 'Home' : '首页', href: '/' },
+    { name: locale === 'en' ? 'Payment Solutions' : '支付方案' }
+  ]}
 >
   <!-- Header -->
   <div class="hero-gradient text-white">
@@ -74,6 +78,63 @@ const pageJsonLd = {
       solutions={paymentSolutionsData}
       locale={locale}
     />
+
+    {/* Payment Solutions Comparison Table */}
+    <section class="mt-8">
+      <h2 class="text-2xl font-bold mb-6">支付方案对比一览</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border border-gray-200 rounded-xl overflow-hidden">
+          <thead>
+            <tr class="bg-gray-50">
+              <th class="text-left p-3 font-semibold">方案名称</th>
+              <th class="text-left p-3 font-semibold">适用工具</th>
+              <th class="text-left p-3 font-semibold">难度</th>
+              <th class="text-left p-3 font-semibold">可靠性</th>
+              <th class="text-left p-3 font-semibold">评分</th>
+              <th class="text-left p-3 font-semibold">优点/缺点</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paymentSolutionsData.slice(0, 10).map((sol) => (
+              <tr class="border-t border-gray-100 hover:bg-gray-50">
+                <td class="p-3">
+                  <a href={`/payment/${sol.id}`} class="text-primary-600 hover:underline font-medium">
+                    {sol.title.slice(0, 20)}...
+                  </a>
+                </td>
+                <td class="p-3 text-gray-600">{sol.toolIds.slice(0, 2).join(', ')}</td>
+                <td class="p-3">
+                  <span class={`px-2 py-0.5 rounded-full text-xs ${
+                    sol.difficulty === 'easy' ? 'bg-green-100 text-green-700' :
+                    sol.difficulty === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {sol.difficulty === 'easy' ? '简单' : sol.difficulty === 'medium' ? '中等' : '困难'}
+                  </span>
+                </td>
+                <td class="p-3">
+                  <span class={`px-2 py-0.5 rounded-full text-xs ${
+                    sol.reliability === 'high' ? 'bg-green-100 text-green-700' :
+                    sol.reliability === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-red-100 text-red-700'
+                  }`}>
+                    {sol.reliability === 'high' ? '高' : sol.reliability === 'medium' ? '中' : '低'}
+                  </span>
+                </td>
+                <td class="p-3">
+                  <div class="flex items-center gap-1">
+                    <span class="text-yellow-500">★</span>
+                    <span class="font-medium">{sol.rating}</span>
+                  </div>
+                </td>
+                <td class="p-3 text-gray-600 text-xs max-w-[200px]">{sol.excerpt.slice(0, 40)}...</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-gray-500 mt-2">* 点击方案名称查看详细教程和操作步骤</p>
+    </section>
 
     <!-- Ad Slot: between filter and CTA -->
     <div class="mt-8">

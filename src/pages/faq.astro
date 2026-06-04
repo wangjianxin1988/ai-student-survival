@@ -123,6 +123,10 @@ const contactInfo = {
   description={translate(locale, 'faq.description')}
   locale={locale}
   faqItems={faqItems}
+  breadcrumbs={[
+    { name: locale === 'en' ? 'Home' : '首页', href: '/' },
+    { name: locale === 'en' ? 'FAQ' : '常见问题' }
+  ]}
 >
   <div class="bg-gradient-to-br from-primary-50 to-secondary-50 py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -172,7 +176,7 @@ const contactInfo = {
                     onclick={`toggleFaq(this)`}
                     aria-expanded="false"
                   >
-                    <span class="font-medium text-gray-900">{item.q}</span>
+                    <h3 class="font-medium text-gray-900">{item.q}</h3>
                     <svg class="w-5 h-5 text-gray-400 flex-shrink-0 faq-arrow transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>

@@ -79,6 +79,86 @@ function markdownToHtml(md: string): string {
 
 const htmlContent = markdownToHtml(post.content);
 
+// Generate FAQ items from blog post slug/topic for SEO
+function generateFaqFromSlug(slug: string, title: string, locale: string): Array<{question: string, answer: string}> {
+  const faqMap: Record<string, {zh: {q: string, a: string}[], en: {q: string, a: string}[]}> = {
+    'chatgpt-go-how-to-subscribe': {
+      zh: [
+        {q: 'ChatGPT Go是什么套餐？', a: 'ChatGPT Go是OpenAI推出的低价订阅套餐，价格远低于ChatGPT Plus，适合预算有限的留学生使用AI工具。它提供基础的GPT-4访问权限和一定的使用额度。'},
+        {q: '如何订阅ChatGPT Go？', a: '订阅ChatGPT Go需要使用支持的支付方式，包括国际信用卡或虚拟卡（如Depay、WildCard等）。部分地区的用户也可以通过礼品卡完成支付。'},
+        {q: 'ChatGPT Go和Plus有什么区别？', a: '主要区别在于价格和功能限制。ChatGPT Go价格更低但使用额度有限，适合轻度使用；ChatGPT Plus提供更高的使用限制和优先访问GPT-4的权限。'}
+      ],
+      en: [
+        {q: 'What is ChatGPT Go?', a: 'ChatGPT Go is a budget-friendly subscription plan from OpenAI, priced significantly lower than ChatGPT Plus. It provides basic GPT-4 access with usage limits, ideal for cost-conscious students.'},
+        {q: 'How to subscribe to ChatGPT Go?', a: 'You can subscribe using supported payment methods including international credit cards or virtual cards like Depay and WildCard. Some regions may also support gift card payments.'},
+        {q: 'What is the difference between ChatGPT Go and Plus?', a: 'The main differences are price and usage limits. ChatGPT Go is cheaper with limited usage quotas, while ChatGPT Plus offers higher limits and priority GPT-4 access.'}
+      ]
+    },
+    'claude-opus-48-review': {
+      zh: [
+        {q: 'Claude Opus 4.8有什么新功能？', a: 'Claude Opus 4.8在推理能力、代码生成和长文本处理方面有显著提升，支持更大的上下文窗口，并在多项基准测试中表现优异。'},
+        {q: 'Claude Opus 4.8适合学生使用吗？', a: '非常适合。Claude Opus 4.8在学术写作、论文分析和研究辅助方面表现出色，是留学生完成作业和研究的优秀工具。'},
+        {q: 'Claude Opus 4.8的价格是多少？', a: 'Claude通过Anthropic平台提供订阅服务，Pro计划约$20/月，也可通过API按量计费。学生可以通过虚拟卡完成支付。'}
+      ],
+      en: [
+        {q: 'What are the new features of Claude Opus 4.8?', a: 'Claude Opus 4.8 brings significant improvements in reasoning, code generation, and long-context processing, with a larger context window and strong benchmark performance.'},
+        {q: 'Is Claude Opus 4.8 good for students?', a: 'Yes, it excels at academic writing, paper analysis, and research assistance, making it an excellent tool for international students.'},
+        {q: 'How much does Claude Opus 4.8 cost?', a: 'Claude is available through Anthropic subscription service at around $20/month for Pro, or pay-per-use via API. Students can pay with virtual cards.'}
+      ]
+    },
+    'eu-ai-act-student-guide': {
+      zh: [
+        {q: 'EU AI Act对学生使用AI有什么影响？', a: 'EU AI Act对学术场景中AI的使用提出了透明度要求，学生需要明确标注AI辅助完成的内容，但并未完全禁止在学习中使用AI工具。'},
+        {q: '在欧洲留学还能用ChatGPT吗？', a: '可以使用，但需遵守各大学的具体政策。大多数欧洲大学允许在适当场景下使用AI工具，但要求学生保持学术诚信并披露AI使用情况。'},
+        {q: 'EU AI Act什么时候正式生效？', a: 'EU AI Act于2024年正式通过，分阶段实施。大部分条款将在2025-2026年间逐步生效，各成员国将制定具体执行细则。'}
+      ],
+      en: [
+        {q: 'How does the EU AI Act affect student AI usage?', a: 'The EU AI Act requires transparency in AI-assisted academic work. Students must disclose AI-generated content, but it does not completely ban AI tool usage in education.'},
+        {q: 'Can I still use ChatGPT while studying in Europe?', a: 'Yes, but you must comply with your university specific policies. Most European universities allow AI tools in appropriate contexts, requiring academic integrity and disclosure.'},
+        {q: 'When does the EU AI Act take effect?', a: 'The EU AI Act was formally adopted in 2024 with phased implementation. Most provisions will take effect between 2025-2026, with member states developing specific enforcement rules.'}
+      ]
+    },
+    'best-ai-coding-tools-2026': {
+      zh: [
+        {q: '2026年最好的AI编程工具有哪些？', a: '2026年主流AI编程工具包括GitHub Copilot、Cursor、Replit等。其中Cursor因其深度AI集成和多文件编辑能力受到开发者广泛好评。'},
+        {q: 'AI编程工具对学生免费吗？', a: '部分AI编程工具提供学生优惠。GitHub Copilot对学生免费，Replit有免费计划，Cursor提供免费试用。建议学生充分利用教育优惠。'},
+        {q: 'AI编程工具会取代程序员吗？', a: 'AI编程工具是辅助工具而非替代品。它们能提高编码效率，但程序员的架构设计、问题分析和创新能力仍然不可替代。'}
+      ],
+      en: [
+        {q: 'What are the best AI coding tools in 2026?', a: 'Top AI coding tools in 2026 include GitHub Copilot, Cursor, and Replit. Cursor is particularly popular for its deep AI integration and multi-file editing capabilities.'},
+        {q: 'Are AI coding tools free for students?', a: 'Many offer student discounts. GitHub Copilot is free for students, Replit has a free tier, and Cursor offers free trials. Students should take advantage of education pricing.'},
+        {q: 'Will AI coding tools replace programmers?', a: 'AI coding tools are assistants, not replacements. They boost coding efficiency, but programmers skills in architecture design, problem analysis, and innovation remain irreplaceable.'}
+      ]
+    }
+  };
+
+  const faqs = faqMap[slug];
+  if (faqs) {
+    const lang = locale === 'en' ? 'en' : 'zh';
+    return faqs[lang].map(f => ({ question: f.q, answer: f.a }));
+  }
+
+  // Fallback: generate generic FAQ based on title
+  if (locale === 'en') {
+    return [
+      { question: `What is ${title}?`, answer: `This article provides a comprehensive guide about ${title}, covering key concepts, practical tips, and recommendations for international students.` },
+      { question: `How can this help international students?`, answer: `This guide helps students understand and navigate the topic effectively, with actionable advice tailored for the student experience.` },
+      { question: `Where can I learn more?`, answer: `Visit mi-to-ai.com for more guides, tools, and resources designed specifically for international students using AI.` }
+    ];
+  }
+  return [
+    { question: `什么是${title}？`, answer: `本文提供了关于${title}的全面指南，涵盖关键概念、实用技巧和针对留学生的建议。` },
+    { question: `这对留学生有什么帮助？`, answer: `本指南帮助学生有效理解和应对相关话题，提供针对学生群体的可操作建议。` },
+    { question: `在哪里可以了解更多？`, answer: `访问mi-to-ai.com获取更多专为使用AI的留学生设计的指南、工具和资源。` }
+  ];
+}
+
+const blogFaqItems = generateFaqFromSlug(
+  post.slug as string,
+  locale === 'en' ? post.titleEn : post.title,
+  locale
+);
+
 const jsonLd = {
  "@context": "https://schema.org",
  "@type": "BlogPosting",
@@ -118,6 +198,7 @@ const breadcrumbs = [
  canonicalUrl={`https://www.mi-to-ai.com/blog/${post.slug}`}
  jsonLd={jsonLd}
  breadcrumbs={breadcrumbs}
+ faqItems={blogFaqItems}
 >
  <main class="min-h-screen bg-gradient-to-b from-gray-50 to-white ">
   <!-- Breadcrumb -->

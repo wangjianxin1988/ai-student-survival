@@ -6,11 +6,72 @@ import { type Locale, getLocaleFromUrl } from '@/i18n';
 export const prerender = false;
 
 const locale: Locale = getLocaleFromUrl(Astro.url);
+
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": locale === 'zh' ? '留学生AI工具使用生存指南' : 'International Student AI Survival Guide',
+  "description": locale === 'zh'
+    ? '手把手教留学生如何选择、注册和使用AI工具，涵盖虚拟卡支付、学校政策遵守等关键步骤'
+    : 'Step-by-step guide for international students on selecting, registering, and using AI tools, covering virtual card payment and school policy compliance',
+  "totalTime": "PT30M",
+  "supply": [
+    { "@type": "HowToSupply", "name": locale === 'zh' ? '电脑或手机' : 'Computer or smartphone' },
+    { "@type": "HowToSupply", "name": locale === 'zh' ? '网络连接' : 'Internet connection' },
+    { "@type": "HowToSupply", "name": locale === 'zh' ? '虚拟信用卡（可选）' : 'Virtual credit card (optional)' }
+  ],
+  "tool": [
+    { "@type": "HowToTool", "name": "ChatGPT / Claude / Gemini" }
+  ],
+  "step": [
+    {
+      "@type": "HowToStep",
+      "position": 1,
+      "name": locale === 'zh' ? '选择合适的AI工具' : 'Choose the Right AI Tool',
+      "text": locale === 'zh'
+        ? '根据你的需求选择合适的AI工具。写作推荐ChatGPT或Claude，编程推荐GitHub Copilot或Cursor，搜索推荐Perplexity。'
+        : 'Select the right AI tool based on your needs. ChatGPT or Claude for writing, GitHub Copilot or Cursor for coding, Perplexity for research.'
+    },
+    {
+      "@type": "HowToStep",
+      "position": 2,
+      "name": locale === 'zh' ? '注册并设置账户' : 'Register and Set Up Account',
+      "text": locale === 'zh'
+        ? '访问AI工具官网注册账户。部分工具需要海外手机号验证，可以使用接码平台完成注册。'
+        : 'Visit the AI tool official website to register. Some tools require phone verification; you can use SMS verification platforms.'
+    },
+    {
+      "@type": "HowToStep",
+      "position": 3,
+      "name": locale === 'zh' ? '使用虚拟卡完成支付' : 'Complete Payment with Virtual Card',
+      "text": locale === 'zh'
+        ? '使用Depay、WildCard等虚拟卡服务完成订阅支付。虚拟卡支持USDT充值，无需海外银行卡。'
+        : 'Use virtual card services like Depay or WildCard to complete subscription payments. Virtual cards support USDT deposits without needing a foreign bank account.'
+    },
+    {
+      "@type": "HowToStep",
+      "position": 4,
+      "name": locale === 'zh' ? '遵守学校AI使用政策' : 'Comply with School AI Policies',
+      "text": locale === 'zh'
+        ? '查看我们收录的大学AI政策数据库，了解你所在学校对AI工具的具体规定，确保合规使用。'
+        : 'Check our university AI policy database to understand your school specific regulations on AI tool usage and ensure compliance.'
+    },
+    {
+      "@type": "HowToStep",
+      "position": 5,
+      "name": locale === 'zh' ? '提升学习效率' : 'Improve Study Efficiency',
+      "text": locale === 'zh'
+        ? '将AI工具融入日常学习流程，用于论文写作、代码调试、知识总结等场景，同时保持学术诚信。'
+        : 'Integrate AI tools into your daily study workflow for essay writing, code debugging, and knowledge summarization while maintaining academic integrity.'
+    }
+  ]
+};
 ---
 
 <Layout
   title={locale === 'zh' ? '防坑防骗指南' : 'Survival Guides'}
   description={locale === 'zh' ? '留学生生存必备知识分享，包括租房防骗、兼职陷阱、文化禁忌、安全提醒等' : 'Essential knowledge for international students including scam prevention, cultural etiquette, and safety tips'}
+  jsonLd={howToJsonLd}
 >
   <SurvivalClient locale={locale} client:load />
 </Layout>

@@ -429,18 +429,46 @@ const allTools: Tool[] = [
 ];
 
 // JSON-LD for comparison page
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "AI工具对比 - MI TO AI留学生存指南",
-  "description": "对比留学生的20款主流AI工具，从易用性、功能、价格等多维度进行全面比较，帮助找到最适合自己的AI工具。",
-  "url": "https://www.mi-to-ai.com/compare",
-  "isPartOf": {
-    "@type": "WebSite",
-    "name": "MI TO AI留学生存指南",
-    "url": "https://www.mi-to-ai.com"
-  }
-};
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": locale === 'en' ? 'AI Tools Comparison - MI TO AI' : 'AI工具对比 - MI TO AI留学生存指南',
+    "description": locale === 'en'
+      ? 'Compare 20 mainstream AI tools for students across ease of use, features, pricing and more dimensions.'
+      : '对比留学生的20款主流AI工具，从易用性、功能、价格等多维度进行全面比较，帮助找到最适合自己的AI工具。',
+    "url": "https://www.mi-to-ai.com/compare",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": locale === 'en' ? 'MI TO AI Student Guide' : 'MI TO AI留学生存指南',
+      "url": "https://www.mi-to-ai.com"
+    }
+  },
+  ...allTools.slice(0, 10).map(tool => ({
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": tool.name,
+    "description": tool.description,
+    "url": `https://www.mi-to-ai.com/tools/${tool.slug}`,
+    "applicationCategory": tool.category === 'coding' ? 'DeveloperApplication' :
+      tool.category === 'design' ? 'DesignApplication' :
+      tool.category === 'writing' ? 'BusinessApplication' :
+      tool.category === 'research' ? 'ReferenceApplication' : 'BusinessApplication',
+    "operatingSystem": "Web",
+    "offers": {
+      "@type": "Offer",
+      "price": tool.priceDetail.monthly || 0,
+      "priceCurrency": tool.priceDetail.currency || "USD",
+      "priceValidUntil": "2026-12-31"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": tool.rating,
+      "bestRating": 5,
+      "ratingCount": tool.ratingCount
+    }
+  }))
+];
 
 // Category mapping for display (using translation keys)
 const categoryLabels: Record<string, string> = {
