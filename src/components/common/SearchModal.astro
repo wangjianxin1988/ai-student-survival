@@ -96,13 +96,41 @@ const { locale = 'zh' } = Astro.props;
 </style>
 
 <script is:inline>
-  // Listen for search button click (event delegation)
-  document.addEventListener('click', function(e) {
-    var target = e.target.closest('[data-search-trigger]');
-    if (target) {
-      openModal();
+  // Open search modal - robust approach
+  function initSearch() {
+    // Find all search trigger buttons
+    var triggers = document.querySelectorAll('[data-search-trigger]');
+    triggers.forEach(function(btn) {
+      // Remove any existing listener to avoid duplicates
+      btn.removeEventListener('click', handleSearchClick);
+      btn.addEventListener('click', handleSearchClick);
+    });
+  }
+
+  function handleSearchClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    var modal = document.getElementById('search-modal');
+    var input = document.getElementById('search-input');
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
     }
-  });
+    if (input) {
+      input.focus();
+    }
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Run immediately
+  initSearch();
+  // Run again after DOMContentLoaded (for React components)
+  document.addEventListener('DOMContentLoaded', initSearch);
+  // Run after a delay to catch React hydration
+  setTimeout(initSearch, 500);
+  setTimeout(initSearch, 1000);
+  setTimeout(initSearch, 2000);
+
 
   // Search data sources — all tools, pages, blog posts, payment guides
   const searchData = {
