@@ -288,6 +288,57 @@ function getAlternatePath(loc: Locale): string {
     <!-- Monetag overlay ads removed per user request (zone 11076692) -->
     <!-- Inline ads (AdSense) are preserved in AdSlot components -->
 
+    <!-- Auto locale suggestion: prompt user to switch language based on browser language -->
+    <script is:inline>
+    (function() {
+      // Check if user has dismissed the suggestion
+      if (localStorage.getItem('locale-suggestion-dismissed')) return;
+      
+      // Get browser language
+      var browserLang = navigator.language || navigator.userLanguage || '';
+      var isBrowserEnglish = browserLang.startsWith('en');
+      
+      // Get current page locale from URL
+      var currentPath = window.location.pathname;
+      var isEnglishPage = currentPath.startsWith('/en/');
+      var isChinesePage = !isEnglishPage;
+      
+      // Determine if we should suggest switching
+      var shouldSuggestEnglish = isChinesePage && isBrowserEnglish;
+      var shouldSuggestChinese = isEnglishPage && !isBrowserEnglish;
+      
+      if (!shouldSuggestEnglish && !shouldSuggestChinese) return;
+      
+      // Build alternate URL
+      var alternateUrl;
+      if (shouldSuggestEnglish) {
+        alternateUrl = '/en' + currentPath;
+      } else {
+        alternateUrl = currentPath.replace(/^\/en(\/|$)/, '/');
+      }
+      
+      // Create suggestion banner
+      var banner = document.createElement('div');
+      banner.id = 'locale-suggestion';
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#1e40af;color:white;padding:8px 16px;display:flex;align-items:center;justify-content:center;gap:12px;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,0.2);';
+      
+      var msg = shouldSuggestEnglish 
+        ? '🌐 Would you like to view this page in English?' 
+        : '🌐 您想查看中文版页面吗？';
+      var linkText = shouldSuggestEnglish ? 'Switch to English' : '切换到中文';
+      var dismissText = shouldSuggestEnglish ? 'No thanks' : '不用了';
+      
+      banner.innerHTML = 
+        '<span>' + msg + '</span>' +
+        '<a href="' + alternateUrl + '" style="color:#93c5fd;text-decoration:underline;font-weight:500;">' + linkText + '</a>' +
+        '<button onclick="this.parentElement.remove();localStorage.setItem(\'locale-suggestion-dismissed\',\'1\');" style="background:transparent;border:1px solid rgba(255,255,255,0.3);color:white;padding:2px 10px;border-radius:4px;cursor:pointer;font-size:12px;">' + dismissText + '</button>';
+      
+      document.body.prepend(banner);
+      // Adjust body padding so content isn't hidden behind banner
+      document.body.style.paddingTop = '40px';
+    })();
+    </script>
+
   </body>
 </html>
 
