@@ -257,20 +257,19 @@ export default function ToolPricingRealtime({ toolSlug, toolName, officialUrl, i
       // Try to fetch from the pricing API endpoint
       const response = await fetch(`/api/tools/pricing/${toolSlug}`);
       
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          const updatedData = result.data.map((p: PricingInfo) => ({
-            ...p,
-            lastUpdated: new Date().toISOString(),
-          }));
-          setPricing(updatedData);
-          setLastRefresh(new Date().toISOString());
-          return;
-        }
+      // Parse JSON regardless of HTTP status (CF Workers may return 404 with valid body)
+      const result = await response.json();
+      if (result.success && result.data && result.data.length > 0) {
+        const updatedData = result.data.map((p: PricingInfo) => ({
+          ...p,
+          lastUpdated: new Date().toISOString(),
+        }));
+        setPricing(updatedData);
+        setLastRefresh(new Date().toISOString());
+        return;
       }
       
-      // Fallback to local data if API fails
+      // Fallback to local data if API returns no data
       const data = fallbackPricing[toolSlug];
       if (data) {
         const updatedData = data.map(p => ({
