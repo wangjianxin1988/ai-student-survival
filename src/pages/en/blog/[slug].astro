@@ -84,7 +84,7 @@ const jsonLd = {
  "description": post.excerpt,
  "datePublished": post.createdAt,
  "dateModified": post.updatedAt,
- "url": `https://www.mi-to-ai.com/blog/${post.slug}`,
+ "url": `https://www.mi-to-ai.com/en/blog/${post.slug}`,
  "keywords": post.seoKeywords.join(', '),
  "author": {
   "@type": "Organization",
@@ -98,13 +98,13 @@ const jsonLd = {
  },
  "mainEntityOfPage": {
   "@type": "WebPage",
-  "@id": `https://www.mi-to-ai.com/blog/${post.slug}`
+  "@id": `https://www.mi-to-ai.com/en/blog/${post.slug}`
  },
 };
 
 const breadcrumbs = [
- { name: locale === 'en' ? 'Home' : '首页', href: '/' },
- { name: locale === 'en' ? 'Blog' : '博客', href: '/blog' },
+ { name: locale === 'en' ? 'Home' : '首页', href: locale === 'en' ? '/en' : '/' },
+ { name: locale === 'en' ? 'Blog' : '博客', href: '/en/blog' },
  { name: locale === 'en' ? post.titleEn : post.title },
 ];
 ---
@@ -113,7 +113,8 @@ const breadcrumbs = [
  title={locale === 'en' ? post.titleEn : post.title}
  description={post.excerpt}
  type="article"
- canonicalUrl={`https://www.mi-to-ai.com/blog/${post.slug}`}
+ canonicalUrl={`https://www.mi-to-ai.com/en/blog/${post.slug}`}
+ locale={locale}
  jsonLd={jsonLd}
  breadcrumbs={breadcrumbs}
 >
@@ -122,9 +123,9 @@ const breadcrumbs = [
   <nav class="pt-20 pb-4 px-4">
    <div class="max-w-4xl mx-auto">
     <ol class="flex items-center gap-2 text-sm text-gray-500 ">
-     <li><a href="/" class="hover:text-blue-600 :text-blue-400">{locale === 'en' ? 'Home' : '首页'}</a></li>
+     <li><a href={locale === 'en' ? '/en' : '/'} class="hover:text-blue-600 :text-blue-400">{locale === 'en' ? 'Home' : '首页'}</a></li>
      <li>/</li>
-     <li><a href="/blog" class="hover:text-blue-600 :text-blue-400">{locale === 'en' ? 'Blog' : '博客'}</a></li>
+     <li><a href="/en/blog" class="hover:text-blue-600 :text-blue-400">{locale === 'en' ? 'Blog' : '博客'}</a></li>
      <li>/</li>
      <li class="text-gray-900 truncate">{locale === 'en' ? post.titleEn : post.title}</li>
     </ol>
@@ -186,7 +187,7 @@ const breadcrumbs = [
      </h2>
      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {relatedPosts.map(related => (
-       <a href={`/blog/${related.slug}`} class="block bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 p-5">
+       <a href={`/en/blog/${related.slug}`} class="block bg-white rounded-xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 p-5">
         <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700 mb-3 inline-block">
          {categoryLabels[related.category]?.[locale === 'en' ? 'en' : 'zh'] || related.category}
         </span>
@@ -210,7 +211,7 @@ const breadcrumbs = [
   <section class="px-4 pb-16">
    <div class="max-w-4xl mx-auto text-center">
     <a
-     href="/blog"
+     href="/en/blog"
      class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
     >
      ← {locale === 'en' ? 'Back to Blog' : '返回博客'}
