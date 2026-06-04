@@ -1,0 +1,159 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+import { blogPosts, getAllBlogCategories, getAllBlogTags } from '@/data/blogPosts';
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+
+const posts = blogPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+const categories = getAllBlogCategories();
+const tags = getAllBlogTags();
+
+const categoryLabels: Record<string, { zh: string; en: string }> = {
+  tutorials: { zh: '教程', en: 'Tutorials' },
+  reviews: { zh: '评测', en: 'Reviews' },
+  policy: { zh: '政策解读', en: 'Policy' },
+  comparisons: { zh: '工具对比', en: 'Comparisons' },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": locale === 'en' ? "AI Student Survival Guide Blog" : "留学生AI生存指南博客",
+  "description": locale === 'en'
+    ? "In-depth articles about AI tools, policies, and tutorials for international students"
+    : "关于AI工具、政策和教程的深度文章，专为留学生打造",
+  "url": "https://www.mi-to-ai.com/blog",
+  "blogPost": posts.map(post => ({
+    "@type": "BlogPosting",
+    "headline": locale === 'en' ? post.titleEn : post.title,
+    "description": post.excerpt,
+    "datePublished": post.createdAt,
+    "dateModified": post.updatedAt,
+    "url": `https://www.mi-to-ai.com/blog/${post.slug}`,
+  })),
+};
+---
+
+<Layout
+  title={locale === 'en' ? 'Blog - AI Student Survival Guide' : '博客 - 留学生AI生存指南'}
+  description={locale === 'en'
+    ? 'In-depth articles about AI tools, EU AI Act policies, tutorials and reviews for international students'
+    : '深度文章：AI工具评测、EU AI Act政策解读、订阅教程、工具对比，专为留学生打造'}
+  type="website"
+  canonicalUrl="https://www.mi-to-ai.com/blog"
+  jsonLd={jsonLd}
+>
+  <main class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+    <!-- Hero Section -->
+    <section class="pt-24 pb-12 px-4">
+      <div class="max-w-6xl mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          {locale === 'en' ? '📚 Blog' : '📚 博客'}
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          {locale === 'en'
+            ? 'Deep dives into AI tools, policies, and tutorials for international students'
+            : 'AI工具深度评测、政策解读、订阅教程，帮助留学生更好地使用AI'}
+        </p>
+      </div>
+    </section>
+
+    <!-- Category Filter -->
+    <section class="px-4 pb-8">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex flex-wrap gap-3 justify-center">
+          <a
+            href="/blog"
+            class="px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+          >
+            {locale === 'en' ? 'All' : '全部'}
+          </a>
+          {categories.map(cat => (
+            <a
+              href={`/blog?category=${cat}`}
+              class="px-4 py-2 rounded-full text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors"
+            >
+              {categoryLabels[cat]?.[locale === 'en' ? 'en' : 'zh'] || cat}
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Posts Grid -->
+    <section class="px-4 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {posts.map(post => (
+            <article class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-700 overflow-hidden">
+              <div class="p-6">
+                <!-- Category Badge -->
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                    {categoryLabels[post.category]?.[locale === 'en' ? 'en' : 'zh'] || post.category}
+                  </span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
+                    {post.readTime} {locale === 'en' ? 'min read' : '分钟阅读'}
+                  </span>
+                </div>
+
+                <!-- Title -->
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+                  <a href={`/blog/${post.slug}`} class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    {locale === 'en' ? post.titleEn : post.title}
+                  </a>
+                </h2>
+
+                <!-- Excerpt -->
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+                  {post.excerpt}
+                </p>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                  {post.tags.slice(0, 4).map(tag => (
+                    <span class="px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                <!-- Footer -->
+                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                  <time datetime={post.createdAt}>
+                    {post.createdAt}
+                  </time>
+                  <a
+                    href={`/blog/${post.slug}`}
+                    class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                  >
+                    {locale === 'en' ? 'Read more →' : '阅读全文 →'}
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Tags Cloud -->
+    <section class="px-4 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+          {locale === 'en' ? 'Popular Tags' : '热门标签'}
+        </h2>
+        <div class="flex flex-wrap gap-3 justify-center">
+          {tags.map(tag => (
+            <span class="px-4 py-2 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer transition-colors">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>

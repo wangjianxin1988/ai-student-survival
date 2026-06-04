@@ -4,6 +4,7 @@ import { policiesData } from '@/data/policies';
 import { promptTemplates } from '@/data/promptTemplates';
 import { paymentSolutionsData } from '@/data/paymentSolutions';
 import { sampleOffers } from '@/data/offers';
+import { blogPosts } from '@/data/blogPosts';
 
 const siteUrl = 'https://www.mi-to-ai.com';
 
@@ -150,6 +151,15 @@ export const GET: APIRoute = async () => {
     ];
   });
 
+  // Dynamic blog routes — use updatedAt from blogPosts data
+  const blogRoutes = (blogPosts || []).flatMap((post: any) => {
+    const lm = latestDate([post.updatedAt, post.createdAt]);
+    return [
+      { url: `/blog/${post.slug}`, priority: '0.7', changefreq: 'weekly', lastmod: lm },
+      { url: `/en/blog/${post.slug}`, priority: '0.7', changefreq: 'weekly', lastmod: lm },
+    ];
+  });
+
   const allRoutes = [
     ...allStaticRoutes,
     ...toolRoutes,
@@ -157,6 +167,7 @@ export const GET: APIRoute = async () => {
     ...promptRoutes,
     ...paymentRoutes,
     ...offerRoutes,
+    ...blogRoutes,
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>

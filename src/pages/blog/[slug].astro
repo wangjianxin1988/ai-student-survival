@@ -1,0 +1,283 @@
+---
+export const prerender = false;
+
+export function getStaticPaths() {
+  return [];
+}
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+import { blogPosts, findBlogPostBySlug, getRelatedBlogPosts } from '@/data/blogPosts';
+
+const locale: Locale = getLocaleFromUrl(Astro.url);
+const { slug } = Astro.params;
+
+const post = findBlogPostBySlug(slug as string);
+
+if (!post) {
+  return Astro.redirect('/blog');
+}
+
+const relatedPosts = getRelatedBlogPosts(post, 3);
+
+const categoryLabels: Record<string, { zh: string; en: string }> = {
+  tutorials: { zh: '教程', en: 'Tutorials' },
+  reviews: { zh: '评测', en: 'Reviews' },
+  policy: { zh: '政策解读', en: 'Policy' },
+  comparisons: { zh: '工具对比', en: 'Comparisons' },
+};
+
+// Simple markdown to HTML conversion for rendering
+function markdownToHtml(md: string): string {
+  let html = md
+    // Headers
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    // Blockquotes
+    .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+    // Bold and italic
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g, '<em>$1</em>')
+    // Links
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    // Inline code
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    // Horizontal rule
+    .replace(/^---$/gm, '<hr>')
+    // Checkboxes
+    .replace(/^- \[ \] (.+)$/gm, '<li class="checkbox">☐ $1</li>')
+    .replace(/^- \[x\] (.+)$/gm, '<li class="checkbox checked">☑ $1</li>')
+    // Unordered lists
+    .replace(/^- (.+)$/gm, '<li>$1</li>')
+    // Tables - basic support
+    .replace(/\|[-\s|]+\|/g, '') // Remove separator rows
+    .replace(/^\| (.+) \|$/gm, (match, content) => {
+      const cells = content.split(' | ').map((c: string) => `<td>${c.trim()}</td>`).join('');
+      return `<tr>${cells}</tr>`;
+    })
+    // Paragraphs (lines that aren't already wrapped in HTML tags)
+    .split('\n\n')
+    .map(block => {
+      block = block.trim();
+      if (!block) return '';
+      if (block.startsWith('<')) return block;
+      return `<p>${block}</p>`;
+    })
+    .join('\n');
+
+  // Wrap consecutive <tr> in <table>
+  html = html.replace(/(<tr>[\s\S]*?<\/tr>\n?)+/g, (match) => `<table>${match}</table>`);
+
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/(<li[^>]*>[\s\S]*?<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`);
+
+  return html;
+}
+
+const htmlContent = markdownToHtml(post.content);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": locale === 'en' ? post.titleEn : post.title,
+  "description": post.excerpt,
+  "datePublished": post.createdAt,
+  "dateModified": post.updatedAt,
+  "url": `https://www.mi-to-ai.com/blog/${post.slug}`,
+  "keywords": post.seoKeywords.join(', '),
+  "author": {
+    "@type": "Organization",
+    "name": "留学生AI生存指南",
+    "url": "https://www.mi-to-ai.com"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "留学生AI生存指南",
+    "url": "https://www.mi-to-ai.com"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": `https://www.mi-to-ai.com/blog/${post.slug}`
+  },
+};
+
+const breadcrumbs = [
+  { name: locale === 'en' ? 'Home' : '首页', href: '/' },
+  { name: locale === 'en' ? 'Blog' : '博客', href: '/blog' },
+  { name: locale === 'en' ? post.titleEn : post.title },
+];
+---
+
+<Layout
+  title={locale === 'en' ? post.titleEn : post.title}
+  description={post.excerpt}
+  type="article"
+  canonicalUrl={`https://www.mi-to-ai.com/blog/${post.slug}`}
+  jsonLd={jsonLd}
+  breadcrumbs={breadcrumbs}
+>
+  <main class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+    <!-- Breadcrumb -->
+    <nav class="pt-20 pb-4 px-4">
+      <div class="max-w-4xl mx-auto">
+        <ol class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+          <li><a href="/" class="hover:text-blue-600 dark:hover:text-blue-400">{locale === 'en' ? 'Home' : '首页'}</a></li>
+          <li>/</li>
+          <li><a href="/blog" class="hover:text-blue-600 dark:hover:text-blue-400">{locale === 'en' ? 'Blog' : '博客'}</a></li>
+          <li>/</li>
+          <li class="text-gray-900 dark:text-white truncate">{locale === 'en' ? post.titleEn : post.title}</li>
+        </ol>
+      </div>
+    </nav>
+
+    <!-- Article Header -->
+    <header class="px-4 pb-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Category & Read Time -->
+        <div class="flex items-center gap-3 mb-4">
+          <span class="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+            {categoryLabels[post.category]?.[locale === 'en' ? 'en' : 'zh'] || post.category}
+          </span>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            {post.readTime} {locale === 'en' ? 'min read' : '分钟阅读'}
+          </span>
+          <span class="text-sm text-gray-500 dark:text-gray-400">
+            {locale === 'en' ? 'Updated' : '更新于'} {post.updatedAt}
+          </span>
+        </div>
+
+        <!-- Title -->
+        <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-6 leading-tight">
+          {locale === 'en' ? post.titleEn : post.title}
+        </h1>
+
+        <!-- Excerpt -->
+        <p class="text-lg text-gray-600 dark:text-gray-400 mb-6">
+          {post.excerpt}
+        </p>
+
+        <!-- Tags -->
+        <div class="flex flex-wrap gap-2">
+          {post.tags.map(tag => (
+            <span class="px-3 py-1 text-sm rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </header>
+
+    <!-- Article Content -->
+    <article class="px-4 pb-12">
+      <div class="max-w-4xl mx-auto">
+        <div class="prose prose-lg dark:prose-invert max-w-none
+          prose-headings:text-gray-900 dark:prose-headings:text-white
+          prose-p:text-gray-700 dark:prose-p:text-gray-300
+          prose-a:text-blue-600 dark:prose-a:text-blue-400
+          prose-strong:text-gray-900 dark:prose-strong:text-white
+          prose-code:bg-gray-100 dark:prose-code:bg-gray-800
+          prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+          prose-blockquote:border-blue-500
+          prose-blockquote:bg-blue-50 dark:prose-blockquote:bg-blue-950
+          prose-blockquote:py-1 prose-blockquote:px-4 prose-blockquote:rounded-r-lg
+          prose-table:border-collapse
+          prose-th:bg-gray-100 dark:prose-th:bg-gray-800
+          prose-th:px-4 prose-th:py-2 prose-th:text-left
+          prose-td:px-4 prose-td:py-2
+          prose-hr:border-gray-200 dark:prose-hr:border-gray-700"
+          set:html={htmlContent}
+        />
+      </div>
+    </article>
+
+    <!-- Related Posts -->
+    {relatedPosts.length > 0 && (
+      <section class="px-4 pb-16">
+        <div class="max-w-4xl mx-auto">
+          <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-8">
+            {locale === 'en' ? 'Related Articles' : '相关文章'}
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {relatedPosts.map(related => (
+              <a href={`/blog/${related.slug}`} class="block bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-700 p-5">
+                <span class="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 mb-3 inline-block">
+                  {categoryLabels[related.category]?.[locale === 'en' ? 'en' : 'zh'] || related.category}
+                </span>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                  {locale === 'en' ? related.titleEn : related.title}
+                </h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                  {related.excerpt}
+                </p>
+                <span class="text-sm text-gray-500 dark:text-gray-400 mt-3 block">
+                  {related.readTime} {locale === 'en' ? 'min read' : '分钟'}
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Back to Blog -->
+    <section class="px-4 pb-16">
+      <div class="max-w-4xl mx-auto text-center">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-blue-600 text-white hover:bg-blue-700 transition-colors font-medium"
+        >
+          ← {locale === 'en' ? 'Back to Blog' : '返回博客'}
+        </a>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  /* Additional styles for rendered markdown content */
+  :global(.prose table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.9em;
+  }
+  :global(.prose td),
+  :global(.prose th) {
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+  :global(.dark .prose td),
+  :global(.dark .prose th) {
+    border-color: #374151;
+  }
+  :global(.prose tr:nth-child(even)) {
+    background-color: #f9fafb;
+  }
+  :global(.dark .prose tr:nth-child(even)) {
+    background-color: #1f2937;
+  }
+  :global(.prose ul) {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin: 1rem 0;
+  }
+  :global(.prose li) {
+    margin: 0.25rem 0;
+  }
+  :global(.prose li.checkbox) {
+    list-style-type: none;
+    margin-left: -1.5rem;
+  }
+  :global(.prose code) {
+    font-size: 0.875em;
+  }
+  :global(.prose blockquote) {
+    margin: 1.5rem 0;
+    font-style: italic;
+  }
+  :global(.prose hr) {
+    margin: 2rem 0;
+  }
+</style>

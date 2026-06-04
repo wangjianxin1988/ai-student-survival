@@ -1,5 +1,19 @@
 // University AI Policy Database
 // Complete policy data for universities worldwide
+//
+// ============================================================
+// EU AI Act (Regulation (EU) 2024/1689) - Key Dates & Deadlines
+// ============================================================
+// Entered into force:        August 1, 2024
+// Prohibited practices:      February 2, 2025
+// General-purpose AI (GPAI): August 2, 2025
+// FULLY APPLICABLE:          August 2, 2026  <-- DEADLINE
+// ------------------------------------------------------------
+// High-risk AI obligations, transparency rules, and regulatory
+// sandboxes all take effect on August 2, 2026.
+// Universities in the EU/EEA must ensure AI tools used in
+// education comply with these regulations by this date.
+// ============================================================
 
 export interface UniversityPolicy {
   id: string;
@@ -330,7 +344,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://www.ox.ac.uk/',
     sourceUrlBackup: 'https://www.ox.ac.uk/students/academic-issues/general-guidance',
     policyDocumentTitle: 'Oxford Assessment and Academic Integrity Policy',
-    lastUpdated: '2026-03-01',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-09-01',
     version: '1.0',
     verified: true,
@@ -368,7 +382,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://www.cam.ac.uk/',
     sourceUrlBackup: 'https://www.cam.ac.uk/current-students/',
     policyDocumentTitle: 'Cambridge AI Use Guidelines',
-    lastUpdated: '2026-01-10',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-01',
     version: '1.0',
     verified: true,
@@ -406,7 +420,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://imperial.ac.uk/',
     sourceUrlBackup: 'https://www.imperial.ac.uk/about/leadership/provost/education/',
     policyDocumentTitle: 'Imperial AI in Education Guidelines',
-    lastUpdated: '2026-02-25',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-25',
     version: '1.0',
     verified: true,
@@ -444,7 +458,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://ucl.ac.uk/',
     sourceUrlBackup: 'https://www.ucl.ac.uk/teaching-learning/',
     policyDocumentTitle: 'UCL AI in Assessment Guidelines',
-    lastUpdated: '2026-03-18',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-09-01',
     version: '1.0',
     verified: true,
@@ -672,7 +686,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://ethz.ch/',
     sourceUrlBackup: 'https://www.ethz.ch/about/en/education/',
     policyDocumentTitle: 'ETH Zurich Guidelines on AI Use',
-    lastUpdated: '2026-01-25',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-07-25',
     version: '1.0',
     verified: true,
@@ -710,7 +724,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://tum.de/',
     sourceUrlBackup: 'https://www.tum.de/en/about-tum/',
     policyDocumentTitle: 'TUM Policy on AI in Teaching and Learning',
-    lastUpdated: '2026-02-28',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-28',
     version: '1.0',
     verified: true,
@@ -1052,7 +1066,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://epfl.ch/',
     sourceUrlBackup: 'https://www.epfl.ch/education/',
     policyDocumentTitle: 'EPFL AI Policy in Education',
-    lastUpdated: '2026-02-22',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-22',
     version: '1.0',
     verified: true,
@@ -1090,7 +1104,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://tudelft.nl/',
     sourceUrlBackup: 'https://www.tudelft.nl/',
     policyDocumentTitle: 'TU Delft AI in Education Policy',
-    lastUpdated: '2026-02-10',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-10',
     version: '1.0',
     verified: true,
@@ -1166,7 +1180,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://nus.edu.sg/',
     sourceUrlBackup: 'https://nus.edu.sg/osa',
     policyDocumentTitle: 'NUS Guidelines on AI Use in Teaching and Learning',
-    lastUpdated: '2026-03-12',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-09-01',
     version: '2.0',
     verified: true,
@@ -1206,7 +1220,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://london.ac.uk/',
     sourceUrlBackup: 'https://www.london.ac.uk/study',
     policyDocumentTitle: 'University of London AI Guidelines (by college)',
-    lastUpdated: '2026-03-01',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-09-01',
     version: '1.0',
     verified: true,
@@ -1282,7 +1296,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://ljmu.ac.uk/',
     sourceUrlBackup: 'https://www.ljmu.ac.uk/current-students',
     policyDocumentTitle: 'LJMU AI Use in Assessment Policy',
-    lastUpdated: '2026-02-20',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-20',
     version: '1.0',
     verified: true,
@@ -1320,7 +1334,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://port.ac.uk/',
     sourceUrlBackup: 'https://www.port.ac.uk/current-students',
     policyDocumentTitle: 'Portsmouth AI Assessment Policy',
-    lastUpdated: '2026-03-01',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-09-01',
     version: '1.0',
     verified: true,
@@ -1472,7 +1486,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://northumbria.ac.uk/',
     sourceUrlBackup: 'https://www.northumbria.ac.uk/current-students',
     policyDocumentTitle: 'Northumbria AI in Assessment Policy',
-    lastUpdated: '2026-02-25',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-25',
     version: '1.0',
     verified: true,
@@ -1511,7 +1525,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://umass.edu/',
     sourceUrlBackup: 'https://www.umass.edu/ai/',
     policyDocumentTitle: 'UMass AI Use Guidelines',
-    lastUpdated: '2026-03-15',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-09-15',
     version: '1.0',
     verified: true,
@@ -1549,7 +1563,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://ntu.ac.uk/',
     sourceUrlBackup: 'https://www.ntu.ac.uk/current-students',
     policyDocumentTitle: 'NTU AI in Assessment Guidelines',
-    lastUpdated: '2026-02-28',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-28',
     version: '1.0',
     verified: true,
@@ -1625,7 +1639,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://manchester.ac.uk/',
     sourceUrlBackup: 'https://www.manchester.ac.uk/current-students/',
     policyDocumentTitle: 'Manchester AI Assessment Policy',
-    lastUpdated: '2026-02-20',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-20',
     version: '1.0',
     verified: true,
@@ -1663,7 +1677,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://ed.ac.uk/',
     sourceUrlBackup: 'https://www.ed.ac.uk/current-students/',
     policyDocumentTitle: 'Edinburgh AI Guidelines',
-    lastUpdated: '2026-03-01',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-09-01',
     version: '1.0',
     verified: true,
@@ -1701,7 +1715,7 @@ export const policiesData: UniversityPolicy[] = [
     sourceUrl: 'https://kcl.ac.uk/',
     sourceUrlBackup: 'https://www.kcl.ac.uk/current-students',
     policyDocumentTitle: 'KCL AI Use in Assessment Policy',
-    lastUpdated: '2026-02-28',
+    lastUpdated: '2026-06-04',
     nextReviewDate: '2026-08-28',
     version: '1.0',
     verified: true,
