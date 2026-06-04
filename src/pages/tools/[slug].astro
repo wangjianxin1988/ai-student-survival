@@ -20,9 +20,14 @@ import UpdateNotesClient from '@/components/tools/UpdateNotesClient';
 
 const { slug } = Astro.params;
 
-// Fetch pricing data server-side for SSR
-const pricingResult = await getPricing(slug || '');
-const initialPricingList = pricingResult.plans || [];
+// Fetch pricing data server-side for SSR (wrapped in try-catch to prevent page crash)
+let initialPricingList: any[] = [];
+try {
+  const pricingResult = await getPricing(slug || '');
+  initialPricingList = pricingResult.plans || [];
+} catch (e) {
+  console.error('Pricing fetch failed:', e);
+}
 
 // In real implementation, fetch from Supabase
 // For MVP, we use static data
