@@ -44,11 +44,15 @@ function escapeXml(str: string): string {
     .replace(/'/g, '&apos;');
 }
 
+// Date floor: any lastmod before this gets bumped to FALLBACK_DATE
+const DATE_FLOOR = '2025-06-01';
+
 // Helper to get the latest date from an array of dates
 function latestDate(dates: string[]): string {
   const valid = dates.filter(Boolean).map(d => d.split('T')[0]);
   if (valid.length === 0) return FALLBACK_DATE;
-  return valid.sort().reverse()[0];
+  const best = valid.sort().reverse()[0];
+  return best < DATE_FLOOR ? FALLBACK_DATE : best;
 }
 
 // Build slug→lastmod maps from data files (use real updatedAt/lastUpdated/createdAt)
