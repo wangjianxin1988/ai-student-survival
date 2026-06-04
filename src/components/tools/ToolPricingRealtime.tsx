@@ -300,10 +300,8 @@ export default function ToolPricingRealtime({ toolSlug, toolName, officialUrl, i
   };
 
   useEffect(() => {
-    // Initial fetch when component mounts
-    if (pricing.length === 0) {
-      fetchPricing();
-    }
+    // Always fetch fresh data from API on mount
+    fetchPricing();
   }, [toolSlug]);
 
   const formatDate = (isoString: string) => {
