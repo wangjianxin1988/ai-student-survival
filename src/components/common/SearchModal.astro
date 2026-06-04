@@ -321,7 +321,7 @@ const { locale = 'zh' } = Astro.props;
     getNoResults()?.classList.add('hidden');
   }
 
-  function showResults(results: typeof currentResults) {
+  function showResults(results) {
     var loadingState = getLoadingState();
     var initialState = getInitialState();
     var noResultsEl = getNoResults();
@@ -417,7 +417,7 @@ const { locale = 'zh' } = Astro.props;
 
     // Simulate a short delay for instant-appearing results
     setTimeout(() => {
-      const results: typeof currentResults = [];
+      const results = [];
 
       // Search tools
       searchData.tools.forEach(tool => {
