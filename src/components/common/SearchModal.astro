@@ -106,24 +106,47 @@ const { locale = 'zh' } = Astro.props;
     }
   });
 
-  // Search data sources
+  // Search data sources — all tools, pages, blog posts, payment guides
   const searchData = {
     tools: [
-      { name: 'ChatGPT', slug: 'chatgpt', category: '对话', description: 'OpenAI开发的AI对话助手' },
-      { name: 'Claude', slug: 'claude', category: '对话', description: 'Anthropic开发的AI助手，擅长长文本处理' },
+      { name: 'ChatGPT', slug: 'chatgpt', category: '对话', description: 'OpenAI AI对话助手，Go/Plus/Pro多层级' },
+      { name: 'Claude', slug: 'claude', category: '对话', description: 'Anthropic AI助手，Opus 4.8最新版' },
       { name: 'Midjourney', slug: 'midjourney', category: '设计', description: 'AI图像生成工具' },
-      { name: 'GitHub Copilot', slug: 'github-copilot', category: '编程', description: 'AI编程助手' },
+      { name: 'GitHub Copilot', slug: 'github-copilot', category: '编程', description: 'AI编程助手，代码补全' },
+      { name: 'GitHub Copilot App', slug: 'github-copilot-app', category: '编程', description: 'Agent原生桌面开发应用' },
       { name: 'Notion AI', slug: 'notion-ai', category: '写作', description: '集成在Notion中的AI助手' },
       { name: 'Perplexity', slug: 'perplexity', category: '研究', description: 'AI搜索引擎' },
-      { name: 'Kimi', slug: 'kimi', category: '对话', description: '月之暗面开发的AI助手，20万字上下文' },
-      { name: 'Gemini', slug: 'gemini', category: '对话', description: 'Google开发的AI助手' },
-      { name: 'DALL-E 3', slug: 'dalle-3', category: '设计', description: 'OpenAI开发的AI图像生成模型' },
-      { name: 'Stable Diffusion', slug: 'stable-diffusion', category: '设计', description: '开源AI图像生成模型' },
-      { name: 'Figma', slug: 'figma', category: '设计', description: 'AI增强的设计工具' },
-      { name: 'Grammarly', slug: 'grammarly', category: '写作', description: 'AI写作辅助工具' },
-      { name: 'QuillBot', slug: 'quillbot', category: '写作', description: 'AI改写和润色工具' },
-      { name: 'Cursor', slug: 'cursor', category: '编程', description: 'AI代码编辑器' },
       { name: 'Jasper', slug: 'jasper', category: '写作', description: '企业级AI写作助手' },
+      { name: 'Copy.ai', slug: 'copyai', category: '写作', description: 'AI文案生成工具，100+模板' },
+      { name: 'Grammarly', slug: 'grammarly', category: '写作', description: 'AI写作辅助，语法检查' },
+      { name: 'QuillBot', slug: 'quillbot', category: '写作', description: 'AI改写和润色工具' },
+      { name: 'Tabnine', slug: 'tabnine', category: '编程', description: 'AI代码补全插件' },
+      { name: 'Cursor', slug: 'cursor', category: '编程', description: 'AI代码编辑器，GPT-4驱动' },
+      { name: 'Replit', slug: 'replit', category: '编程', description: '在线AI编程平台' },
+      { name: 'Figma', slug: 'figma', category: '设计', description: 'AI增强的UI设计工具' },
+      { name: 'DALL-E 3', slug: 'dalle-3', category: '设计', description: 'OpenAI图像生成模型' },
+      { name: 'Stable Diffusion', slug: 'stable-diffusion', category: '设计', description: '开源AI图像生成' },
+      { name: 'Kimi', slug: 'kimi', category: '对话', description: '月之暗面AI助手，20万字上下文' },
+      { name: 'Gemini', slug: 'gemini', category: '对话', description: 'Google AI助手' },
+      { name: 'WebPilot', slug: 'webpilot', category: '研究', description: 'AI网页阅读助手' },
+      { name: 'Elicit', slug: 'elicit', category: '研究', description: 'AI学术研究助手' },
+      { name: 'OpenClaw', slug: 'openclaw', category: 'Agent', description: '开源AI Agent框架，300K+ Stars' },
+      { name: 'Hermes Agent', slug: 'hermes-agent', category: 'Agent', description: '自进化AI Agent框架' },
+      { name: 'Hermes Desktop', slug: 'hermes-desktop', category: 'Agent', description: 'Hermes桌面应用，跨平台' },
+      { name: 'AutoGPT', slug: 'autogpt', category: 'Agent', description: '自主任务执行Agent' },
+      { name: 'CrewAI', slug: 'crewai', category: 'Agent', description: '多Agent协作框架' },
+      { name: 'LangChain', slug: 'langchain', category: 'Agent', description: 'LLM应用开发框架' },
+      { name: 'Dify', slug: 'dify', category: 'Agent', description: '低代码LLM应用平台' },
+      { name: 'Coze', slug: 'coze', category: 'Agent', description: '字节跳动Bot开发平台' },
+      { name: 'Ollama', slug: 'ollama', category: '编程', description: '本地大模型运行工具' },
+      { name: 'LM Studio', slug: 'lm-studio', category: '编程', description: '本地LLM运行平台' },
+      { name: 'AnythingLLM', slug: 'anything-llm', category: 'Agent', description: '本地RAG知识库' },
+      { name: 'DeepSeek', slug: 'deepseek', category: '对话', description: '国产开源大模型，API极低价' },
+      { name: 'Qwen', slug: 'qwen', category: '对话', description: '阿里通义千问大模型' },
+      { name: 'ChatGLM', slug: 'chatglm', category: '对话', description: '清华智谱AI大模型' },
+      { name: 'Microsoft Scout', slug: 'microsoft-scout', category: 'Agent', description: '微软个人AI Agent' },
+      { name: 'OpenAI Codex', slug: 'openai-codex', category: '编程', description: 'OpenAI编码Agent' },
+      { name: 'Windsurf', slug: 'windsurf', category: '编程', description: 'Codeium AI代码编辑器' },
     ],
     pages: [
       { name: 'AI工具库', url: '/tools', description: '精选留学生常用的AI工具' },
@@ -131,6 +154,22 @@ const { locale = 'zh' } = Astro.props;
       { name: '大学AI政策', url: '/policies', description: '首家全面收录海外大学AI使用政策' },
       { name: 'Prompt模板库', url: '/prompts', description: '精选留学生常用的Prompt模板' },
       { name: '工具对比', url: '/compare', description: '横向对比多个AI工具' },
+      { name: '社区', url: '/community', description: '留学生AI工具使用社区' },
+      { name: '问答', url: '/questions', description: 'AI工具使用问答' },
+      { name: '生存指南', url: '/survival', description: '留学生AI生存指南' },
+      { name: '优惠信息', url: '/offers', description: 'AI工具优惠和折扣信息' },
+      { name: '博客', url: '/blog', description: 'AI工具评测、教程和资讯' },
+    ],
+    blog: [
+      { name: 'ChatGPT Go怎么订阅？2026最新教程', slug: 'chatgpt-go-how-to-subscribe', description: 'ChatGPT Go订阅完整指南，含虚拟卡支付方法' },
+      { name: 'Claude Opus 4.8评测：值得升级吗？', slug: 'claude-opus-48-review', description: 'Claude Opus 4.8详细评测，与GPT-5.5对比' },
+      { name: 'EU AI Act对留学生有什么影响？', slug: 'eu-ai-act-student-guide', description: '2026年8月2日截止日全解读' },
+      { name: '2026年最好用的AI编程工具Top 10', slug: 'best-ai-coding-tools-2026', description: 'Copilot、Cursor、Codex等10款工具对比' },
+    ],
+    payment: [
+      { name: 'ChatGPT订阅支付指南', id: 'chatgpt-subscription', description: 'Go/Plus/Pro全层级支付教程' },
+      { name: 'Depay虚拟卡', id: 'depay-virtual-card', description: 'USDT充值虚拟卡，无需KYC' },
+      { name: 'WildCard虚拟卡', id: 'wildcard-virtual-card', description: '支付宝充值，专为国内用户设计' },
     ],
     // Dynamically loaded on first search
     community: null,
@@ -382,6 +421,26 @@ const { locale = 'zh' } = Astro.props;
           page.description.toLowerCase().includes(q)
         ) {
           results.push({ type: 'page', ...page });
+        }
+      });
+
+      // Search blog posts
+      searchData.blog.forEach(post => {
+        if (
+          post.name.toLowerCase().includes(q) ||
+          post.description.toLowerCase().includes(q)
+        ) {
+          results.push({ type: 'page', name: post.name, url: `/blog/${post.slug}`, description: post.description, category: '博客' });
+        }
+      });
+
+      // Search payment solutions
+      searchData.payment.forEach(item => {
+        if (
+          item.name.toLowerCase().includes(q) ||
+          item.description.toLowerCase().includes(q)
+        ) {
+          results.push({ type: 'page', name: item.name, url: `/payment/${item.id}`, description: item.description, category: '支付' });
         }
       });
 
