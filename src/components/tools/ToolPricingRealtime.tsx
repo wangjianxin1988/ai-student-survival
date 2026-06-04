@@ -66,19 +66,16 @@ export default function ToolPricingRealtime({ toolSlug, toolName, officialUrl, i
 
     try {
       const response = await fetch(`/api/tools/pricing/${toolSlug}`);
+      const result = await response.json();
       
-      if (response.ok) {
-        const result = await response.json();
-        if (result.success && result.data) {
-          setPricing(result.data);
-          setLastRefresh(result.meta?.fetchedAt || new Date().toISOString());
-          setIsScraped(result.meta?.scraped || false);
-          setSource(result.meta?.source || '');
-          return;
-        }
+      if (result.success && result.data && result.data.length > 0) {
+        setPricing(result.data);
+        setLastRefresh(result.meta?.fetchedAt || new Date().toISOString());
+        setIsScraped(result.meta?.scraped || false);
+        setSource(result.meta?.source || '');
+      } else {
+        setError(t.error);
       }
-      
-      setError(t.error);
     } catch (err) {
       setError(t.error);
     } finally {
