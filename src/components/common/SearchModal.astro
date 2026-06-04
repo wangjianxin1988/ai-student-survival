@@ -27,6 +27,11 @@ const { locale = 'zh' } = Astro.props;
         class="flex-1 px-4 py-4 text-lg outline-none placeholder-gray-400"
         autocomplete="off"
       />
+      <button id="search-close-btn" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" aria-label="Close search">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
       <kbd class="hidden sm:inline-flex px-2 py-1 text-xs bg-gray-100 text-gray-500 rounded">ESC</kbd>
     </div>
 
@@ -259,36 +264,46 @@ const { locale = 'zh' } = Astro.props;
     historyList.querySelectorAll('.search-history-item').forEach(btn => {
       btn.addEventListener('click', (e) => {
         const text = e.target.textContent;
+        var input = getInput();
         if (input) input.value = text;
         search(text);
       });
     });
   }
 
-  // DOM Elements
-  const modal = document.getElementById('search-modal');
-  const input = document.getElementById('search-input');
-  const backdrop = document.getElementById('search-backdrop');
-  const initialState = document.getElementById('search-initial');
-  const loadingState = document.getElementById('search-loading');
-  const resultsContainer = document.getElementById('search-results-container');
-  const noResults = document.getElementById('search-no-results');
-  const clearHistoryBtn = document.getElementById('clear-history');
+  // DOM Elements - always re-query to avoid stale references
+  function getModal() { return document.getElementById('search-modal'); }
+  function getInput() { return document.getElementById('search-input'); }
+  function getBackdrop() { return document.getElementById('search-backdrop'); }
+  function getInitialState() { return document.getElementById('search-initial'); }
+  function getLoadingState() { return document.getElementById('search-loading'); }
+  function getResultsContainer() { return document.getElementById('search-results-container'); }
+  function getNoResults() { return document.getElementById('search-no-results'); }
+  function getClearHistoryBtn() { return document.getElementById('clear-history'); }
+  function getCloseBtn() { return document.getElementById('search-close-btn'); }
 
   let selectedIndex = -1;
   let currentResults: Array<{type: string, name: string, url: string, description: string, category?: string}> = [];
 
   function openModal() {
-    modal?.classList.add('active');
-    modal?.setAttribute('aria-hidden', 'false');
-    input?.focus();
+    var modal = getModal();
+    var input = getInput();
+    if (modal) {
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+    if (input) input.focus();
     document.body.style.overflow = 'hidden';
     renderSearchHistory();
   }
 
   function closeModal() {
-    modal?.classList.remove('active');
-    modal?.setAttribute('aria-hidden', 'true');
+    var modal = getModal();
+    var input = getInput();
+    if (modal) {
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden', 'true');
+    }
     if (input) input.value = '';
     resetToInitialState();
     document.body.style.overflow = '';
@@ -296,24 +311,30 @@ const { locale = 'zh' } = Astro.props;
   }
 
   function resetToInitialState() {
-    initialState?.classList.remove('hidden');
-    loadingState?.classList.add('hidden');
-    resultsContainer?.classList.add('hidden');
-    noResults?.classList.add('hidden');
-    if (resultsContainer) resultsContainer.innerHTML = '';
+    getInitialState()?.classList.remove('hidden');
+    getLoadingState()?.classList.add('hidden');
+    getResultsContainer()?.classList.add('hidden');
+    getNoResults()?.classList.add('hidden');
+    var rc = getResultsContainer();
+    if (rc) rc.innerHTML = '';
   }
 
   function showLoading() {
-    initialState?.classList.add('hidden');
-    loadingState?.classList.remove('hidden');
-    resultsContainer?.classList.add('hidden');
-    noResults?.classList.add('hidden');
+    getInitialState()?.classList.add('hidden');
+    getLoadingState()?.classList.remove('hidden');
+    getResultsContainer()?.classList.add('hidden');
+    getNoResults()?.classList.add('hidden');
   }
 
   function showResults(results: typeof currentResults) {
+    var loadingState = getLoadingState();
+    var initialState = getInitialState();
+    var noResultsEl = getNoResults();
+    var resultsContainer = getResultsContainer();
+
     loadingState?.classList.add('hidden');
     initialState?.classList.add('hidden');
-    noResults?.classList.add('hidden');
+    noResultsEl?.classList.add('hidden');
     resultsContainer?.classList.remove('hidden');
 
     if (results.length === 0) {
@@ -481,6 +502,7 @@ const { locale = 'zh' } = Astro.props;
     }
 
     // Close with ESC
+    var modal = getModal();
     if (e.key === 'Escape' && modal?.classList.contains('active')) {
       closeModal();
     }
@@ -504,27 +526,49 @@ const { locale = 'zh' } = Astro.props;
     }
   });
 
-  // Click handlers
-  backdrop?.addEventListener('click', closeModal);
-
-  // Clear history button
-  clearHistoryBtn?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    clearSearchHistory();
-  });
-
-  // Search input handler
-  input?.addEventListener('input', (e) => {
-    search(e.target.value);
-  });
-
-  // Trending search clicks
-  document.querySelectorAll('.search-trending').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      const text = (e.target as HTMLElement).textContent;
+  // Click handlers - use event delegation for reliability
+  document.addEventListener('click', (e) => {
+    // Close button (X)
+    if (e.target.closest('#search-close-btn')) {
+      closeModal();
+      return;
+    }
+    // Backdrop click
+    if (e.target.id === 'search-backdrop') {
+      closeModal();
+      return;
+    }
+    // Clear history button
+    if (e.target.closest('#clear-history')) {
+      e.stopPropagation();
+      clearSearchHistory();
+      return;
+    }
+    // Trending search clicks
+    if (e.target.closest('.search-trending')) {
+      var btn = e.target.closest('.search-trending');
+      var text = btn.textContent;
+      var input = getInput();
       if (input) input.value = text;
       search(text);
-    });
+      return;
+    }
+    // Search history item clicks
+    if (e.target.closest('.search-history-item')) {
+      var btn = e.target.closest('.search-history-item');
+      var text = btn.textContent;
+      var input = getInput();
+      if (input) input.value = text;
+      search(text);
+      return;
+    }
+  });
+
+  // Search input handler - use event delegation
+  document.addEventListener('input', (e) => {
+    if (e.target && e.target.id === 'search-input') {
+      search((e.target as HTMLInputElement).value);
+    }
   });
 
   // Expose open function for other components

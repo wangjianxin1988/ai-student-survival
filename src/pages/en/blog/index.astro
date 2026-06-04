@@ -1,0 +1,272 @@
+---
+export const prerender = false;
+
+import Layout from '@/layouts/Layout.astro';
+import { type Locale, t as translate, getLocaleFromUrl } from '@/i18n';
+import { blogPosts, getAllBlogCategories, getAllBlogTags } from '@/data/blogPosts';
+
+const locale: Locale = 'en';
+
+const posts = blogPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+const categories = getAllBlogCategories();
+const tags = getAllBlogTags();
+
+const categoryLabels: Record<string, { zh: string; en: string }> = {
+  tutorials: { zh: '教程', en: 'Tutorials' },
+  reviews: { zh: '评测', en: 'Reviews' },
+  policy: { zh: '政策解读', en: 'Policy' },
+  comparisons: { zh: '工具对比', en: 'Comparisons' },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "AI Student Survival Guide Blog",
+  "description": "In-depth articles about AI tools, policies, and tutorials for international students",
+  "url": "https://www.mi-to-ai.com/en/blog",
+  "blogPost": posts.map(post => ({
+    "@type": "BlogPosting",
+    "headline": post.titleEn,
+    "description": post.excerpt,
+    "datePublished": post.createdAt,
+    "dateModified": post.updatedAt,
+    "url": `https://www.mi-to-ai.com/en/blog/${post.slug}`,
+  })),
+};
+---
+
+<Layout
+  title="Blog - AI Student Survival Guide"
+  description="In-depth articles about AI tools, EU AI Act policies, tutorials and reviews for international students"
+  type="website"
+  canonicalUrl="https://www.mi-to-ai.com/en/blog"
+  jsonLd={jsonLd}
+>
+  <main class="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950">
+    <!-- Hero Section -->
+    <section class="pt-24 pb-12 px-4">
+      <div class="max-w-6xl mx-auto text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          📚 Blog
+        </h1>
+        <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+          Deep dives into AI tools, policies, and tutorials for international students
+        </p>
+      </div>
+    </section>
+
+    <!-- Category Filter -->
+    <section class="px-4 pb-8">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex flex-wrap gap-3 justify-center" id="category-filters">
+          <button
+            data-category="all"
+            class="category-btn px-4 py-2 rounded-full text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer"
+          >
+            All
+          </button>
+          {categories.map(cat => (
+            <button
+              data-category={cat}
+              class="category-btn px-4 py-2 rounded-full text-sm font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors cursor-pointer"
+            >
+              {categoryLabels[cat]?.['en'] || cat}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Blog Posts Grid -->
+    <section class="px-4 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {posts.map(post => (
+            <article
+              class="blog-post-card bg-white dark:bg-gray-800 rounded-2xl shadow-sm hover:shadow-lg transition-shadow border border-gray-100 dark:border-gray-700 overflow-hidden"
+              data-category={post.category}
+              data-tags={post.tags.join(',')}
+            >
+              <div class="p-6">
+                <!-- Category Badge -->
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                    {categoryLabels[post.category]?.['en'] || post.category}
+                  </span>
+                  <span class="text-sm text-gray-500 dark:text-gray-400">
+                    {post.readTime} min read
+                  </span>
+                </div>
+
+                <!-- Title -->
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+                  <a href={`/en/blog/${post.slug}`} class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    {post.titleEn}
+                  </a>
+                </h2>
+
+                <!-- Excerpt -->
+                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+                  {post.excerpt}
+                </p>
+
+                <!-- Tags -->
+                <div class="flex flex-wrap gap-2 mb-4">
+                  {post.tags.slice(0, 4).map(tag => (
+                    <span
+                      data-tag={tag}
+                      class="tag-btn px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+
+                <!-- Footer -->
+                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                  <time datetime={post.createdAt}>
+                    {post.createdAt}
+                  </time>
+                  <a
+                    href={`/en/blog/${post.slug}`}
+                    class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                  >
+                    Read more →
+                  </a>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Tags Cloud -->
+    <section class="px-4 pb-16">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
+          Popular Tags
+        </h2>
+        <div class="flex flex-wrap gap-3 justify-center" id="tag-filters">
+          {tags.map(tag => (
+            <span
+              data-tag={tag}
+              class="tag-btn px-4 py-2 rounded-full text-sm bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer transition-colors"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<script is:inline>
+(function() {
+  const categoryBtns = document.querySelectorAll('.category-btn');
+  const tagBtns = document.querySelectorAll('#tag-filters .tag-btn');
+  const postCards = document.querySelectorAll('.blog-post-card');
+  let activeCategory = 'all';
+  let activeTag = null;
+
+  function filterPosts() {
+    postCards.forEach(card => {
+      const cardCategory = card.getAttribute('data-category');
+      const cardTags = card.getAttribute('data-tags').split(',');
+
+      const categoryMatch = activeCategory === 'all' || cardCategory === activeCategory;
+      const tagMatch = !activeTag || cardTags.includes(activeTag);
+
+      if (categoryMatch && tagMatch) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+  }
+
+  function updateCategoryButtons(activeBtn) {
+    categoryBtns.forEach(btn => {
+      btn.classList.remove('bg-blue-600', 'text-white');
+      btn.classList.add('bg-gray-200', 'text-gray-700');
+    });
+    activeBtn.classList.remove('bg-gray-200', 'text-gray-700');
+    activeBtn.classList.add('bg-blue-600', 'text-white');
+  }
+
+  function updateTagButtons(activeBtn) {
+    tagBtns.forEach(btn => {
+      btn.classList.remove('bg-blue-600', 'text-white');
+      btn.classList.add('bg-gray-100', 'text-gray-700');
+    });
+    if (activeBtn) {
+      activeBtn.classList.remove('bg-gray-100', 'text-gray-700');
+      activeBtn.classList.add('bg-blue-600', 'text-white');
+    }
+  }
+
+  categoryBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      activeCategory = this.getAttribute('data-category');
+      updateCategoryButtons(this);
+      filterPosts();
+      const url = new URL(window.location);
+      if (activeCategory === 'all') {
+        url.searchParams.delete('category');
+      } else {
+        url.searchParams.set('category', activeCategory);
+      }
+      window.history.pushState({}, '', url);
+    });
+  });
+
+  tagBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const tag = this.getAttribute('data-tag');
+      if (activeTag === tag) {
+        activeTag = null;
+        updateTagButtons(null);
+      } else {
+        activeTag = tag;
+        updateTagButtons(this);
+      }
+      filterPosts();
+      const url = new URL(window.location);
+      if (activeTag) {
+        url.searchParams.set('tag', activeTag);
+      } else {
+        url.searchParams.delete('tag');
+      }
+      window.history.pushState({}, '', url);
+    });
+  });
+
+  // Apply filters from URL on page load
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlCategory = urlParams.get('category');
+  const urlTag = urlParams.get('tag');
+
+  if (urlCategory) {
+    activeCategory = urlCategory;
+    categoryBtns.forEach(btn => {
+      if (btn.getAttribute('data-category') === urlCategory) {
+        updateCategoryButtons(btn);
+      }
+    });
+  }
+
+  if (urlTag) {
+    activeTag = urlTag;
+    tagBtns.forEach(btn => {
+      if (btn.getAttribute('data-tag') === urlTag) {
+        updateTagButtons(btn);
+      }
+    });
+  }
+
+  if (urlCategory || urlTag) {
+    filterPosts();
+  }
+})();
+</script>
