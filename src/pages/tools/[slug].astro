@@ -1681,6 +1681,191 @@ const toolsData: Record<string, Tool> = {
     updateSourceUrl: 'https://github.com/THUDM/ChatGLM3/releases',
     updateSourceType: 'github',
   },
+  'hermes-desktop': {
+    id: '34',
+    name: 'Hermes Desktop',
+    slug: 'hermes-desktop',
+    description: 'Nous Research发布的Hermes Agent原生桌面应用，跨平台支持Windows/Mac/Linux，提供流式工具输出和完整的Agent能力。',
+    category: 'agent',
+    subcategory: 'desktop-agent',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://github.com/fathah/hermes-desktop',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=Hermes+Desktop',
+    rating: 4.6,
+    ratingCount: 1200,
+    dimensions: { easeOfUse: 4.5, features: 4.7, value: 4.9 },
+    tags: ['Agent', '桌面应用', '开源', '跨平台', 'Hermes'],
+    features: ['流式工具输出', '跨平台支持', '完整Agent能力', 'Skills系统', '长期记忆'],
+    alternatives: ['hermes-agent', 'openclaw'],
+    isNew: true,
+    createdAt: '2026-06-04',
+    updatedAt: '2026-06-04',
+    details: {
+      howToUse: [
+        { step: 1, title: '下载安装', description: '访问github.com/fathah/hermes-desktop下载对应平台安装包。Windows: .exe安装包，Mac: .dmg，Linux: .AppImage/.deb' },
+        { step: 2, title: '配置API Key', description: '首次启动后在设置中配置LLM API Key（OpenAI/Anthropic/本地Ollama等）。与CLI版本共享同一份config.yaml配置' },
+        { step: 3, title: '开始使用', description: '在聊天界面直接与Hermes Agent对话，支持工具调用、文件操作、代码执行等。流式输出让你实时看到Agent的工作过程' }
+      ],
+      useCases: [
+        { title: '桌面AI助手', description: '作为日常桌面AI助手，处理文件、搜索信息、编写代码、分析数据。相比CLI版本，图形界面更直观易用' },
+        { title: '可视化Agent工作流', description: '实时查看Agent的工具调用过程和思考链，便于调试和理解Agent的决策逻辑' }
+      ],
+      tips: [
+        '与CLI版本共享配置和记忆，可以在桌面和终端之间无缝切换',
+        '首次使用建议先用简单任务测试，熟悉Agent的工作方式后再尝试复杂任务'
+      ],
+      updateNotes: '2026年6月：Hermes Desktop v0.15.2发布，支持流式工具输出，跨平台原生体验'
+    },
+  },
+  'github-copilot-app': {
+    id: '35',
+    name: 'GitHub Copilot App',
+    slug: 'github-copilot-app',
+    description: 'GitHub推出的Agent原生桌面开发应用，支持并行Agent会话、PR生命周期管理、Canvas工作面和沙箱环境。',
+    category: 'coding',
+    subcategory: 'agent-ide',
+    pricing: 'paid',
+    priceDetail: { monthly: 10, yearly: 100, currency: 'USD' },
+    url: 'https://github.com/features/ai/github-app',
+    imageUrl: 'https://placehold.co/800x400/238636/ffffff?text=Copilot+App',
+    rating: 4.7,
+    ratingCount: 2800,
+    dimensions: { easeOfUse: 4.5, features: 4.8, value: 4.3 },
+    tags: ['编程', 'Agent', 'IDE', 'GitHub', '桌面应用'],
+    features: ['并行Agent会话', 'PR生命周期管理', 'Canvas工作面', '云/本地沙箱', '代码审查'],
+    alternatives: ['cursor', 'github-copilot'],
+    isNew: true,
+    createdAt: '2026-06-04',
+    updatedAt: '2026-06-04',
+    details: {
+      howToUse: [
+        { step: 1, title: '获取访问权限', description: '需要Copilot Pro/Pro+/Business/Enterprise订阅。访问github.com/features/ai/github-app下载桌面应用' },
+        { step: 2, title: '连接仓库', description: '登录GitHub账号后，连接你的代码仓库。Copilot App会自动获取issue、PR和代码上下文' },
+        { step: 3, title: '启动Agent会话', description: '从issue或prompt启动Agent会话，每个会话在独立的git worktree中运行。使用Canvas查看和管理工作进度' }
+      ],
+      useCases: [
+        { title: '并行多任务开发', description: '同时运行多个Agent处理不同issue，每个Agent在隔离环境中工作，互不干扰' },
+        { title: '自动化代码审查', description: 'Copilot Code Review自动审查PR，支持安全审查、自定义规范和多模型审查级别' }
+      ],
+      tips: [
+        'Technical Preview阶段，功能还在快速迭代中',
+        '建议配合GitHub Issues使用效果最佳'
+      ],
+      updateNotes: '2026年6月：Microsoft Build发布，Canvas、云沙箱、Agent Merge等新功能上线'
+    },
+  },
+  'microsoft-scout': {
+    id: '36',
+    name: 'Microsoft Scout',
+    slug: 'microsoft-scout',
+    description: '微软推出的Always-on个人AI Agent（Autopilot），深度集成Microsoft 365，可自主执行任务。',
+    category: 'agent',
+    subcategory: 'personal-agent',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://www.microsoft.com/en-us/microsoft-365/blog/2026/06/02/introducing-microsoft-scout-your-always-on-personal-agent/',
+    imageUrl: 'https://placehold.co/800x400/00a4ef/ffffff?text=Scout',
+    rating: 4.5,
+    ratingCount: 1500,
+    dimensions: { easeOfUse: 4.6, features: 4.5, value: 4.4 },
+    tags: ['Agent', '微软', 'Microsoft 365', '自动化', 'Autopilot'],
+    features: ['Always-on运行', 'Microsoft 365集成', '自主任务执行', '邮件/日历/文档管理'],
+    alternatives: ['hermes-agent', 'coze'],
+    isNew: true,
+    createdAt: '2026-06-04',
+    updatedAt: '2026-06-04',
+    details: {
+      howToUse: [
+        { step: 1, title: '获取访问权限', description: 'Microsoft 365订阅用户可使用。在Microsoft 365管理中心启用Scout功能' },
+        { step: 2, title: '配置权限', description: '设置Scout可访问的应用（邮件、日历、OneDrive、Teams等）。配置自动化规则和审批流程' },
+        { step: 3, title: '定义任务', description: '用自然语言描述任务，Scout会自主规划和执行。例如：每天早上整理未读邮件摘要、自动安排会议' }
+      ],
+      useCases: [
+        { title: '邮件自动管理', description: '自动分类、回复和整理邮件，生成每日邮件摘要' },
+        { title: '日程智能安排', description: '根据优先级和空闲时间自动安排会议和任务' }
+      ],
+      tips: [
+        '2026年6月刚发布，功能还在早期阶段',
+        '建议先在低风险场景测试，逐步扩大使用范围'
+      ],
+      updateNotes: '2026年6月2日：Microsoft Build 2026发布，全新Autopilot品类'
+    },
+  },
+  'openai-codex': {
+    id: '37',
+    name: 'OpenAI Codex',
+    slug: 'openai-codex',
+    description: 'OpenAI推出的编码Agent，支持自主编写、测试和部署代码。2026年6月新增角色插件和Sites功能。',
+    category: 'coding',
+    subcategory: 'code-agent',
+    pricing: 'paid',
+    priceDetail: { monthly: 20, yearly: 200, currency: 'USD' },
+    url: 'https://openai.com/index/codex-for-every-role-tool-workflow/',
+    imageUrl: 'https://placehold.co/800x400/10a37f/ffffff?text=Codex',
+    rating: 4.6,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.3, features: 4.7, value: 4.2 },
+    tags: ['编程', 'Agent', 'OpenAI', '代码生成', '自动化'],
+    features: ['自主编码', '角色插件', 'Sites', '注释功能', 'GPT-5.5驱动'],
+    alternatives: ['cursor', 'github-copilot-app'],
+    isNew: true,
+    createdAt: '2026-06-04',
+    updatedAt: '2026-06-04',
+    details: {
+      howToUse: [
+        { step: 1, title: '订阅ChatGPT Plus或更高层级', description: 'Codex包含在ChatGPT Plus($20/月)及以上订阅中。Pro $100/$200用户获得更多Codex用量' },
+        { step: 2, title: '访问Codex', description: '在ChatGPT界面中选择Codex模式，或通过API调用。支持终端和网页两种使用方式' },
+        { step: 3, title: '描述编码任务', description: '用自然语言描述你要实现的功能，Codex会自主编写代码、运行测试、修复Bug。支持角色插件适配不同工作场景' }
+      ],
+      useCases: [
+        { title: '快速原型开发', description: '描述产品需求，Codex快速生成可运行的原型代码' },
+        { title: '自动化测试', description: '让Codex为现有代码生成测试用例并自动运行' }
+      ],
+      tips: [
+        'Pro $100的10x Codex用量是限时促销（至2026年5月31日），之后恢复5x',
+        '建议先在小任务上测试，逐步增加复杂度'
+      ],
+      updateNotes: '2026年6月2日：新增角色插件、Sites、注释功能，面向所有角色和工作流'
+    },
+  },
+  'windsurf': {
+    id: '38',
+    name: 'Windsurf',
+    slug: 'windsurf',
+    description: 'Codeium推出的AI代码编辑器（原Codeium IDE），内置Cascade Agent，支持多文件编辑和智能代码补全。',
+    category: 'coding',
+    subcategory: 'code-editor',
+    pricing: 'freemium',
+    priceDetail: { monthly: 15, yearly: 144, currency: 'USD' },
+    url: 'https://windsurf.com',
+    imageUrl: 'https://placehold.co/800x400/6366f1/ffffff?text=Windsurf',
+    rating: 4.5,
+    ratingCount: 2100,
+    dimensions: { easeOfUse: 4.6, features: 4.6, value: 4.4 },
+    tags: ['编程', 'IDE', 'AI代码编辑器', 'Cascade', 'Codeium'],
+    features: ['Cascade Agent', '多文件编辑', '智能补全', '代码聊天', '上下文感知'],
+    alternatives: ['cursor', 'github-copilot'],
+    isNew: true,
+    createdAt: '2026-06-04',
+    updatedAt: '2026-06-04',
+    details: {
+      howToUse: [
+        { step: 1, title: '下载安装', description: '访问windsurf.com下载对应平台安装包。支持Windows/Mac/Linux' },
+        { step: 2, title: '注册账号', description: '免费版提供基础AI功能。Pro版($15/月)解锁Cascade Agent和高级模型' },
+        { step: 3, title: '使用Cascade', description: '在编辑器中按快捷键唤起Cascade Agent，描述你的编码需求，Agent会自动编辑多个文件完成任务' }
+      ],
+      useCases: [
+        { title: '智能代码重构', description: 'Cascade Agent可以跨多个文件进行代码重构，自动处理依赖关系' },
+        { title: '快速功能开发', description: '描述功能需求，Cascade自动编写实现代码、添加测试、更新文档' }
+      ],
+      tips: [
+        '免费版有每日AI使用额度限制，重度使用者建议升级Pro',
+        'Cascade Agent的上下文窗口较大，适合处理大型代码库'
+      ],
+      updateNotes: '持续更新中，Cascade Agent能力不断增强'
+    },
+  },
 };
 
 const tool = toolsData[slug as string];
