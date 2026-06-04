@@ -283,21 +283,7 @@ function getAlternatePath(loc: Locale): string {
       <Chatbot client:idle locale={locale} />
     </AuthProvider>
 
-    <script is:inline>
-      // Connect search trigger button to search modal
-      document.querySelectorAll('[data-search-trigger]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          var modal = document.getElementById('search-modal');
-          var input = document.getElementById('search-input');
-          if (modal) {
-            modal.classList.add('active');
-            modal.setAttribute('aria-hidden', 'false');
-            if (input) input.focus();
-            document.body.style.overflow = 'hidden';
-          }
-        });
-      });
-    </script>
+
 
     <!-- Monetag overlay ads removed per user request (zone 11076692) -->
     <!-- Inline ads (AdSense) are preserved in AdSlot components -->
