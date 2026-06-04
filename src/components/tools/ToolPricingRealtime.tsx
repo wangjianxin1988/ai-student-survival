@@ -15,6 +15,7 @@ interface ToolPricingRealtimeProps {
   toolName: string;
   officialUrl: string;
   initialPricing?: PricingPlan;
+  initialPricingList?: PricingPlan[];
   locale?: 'zh' | 'en';
 }
 
@@ -52,7 +53,7 @@ const translations = {
 };
 
 export default function ToolPricingRealtime({ toolSlug, toolName, officialUrl, initialPricing, locale = 'zh' }: ToolPricingRealtimeProps) {
-  const [pricing, setPricing] = useState<PricingPlan[]>(initialPricing ? [initialPricing] : []);
+  const [pricing, setPricing] = useState<PricingPlan[]>(initialPricingList || (initialPricing ? [initialPricing] : []));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<string>('');

@@ -15,9 +15,14 @@ import ShareButton from '@/components/common/ShareButton';
 import LikeButton from '@/components/common/LikeButton';
 import CommentSection from '@/components/user/CommentSection';
 import ToolPricingRealtime from '@/components/tools/ToolPricingRealtime';
+import { getPricing } from '../../lib/pricing/scraper';
 import UpdateNotesClient from '@/components/tools/UpdateNotesClient';
 
 const { slug } = Astro.params;
+
+// Fetch pricing data server-side for SSR
+const pricingResult = await getPricing(slug || '');
+const initialPricingList = pricingResult.plans || [];
 
 // In real implementation, fetch from Supabase
 // For MVP, we use static data
@@ -2524,6 +2529,7 @@ const jsonLd = [
             toolSlug={tool.slug}
             toolName={tool.name}
             officialUrl={tool.url}
+            initialPricingList={initialPricingList}
             locale="zh"
           />
 
