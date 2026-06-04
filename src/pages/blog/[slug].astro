@@ -39,6 +39,8 @@ function markdownToHtml(md: string): string {
   // Bold and italic
   .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   .replace(/\*(.+?)\*/g, '<em>$1</em>')
+  // Images (before links to avoid conflict)
+  .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" />')
   // Links
   .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
   // Inline code
@@ -266,10 +268,13 @@ const breadcrumbs = [
   color: #dc2626;
  }
  .blog-content table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-  font-size: 0.9em;
+   width: 100%;
+   border-collapse: collapse;
+   margin: 1.5rem 0;
+   font-size: 0.9em;
+   display: block;
+   overflow-x: auto;
+   -webkit-overflow-scrolling: touch;
  }
  .blog-content td,
  .blog-content th {
