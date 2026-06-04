@@ -1,5 +1,5 @@
 import type { APIRoute } from 'astro';
-import { getPricing } from '../../../lib/pricing/scraper';
+import { getPricing } from '../../../../../lib/pricing/scraper';
 
 export const prerender = false;
 
