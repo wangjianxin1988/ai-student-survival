@@ -215,6 +215,29 @@ const pricingDatabase: Record<string, PricingPlan[]> = {
   'chatglm': [
     { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['Open source', 'GLM-4', 'API access'], lastUpdated: '2026-06-01', source: 'ChatGLM Official' },
   ],
+
+  // ========== New Tools (2026) ==========
+  'hermes-desktop': [
+    { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['Open source', 'Cross-platform', 'Full Agent capabilities', 'Skills system'], lastUpdated: '2026-06-01', source: 'Nous Research Official' },
+  ],
+  'github-copilot-app': [
+    { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['Basic completions', 'Limited usage', 'Community support'], lastUpdated: '2026-06-01', source: 'GitHub Official' },
+    { price: '$10', currency: 'USD', period: '/month', planName: 'Pro', features: ['Unlimited completions', 'Agent sessions', 'PR lifecycle', 'Canvas'], lastUpdated: '2026-06-01', source: 'GitHub Official' },
+    { price: '$39', currency: 'USD', period: '/month', planName: 'Pro+', features: ['Everything in Pro', 'Advanced code review', 'Priority support'], lastUpdated: '2026-06-01', source: 'GitHub Official' },
+  ],
+  'microsoft-scout': [
+    { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['Basic AI assistant', 'Microsoft 365 integration', 'Limited automation'], lastUpdated: '2026-06-01', source: 'Microsoft Official' },
+    { price: '$10', currency: 'USD', period: '/month', planName: 'Premium', features: ['Full Autopilot', 'Advanced automation', 'Priority support'], lastUpdated: '2026-06-01', source: 'Microsoft Official' },
+  ],
+  'openai-codex': [
+    { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['Limited Codex access', 'Basic code generation'], lastUpdated: '2026-06-01', source: 'OpenAI Official' },
+    { price: '$20', currency: 'USD', period: '/month', planName: 'Plus', features: ['Standard Codex', 'Role plugins', 'Sites', 'GPT-5.5'], lastUpdated: '2026-06-01', source: 'OpenAI Official' },
+    { price: '$100', currency: 'USD', period: '/month', planName: 'Pro', features: ['5x usage', 'All features', 'Priority support'], lastUpdated: '2026-06-01', source: 'OpenAI Official' },
+  ],
+  'windsurf': [
+    { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['Basic Cascade', 'Limited AI usage', 'Standard features'], lastUpdated: '2026-06-01', source: 'Codeium Official' },
+    { price: '$15', currency: 'USD', period: '/month', planName: 'Pro', features: ['Full Cascade Agent', 'Unlimited AI', 'Advanced models', 'Priority support'], lastUpdated: '2026-06-01', source: 'Codeium Official' },
+  ],
 };
 
 function getCachedPricing(slug: string): PricingPlan[] | null {
