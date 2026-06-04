@@ -22,12 +22,16 @@ interface ToolPricingRealtimeProps {
 const fallbackPricing: Record<string, PricingInfo[]> = {
   'chatgpt': [
     { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['GPT-3.5 access', 'Basic features', 'Standard response speed'], lastUpdated: new Date().toISOString(), source: 'OpenAI Official' },
+    { price: '$8', currency: 'USD', period: '/month', planName: 'Go', features: ['GPT-4o mini', 'Higher limits', 'Extended context'], lastUpdated: new Date().toISOString(), source: 'OpenAI Official' },
     { price: '$20', currency: 'USD', period: '/month', planName: 'Plus', features: ['GPT-4 access', 'DALL-E image generation', 'Advanced features', 'Priority access'], lastUpdated: new Date().toISOString(), source: 'OpenAI Official' },
-    { price: '$200', currency: 'USD', period: '/month', planName: 'Pro', features: ['Unlimited GPT-4', 'All features', 'Team features'], lastUpdated: new Date().toISOString(), source: 'OpenAI Official' },
+    { price: '$100', currency: 'USD', period: '/month', planName: 'Pro $100', features: ['Unlimited GPT-4o', 'Advanced voice', 'Codex access', 'Deep research'], lastUpdated: new Date().toISOString(), source: 'OpenAI Official' },
+    { price: '$200', currency: 'USD', period: '/month', planName: 'Pro $200', features: ['Everything in Pro $100', 'Maximum compute', 'Unlimited all models', 'Priority access'], lastUpdated: new Date().toISOString(), source: 'OpenAI Official' },
   ],
   'claude': [
     { price: '$0', currency: 'USD', period: '/month', planName: 'Free', features: ['Claude 3 Haiku', 'Standard features', 'Limited usage'], lastUpdated: new Date().toISOString(), source: 'Anthropic Official' },
     { price: '$20', currency: 'USD', period: '/month', planName: 'Pro', features: ['Claude 3 Sonnet & Opus', 'Priority access', 'Higher limits'], lastUpdated: new Date().toISOString(), source: 'Anthropic Official' },
+    { price: '$100', currency: 'USD', period: '/month', planName: 'Max 5x', features: ['5x Pro usage', 'Priority access', 'Extended thinking'], lastUpdated: new Date().toISOString(), source: 'Anthropic Official' },
+    { price: '$200', currency: 'USD', period: '/month', planName: 'Max 20x', features: ['20x Pro usage', 'Highest priority', 'All features unlocked'], lastUpdated: new Date().toISOString(), source: 'Anthropic Official' },
   ],
   'midjourney': [
     { price: '$10', currency: 'USD', period: '/month', planName: 'Basic', features: ['200 images/month', 'Fast generation'], lastUpdated: new Date().toISOString(), source: 'Midjourney Official' },
