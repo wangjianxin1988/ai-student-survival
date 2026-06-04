@@ -1464,15 +1464,51 @@ const jsonLd = [
       "description": tool.description
     },
     "image": tool.imageUrl
+  },
+  // FAQPage Schema
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": `What is ${tool.name}?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": tool.description
+        }
+      },
+      {
+        "@type": "Question",
+        "name": `How much does ${tool.name} cost?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": tool.pricing === 'free'
+            ? `${tool.name} is completely free to use.`
+            : tool.pricing === 'freemium'
+              ? `${tool.name} offers a free tier with basic features. Paid plans start at $${tool.priceDetail.monthly}/month, unlocking advanced capabilities, higher usage limits, and priority access.`
+              : `${tool.name} is a paid tool starting at $${tool.priceDetail.monthly}/month with full feature access.`
+        }
+      },
+      {
+        "@type": "Question",
+        "name": `Is ${tool.name} good for students?`,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": `Yes, ${tool.name} can be very useful for students. However, please check your university's AI usage policy, as some courses may restrict AI tool usage. We recommend reviewing your school's specific guidelines and using AI tools within the permitted scope.`
+        }
+      }
+    ]
   }
 ];
 ---
 
 <Layout
-  title={tool.name}
+  title={`${tool.name} AI Assistant`}
   description={tool.description}
   image={tool.imageUrl}
   type="article"
+  locale="en"
   jsonLd={jsonLd}
   breadcrumbs={[
     { name: 'Home', href: '/en/' },
