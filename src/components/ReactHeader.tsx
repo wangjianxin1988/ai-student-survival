@@ -30,6 +30,7 @@ const baseNavLinks = [
   { href: '/tools', key: 'nav.aiTools', shortZh: 'AI工具', shortEn: 'AI Tools' },
   { href: '/payment', key: 'nav.payment', shortZh: 'AI工具支付指南', shortEn: 'AI Tools Payment' },
   { href: '/policies', key: 'nav.policies', shortZh: '大学AI政策', shortEn: 'University AI Policies' },
+  { href: '/blog', key: 'nav.blog', shortZh: '博客', shortEn: 'Blog' },
   { href: '/map', key: 'nav.map', shortZh: '妙妙地图', shortEn: 'Map' },
   { href: '/survival', key: 'nav.survival', shortZh: '防坑指南', shortEn: 'Survival Guide' },
   { href: '/prompts', key: 'nav.prompts', shortZh: 'Prompt', shortEn: 'Prompts' },
