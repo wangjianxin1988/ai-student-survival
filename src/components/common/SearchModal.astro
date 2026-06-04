@@ -181,7 +181,7 @@ const { locale = 'zh' } = Astro.props;
         const res = await fetch('/api/community?limit=30&sort=latest');
         const data = await res.json();
         if (data.success && data.data) {
-          searchData.community = data.data.slice(0, 30).map((post: any) => ({
+          searchData.community = data.data.slice(0, 30).map((post) => ({
             name: post.title || post.content?.slice(0, 60) || '社区帖子',
             url: `/community/${post.id}`,
             description: post.content?.slice(0, 120) || '',
@@ -194,7 +194,7 @@ const { locale = 'zh' } = Astro.props;
         const res = await fetch('/api/policies');
         const data = await res.json();
         if (data.success && data.data) {
-          searchData.policies = data.data.slice(0, 20).map((policy: any) => ({
+          searchData.policies = data.data.slice(0, 20).map((policy) => ({
             name: policy.university || policy.name || '大学政策',
             url: `/policies/${policy.slug || policy.id}`,
             description: policy.summary || policy.ai_policy || '',
@@ -208,7 +208,7 @@ const { locale = 'zh' } = Astro.props;
   const SEARCH_HISTORY_KEY = 'demo_search_history';
   const MAX_HISTORY_ITEMS = 10;
 
-  function getSearchHistory(): string[] {
+  function getSearchHistory() {
     try {
       const stored = localStorage.getItem(SEARCH_HISTORY_KEY);
       return stored ? JSON.parse(stored) : [];
@@ -217,7 +217,7 @@ const { locale = 'zh' } = Astro.props;
     }
   }
 
-  function addToSearchHistory(query: string) {
+  function addToSearchHistory(query) {
     if (!query.trim()) return;
     let history = getSearchHistory();
     // Remove if already exists
@@ -276,7 +276,7 @@ const { locale = 'zh' } = Astro.props;
   function getCloseBtn() { return document.getElementById('search-close-btn'); }
 
   let selectedIndex = -1;
-  let currentResults: Array<{type: string, name: string, url: string, description: string, category?: string}> = [];
+  let currentResults = [];
 
   function openModal() {
     var modal = getModal();
@@ -399,7 +399,7 @@ const { locale = 'zh' } = Astro.props;
     });
   }
 
-  async function search(query: string) {
+  async function search(query) {
     if (!query.trim()) {
       resetToInitialState();
       return;
