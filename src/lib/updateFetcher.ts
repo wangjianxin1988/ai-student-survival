@@ -231,6 +231,30 @@ export const UPDATE_SOURCES: Record<string, UpdateSource> = {
     githubOwner: 'THUDM',
     githubRepo: 'ChatGLM3',
   },
+
+  // ========== New Tools (2026) ==========
+  'hermes-desktop': {
+    url: 'https://github.com/fathah/hermes-desktop/releases',
+    type: 'github',
+    githubOwner: 'fathah',
+    githubRepo: 'hermes-desktop',
+  },
+  'github-copilot-app': {
+    url: 'https://github.blog/changelog/',
+    type: 'changelog',
+  },
+  'microsoft-scout': {
+    url: 'https://www.microsoft.com/en-us/microsoft-365/blog/',
+    type: 'changelog',
+  },
+  'openai-codex': {
+    url: 'https://openai.com/index/',
+    type: 'changelog',
+  },
+  'windsurf': {
+    url: 'https://windsurf.com/blog',
+    type: 'changelog',
+  },
 };
 
 // GitHub API 调用获取最新 release

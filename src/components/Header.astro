@@ -130,19 +130,11 @@ const navLinks = [
     mobileMenu?.classList.toggle('hidden');
   });
 
-  // Search button click handler - directly show modal
+  // Search button click handler - use the exposed openSearch function
   const searchBtn = document.querySelector('[data-search-trigger]');
-  console.log('Search button found:', searchBtn);
   searchBtn?.addEventListener('click', () => {
-    console.log('Search button clicked!');
-    const modal = document.getElementById('search-modal');
-    const input = document.getElementById('search-input');
-    console.log('Modal:', modal, 'Input:', input);
-    if (modal) {
-      modal.classList.add('active');
-      modal.setAttribute('aria-hidden', 'false');
-      input?.focus();
-      document.body.style.overflow = 'hidden';
+    if (typeof window.openSearch === 'function') {
+      window.openSearch();
     }
   });
 </script>

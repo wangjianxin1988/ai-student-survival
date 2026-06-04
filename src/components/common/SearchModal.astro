@@ -9,7 +9,7 @@ interface Props {
 const { locale = 'zh' } = Astro.props;
 ---
 
-<div id="search-modal" class="fixed inset-0 z-50 hidden" aria-hidden="false">
+<div id="search-modal" class="fixed inset-0 z-50" style="display:none" aria-hidden="true">
   <!-- Backdrop -->
   <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="search-backdrop"></div>
 
@@ -100,14 +100,7 @@ const { locale = 'zh' } = Astro.props;
   document.addEventListener('click', function(e) {
     var target = e.target.closest('[data-search-trigger]');
     if (target) {
-      var modal = document.getElementById('search-modal');
-      var input = document.getElementById('search-input');
-      if (modal) {
-        modal.classList.add('active');
-        modal.setAttribute('aria-hidden', 'false');
-        if (input) input.focus();
-        document.body.style.overflow = 'hidden';
-      }
+      openModal();
     }
   });
 
@@ -291,6 +284,7 @@ const { locale = 'zh' } = Astro.props;
     if (modal) {
       modal.classList.add('active');
       modal.setAttribute('aria-hidden', 'false');
+      modal.style.display = 'flex';
     }
     if (input) input.focus();
     document.body.style.overflow = 'hidden';
@@ -303,6 +297,7 @@ const { locale = 'zh' } = Astro.props;
     if (modal) {
       modal.classList.remove('active');
       modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
     }
     if (input) input.value = '';
     resetToInitialState();
@@ -339,7 +334,7 @@ const { locale = 'zh' } = Astro.props;
 
     if (results.length === 0) {
       resultsContainer?.classList.add('hidden');
-      noResults?.classList.remove('hidden');
+      noResultsEl?.classList.remove('hidden');
       return;
     }
 
