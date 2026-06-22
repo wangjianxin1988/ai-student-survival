@@ -255,7 +255,39 @@ export const UPDATE_SOURCES: Record<string, UpdateSource> = {
     url: 'https://windsurf.com/blog',
     type: 'changelog',
   },
-};
+  'lovable': {
+    url: 'https://lovable.dev/blog',
+    type: 'blog',
+  },
+  'bolt-new': {
+    url: 'https://bolt.new/blog',
+    type: 'blog',
+  },
+  'v0-vercel': {
+    url: 'https://v0.dev',
+    type: 'changelog',
+  },
+  'google-stitch': {
+    url: 'https://stitch.withgoogle.com',
+    type: 'none',
+  },
+  'nxcode': {
+    url: 'https://nxcode.io/blog',
+    type: 'blog',
+  },
+  'claude-code': {
+      url: 'https://docs.anthropic.com/en/docs/claude-code',
+      type: 'changelog',
+    },
+    'notebooklm': {
+      url: 'https://blog.google/technology/ai/notebooklm-updates/',
+      type: 'blog',
+    },
+    'manus': {
+      url: 'https://help.manus.im',
+      type: 'blog',
+    },
+  };
 
 // GitHub API 调用获取最新 release
 export async function fetchGitHubLatestRelease(owner: string, repo: string): Promise<string | null> {

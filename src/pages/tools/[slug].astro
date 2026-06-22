@@ -60,7 +60,7 @@ const toolsData: Record<string, Tool> = {
         'GPT-4o相比GPT-4 Turbo响应更快且免费额度更多，日常使用优先选择GPT-4o以节省GPT-4额度',
         '多模态交互：直接粘贴截图或照片让GPT分析，可识别UI设计、代码截图、表格内容甚至手绘草图'
       ],
-      updateNotes: '2026年4月：GPT-4o全面推出，支持实时语音对话、屏幕共享、情绪识别；ChatGPT Mac版支持屏幕共享；SearchGPT测试中集成实时网络搜索'
+      updateNotes: '2026年6月：GPT-5.5模型已面向Plus/Pro/Business/Enterprise/Edu全量推送（4月23日发布，1M上下文窗口，API定价$30/百万输出token）。ChatGPT内置网页搜索功能原生集成到对话中，自动判断是否联网并给出带引用来源的回答。Codex CLI同步升级GPT-5.5驱动'
     },
     updateSourceUrl: 'https://help.openai.com/en/articles/6825453-chatgpt-release-notes',
     updateSourceType: 'changelog',
@@ -104,7 +104,7 @@ const toolsData: Record<string, Tool> = {
         '通过Artifacts分享代码片段，生成的React组件、HTML页面可直接嵌入网站，点击打开完整预览',
         'Web Search扩展可获取实时信息，但在深度分析任务中慎用，会消耗额外配额'
       ],
-      updateNotes: '2026年5月：Claude 3.5 Sonnet升级支持更长的上下文窗口；新增 Projects 功能可上传文件集构建知识库；引用功能全面支持PDF内联引用；Team Plan推出支持5人团队协作'
+      updateNotes: '2026年6月：Claude Fable 5与Mythos 5同步发布（6月9-10日），Fable 5为Mythos级别的公众版本，SWE-Bench Pro 80.3%超Opus 4.8 11分，定价$10/$50每百万token。Claude Opus系列版本号密集迭代：4.6（2月）→4.7（4月16日）→4.8（5月28日）→Fable 5（6月9日）。Claude Sonnet 4.5的1M上下文beta于4月30日退役'
     },
     updateSourceUrl: 'https://docs.anthropic.com/en/release-notes/overview',
     updateSourceType: 'changelog',
@@ -702,7 +702,7 @@ const toolsData: Record<string, Tool> = {
         '利用Gems创建专属AI助手，如Python导师、健身教练、翻译助手，预设指令和知识库后每次对话自动加载',
         'Google Workspace用户可将Gemini集成到Gmail和Docs，对长邮件点击Summarize快速获取要点，在Docs中直接询问内容相关问题'
       ],
-      updateNotes: '2026年4月：Gemini 2.0 Flash推出，响应速度提升2倍；Deep Research支持中文和更多语言；Gems商店上线提供预设助手；Gemini Nano可在Android设备离线运行'
+      updateNotes: '2026年6月：Gemini 3.1 Pro Preview 2月19日发布，1M上下文（>200K分段计价），API定价$4输入/$18输出（每百万token）。已在Gemini API/Vertex AI/Gemini App/NotebookLM全平台铺开。Google I/O 2026还发布Gemini 3.5 Flash GA、Gemini 3.5 Pro 公告，以及Spark agents和Omni视频模型'
     },
     updateSourceUrl: 'https://ai.google.dev/gemini-api/docs/changelog',
     updateSourceType: 'changelog',
@@ -1590,7 +1590,7 @@ const toolsData: Record<string, Tool> = {
         '成本控制：开启 stream 模式实时返回减少等待时间；合理设置 max_tokens 避免浪费；批量请求合并调用',
         'Token计算：用官方工具或 tiktoken 库准确计算token数，避免超出限额。中文token数约为汉字数的1.5-2倍'
       ],
-      updateNotes: '2026年更新: DeepSeek-V3最新版本发布，MoE架构2400亿参数，代码能力大幅提升。DeepSeek-R2正在内测，支持多模态。新增Function Calling稳定版，API新增EU区域节点'
+      updateNotes: '2026年6月：DeepSeek V4-Pro 5月25日宣布永久降价75%（原限时优惠结束转为正式价），输出价格降至$0.87/百万token，比Claude Opus 4.8便宜17倍、比GPT-5.5便宜约100倍。DeepSeek-V4-Flash输入缓存命中价降至0.02元/百万token。同步开放Function Calling稳定版与API新增EU区域节点'
     },
     updateSourceUrl: 'https://api-docs.deepseek.com/updates',
     updateSourceType: 'changelog',
@@ -1874,6 +1874,252 @@ const toolsData: Record<string, Tool> = {
       updateNotes: '持续更新中，Cascade Agent能力不断增强'
     },
     updateSourceUrl: 'https://windsurf.com/blog',
+    updateSourceType: 'changelog',
+  },
+  'lovable': {
+    id: '39',
+    name: 'Lovable',
+    slug: 'lovable',
+    description: '增长最快的AI应用构建器，从提示词到部署好的MVP仅需1小时，内置Supabase集成，适合快速验证创业想法',
+    category: 'coding',
+    subcategory: 'no-code-ai',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://lovable.dev',
+    imageUrl: 'https://placehold.co/800x400/f43f5e/ffffff?text=Lovable',
+    rating: 4.5,
+    ratingCount: 3200,
+    dimensions: { easeOfUse: 4.8, features: 4.3, value: 4.5 },
+    tags: ['应用构建', '无代码', 'MVP', '创业', 'Supabase'],
+    features: ['提示词生成全栈应用', '内置Supabase集成', '一键部署', '实时预览', '代码导出'],
+    alternatives: ['bolt-new', 'v0-vercel', 'nxcode'],
+    isNew: true,
+    createdAt: '2026-06-15',
+    updatedAt: '2026-06-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册账户', description: '访问lovable.dev使用Google或GitHub账户注册，免费用户即可开始构建' },
+        { step: 2, title: '描述你的应用', description: '在输入框中用自然语言描述你想要的应用，如"创建一个任务管理应用，支持用户注册和待办列表"' },
+        { step: 3, title: '预览和迭代', description: 'Lovable会生成完整的应用预览，你可以继续对话修改功能、样式和布局' }
+      ],
+      useCases: [
+        { title: '创业MVP验证', description: '1小时内从创意到部署好的MVP，快速验证商业想法，内置Supabase提供用户认证和数据库' },
+        { title: '课程项目开发', description: '留学生课程作业和项目，无需学习复杂框架，用自然语言描述即可生成完整应用' },
+        { title: '原型快速制作', description: '为产品经理和设计师快速制作可交互的产品原型，支持实时预览和迭代' }
+      ],
+      tips: [
+        '描述越详细，生成的应用越接近预期，包括功能、页面结构、用户交互等',
+        '利用内置的Supabase集成，可以快速实现用户认证、数据库存储和实时功能',
+        '免费版有一定使用限制，建议先在免费版验证想法后再升级'
+      ],
+      updateNotes: '2026年Q1达到$20M ARR，持续优化生成质量和部署速度'
+    },
+    updateSourceUrl: 'https://lovable.dev/blog',
+    updateSourceType: 'blog',
+  },
+  'bolt-new': {
+    id: '40',
+    name: 'Bolt.new',
+    slug: 'bolt-new',
+    description: '基于浏览器的AI应用构建器，使用WebContainers技术完全在浏览器中运行，零本地配置，适合快速原型开发',
+    category: 'coding',
+    subcategory: 'no-code-ai',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://bolt.new',
+    imageUrl: 'https://placehold.co/800x400/8b5cf6/ffffff?text=Bolt.new',
+    rating: 4.4,
+    ratingCount: 2800,
+    dimensions: { easeOfUse: 4.7, features: 4.2, value: 4.4 },
+    tags: ['应用构建', '浏览器', '无代码', 'WebContainers', '原型'],
+    features: ['浏览器内运行', '零配置', 'WebContainers技术', '实时预览', 'npm支持'],
+    alternatives: ['lovable', 'v0-vercel', 'nxcode'],
+    isNew: true,
+    createdAt: '2026-06-15',
+    updatedAt: '2026-06-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '直接访问', description: '访问bolt.new，无需安装任何软件，直接在浏览器中开始构建' },
+        { step: 2, title: '描述需求', description: '用自然语言描述你想要的应用或网站，Bolt.new会自动生成代码并在浏览器中运行' },
+        { step: 3, title: '实时修改', description: '通过对话继续修改功能，支持npm包安装、API调用等高级功能' }
+      ],
+      useCases: [
+        { title: '快速原型', description: '无需配置本地开发环境，在浏览器中直接构建和预览Web应用原型' },
+        { title: '学习编程', description: '初学者可以通过AI辅助学习Web开发，实时看到代码效果' },
+        { title: '小型项目', description: '快速构建小型工具、着陆页、仪表板等，适合个人和小团队' }
+      ],
+      tips: [
+        '基于WebContainers技术，支持完整的Node.js运行环境，可以安装npm包',
+        '免费版有每日使用限制，合理规划使用时间',
+        '生成的代码可以导出到本地继续开发'
+      ],
+      updateNotes: '2026年ARR达$40M，持续优化浏览器内开发体验'
+    },
+    updateSourceUrl: 'https://bolt.new/blog',
+    updateSourceType: 'blog',
+  },
+  'v0-vercel': {
+    id: '41',
+    name: 'v0 by Vercel',
+    slug: 'v0-vercel',
+    description: 'Vercel出品的AI UI组件生成器，专注于生成高质量React和Tailwind CSS组件，支持Figma转代码',
+    category: 'design',
+    subcategory: 'ui-design',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://v0.dev',
+    imageUrl: 'https://placehold.co/800x400/000000/ffffff?text=v0',
+    rating: 4.5,
+    ratingCount: 2100,
+    dimensions: { easeOfUse: 4.6, features: 4.4, value: 4.5 },
+    tags: ['UI组件', 'React', 'Tailwind', 'Figma', '前端'],
+    features: ['React组件生成', 'Tailwind CSS', 'Figma转代码', 'Shadcn/ui集成', '实时预览'],
+    alternatives: ['lovable', 'bolt-new', 'figma'],
+    isNew: true,
+    createdAt: '2026-06-15',
+    updatedAt: '2026-06-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '描述组件', description: '访问v0.dev，用自然语言描述你想要的UI组件，如"创建一个带搜索框的导航栏"' },
+        { step: 2, title: '选择变体', description: 'v0会生成多个变体供选择，点击喜欢的变体进入详细编辑' },
+        { step: 3, title: '复制代码', description: '一键复制React+Tailwind代码到你的项目中，或从Figma导入设计稿' }
+      ],
+      useCases: [
+        { title: '前端组件开发', description: '快速生成React和Tailwind CSS组件，提升前端开发效率' },
+        { title: 'Figma转代码', description: '将Figma设计稿转换为可用的React组件，缩短设计到开发的周期' },
+        { title: 'UI学习', description: '学习React和Tailwind CSS的最佳实践，通过AI生成的代码学习组件设计' }
+      ],
+      tips: [
+        '生成的组件基于Shadcn/ui，可以直接集成到Next.js项目中',
+        '支持Figma导入，设计师可以在Figma中完成设计后直接转为代码',
+        '与其他工具配合使用效果最佳，如用v0生成组件，用Lovable构建完整应用'
+      ],
+      updateNotes: '持续优化组件生成质量和Figma集成'
+    },
+    updateSourceUrl: 'https://v0.dev',
+    updateSourceType: 'changelog',
+  },
+  'google-stitch': {
+    id: '42',
+    name: 'Google Stitch',
+    slug: 'google-stitch',
+    description: 'Google出品的免费AI设计工具，每月550次生成额度，可根据文本描述生成生产级UI设计，目前处于Labs阶段',
+    category: 'design',
+    subcategory: 'ui-design',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://stitch.withgoogle.com',
+    imageUrl: 'https://placehold.co/800x400/4285f4/ffffff?text=Google+Stitch',
+    rating: 4.3,
+    ratingCount: 1500,
+    dimensions: { easeOfUse: 4.7, features: 4.1, value: 4.8 },
+    tags: ['设计', '免费', 'Google', 'UI设计', 'Labs'],
+    features: ['免费550次/月', '文本生成UI设计', '生产级输出', 'Google出品', 'Labs阶段'],
+    alternatives: ['v0-vercel', 'figma', 'midjourney'],
+    isNew: true,
+    createdAt: '2026-06-15',
+    updatedAt: '2026-06-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '访问平台', description: '访问stitch.withgoogle.com，使用Google账户登录' },
+        { step: 2, title: '描述设计', description: '用文本描述你想要的UI设计，如"创建一个现代风格的登录页面，包含邮箱输入和社交登录按钮"' },
+        { step: 3, title: '导出使用', description: '选择喜欢的设计变体，导出为可用的设计文件或代码' }
+      ],
+      useCases: [
+        { title: 'UI设计探索', description: '快速生成多种UI设计方案，适合设计初期的创意探索' },
+        { title: '免费设计资源', description: '每月550次免费生成，适合预算有限的学生和个人开发者' },
+        { title: '快速原型设计', description: '为产品经理和开发者快速生成UI原型，加速产品迭代' }
+      ],
+      tips: [
+        '目前处于Labs阶段，功能可能有限但完全免费',
+        '每月550次生成额度对个人使用已经足够',
+        '生成的设计质量较高，可以直接用于生产环境'
+      ],
+      updateNotes: 'Google Labs阶段产品，持续迭代中'
+    },
+    updateSourceUrl: 'https://stitch.withgoogle.com',
+    updateSourceType: 'changelog',
+  },
+  'nxcode': {
+    id: '43',
+    name: 'NxCode',
+    slug: 'nxcode',
+    description: '全栈AI应用构建器，免费额度永不过期，生成包含前端、后端、数据库和API层的真实全栈应用，用户拥有完整代码所有权',
+    category: 'coding',
+    subcategory: 'no-code-ai',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://nxcode.io',
+    imageUrl: 'https://placehold.co/800x400/06b6d4/ffffff?text=NxCode',
+    rating: 4.4,
+    ratingCount: 1800,
+    dimensions: { easeOfUse: 4.5, features: 4.5, value: 4.7 },
+    tags: ['应用构建', '全栈', '免费', '代码所有权', '创业'],
+    features: ['免费额度永不过期', '全栈应用生成', '完整代码所有权', '前端+后端+数据库', '无供应商锁定'],
+    alternatives: ['lovable', 'bolt-new', 'v0-vercel'],
+    isNew: true,
+    createdAt: '2026-06-15',
+    updatedAt: '2026-06-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册账户', description: '访问nxcode.io注册账户，免费额度永不过期' },
+        { step: 2, title: '描述应用', description: '用自然语言描述你想要的全栈应用，NxCode会生成完整的前端、后端和数据库' },
+        { step: 3, title: '导出代码', description: '生成的代码完全归你所有，可以导出、修改、在任何地方托管' }
+      ],
+      useCases: [
+        { title: '创业项目', description: '快速构建完整的创业项目，包括用户系统、支付集成、数据存储等' },
+        { title: '全栈学习', description: '通过AI生成的代码学习全栈开发，理解前后端架构' },
+        { title: '企业内部工具', description: '快速构建企业内部管理系统、数据仪表板等工具' }
+      ],
+      tips: [
+        '免费额度永不过期，可以慢慢构建项目，没有时间压力',
+        '生成的代码完全归你所有，没有供应商锁定问题',
+        '支持完整的全栈功能，包括前端、后端、数据库和API层'
+      ],
+      updateNotes: '持续优化全栈应用生成能力'
+    },
+    updateSourceUrl: 'https://nxcode.io/blog',
+    updateSourceType: 'blog',
+  },
+  'claude-code': {
+    id: '44',
+    name: 'Claude Code',
+    slug: 'claude-code',
+    description: 'Anthropic推出的终端AI编程Agent，SWE-bench评分80.8%为商业工具最高，直接在终端运行读写文件、运行测试、git提交',
+    category: 'coding',
+    subcategory: 'code-agent',
+    pricing: 'paid',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://docs.anthropic.com/en/docs/claude-code',
+    imageUrl: 'https://placehold.co/800x400/d97706/ffffff?text=Claude+Code',
+    rating: 4.7,
+    ratingCount: 3500,
+    dimensions: { easeOfUse: 3.8, features: 4.9, value: 4.5 },
+    tags: ['编程', 'Agent', '终端', 'Anthropic', 'SWE-bench'],
+    features: ['SWE-bench 80.8%', '终端运行', 'MCP集成', '自主多步骤任务', 'Git原生'],
+    alternatives: ['cursor', 'github-copilot', 'openai-codex'],
+    isNew: true,
+    createdAt: '2026-06-15',
+    updatedAt: '2026-06-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '安装Claude Code', description: '通过npm安装：npm install -g @anthropic-ai/claude-code。需要Claude Pro($20/月)或Max($200/月)订阅' },
+        { step: 2, title: '启动Agent', description: '在项目目录运行claude命令启动终端Agent，它会读取项目结构和代码上下文' },
+        { step: 3, title: '分配任务', description: '用自然语言描述编程任务，如"修复这个bug"或"添加用户认证功能"，Claude Code会自主完成' }
+      ],
+      useCases: [
+        { title: '复杂编程任务', description: '处理多步骤的编程任务，如重构代码库、添加新功能、修复复杂bug' },
+        { title: '代码审查', description: '自动审查代码变更，检查潜在问题，提供改进建议' },
+        { title: 'Git工作流', description: '自动创建分支、提交代码、创建PR，集成完整的Git工作流' }
+      ],
+      tips: [
+        'SWE-bench评分80.8%，是商业编程Agent中最高的',
+        '支持MCP(Model Context Protocol)集成，可以连接数据库、API和外部服务',
+        '适合高级开发者，需要一定的终端操作经验'
+      ],
+      updateNotes: 'SWE-bench持续领先，MCP生态不断扩展'
+    },
+    updateSourceUrl: 'https://docs.anthropic.com/en/docs/claude-code',
     updateSourceType: 'changelog',
   },
 };

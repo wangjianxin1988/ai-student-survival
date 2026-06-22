@@ -581,6 +581,66 @@ function getFallback(slug: string): PricingResult {
       ],
       scraped: false, source: 'Codeium (search-sourced 2026-06)', fetchedAt: ts
     },
+    'lovable': {
+      plans: [
+        { planName: 'Free', price: '$0', currency: 'USD', period: '/month', features: ['Limited projects', 'Community support', 'Basic features'], lastUpdated: ts, source: 'Lovable (search-sourced)' },
+        { planName: 'Starter', price: '$20', currency: 'USD', period: '/month', features: ['More projects', 'Priority support', 'Custom domains'], lastUpdated: ts, source: 'Lovable (search-sourced)' },
+        { planName: 'Growth', price: '$50', currency: 'USD', period: '/month', features: ['Unlimited projects', 'Team collaboration', 'Advanced features'], lastUpdated: ts, source: 'Lovable (search-sourced)' },
+      ],
+      scraped: false, source: 'Lovable (search-sourced 2026-06)', fetchedAt: ts
+    },
+    'bolt-new': {
+      plans: [
+        { planName: 'Free', price: '$0', currency: 'USD', period: '/month', features: ['Limited daily usage', 'Browser-based', 'Basic features'], lastUpdated: ts, source: 'Bolt.new (search-sourced)' },
+        { planName: 'Pro', price: '$20', currency: 'USD', period: '/month', features: ['More daily usage', 'Priority support', 'Advanced features'], lastUpdated: ts, source: 'Bolt.new (search-sourced)' },
+        { planName: 'Team', price: '$25', currency: 'USD', period: '/month', features: ['Team collaboration', 'Shared projects', 'Admin controls'], lastUpdated: ts, source: 'Bolt.new (search-sourced)' },
+      ],
+      scraped: false, source: 'Bolt.new (search-sourced 2026-06)', fetchedAt: ts
+    },
+    'v0-vercel': {
+      plans: [
+        { planName: 'Free', price: '$0', currency: 'USD', period: '/month', features: ['Limited generations', 'Basic components', 'Community support'], lastUpdated: ts, source: 'Vercel (search-sourced)' },
+        { planName: 'Premium', price: '$20', currency: 'USD', period: '/month', features: ['More generations', 'Figma import', 'Priority support'], lastUpdated: ts, source: 'Vercel (search-sourced)' },
+      ],
+      scraped: false, source: 'Vercel (search-sourced 2026-06)', fetchedAt: ts
+    },
+    'google-stitch': {
+      plans: [
+        { planName: 'Free (Labs)', price: '$0', currency: 'USD', period: '/month', features: ['550 generations/month', 'UI design generation', 'Text-to-design'], lastUpdated: ts, source: 'Google (search-sourced)' },
+      ],
+      scraped: false, source: 'Google (search-sourced 2026-06)', fetchedAt: ts
+    },
+    'nxcode': {
+      plans: [
+        { planName: 'Free', price: '$0', currency: 'USD', period: '/month', features: ['Free credits (never expire)', 'Full-stack app generation', 'Code ownership'], lastUpdated: ts, source: 'NxCode (search-sourced)' },
+        { planName: 'Pay as you go', price: 'Usage-based', currency: 'USD', period: '', features: ['Additional credits', 'Priority support', 'Advanced features'], lastUpdated: ts, source: 'NxCode (search-sourced)' },
+      ],
+      scraped: false, source: 'NxCode (search-sourced 2026-06)', fetchedAt: ts
+    },
+    'claude-code': {
+        plans: [
+          { planName: 'Pro', price: '$20', currency: 'USD', period: '/month', features: ['Claude Code access', 'Terminal agent', 'MCP integration', 'SWE-bench 80.8%'], lastUpdated: ts, source: 'Anthropic (search-sourced)' },
+          { planName: 'Max', price: '$200', currency: 'USD', period: '/month', features: ['5x usage', 'Priority access', 'All Claude models', 'Extended context'], lastUpdated: ts, source: 'Anthropic (search-sourced)' },
+        ],
+        scraped: false, source: 'Anthropic (search-sourced 2026-06)', fetchedAt: ts
+      },
+    'notebooklm': {
+        plans: [
+          { planName: 'Free', price: '$0', currency: 'USD', period: '/month', features: ['50 sources per notebook', 'Audio Overview 3/day', 'Mind maps', 'Flashcards'], lastUpdated: ts, source: 'Google (search-sourced 2026-06)' },
+          { planName: 'Plus (Google One AI)', price: '$10', currency: 'USD', period: '/month', features: ['5x more Audio Overviews', 'More notebooks', 'Priority access'], lastUpdated: ts, source: 'Google (search-sourced 2026-06)' },
+          { planName: 'Pro (Google One AI)', price: '$20', currency: 'USD', period: '/month', features: ['20 Audio Overviews/day', 'Full feature access'], lastUpdated: ts, source: 'Google (search-sourced 2026-06)' },
+          { planName: 'Ultra (Google One AI)', price: '$250', currency: 'USD', period: '/month', features: ['200 Audio Overviews/day', 'Highest limits', 'Family sharing'], lastUpdated: ts, source: 'Google (search-sourced 2026-06)' },
+        ],
+        scraped: false, source: 'Google (search-sourced 2026-06)', fetchedAt: ts
+      },
+    'manus': {
+        plans: [
+          { planName: 'Free', price: '$0', currency: 'USD', period: '/month', features: ['300 credits/day', 'Chat Mode', 'Manus 1.6 Lite Agent'], lastUpdated: ts, source: 'Manus (search-sourced 2026-06)' },
+          { planName: 'Pro', price: '$20', currency: 'USD', period: '/month', features: ['More credits', 'Full Agent Mode', 'Priority queue'], lastUpdated: ts, source: 'Manus (search-sourced 2026-06)' },
+          { planName: 'Pro Plus', price: '$200', currency: 'USD', period: '/month', features: ['Heavy usage', 'All models', 'Best support'], lastUpdated: ts, source: 'Manus (search-sourced 2026-06)' },
+        ],
+        scraped: false, source: 'Manus (search-sourced 2026-06)', fetchedAt: ts
+      },
   };
   
   return fallbacks[slug] || {

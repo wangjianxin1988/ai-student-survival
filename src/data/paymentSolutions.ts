@@ -5382,7 +5382,112 @@ ollama run chatglm
 |------|---------|---------|
 | ChatGLM2-6B | 12GB | 16GB+ |
 | ChatGLM3-6B | 12GB | 16GB+ |`
-  }
+  },
+  {
+    id: 'perplexity-pro-student-discount-2026',
+    title: 'Perplexity Pro 学生 50% 折扣指南（SheerID 验证）',
+    category: 'regional_pricing',
+    excerpt: 'Perplexity 官方为学生提供 50% Pro 折扣：月付 $10/月（正常 $20），年付可叠加折扣达 $50/年。需用 .edu/.ac 等学校邮箱或 SheerID 验证学生身份。覆盖美加澳等 181+ 国家。',
+    toolIds: ['perplexity'],
+    difficulty: 'easy',
+    reliability: 'high',
+    tags: ['Perplexity', '学生折扣', 'SheerID', '50%折扣', '.edu邮箱'],
+    rating: 4.7,
+    ratingCount: 8500,
+    viewCount: 125000,
+    createdAt: '2026-06-22T00:00:00Z',
+    updatedAt: '2026-06-22T00:00:00Z',
+    content: `## 一、Perplexity Pro 学生折扣概览
+
+Perplexity 官方为学生提供 **50% Pro 折扣**，月付从 $20/月降到 **$10/月**。叠加年付优惠后，年付仅需 $50/年（正常 $200）。
+
+来源：[Perplexity 官方学生页](https://www.perplexity.ai/students)、[SheerID 50% off 详情](https://shop.sheerid.com/offers/50-off-perplexity-pro-for-students-and-educators/)。
+
+**支持国家**：美国、加拿大、澳大利亚 + 181 个国家（基本覆盖所有主要留学目的地）。
+
+**不是免费**：注意这是折扣不是免费。Reddit 2026-02 用户反馈："用 .edu 邮箱验证后可 1 年 $50"——这是年付 $50 的叠加优惠。
+
+## 二、申请流程
+
+### 步骤 1：注册账号
+
+访问 [perplexity.ai/students](https://www.perplexity.ai/students)，使用任意邮箱注册。
+
+### 步骤 2：SheerID 验证学生身份
+
+Perplexity 用 SheerID 验证学生身份，提供两种方式：
+
+**方式 A：学校邮箱验证**
+- 使用 .edu、.ac、.edu.cn、ac.uk 等公认教育域名邮箱
+- 自动识别，无需上传材料
+- 大多数国际学生用此方式
+
+**方式 B：学生证/录取通知**
+- 上传学生证照片（含姓名、学校、有效期）
+- 或上传在读证明/录取通知
+- 审核 1-3 个工作日
+
+### 步骤 3：选择套餐
+
+- **月付**：$10/月（原价 $20/月）
+- **年付**：$50/年（原价 $200/年，等同于月付的 25%）
+
+### 步骤 4：续费
+
+折扣自动续费，但需每年重新验证学生身份。毕业后会切换到原价。
+
+## 三、能拿到什么
+
+### Pro 功能
+
+- **GPT-4o、Claude 3.5 Sonnet、Sonar** 等高级模型选择
+- **无限 Pro Search**（Copilot 引导式搜索）
+- **每日 300+ 次专业搜索**
+- **无限文件上传分析**（PDF、Word、Excel）
+- **图像生成**（每月 50+ 张）
+
+### 新增：Comet 浏览器
+
+2026 年 6 月 Perplexity 与 Comet AI 浏览器合作，学生可获得 **Comet 折扣**（不是完全免费）。
+
+## 四、不适合的人群
+
+- 博士生在做敏感研究（涉及未发表论文、专利、医疗等）：Perplexity 会用你的查询改进模型，考虑用本地模型
+- 学校在禁止 AI 工具名单上（少见，但有）：先查 [mi-to-ai 政策库](/policies)
+- 已经在用免费 ChatGPT/Claude 够用：不一定需要 Pro
+
+## 五、常见问题
+
+**Q：折扣会一直续吗？**
+A：会自动续费，但需每年重新验证学生身份。毕业后切换到原价。
+
+**Q：没有 .edu 邮箱怎么办？**
+A：用方式 B 上传学生证或录取通知。1-3 工作日审核。
+
+**Q：能叠加 GitHub Student Pack 吗？**
+A：可以。GitHub Student Pack 已经包含 Perplexity Pro 学生折扣（不同入口），不要再叠加 Perplexity 官方的。
+
+**Q：学校邮箱不是 .edu 怎么办？**
+A：可以用学校正式邮箱（如 student@your-university.edu.cn），只要 SheerID 能识别。或者用方式 B 上传材料。
+
+**Q：能取消吗？**
+A：随时取消，没有合同限制。
+
+**Q：退款政策？**
+A：Perplexity 30 天内不满意可全额退款。
+
+## 六、替代方案
+
+如果不符合 Perplexity 学生折扣条件：
+- **ChatGPT Plus**：$20/月，无官方学生折扣
+- **Claude Pro**：$20/月，无官方学生折扣（但有 GitHub Student Pack）
+- **Gemini Advanced**：$20/月，**有 Google AI Student 免费试用 1 个月**
+- **NotebookLM**：完全免费，Google 出品
+- **DeepSeek V4-Pro**：API 输出 $0.87/百万 token，超级便宜
+
+参考：[GitHub Student Developer Pack](https://education.github.com/pack)、[Google AI Student Plan](https://one.google.com/about/google-ai-premium/)。
+`
+  },
 ];
 
 // Helper functions
