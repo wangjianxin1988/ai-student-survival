@@ -2122,6 +2122,92 @@ const toolsData: Record<string, Tool> = {
     updateSourceUrl: 'https://docs.anthropic.com/en/docs/claude-code',
     updateSourceType: 'changelog',
   },
+  'notebooklm': {
+    id: '45',
+    name: 'NotebookLM',
+    slug: 'notebooklm',
+    description: 'Google推出的AI研究助手，上传资料后自动生成摘要、思维导图、播客式音频讲解（Audio Overview），支持50+语言',
+    category: 'research',
+    subcategory: 'research-assistant',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://notebooklm.google',
+    imageUrl: 'https://placehold.co/800x400/4285f4/ffffff?text=NotebookLM',
+    rating: 4.7,
+    ratingCount: 14200,
+    dimensions: { easeOfUse: 4.7, features: 4.6, value: 4.9 },
+    tags: ['研究', '笔记', 'AI播客', '音频总结', 'Google'],
+    features: ['Audio Overview播客生成', '50+语言支持', '思维导图', '学习卡片', '50个来源/笔记本', '引用溯源'],
+    alternatives: ['perplexity', 'notion-ai', 'elicit'],
+    isNew: true,
+    createdAt: '2026-06-22',
+    updatedAt: '2026-06-22',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册Google账号', description: '访问 notebooklm.google 用 Google 账号登录。免费版就能用核心功能，包括 50 个来源/笔记本' },
+        { step: 2, title: '上传资料', description: '支持 PDF、Google Docs、Slides、网页 URL、YouTube 链接等。可上传 50 个来源构建私有知识库' },
+        { step: 3, title: '生成摘要和播客', description: '点击 "Audio Overview" 一键生成两位 AI 主持人的播客式对话（5-15 分钟），或用 "Briefing Doc" 生成结构化摘要' }
+      ],
+      useCases: [
+        { title: '学术文献速读', description: '上传 10 篇论文到 NotebookLM，让它生成综述播客。通勤路上就能"听完"一篇文献' },
+        { title: '课件整理', description: '上传课堂笔记、教材章节，生成思维导图和学习卡片，复习效率提升 2-3 倍' },
+        { title: '会议纪要', description: '上传 Zoom 录像转录或会议纪要，自动生成关键决策点摘要和行动项列表' },
+        { title: '多语言学习', description: 'Audio Overview 支持 50+ 语言，包括中文。可把英文论文生成中文播客摘要' }
+      ],
+      tips: [
+        'Audio Overview 是 NotebookLM 最具特色的功能，把任何资料变成两位 AI 主持人的对话播客，5-15 分钟',
+        '免费版 50 个来源足够大部分学生用，Plus($10) 5 倍额度适合研究密集型用户',
+        '支持 50+ 语言：英语、中文、西班牙语、阿拉伯语等，跨国学生友好',
+        '引用溯源是 NotebookLM 的强项——AI 答案会标注原始来源，方便学术引用'
+      ],
+      updateNotes: '2026年6月：Audio Overview 支持 50+ 语言；新增 Cinematic Video Overviews（电影级视频概述）；Pro 版 100 次/天 Audio Overview'
+    },
+    updateSourceUrl: 'https://blog.google/technology/ai/notebooklm-updates/',
+    updateSourceType: 'blog',
+  },
+  'manus': {
+    id: '46',
+    name: 'Manus',
+    slug: 'manus',
+    description: '通用AI Agent，输入任务后自主规划、调用工具、执行并产出完整成果（不只回答问题），适合研究、编码、数据分析',
+    category: 'agent',
+    subcategory: 'general-agent',
+    pricing: 'freemium',
+    priceDetail: { monthly: 20, yearly: 192, currency: 'USD' },
+    url: 'https://manus.im',
+    imageUrl: 'https://placehold.co/800x400/000000/ffffff?text=Manus',
+    rating: 4.5,
+    ratingCount: 6800,
+    dimensions: { easeOfUse: 4.2, features: 4.8, value: 4.3 },
+    tags: ['Agent', '自动化', '编程', '研究', '通用'],
+    features: ['自主任务执行', '工具调用', '浏览器/Shell/文件操作', 'Manus 1.6 Lite模型', '.edu邮箱1000积分', '5-100积分/任务'],
+    alternatives: ['claude-code', 'cursor', 'chatgpt-agent'],
+    isNew: true,
+    createdAt: '2026-06-22',
+    updatedAt: '2026-06-22',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册并获得积分', description: '访问 manus.im 注册账号，普通用户 300 积分/天，用 .edu 邮箱验证后自动到账 1000 积分（约 $10 等值）' },
+        { step: 2, title: '用自然语言描述任务', description: '不需要特殊 prompt 格式，直接说"分析这 10 篇论文的共同方法论"或"为这个 React 项目写测试用例"，Manus 会自主规划步骤' },
+        { step: 3, title: '等待任务执行并下载成果', description: 'Manus 会自主调用浏览器、Shell、文件操作完成任务（5-30 分钟），完成后产出文档、代码或报告' }
+      ],
+      useCases: [
+        { title: '学术研究自动化', description: '批量分析论文、生成文献综述、整理实验数据。1000 积分能跑 10-30 个研究类任务' },
+        { title: '编程 Agent', description: '从需求到部署：Manus 能创建完整 Web 应用、调试代码、写测试。比 Claude Code 更通用但编程略弱' },
+        { title: '数据爬取与分析', description: '自主调用浏览器爬取数据、清洗、分析，产出可视化报告。比手动写 Python 脚本快 5-10 倍' },
+        { title: '期末作业冲刺', description: '研究类作业（市场分析、文献综述、案例研究）可一次完成。编程类作业 Manus 1.6 Lite 也能胜任' }
+      ],
+      tips: [
+        '.edu 邮箱自动到账 1000 积分（约 $10 等值），这是学生党最大优惠',
+        '积分按任务复杂度扣减：简单问答 5-20 积分，研究分析 50-100 积分',
+        'Manus 1.6 Lite 是默认模型（免费版），Pro 用户能用更高级模型',
+        '和 Claude Code 比：Manus 更通用（不只编程），Claude Code 编程更专业'
+      ],
+      updateNotes: '2026年6月：免费版积分从 200/天提升到 300/天；新增 Manus 1.6 Lite 模型；教育优惠持续有效（.edu 邮箱 1000 积分）'
+    },
+    updateSourceUrl: 'https://help.manus.im',
+    updateSourceType: 'blog',
+  },
 };
 
 const tool = toolsData[slug as string];
