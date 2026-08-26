@@ -136,3 +136,8 @@ deep_test_results_v3.json
 !public/**/*.png
 !src/**/*.png
 .service_role_key.txt
+
+# GSC OAuth 凭据（不能 commit，参考 P50 安全铁律）
+references/gcp-oauth-client.json
+references/gsc-refresh-token.json
+references/gsc-credentials.md

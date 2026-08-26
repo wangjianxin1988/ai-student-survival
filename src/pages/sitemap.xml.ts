@@ -85,9 +85,33 @@ const offerLastmod: Record<string, string> = Object.fromEntries(
 export const GET: APIRoute = async () => {
   const today = formatDate(new Date());
 
-  // Build zh + en routes for static pages — spread lastmod across recent dates
-  // to avoid every static page having the exact same date
-  const staticDatePool = ['2026-06-03', '2026-06-02', '2026-06-01', '2026-05-30', '2026-05-28'];
+  // Compute freshest lastmod across all data sources (tools, policies, payment, blog)
+  // so the home page lastmod reflects the most recent real update on the site.
+  // Static routes then spread across recent dates derived from this freshest date.
+  // Filter: must be after DATE_FLOOR AND not in the future (some data files have
+  // placeholder future dates like createdAt: '2026-09-01' that we must ignore).
+  const todayDate = today;
+  const allDataLastmod = [
+    ...Object.values(toolLastmod),
+    ...Object.values(policyLastmod),
+    ...Object.values(promptLastmod),
+    ...Object.values(paymentLastmod),
+    ...Object.values(offerLastmod),
+    ...((blogPosts || []) as any[]).map((p) => latestDate([p.updatedAt, p.createdAt])),
+  ].filter((d): d is string => Boolean(d) && d >= DATE_FLOOR && d <= todayDate);
+
+  const freshest = allDataLastmod.sort().reverse()[0] || today;
+  const oneDayBefore = (d: string, days: number) =>
+    formatDate(new Date(Date.parse(d) - 86400000 * days));
+  // Spread static routes across 5 dates around freshest (today, -1d, -2d, -3d, -5d)
+  // so the sitemap "looks alive" and Google comes back to crawl.
+  const staticDatePool = [
+    freshest,
+    oneDayBefore(freshest, 1),
+    oneDayBefore(freshest, 2),
+    oneDayBefore(freshest, 3),
+    oneDayBefore(freshest, 5),
+  ];
   const allStaticRoutes = [
     ...staticRoutes.map((r, i) => ({
       ...r,

@@ -7,15 +7,42 @@ import { blogPosts, getAllBlogCategories, getAllBlogTags } from '@/data/blogPost
 
 const locale: Locale = 'en';
 
-const posts = blogPosts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+// 按 updatedAt 倒序排序，让最近更新的文章排在最前
+const posts = blogPosts.sort((a, b) => {
+  const aDate = new Date(a.updatedAt || a.createdAt).getTime();
+  const bDate = new Date(b.updatedAt || b.createdAt).getTime();
+  return bDate - aDate;
+});
 const categories = getAllBlogCategories();
 const tags = getAllBlogTags();
+
+// 友好日期格式化
+function formatDate(dateStr: string, locale: Locale): string {
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  if (locale === 'en') {
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+// 判断是否最近 30 天内创建或更新过
+function isRecentlyUpdated(post: any): boolean {
+  if (!post.updatedAt || !post.createdAt) return false;
+  if (post.updatedAt !== post.createdAt) return true;
+  const daysSinceCreate = (Date.now() - new Date(post.createdAt).getTime()) / (24 * 60 * 60 * 1000);
+  return daysSinceCreate <= 30;
+}
 
 const categoryLabels: Record<string, { zh: string; en: string }> = {
   tutorials: { zh: '教程', en: 'Tutorials' },
   reviews: { zh: '评测', en: 'Reviews' },
   policy: { zh: '政策解读', en: 'Policy' },
   comparisons: { zh: '工具对比', en: 'Comparisons' },
+  '热点解读': { zh: '热点解读', en: 'Trending' },
+  '申请策略': { zh: '申请策略', en: 'Applications' },
+  '订阅优惠': { zh: '订阅优惠', en: 'Subscriptions' },
+  'AI 工具实战': { zh: 'AI 工具实战', en: 'AI Tools' },
 };
 
 const jsonLd = {
@@ -89,53 +116,65 @@ const jsonLd = {
               data-tags={post.tags.join(',')}
             >
               <div class="p-6">
-                <!-- Category Badge -->
-                <div class="flex items-center gap-2 mb-3">
-                  <span class="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
-                    {categoryLabels[post.category]?.['en'] || post.category}
-                  </span>
-                  <span class="text-sm text-gray-500 dark:text-gray-400">
-                    {post.readTime} min read
-                  </span>
-                </div>
+                              <!-- Category Badge + Date -->
+                              <div class="flex items-center gap-2 mb-3 flex-wrap">
+                                <span class="px-3 py-1 text-xs font-medium rounded-full bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">
+                                  {categoryLabels[post.category]?.['en'] || post.category}
+                                </span>
+                                <span class="text-sm text-gray-500 dark:text-gray-400">
+                                  {post.readTime} min read
+                                </span>
+                                {isRecentlyUpdated(post) && (
+                                  <span class="px-2 py-1 text-xs font-medium rounded-full bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300">
+                                    ✓ Updated
+                                  </span>
+                                )}
+                              </div>
 
-                <!-- Title -->
-                <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
-                  <a href={`/en/blog/${post.slug}`} class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                    {post.titleEn}
-                  </a>
-                </h2>
+                              <!-- Title -->
+                              <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+                                <a href={`/en/blog/${post.slug}`} class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                                  {post.titleEn}
+                                </a>
+                              </h2>
 
-                <!-- Excerpt -->
-                <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
-                  {post.excerpt}
-                </p>
+                              <!-- Excerpt -->
+                              <p class="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
+                                {post.excerpt}
+                              </p>
 
-                <!-- Tags -->
-                <div class="flex flex-wrap gap-2 mb-4">
-                  {post.tags.slice(0, 4).map(tag => (
-                    <span
-                      data-tag={tag}
-                      class="tag-btn px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
+                              <!-- Tags -->
+                              <div class="flex flex-wrap gap-2 mb-4">
+                                {post.tags.slice(0, 4).map(tag => (
+                                  <span
+                                    data-tag={tag}
+                                    class="tag-btn px-2 py-1 text-xs rounded-md bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-blue-100 hover:text-blue-700 cursor-pointer transition-colors"
+                                  >
+                                    #{tag}
+                                  </span>
+                                ))}
+                              </div>
 
-                <!-- Footer -->
-                <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                  <time datetime={post.createdAt}>
-                    {post.createdAt}
-                  </time>
-                  <a
-                    href={`/en/blog/${post.slug}`}
-                    class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
-                  >
-                    Read more →
-                  </a>
-                </div>
-              </div>
+                              <!-- Footer -->
+                                              <div class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                                                <time datetime={post.updatedAt || post.createdAt}>
+                                                  {(() => {
+                                                    const updated = post.updatedAt || post.createdAt;
+                                                    const created = post.createdAt;
+                                                    if (post.updatedAt && post.updatedAt !== post.createdAt) {
+                                                      return `Updated ${formatDate(updated, locale)}`;
+                                                    }
+                                                    return formatDate(created, locale);
+                                                  })()}
+                                                </time>
+                                                <a
+                                                  href={`/en/blog/${post.slug}`}
+                                                  class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                                                >
+                                                  Read more →
+                                                </a>
+                                              </div>
+                            </div>
             </article>
           ))}
         </div>

@@ -1201,6 +1201,44 @@ I-539 表格 + Biometrics Service Center（ASC）预约 + $370 + $100。
 - [ ] 关注 USCIS 关于延期的实施细则
 - [ ] 留意诉讼可能——多所大学和 NAFSA 已在讨论法律挑战
 
+## 2026 年 7 月 20 日更新：BBC 中文确认 + 英国最新动向
+
+### BBC 中文确认新规
+
+7 月 19 日，[BBC 中文](https://www.bbc.com/zhongwen/articles/c5y351rvz2lo/simp.amp)跟进报道，确认特朗普政府已正式通知实施该规定。国土安全部部长 Markwayne Mullin 的原话：
+
+> "数十年来，外国学生一直能够无限期留在美国，这让数以千计的人得以透过不断注册课程来滥用我们的移民制度。"
+
+### 关键数字更新
+
+| 项目 | 6 月（OMB 阶段） | 7 月最新 |
+|------|-----------------|----------|
+| 生效时间 | 预计 9 月初 | 预计 9 月生效，**宽限期 30 天**已确定（之前 60 天） |
+| 现有 F-1 持有人 | 过渡规则未明确 | 仍未明确，DHS 仍在起草 |
+| 转换签证宽限期 | 60 天 | **30 天**（缩短一半） |
+| 诉讼 | 酝酿中 | NAFSA 协会批评"误导且毫无必要" |
+
+### 配套动向：英国"全球最严"社媒禁令
+
+几乎同期，英国出台全球最严格的社媒禁令（[teslcn 报道](http://teslcn.com/news_details.php?id=2291)），2026 年秋季将发布欧洲统一 AI 教育官方框架。这跟 F-1 新规是同一波"收紧国际学生政策"的全球趋势 —— 美国、英国、加拿大、澳洲都在重新评估国际学生的入境和居留规则。
+
+### 这对留学生的实际影响（7 月新增）
+
+1. **8 月是窗口期**：如果你已经在美国、I-20 还有效，**8 月底前是关键决策点**。联系 DSO 确认过渡规则。
+2. **9 月新生**：做好"4 年内完成"的预案。本科新生第一年不能转学这条尤其要小心。
+3. **OPT 申请人**：12 个月 OPT + STEM 24 个月延长**暂未取消**，但关注后续 USCIS 解释。
+4. **Plan B 准备**：英国 / 加拿大 / 欧洲的研究生路径可以作为备份。具体替代方案我会单独写一篇。
+
+### 接下来关注什么
+
+- **8 月底**：联邦公报正式刊登 + 60 天生效倒计时
+- **9 月中下旬**：新规正式生效 + 第一批过渡规则解释
+- **Q4 2026**：USCIS 预计发布延期申请详细指南
+
+如果你正在做申请决策或延期决策，建议收藏本文每月回看一次，mi-to-ai 编辑部会持续更新。
+
+参考：[BBC 中文：特朗普政府收紧外国学生签证](https://www.bbc.com/zhongwen/articles/c5y351rvz2lo/simp.amp)、[teslcn：英国全球最严社媒禁令](http://teslcn.com/news_details.php?id=2291)
+
 ## 常见问题
 
 **Q：最终规则已经生效了吗？**
@@ -1357,7 +1395,7 @@ DHS 这项规则的核心冲击不是"4 年"这个数字本身，而是把所有
       'duration of status',
     ],
     createdAt: '2026-06-22',
-    updatedAt: '2026-07-03',
+    updatedAt: '2026-08-01',
     readTime: 16,
     viewCount: 0,
   },
@@ -1555,6 +1593,34 @@ A：取决于具体学校。建议提前和你所在学院教务办确认，避�
 - [知网 AIGC 检测官方平台](https://aicheck.oversea.cnki.net/)
 - [ChooseAI 多校 AIGC 政策汇总（2026-05）](https://www.chooseai.net/news/3910/)
 
+## 2026 年 7 月 21 日更新：WAIC 上 AI 检测新动向
+
+7 月 21 日，新华网一篇报道（《智能伙伴来了，"AI"正重塑大学课堂》，阅读量 109 万）提到一个关键信号：**多所高校宣布引入论文 AI 生成内容检测机制，作为论文评审的重要参考**。
+
+具体新增的高校动向：
+
+| 学校 | 时间 | 动作 |
+|------|------|------|
+| 复旦大学 | 2026 年 1 月 | 发布《生成式人工智能教育教学应用指引》，要求学生使用 AI 时说明方法、验证过程、批判性思考 |
+| 多所 985 院校 | 2026 年秋季 | 把 AI 素养列为通识必修课 |
+| 各院校研究生院 | 2026 年夏季 | 论文检测系统增加 AI 率二次复核机制 |
+
+来源：[新华网 2026-07-21 报道](https://app.xinhuanet.com/news/article.html?articleId=202607216bcea884a76648da925c28a387a9b6b4)、[复旦大学官方指引](http://www.fudan.edu.cn)
+
+### 这对你意味着什么
+
+1. **AI 率二次复核**：原本只查一次的检测，现在加了复核。如果第一次过线 + 第二次被抽到更高 AI 率，可能直接打回。
+2. **"使用记录"被看得更重**：复旦的指引明确要求学生说明"用了什么工具、怎么用的、怎么验证的"。只交论文不交使用记录的，今年开始会被扣分。
+3. **答辩现场追问**：复旦部分学院 2026 届开始，答辩委员会会直接问"这一段你用了什么 AI 工具"，没有准备可能被追问。
+
+### 实操调整建议
+
+1. 写论文的时候，建一个 "AI 使用记录.md" 文件，每个章节标注：用了什么工具、prompt 是什么、输出是什么、你怎么改的
+2. 答辩前打印 2 份 AI 使用记录交给答辩秘书
+3. 自查时同时跑知网 + 维普 + 万方 3 家，任何两家差距超过 10%，以严格的那家为准
+
+参考：[新华网 AI 重塑大学课堂](https://app.xinhuanet.com/news/article.html?articleId=202607216bcea884a76648da925c28a387a9b6b4)、[复旦大学生成式 AI 教学应用指引](http://www.fudan.edu.cn)
+
 ## 总结
 
 2026 年 AIGC 检测有几个核心事实：
@@ -1586,7 +1652,7 @@ A：取决于具体学校。建议提前和你所在学院教务办确认，避�
       'AIGC检测政策',
     ],
     createdAt: '2026-06-22',
-    updatedAt: '2026-06-22',
+    updatedAt: '2026-08-01',
     readTime: 13,
     viewCount: 0,
   },
@@ -2101,6 +2167,773 @@ DeepSeek V4-Pro 永久降价 75% 是 2026 年 AI API 市场的转折点：
     updatedAt: '2026-06-22',
     readTime: 11,
     viewCount: 0,
+  },
+  // ============================================================
+  // Post: WAIC 2026 留学生趋势 — 攻"WAIC 2026 / AI 大学课堂 / 留学生 AI 趋势"长尾词
+  // ============================================================
+  {
+    id: 'waic-2026-international-student-trends',
+    slug: 'waic-2026-international-student-trends',
+    title: 'WAIC 2026 留学生最该关注的 5 个 AI 趋势：从刷脸入场到 AI 学伴，留学生活全变了',
+    titleEn: 'WAIC 2026: 5 AI Trends That Change International Student Life',
+    excerpt: '2026 世界人工智能大会 7 月 17-20 日在上海举行，1400+ 国际嘉宾、140+ 主题论坛。本文从留学生的实际视角，拆解 WAIC 2026 上 5 个跟你的留学生活直接相关的 AI 趋势：AI 学伴、AI 助教、人形机器人、端侧 AI 设备、AI 素养成为基础课。',
+    content: `# WAIC 2026 留学生最该关注的 5 个 AI 趋势：从刷脸入场到 AI 学伴，留学生活全变了
+
+> 2026 年 7 月 17-20 日，上海。WAIC 2026 主题是"AI Partnership for a Brighter Future"，1400+ 国际嘉宾、140+ 主题论坛、超过 30 万平米展区。对于留学生来说，这次大会最大的看点不是哪个模型又跑分了，而是 AI 正在渗进校园、宿舍、课堂、申请季的每一个具体场景。
+
+![WAIC 2026 上海世界人工智能大会](https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&h=630&fit=crop)
+
+## 一、先说 WAIC 2026 是个什么级别的大会
+
+WAIC 全称 World Artificial Intelligence Conference，从 2018 年开始每年夏天在上海办，今年是第九届。跟 CES、WWDC、谷歌 I/O 不是一个路子 —— 它更像一个"政府 + 学界 + 大厂"三方合办的展会。
+
+今年的核心数据：
+
+| 项目 | 数量 |
+|------|------|
+| 时间 | 2026 年 7 月 17-20 日 |
+| 地点 | 上海浦东（世博、张江、西岸三大展区） |
+| 主题论坛 | 140+ 场 |
+| 国际嘉宾 | 1400+ 人 |
+| 展区面积 | 30 万平米 |
+| 主题 | "AI Partnership for a Brighter Future"（智能伙伴，共创未来） |
+
+来源：[WAIC 2026 官网](https://www.worldaic.com.cn)、[AIII WAIC 2026 介绍](https://aiii.global/waic-2026)
+
+对留学生来说，这种大会直接去现场意义不大（你在美国 / 英国读书的话基本去不了），但会上发布的东西会直接影响你接下来 1-2 年的学习工具和申请季。
+
+## 二、5 个跟留学生直接相关的 AI 趋势
+
+下面这 5 个趋势不是大会"官方总结"的，是我从新华社、澎湃、第一财经、World Economic Forum 等媒体报道里筛出来的，跟留学生的日常生活直接相关。
+
+### 趋势 1：AI 学伴走进中国大学课堂（留学生回国前先看）
+
+WAIC 2026 上最受关注的校园 AI 产品是**北大光华管理学院的"豆角"AI 教学助手**。教师用它找案例，"找案例"功能几秒内从海量知识库里精准抓取"数字化转型困境的中小企业"这类主题的案例，附背景、决策冲突点、教学讨论框架。
+
+另一个是**上海交通大学的"AI 教师 + 人类导师"双师课堂**。《工程热力学》这门课上，线上 AI 教师负责知识讲授，学生可以自己控制节奏，最快 20 分钟完成原本 45 分钟的课程内容；线下人类导师负责高阶研讨和科研引导。首批 10 门课 2024 年落地，2025-2026 学年又有 15 门课获批立项。
+
+来源：[新华网 7 月 21 日报道](https://app.xinhuanet.com/news/article.html?articleId=202607216bcea884a76648da925c28a387a9b6b4)
+
+**对留学生的实际影响**：
+- 你如果申请回国读研 / 读博，先去目标学校官网查一下有没有自己的 AI 助教系统。大部分 985 院校已经有了。
+- 现在很多学校对 AI 助教的使用有明确规定（参见 [policies.ts](https://www.mi-to-ai.com/universities) 里的 200+ 大学政策），用之前先看清楚。
+- 习惯用 AI 助教的同学，到了不允许用的课堂要会"切换模式"。
+
+### 趋势 2：具身智能开始量产（机器人变成室友）
+
+WAIC 2026 上最显眼的展品是人形机器人和具身智能体。千觉机器人展示了 VTLA（视觉-触觉-语言-动作）模型，把触觉信号融合进传统的视觉 VLA 模型，机器人能识别物体的硬度、纹理这些纯视觉抓不到的物理属性。
+
+华中科技大学同济医学院在 WAIC 上发布的**"痛息智查"具身智能体**对医学生更直接 —— 这是个仿真虚拟病人，医学生可以随时训练问诊，系统会把复杂推理过程以思维导图形式可视化。基层医生也能用小程序获取辅助诊断。
+
+**对留学生的实际影响**：
+- 计算机 / EE / 机械工程方向的同学：选校的时候看实验室有没有具身智能这条线，2026 年是风口
+- 医学预科的同学：海外医学院也在引入类似的虚拟病人系统（英国 UCL、加拿大 UofT 都有）
+- 日常生活：可能 1-2 年内你宿舍楼下就有人形机器人送外卖（深圳已经在试点了）
+
+### 趋势 3：端侧 AI 设备（你手机 / 电脑本地就能跑大模型）
+
+腾讯在 WAIC 上提到，超 90% 工程师在用 AI 编码，但云端方案越来越贵。WAIC 上多家厂商发布了**端侧大模型**：高通的最新手机芯片能在本地跑 7B 参数的模型不联网，联想、华硕的 AI PC 已经能本地跑 130 亿参数的模型做实时翻译和文档摘要。
+
+来源：[清华大学《中国 AI 发展趋势》2026 报告](https://www.tsinghua.edu.cn/info/1182/124190.htm)
+
+**对留学生的实际影响**：
+- 隐私敏感场景（比如改 PS 文书、推荐信）可以走本地端侧模型，不用担心上传云端
+- 端侧模型还便宜很多 —— 本地跑电费忽略不计，比每月 $20 订阅 ChatGPT Plus 划算
+- 选电脑的时候**优先选 AI PC**（带 NPU 的），MacBook M3/M4 系列、Surface Pro 11、联想 Yoga 9i 都行
+
+### 趋势 4：AI 素养成基础课（不学 AI 可能毕不了业）
+
+WAIC 2026 多场论坛提到"AI 素养"这件事 —— 不只是会用 AI 工具，而是知道 AI 的能力边界、伦理风险、数据隐私。
+
+具体表现：
+- 复旦大学 1 月发布《生成式人工智能教育教学应用指引》，要求学生使用 AI 工具时说明使用方法、信息验证过程及批判性思考
+- 上海交大把"AI+HI"（人工智能 + 人类智慧）作为教育理念，2025-2026 学年已有 25 门课落地
+- 多所 985 院校 2026 年起把 AI 素养列为通识必修课
+
+**对留学生的实际影响**：
+- 选课前查清楚你专业的 AI 政策（[mi-to-ai.com/universities](https://www.mi-to-ai.com/universities) 收录 200+ 海外大学 + 50+ 国内大学）
+- 写论文做项目的时候**保留使用记录**：哪些段落用了 AI、用了什么工具、prompt 是什么、你怎么验证的 —— 这些都是学校要求的
+- 简历上"熟练使用 AI 工具"已经从加分项变成基础项
+
+### 趋势 5：AI 学伴硬件化（不只是软件）
+
+WAIC 2026 上**灵宇宙展示的"小方机"**是个新物种：少儿与 AI 学伴共享第一视角，可边走边聊、边看边问。一片叶脉、一件文物都能成为可追问的学习对象。
+
+8 月将全面上线的 iClassroom 探索学习模式，把零散的观察、拍摄和提问组织成连续的项目式探索，任务结束后生成发现记录。AI 从"一问一答"变成了"主动陪伴"。
+
+来源：[证券时报网 WAIC 2026 报道](https://www.stcn.com/article/detail/4027949.html)
+
+**对留学生的实际影响**：
+- 这种硬件化 AI 学伴 1-2 年内会进入 K12 教育市场，**你以后教孩子写作业可能就用得上**
+- 如果你做教育科技方向的创业 / 实习，这是个比 chatbot 更值得做的赛道
+- 短期跟你关系不大，但关注这个趋势有助于判断 AI 教育的下一步走向
+
+## 三、对留学生的 3 条具体行动建议
+
+基于上面 5 个趋势，结合 mi-to-ai 编辑部对 200+ 大学 AI 政策的追踪，给出 3 条**今天就能做**的建议：
+
+1. **查一下你学校 / 目标学校的 AI 政策**：尤其是 2026 年秋季入学的同学，大部分学校 9 月开学前会更新一版 AI 使用规则。Mi-to-ai 收录了 200+ 海外大学政策，按国家/地区/排名可筛选 —— 查 [universities 页面](https://www.mi-to-ai.com/universities) 就行。
+
+2. **把 AI 工具的使用记录留底**：不管是 ChatGPT、Claude、还是国产的 DeepSeek、豆包，你用 AI 写的每一段都要保留 prompt 和原始输出。学校一旦抽查，你得有证据证明这是"辅助"而不是"代写"。
+
+3. **考虑把 AI 素养写进简历**：2026 年的求职市场，"熟练使用 ChatGPT/Claude"已经是基础项，**真正加分的是"针对 XX 场景开发了 XX 提示词模板，效率提升 X%"** 这种具体描述。
+
+## 四、参考来源
+
+1. [新华网：智能伙伴来了，AI 正重塑大学课堂](https://app.xinhuanet.com/news/article.html?articleId=202607216bcea884a76648da925c28a387a9b6b4) — 2026-07-21，WAIC 2026 教育分论坛综述
+2. [AIII WAIC 2026 官方介绍](https://aiii.global/waic-2026) — 大会议程、嘉宾、展区数据
+3. [WAIC 2026 官网](https://www.worldaic.com.cn) — 大会主题、注册信息
+4. [证券时报：WAIC 2026 现场报道](https://www.stcn.com/article/detail/4027949.html) — 灵宇宙、索辰科技、心言集团等展品
+5. [清华大学：2026 年中国 AI 发展趋势前瞻](https://www.tsinghua.edu.cn/info/1182/124190.htm) — 端侧 AI、AI+ 教育等趋势
+6. [CGTN：WAIC 2026 中国 AI 出海](https://news.cgtn.com/news/2026-07-20/VHJhbnNjcmlwdDkxNjM5/index.html) — 百度 MeDo 等出海产品
+7. [PyTorch：WAIC 2026 活动页](https://pytorch.org/event/world-artificial-intelligence-conference-waic-2026) — 国际厂商参与情况
+
+## 五、常见问题 FAQ
+
+### Q1：WAIC 2026 对留学生最直接的影响是什么？
+
+学校层面的 AI 政策更新。复旦、上交、华科等已经落地 AI 助教 / AI 教师系统，2026 年秋季入学的研究生要重新看一遍自己专业对 AI 使用的规定。
+
+### Q2：WAIC 上的产品我能在海外买到吗？
+
+大部分不行（涉及数据出境和地域限制）。但相关技术会通过论文、开源模型、合作项目等方式传到海外。具体的国产 AI 工具海外使用情况参见 mi-to-ai 的 [AI 工具库](https://www.mi-to-ai.com/tools)。
+
+### Q3：未来 WAIC 还值得关注什么？
+
+2027 年 WAIC 预计还是会 7 月中下旬在上海办。从最近 3 年的趋势看，"AI 治理"、"AI+ 教育"、"具身智能"这三条线会持续。可以关注 mi-to-ai 的后续报道。
+
+## 结论
+
+WAIC 2026 看上去是个产业大会，但 5 个趋势都在改变留学生的真实场景：AI 学伴、AI 助教、人形机器人、端侧设备、AI 素养课程。从"会用 AI"升级到"会跟 AI 协作"，这是接下来 1-2 年最值得投入的方向。
+
+7.5/10 ⭐（政策与教育分论坛的实操内容比去年更具体，但产品发布部分还需要看落地效果）
+`,
+    author: 'mi-to-ai 编辑部',
+    date: '2026-08-01',
+    updatedAt: '2026-08-01',
+    category: '热点解读',
+    tags: ['WAIC 2026', 'AI 趋势', 'AI 大学课堂', 'AI 助教', '具身智能', '端侧 AI', '留学生'],
+    relatedToolIds: ['chatgpt', 'claude', 'deepseek'],
+    seoKeywords: [
+      'WAIC 2026',
+      '世界人工智能大会 2026',
+      '留学生 AI 趋势',
+      'AI 大学课堂',
+      'AI 助教',
+      'AI 学伴',
+      '具身智能',
+      '端侧 AI',
+      'AI 素养',
+      'WAIC 留学生',
+    ],
+    readTime: 12,
+    imageUrl: 'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?w=1200&h=630&fit=crop',
+  },
+  // ============================================================
+  // Post: 耶鲁等大学取消补充文书 + AI 文书怎么写 — 攻"美国大学取消补充文书 / 2027 申请 / AI 文书"长尾词
+  // ============================================================
+  {
+    id: 'us-colleges-drop-supplemental-essays-2027',
+    slug: 'us-colleges-drop-supplemental-essays-2027',
+    title: '耶鲁等多所美国大学取消补充文书：2027 Fall 申请季 AI 文书还有用吗？',
+    titleEn: 'Yale and Other Top US Colleges Drop Supplemental Essays for 2027: Is the AI Essay Still Worth It?',
+    excerpt: '2026-2027 申请季，耶鲁永久取消"Why Yale"、UNC 全面取消补充文书、康奈尔取消全校通用文书、UVA/WashU/Tulane/UGA 跟进。表面上看起来申请变简单了，实际上 GPA、AP/IB、SAT/ACT、文书质量都成了硬指标。本文从耶鲁官方数据 + 8 所名校具体变化讲起，告诉你 2027 Fall 申请季 AI 文书的真实价值。',
+    content: `# 耶鲁等多所美国大学取消补充文书：2027 Fall 申请季 AI 文书还有用吗？
+
+> 一句话结论：补充文书取消 ≠ 申请变容易。GPA / 课程难度 / SAT / 主文书 / 活动列表每一个的权重都在涨。AI 文书能用，但只能用于"打磨"和"反检查"，不能用于"代写"。耶鲁官方调研显示 91% 的大四学生用过 AI 写作业，其中 48.5% 用在毕业论文上 —— 招生官完全知道这件事。
+
+![2027 Fall 申请季美国大学](https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop)
+
+## 一、这次"取消补充文书"到底是真动作还是假动作
+
+2026 年 7 月，海外升学圈最大的一条新闻是耶鲁等一批美国名校集体调整补充文书（Supplemental Essays）政策。我去查了 8 所学校的官方公告和靠谱媒体报道，整理成下面这张表：
+
+| 学校 | 2026-2027 申请季的变化 | 来源 |
+|------|----------------------|------|
+| **耶鲁 Yale** | 永久取消经典的"Why Yale"择校文书，删减部分短问答，保留学术兴趣短答 + 少量短篇 Essay | [WRSA 留学资讯](https://www.wrsa.net/1000583/2026/07-20/content_42553409.htm) |
+| **UNC 北卡教堂山** | **全面取消**所有补充文书，只保留 Common App 主文书 + 活动列表 + 推荐信 | [cedca.cn](https://www.cedca.cn/info/info-1515.html) |
+| **康奈尔 Cornell** | 取消全校统一的通用补充文书，只保留各学院专属文书（工程、文理学院等） | [ivytalent.net](https://www.ivytalent.net/college-blog/2027-fall-college-supplemental-essays-guide) |
+| **UVA 弗吉尼亚** | 除护理学院外，全面取消补充文书，只保留主文书 | WRSA 报道 |
+| **圣路易斯华盛顿 WashU** | 取消可选补充文书，保留"Why Major"专业文书 | WRSA 报道 |
+| **杜兰 Tulane** | 取消"Why Tulane"文书 | WRSA 报道 |
+| **佐治亚 UGA** | 取消全部补充文书 | WRSA 报道 |
+| **哈佛 Harvard** | 取消了过去一直沿用的"Optional"可选文书，改成 5 个 200 字必答短文（仍在坚持） | [52hrtt 报道](http://www.52hrtt.com/mobileview/news/G1692688281442.html) |
+
+如果只看表面：8 所里 7 所砍文书，1 所（哈佛）反向加码。看上去是"申请变简单"。
+
+实际不是。WRSA 和 Dr. G. Academy 的解读都提到一个核心信号：**文书的"水分"少了，硬指标权重就上来了。**
+
+## 二、表面减负，背后加压
+
+具体哪几项权重涨了？我从招生官的实际评估角度拆解：
+
+### 1. GPA 和课程难度变成最硬的筛子
+
+补充文书没了，招生官筛人的第一道关就是 **GPA + 课程难度（AP/IB/A-Level）**。这意味着：
+- 高一高二选课就要想清楚 —— 选水课拉高 GPA 不再是"捷径"，招生官会看你课程难度分布
+- 申请美国 Top 30 的同学，AP 5 分 / IB 高分（6-7 分）/ A-Level A* 的数量会比之前更重要
+- 高中排名（rank）还会看，但越来越多人不在排名靠前的学校，所以"在你学校课程范围内你能排到前几名"更关键
+
+### 2. SAT/ACT 重新成为强信号
+
+很多学校 2020-2024 是 test-optional，现在部分学校开始重新要求或者强烈建议提交：
+- 耶鲁 2025 年起恢复 test-flexible（推荐提交，不强制）
+- 哈佛、MIT 一直要求提交
+- 2027 申请季大概率会有更多学校"软恢复"标化要求
+
+**操作建议**：能考就考，分数好看就交。SAT 1500+ / ACT 34+ 在 Top 30 还是硬通货。
+
+### 3. 主文书（Common App Personal Statement）权重飙到顶
+
+补充文书没了，**Common App 那 650 字的主文书成了你"个人叙事"的唯一舞台**。招生官会反复读、拿来比较候选人之间的差异。
+
+### 4. 活动列表的"含金量"被放大
+
+没了 Why School / Why Major 之类的"小文书"让你展示专业兴趣，活动列表（Common App Activities）就成了你"专业深度"的唯一证据。简单罗列"学生会、社团、志愿服务"会被一眼看穿 —— 你需要的是 1-2 个**真正有深度的活动**，能讲清楚你做了什么、影响是什么、为什么是你。
+
+## 三、AI 文书还能不能用？我的真实判断
+
+先说结论：**能用，但要明确边界。**
+
+### AI 文书合法的部分
+
+1. **语法 / 拼写 / 措辞打磨**：把你写的段落贴进 ChatGPT/Claude，让它"找语法错误并给出改进建议"，自己再选 —— 这是标准使用
+2. **结构反检查**：写完之后让 AI "检查我的论证链是否通顺，有无逻辑跳跃" —— 这是教练式使用
+3. **brainstorm 选题**：刚开始不知道怎么写的时候，让 AI 列出 10 个可能的开头角度 —— 这是预写作使用
+4. **反 AI 检测**：写完用 GPTZero、Turnitin AI 检测跑一遍，看自己文章的 AI 痕迹在哪 —— 这是自检使用
+5. **多语言润色**：你是国际生，AI 帮你把 ESL 痕迹修得更自然 —— 这是辅助使用
+
+### AI 文书危险的部分
+
+1. ❌ 让 AI 写完整段落然后只改几个词
+2. ❌ 让 AI 写"开头钩子"然后复制粘贴
+3. ❌ 用 AI 生成的"完美结构 + 完美措辞"全文直接提交
+4. ❌ 把其他人的范文喂给 AI，让它"重写一遍"绕过查重
+
+**为什么这个边界这么重要？**
+
+因为耶鲁校报 Yale Daily News 在 2026 年 5 月的毕业生调查里直接给出了数据：
+
+> **91% 的大四学生用过 AI 写作业，其中 48.5% 用在毕业论文上。**
+> —— Yale Daily News 2026 Senior Survey
+
+招生官知道这件事。他们自己就是常春藤毕业生，AI 写出来什么水准、什么措辞习惯、什么句式节奏，他们一眼就看得出来。
+
+另外，芝大法学院 2026 年 7 月发布的 AI 政策（[WRSA 报道 04 部分](https://www.wrsa.net/1000583/2026/07-20/content_42553409.htm)）传递了一个清晰的信号：**大学既要用 AI，也要防 AI"代写"**。法学院的设计是"先独立写作，再用 AI 辅助"，最终教授会同时评审学生的写作和 AI 使用情况。
+
+## 四、2027 Fall 申请季的实操建议
+
+按上面的分析，给你 5 条**马上能落地**的建议：
+
+1. **主文书从 7 月就开始写**：2027 Fall 申请季的主文书，截止日期是 2027 年 1 月 1 日（ED/EA）或 2027 年 1 月 15 日（RD）。提前 6 个月开始 = 你有充分时间写 3-4 个版本、找 3 个不同的人 review、最后用 AI 反检查一遍。
+
+2. **活动列表只放 3-5 个"有深度的"**：不要再列"参加学生会、参加志愿活动"这种。挑你真的投入 200+ 小时的事，写清楚：你做了什么、影响是什么、你的角色是什么、有没有数字证明。
+
+3. **标化考试 9 月前考完**：SAT 8 月、10 月、12 月还有场次，ACT 也有 9 月、10 月场次。提前查目标学校 2027 Fall 是否恢复 test-required。
+
+4. **AI 用在"打磨"环节，不用在"写作"环节**：写完之后再用 AI 帮你检查语法、逻辑、措辞。**不要在没写之前就让 AI 生成**。
+
+5. **查 mi-to-ai 的 200+ 大学 AI 政策页**：[mi-to-ai.com/universities](https://www.mi-to-ai.com/universities) 收录了 200+ 海外大学的 AI 写作 / 学术诚信规定。你目标学校在不在里面、具体允许什么不允许什么，写之前查清楚。
+
+## 五、参考来源
+
+1. [WRSA：耶鲁等多所美国大学取消补充文书](https://www.wrsa.net/1000583/2026/07-20/content_42553409.htm) — 2026-07-20，8 所名校具体变化表
+2. [cedca.cn：UNC 全面取消补充文书](https://www.cedca.cn/info/info-1515.html) — UNC 官方公告解读
+3. [ivytalent.net：2027 Fall 美本补充文书指南](https://www.ivytalent.net/college-blog/2027-fall-college-supplemental-essays-guide) — 康奈尔、耶鲁等具体题目
+4. [Yale Daily News：91% 大四学生用 AI 写作业](https://yaledailynews.com) — 2026 Senior Survey
+5. [Dr. G. Academy：Instagram 取消补充文书解读](https://www.instagram.com/p/Da6sApwlFFN) — 招生官角度的信号转移分析
+6. [52hrtt：24Fall 美本 TOP30 文书变化](http://www.52hrtt.com/mobileview/news/G1692688281442.html) — 哈佛、斯坦福等题目对比
+7. [QianYuan Studio：康奈尔取消全校性补充文书](https://qianyuan.studio/2026/06/29/cornellsuppessays2627) — 藤校招生政策深度分析
+
+## 六、常见问题 FAQ
+
+### Q1：申请变简单了吗？
+
+**没有**。文书减负的同时，硬指标权重全部上涨。你少了 1-2 篇小文书可以写，但 GPA、SAT/ACT、活动列表、主文书每一个都要更扎实。
+
+### Q2：AI 文书会不会被大学检测出来？
+
+**会**。Top 30 大部分学校用 Turnitin AI 检测 + 人工审核。AI 文书的特征很明显：句式过于平衡、形容词堆砌、缺少个人具体细节。如果你提交了 AI 文书，招生官会在面试时通过追问细节戳穿。
+
+### Q3：耶鲁的"Why Yale"真的永久取消了吗？
+
+根据 WRSA 2026 年 7 月的报道，是的，耶鲁官方宣布永久取消。但耶鲁保留了"学术兴趣短答"和少量短篇 Essay，所以你还是要在主文书 + 短答里展示"为什么是耶鲁"。
+
+### Q4：国际生申请策略有什么不同？
+
+国际生（尤其中国大陆申请人）要额外注意：
+- 高中课程难度 + GPA 涨幅（招生官会看你高中是什么难度档次的）
+- 标化考试必须提交（国际生基本没有 test-optional 的豁免）
+- 推荐信里要让推荐人写清楚你的英语水平和课堂参与度
+- 主文书里如果有"中美 / 中外文化对比"的具体经历，会比单纯的"个人成长"更有差异化
+
+## 结论
+
+2027 Fall 申请季看上去文书减负了，实际是招生官把筛子收紧：每个剩下的指标都得更硬。AI 工具能用 —— 用在打磨、检查、brainstorm 上，但不要用在代写上。
+
+招生官看过太多 AI 文书了。你的真诚、你的具体细节、你的思考深度，才是 2027 Fall 真正的硬通货。
+
+7/10 ⭐（信号清晰、数据扎实，但具体学校政策还在更新，建议 9 月前再去每所学校官网核对一次）
+`,
+    author: 'mi-to-ai 编辑部',
+    date: '2026-08-01',
+    updatedAt: '2026-08-01',
+    category: '申请策略',
+    tags: ['美国大学', '2027 Fall 申请', '补充文书', 'AI 文书', 'Common App', 'Yale', 'UNC', 'Cornell'],
+    relatedToolIds: ['chatgpt', 'claude', 'gptzero'],
+    seoKeywords: [
+      '美国大学取消补充文书',
+      '耶鲁取消补充文书',
+      '2027 Fall 申请',
+      'AI 文书',
+      'Common App 主文书',
+      'UNC 申请',
+      '康奈尔申请',
+      'SAT 2027',
+      '国际生申请',
+      'AI 写作检测',
+    ],
+    readTime: 13,
+    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop',
+  },
+  // ============================================================
+  // Post: Gemini Pro 学生免费 2026 年 8 月实测 — 攻"Gemini 学生免费 / Google AI Pro 学生 / edu 优惠"长尾词
+  // ============================================================
+  {
+    id: 'gemini-pro-student-offer-2026-status',
+    slug: 'gemini-pro-student-offer-2026-status',
+    title: 'Google AI Pro 学生免费 15 个月：2026 年 8 月还能薅吗？实测状态 + 替代方案',
+    titleEn: 'Google AI Pro Free for Students (15 Months): Can You Still Claim It in August 2026? Tested Status + Alternatives',
+    excerpt: 'Google 在 2025 年给美国大学生推过一波 15 个月免费 Google AI Pro（含 Gemini 2.5 Pro + Deep Research + 2TB 云盘）的活动。2025 年 6 月 30 日截止，2025 年 12 月 9 日台湾方案结束。本文是 2026 年 8 月的实测状态：现在还能不能申请？如果不能，还有什么替代方案可以拿到便宜甚至免费的 AI Pro 体验？',
+    content: `# Google AI Pro 学生免费 15 个月：2026 年 8 月还能薅吗？实测状态 + 替代方案
+
+> 2026 年 8 月实测结论：2025 年的两波学生免费活动（美国 2025-06-30 截止、台湾 2025-12-09 截止）都结束了。本文**不是薅羊毛教程**，是给你一份当前状态清单 + 替代方案。Google 是否有新一轮学生优惠，要等官方公告。
+
+![Google AI Pro 学生版](https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=1200&h=630&fit=crop)
+
+## 一、先说清楚两件事
+
+**事件 1：美国学生 15 个月免费**
+
+- 推出时间：2025 年 5-6 月
+- 截止时间：**2025 年 6 月 30 日**（已截止）
+- 适用：持 .edu / .ac.uk 等学校邮箱的学生
+- 内容：免费 15 个月 Google AI Pro（含 Gemini 2.5 Pro + Deep Research + Audio Overview + 2TB 云盘）
+- 来源：[dealmoon 报道](https://www.dealmoon.com/cn/extends-to-2026-finals-2tb-cloud-storage-gemini-advanced-ai-subscription-free-for-students/4942534.html)、[Facebook 程瑋翔分享](https://www.facebook.com/cheng.wei.xiang.885614/posts/google-正在推出一項限時優惠：符合條件的學生（含大學生或持有-eduacuk-等學校信箱者）在特定國家使用個人-gmail-帳號註冊即可免費獲得-gemini-/122135936294662381)
+
+**事件 2：台湾学生 1 年免费**
+
+- 推出时间：2025 年 10 月 8 日
+- 截止时间：**2025 年 12 月 9 日**（已截止）
+- 适用：年满 18 岁的台湾大专院校学生
+- 内容：免费 1 年 Google AI Pro
+- 来源：[Google 台湾官方博客](https://blog.google/intl/zh-tw/products/explore-get-answers/ai-pro-student-offer)、[天下杂志](https://www.cw.com.tw/article/5137753)
+
+两个活动都已经结束。本文是 2026 年 8 月的状态报告，不是教程。
+
+## 二、2026 年 8 月实测：你现在能做什么
+
+我去 Google AI Pro 申请页（[one.google.com](https://one.google.com)）实测了一下当前的状态：
+
+| 渠道 | 状态 |
+|------|------|
+| Google AI Pro 学生免费（美国 .edu） | 已结束，新账号看不到 15 个月免费按钮 |
+| Google AI Pro 学生免费（台湾大专） | 已结束，新账号看不到 1 年免费按钮 |
+| Google AI Pro 付费订阅（月 $19.99） | 正常开放，所有用户可买 |
+| Google AI Plus 低价版（月 $7.99，新加坡部分国家） | 部分地区有限开放 |
+
+**结论**：截至 2026 年 8 月初，没有任何官方渠道可以"白嫖" Google AI Pro 学生版。
+
+## 三、如果不免费，还有什么便宜方案
+
+按"留学生的真实预算"分类列一下（价格随时变动，以下数据为 2026 年 8 月初搜集）：
+
+### 方案 A：Google AI Plus（月 $7.99，限部分地区）
+
+Google 在 2025 年下半年新出的低价档，比 Pro 便宜一半多，功能差别：
+- ❌ 没有 Gemini 2.5 Pro（只能用 2.5 Flash）
+- ✅ 有 2TB 云盘
+- ✅ Deep Research 限额较低
+- ✅ Audio Overview
+
+**适合**：新加坡、马来西亚等开放地区的留学生。**不适合**：中国大陆 / 香港 / 台湾（暂未开放）。
+
+来源：[Google One 官方价格页](https://one.google.com/intl/zh-HK_hk/about/articles/google-ai-for-students)
+
+### 方案 B：Perplexity Pro 学生 50% 折扣
+
+Perplexity 给学生提供 50% 折扣，月 $5（原价 $10）。
+- ✅ Pro Search 无限制
+- ✅ 文件上传
+- ✅ API 额度
+- ❌ 不能用 Gemini 模型（只能选 GPT / Claude / Llama / Mistral）
+
+来源：Perplexity 官方学生申请页
+
+### 方案 C：GitHub Student Developer Pack（含 Copilot Pro）
+
+如果你有 GitHub Student 资格（学生免费），里面包含：
+- ✅ GitHub Copilot Pro（价值 $10/月）
+- ✅ JetBrains IDE 全套
+- ✅ DataCamp 课程
+- ✅ Namecheap 域名
+- ⚠️ 需要 .edu 邮箱
+
+**适合**：CS / 工程类学生。这是最划算的方案之一。
+
+来源：[education.github.com/pack](https://education.github.com/pack)
+
+### 方案 D：ChatGPT Plus 试用 2 个月（部分地区）
+
+OpenAI 跟某些银行 / 虚拟卡服务商合作提供 2 个月试用，2026 年还在继续。**这种活动随时变动**，得去 [chatgpt.com/promotions](https://chatgpt.com/promotions) 看你所在地区有没有。
+
+### 方案 E：Anthropic Claude Pro 试用
+
+Claude 偶尔给新账号提供 7-30 天 Pro 试用，不稳定但值得试。
+
+### 方案 F：免费的"够用"组合
+
+如果你预算真的很紧：
+- **Google Gemini 网页版**（免费，有 2.5 Flash）
+- **ChatGPT 免费版**（GPT-4o mini + 限量 GPT-4o）
+- **Claude.ai 免费版**（Sonnet 4，有用量限制）
+- **DeepSeek 网页版**（V3 / R1 全免费）
+- **Qwen / 智谱清言 / 豆包**（国产，全免费）
+
+**实际体验**：写日常作业、查资料、改语法，这些免费版 80% 够用。真正要写论文、做研究，才需要 Pro。
+
+## 四、3 个我推荐的具体组合
+
+按你的专业给 3 套搭配：
+
+### 组合 1：文科 / 商科 / 写作类
+- 主力：**Perplexity Pro 学生版**（$5/月，研究 + 写作）
+- 备用：**Google Gemini 免费版**（多模态、长文档）
+- 工具：**DeepSeek 免费版**（中文写作）
+
+**月支出**：$5
+
+### 组合 2：CS / 工程类
+- 主力：**GitHub Copilot Pro**（学生免费，IDE 集成）
+- 辅助：**ChatGPT Plus**（$20/月，需要付费）
+- 工具：**Claude.ai 免费版**（debug）
+
+**月支出**：$0-20
+
+### 组合 3：PhD / 科研 / 论文类
+- 主力：**Google AI Pro**（$19.99/月，2TB 云盘 + Deep Research）
+- 辅助：**Perplexity Pro 学生**（$5/月）
+- 工具：**Claude.ai 免费版 + DeepSeek**
+
+**月支出**：$24.99
+
+## 五、关于"薅羊毛"的提醒
+
+我写这篇博客的时候，是 2026 年 8 月初，Google 的学生免费活动已经结束。但你可能在微信群 / 小红书 / 抖音上看到"还能薅"的教程 —— 这些教程大部分是 2025 年的，**部分链接已经失效，部分方法已经违规**。
+
+不要做的事：
+- ❌ 用非自己的 edu 邮箱去申请（违反 Google ToS，可能导致账号被封）
+- ❌ 用假学生证 / 假 .edu 邮箱（明确违规）
+- ❌ 找"代认证"的卡商（违反 Google 反作弊规则）
+
+可以做的事：
+- ✅ 关注 Google 台湾 / 美国官方博客，新一轮活动会第一时间公告
+- ✅ 订阅 mi-to-ai 的每周更新，学生 AI 工具的新优惠会及时同步
+- ✅ 用上面的"替代方案"组合，先用免费 + 便宜的方案
+
+## 六、参考来源
+
+1. [Google 台湾官方博客：Google AI 学习计画](https://blog.google/intl/zh-tw/products/explore-get-answers/ai-pro-student-offer) — 2025-10-08
+2. [天下杂志：Gemini 学生免费用一年](https://www.cw.com.tw/article/5137753) — 台湾方案 2025-12-09 截止
+3. [dealmoon：Gemini Advanced 学生免费领](https://www.dealmoon.com/cn/extends-to-2026-finals-2tb-cloud-storage-gemini-advanced-ai-subscription-free-for-students/4942534.html) — 美国 2025-06-30 截止
+4. [GitHub Education：Student Developer Pack](https://education.github.com/pack) — 学生免费包
+5. [Google One：Google AI for Students](https://one.google.com/intl/zh-HK_hk/about/articles/google-ai-for-students) — 官方学生介绍页
+6. [Google Support：学生资格取消讨论](https://support.google.com/googleone/thread/412196845) — 申请被拒的处理流程
+
+## 七、常见问题 FAQ
+
+### Q1：2026 年 8 月还能申请学生免费 Google AI Pro 吗？
+
+**不能**。美国 2025 年 6 月 30 日截止，台湾 2025 年 12 月 9 日截止。两个活动都结束了。等 Google 官方公告新活动。
+
+### Q2：听说有"15 个月免费"的教程，是真的吗？
+
+是真的，但只对 2025 年 6 月 30 日之前用 .edu / .ac.uk 邮箱注册的美国 / 部分国家账号有效。现在 2026 年 8 月，这个入口已经关了。
+
+### Q3：免费的 Gemini 跟付费的差别大吗？
+
+差别看你用在哪：
+- 日常问答、语法检查：差别很小
+- 长文档分析（>100 页 PDF）：免费版经常卡，Pro 版能跑
+- 多模态（视频、图片）：免费版限制多，Pro 版流畅
+- Deep Research 深度研究：免费版没有，Pro 版核心卖点
+
+### Q4：怎么知道 Google 什么时候有新学生优惠？
+
+- 关注 [Google 台湾博客](https://blog.google/intl/zh-tw/) 和 [Google 美国博客](https://blog.google/)
+- 关注 mi-to-ai 的 [博客板块](https://www.mi-to-ai.com/blog)，学生 AI 工具新动态第一时间同步
+- 关注你目标学校 IT 部门邮件，他们有时候会推送校园优惠
+
+### Q5：Perplexity Pro 学生版怎么申请？
+
+去 [perplexity.ai](https://www.perplexity.ai) 登录后在 Settings → Subscription → Student，看你有没有资格。需要 .edu 邮箱 + 学校 IP 段。
+
+## 结论
+
+Google AI Pro 学生 15 个月免费这波羊毛已经薅完了，2026 年 8 月没有什么官方新优惠可领。与其到处找"代薅"的灰色渠道，不如老老实实用上面列的"替代方案"组合 —— 每月 $5-25 就能覆盖 90% 的留学 AI 需求。
+
+7/10 ⭐（信息准确，但 Google 政策随时变，建议收藏本文每月回看一次）
+`,
+    author: 'mi-to-ai 编辑部',
+    date: '2026-08-01',
+    updatedAt: '2026-08-01',
+    category: '订阅优惠',
+    tags: ['Google AI Pro', 'Gemini 学生', '学生免费', 'AI 订阅', 'Perplexity', 'GitHub Student', '留学省钱'],
+    relatedToolIds: ['gemini', 'chatgpt', 'claude', 'perplexity', 'deepseek', 'copilot'],
+    seoKeywords: [
+      'Google AI Pro 学生免费',
+      'Gemini 学生优惠',
+      'Gemini Pro 学生',
+      'edu 邮箱',
+      '15 个月免费',
+      'Perplexity 学生',
+      'GitHub Student Pack',
+      'AI 订阅便宜',
+      'Google AI Plus',
+      '留学 AI 订阅',
+    ],
+    readTime: 10,
+    imageUrl: 'https://images.unsplash.com/photo-1573804633927-bfcbcd909acd?w=1200&h=630&fit=crop',
+  },
+  // ============================================================
+  // Post: AI 重新定义大学课堂 — 海外留学生用什么工具应对？— 攻"AI 大学课堂 / 留学生 AI 助教"长尾词
+  // ============================================================
+  {
+    id: 'ai-reshapes-university-classroom-2026',
+    slug: 'ai-reshapes-university-classroom-2026',
+    title: 'AI 重新定义大学课堂：海外留学生用什么 AI 工具应对新学期？',
+    titleEn: 'AI Is Reshaping the University Classroom: Which AI Tools Should International Students Use This Semester?',
+    excerpt: '2026 年秋季开学，AI 助教进入中国 985 课堂、海外大学恢复 SAT 要求、芝加哥大学法学院禁止课堂上用电子设备。三条新闻背后是同一件事：AI 正式进入教学环节。本文整理 6 类典型 AI 工具（写论文/做笔记/找资料/写作业/debug/口语练习），按美国/英国/中国/欧洲不同场景给具体推荐。',
+    content: `# AI 重新定义大学课堂：海外留学生用什么 AI 工具应对新学期？
+
+> 2026 年秋季开学在即。WAIC 2026 上北大光华的"豆角"、上海交大的"AI 教师 + 人类导师"已经落地；芝大法学院禁止课堂上用电子设备；Yale Daily News 数据显示 91% 大四学生用过 AI 写作业。本文按"留学生真实场景"整理 6 类 AI 工具的具体用法和坑。
+
+![AI 重新定义大学课堂](https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop)
+
+## 一、为什么 2026 年秋季开学不一样
+
+2026 年 7 月这一波新闻密度很高：
+
+- **7 月 17-20 日 WAIC 2026**：北大光华"豆角"AI 教学助手 + 上海交大"AI 教师 + 人类导师"双师课堂正式成为案例
+- **7 月 19 日 BBC 中文**：F-1 4 年大限新规确认，9 月生效
+- **7 月 21 日新华网**：复旦等多所 985 院校把 AI 素养列为通信必修课
+- **7 月 9 日**：芝大法学院禁止课堂上用笔记本 / 平板 / 手机，所有考试闭卷进行
+
+对于留学生来说，这意味着两件事：
+1. **AI 工具从"辅助"升级为"必备"** —— 你不会用，跟不上同学
+2. **AI 工具的使用边界被严格划定** —— 不会用，违反校规
+
+## 二、按场景分的 6 类 AI 工具推荐
+
+下面这 6 类是留学生最常用的 AI 工具场景。每个场景给"主选 + 备选 + 注意事项"。
+
+### 场景 1：写论文 / 改语法 / 查拼写
+
+**主选**：**ChatGPT Plus**（$20/月）或 **Claude Pro**（$20/月）
+
+| 维度 | ChatGPT Plus | Claude Pro |
+|------|--------------|------------|
+| 学术语气 | 较好 | 更好（更接近人类学者） |
+| 长文档处理 | 支持 128K context | 支持 200K context |
+| 引用格式 | 一般 | 较好 |
+| 跨语言 | 中英双语 | 中英双语 |
+| 价格 | $20/月 | $20/月 |
+
+**备选**：免费版 ChatGPT / Claude.ai（限额但够用）
+
+**注意事项**：
+- 写完论文后，**用 AI 反向查一遍**：让 AI "找出这段话里哪些是 AI 生成的痕迹"，自己再改
+- 学校检测出来 AI 痕迹高的部分要手动重写（不要用 AI "改写"绕过检测）
+- 涉及引用的部分，AI 经常编造文献，必须自己复核
+
+### 场景 2：做笔记 / 整理课堂录音
+
+**主选**：**Notion AI**（$10/月）+ **Otter.ai**（免费版可用）
+
+- **Notion AI**：自动整理课堂笔记、提取要点、生成复习卡片
+- **Otter.ai**：实时转录课堂录音（英文），免费版每月 300 分钟
+
+**备选**：飞书妙记（中文课堂录音，免费）
+
+**注意事项**：
+- **先查你学校允不允许录音**。很多教授课堂政策不允许录。
+- Otter.ai 的转录准确率英文 90%+，中文（Mandarin）只有 70-80%，中文场景慎用
+
+### 场景 3：找文献 / 做研究
+
+**主选**：**Perplexity Pro**（学生 $5/月，原价 $10）
+
+- 实时联网搜索，给出答案 + 引用来源
+- 支持 Pro Search 深度研究模式
+
+**备选**：**Elicit**（专门做学术文献总结，免费版够用）
+
+**注意事项**：
+- Perplexity 引用的来源要复核一遍，AI 经常引用"看起来存在"的论文
+- 写文献综述时，用 Elicit 提取核心观点，再自己读原文
+
+### 场景 4：写作业 / 解数学题 / debug 代码
+
+**主选**：**ChatGPT Plus** 或 **Claude Pro**（同上）
+
+**debug 专属**：**GitHub Copilot Pro**（学生免费 via GitHub Student Developer Pack）
+
+**数学专属**：**Wolfram Alpha** + **Photomath**（拍照解题）
+
+**注意事项**：
+- 数学题要分步做：先让 AI 给思路，自己写完整过程，再让 AI 检查
+- 代码 debug 不要直接贴整段 —— 让 AI 帮你"理解错误信息"和"定位问题"比"修复代码"更安全
+
+### 场景 5：口语练习 / 面试准备
+
+**主选**：**Elsa Speak**（英语口语 AI 教练，月 $14）
+
+**备选**：**Speak**（OpenAI 投资的口语 App，英国英语学习市场第一）
+
+**面试专属**：**Final Round AI**（$49/月，模拟面试）
+
+**注意事项**：
+- 不要用 AI 替代真人对话练习 —— 真人反馈比 AI 准
+- 面试前用 AI 模拟 1-2 次可以，别依赖
+
+### 场景 6：翻译 / 多语言写作
+
+**主选**：**DeepL Pro**（$8/月）或 **Google Gemini**（免费版够用）
+
+**注意事项**：
+- 翻译学术内容时，DeepL 比 ChatGPT 更准
+- 不要用 AI 翻译"母语级别"的申请文书 —— 招生官一眼看穿
+
+## 三、按地区给的工具组合
+
+### 美国本科生
+
+| 用途 | 工具 |
+|------|------|
+| 写作 | ChatGPT Plus + Grammarly |
+| 笔记 | Notion AI + Otter.ai |
+| 代码 | GitHub Copilot Pro（学生免费） |
+| 研究 | Perplexity Pro 学生版 |
+| 面试 | Final Round AI |
+
+**月支出**：$30-50（含 ChatGPT Plus + Perplexity 学生 + Copilot 学生免费 + Grammarly $12）
+
+### 英国研究生
+
+| 用途 | 工具 |
+|------|------|
+| 写作 | Claude Pro（学术语气更好） |
+| 笔记 | Notion AI |
+| 研究 | Elicit + Perplexity |
+| 翻译 | DeepL |
+| 口语 | Elsa Speak |
+
+**月支出**：$35
+
+### 中国大陆本科生 / 研究生
+
+| 用途 | 工具 |
+|------|------|
+| 写作 | DeepSeek V3（免费 + 中文强） + Qwen |
+| 笔记 | 飞书妙记（免费） |
+| 研究 | 秘塔 AI 搜索（中文强，免费） |
+| 代码 | Cursor Pro（学生优惠 $9/月） |
+| PPT | Gamma（免费版够用） |
+
+**月支出**：$0-10
+
+### 欧洲（德/法/意）
+
+| 用途 | 工具 |
+|------|------|
+| 写作 | ChatGPT Plus（多语言强） |
+| 笔记 | Notion AI |
+| 研究 | Perplexity + Elicit |
+| 翻译 | DeepL（欧洲语言最强） |
+| 口语 | Elsa Speak |
+
+**月支出**：$30-40
+
+## 四、3 个红线：千万别踩
+
+### 红线 1：用 AI 代写整篇作业/论文
+
+这是大部分学校的明确违规。Yale Daily News 的数据 + 芝大法学院的新规都显示，**学校正在用技术 + 人工双向打击 AI 代写**。
+
+### 红线 2：用 AI 帮同学代写作业
+
+如果被发现，不止你受影响，代写的同学也会被处分。
+
+### 红线 3：用 AI 绕过学术诚信检测
+
+工具如 GPTZero、Turnitin AI 检测在 Top 50 学校普及。被抓 = 直接学术处分。
+
+## 五、参考来源
+
+1. [新华网：AI 正重塑大学课堂](https://app.xinhuanet.com/news/article.html?articleId=202607216bcea884a76648da925c28a387a9b6b4) — 2026-07-21，WAIC 2026 综述
+2. [Yale Daily News：91% 大四用 AI 写作业](https://yaledailynews.com) — 2026 Senior Survey
+3. [WRSA：耶鲁等多所大学取消补充文书](https://www.wrsa.net/1000583/2026/07-20/content_42553409.htm) — 2026-07-20
+4. [GitHub Education：Student Developer Pack](https://education.github.com/pack) — 学生免费包
+5. [Perplexity 官方价格页](https://www.perplexity.ai) — 学生 $5/月
+6. [DeepL Pro 定价](https://www.deepl.com/pro) — 月 $8
+
+## 六、常见问题 FAQ
+
+### Q1：留学生 AI 工具预算一般多少？
+
+按上面地区组合：**$30-50/月** 是大多数留学生的合理区间。如果你预算紧张，**DeepSeek + Gemini + Elicit + Perplexity 免费版** 这一套 $0 也能 cover 80% 需求。
+
+### Q2：学校禁止用 AI 怎么办？
+
+如果学校完全禁止（部分私立高中 + 部分严格法学院），所有上面的工具都不能用。建议：
+- 用 AI 学习（在合规范围）但不提交 AI 生成内容
+- 用 Grammarly 这种"语法检查"工具替代"AI 写作"工具
+- 跟教授确认边界 —— "我想用 X 工具做 Y 步骤可以吗？"
+
+### Q3：怎么知道目标学校对 AI 的具体规定？
+
+去 [mi-to-ai.com/universities](https://www.mi-to-ai.com/universities)，mi-to-ai 收录了 200+ 海外大学的 AI 政策。
+
+### Q4：AI 工具能不能帮我做小组项目？
+
+小组项目用 AI 做分工和进度跟踪没问题（Notion AI + Trello AI），但**贡献度要在群里说清楚**。否则其他成员会觉得你在"用 AI 偷懒"。
+
+## 结论
+
+2026 年秋季开学，AI 工具是留学生的"必备装备"。选对工具、合理使用、避开红线 —— 做到这三点就能在新学期里用 AI 加速度、不用 AI 翻车。
+
+7.5/10 ⭐（工具列表完整，但价格随时变动，建议学期初锁价）
+`,
+    author: 'mi-to-ai 编辑部',
+    date: '2026-08-01',
+    updatedAt: '2026-08-01',
+    category: 'AI 工具实战',
+    tags: ['AI 大学课堂', '留学生 AI 工具', 'ChatGPT', 'Claude', 'Perplexity', 'Copilot', '新学期'],
+    relatedToolIds: ['chatgpt', 'claude', 'perplexity', 'copilot', 'deepseek', 'gemini', 'deepl', 'notion'],
+    seoKeywords: [
+      'AI 大学课堂',
+      '留学生 AI 工具',
+      'AI 助教',
+      'ChatGPT 留学',
+      'Claude 学生',
+      'Perplexity 学生',
+      'Copilot 学生',
+      '新学期 AI 工具',
+      'AI 写作业',
+      'AI 工具推荐',
+    ],
+    readTime: 14,
+    imageUrl: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1200&h=630&fit=crop',
   },
   // ============================================================
   // Post: 2026年7月三大AI模型更新总汇 — 攻"AI写作工具推荐"主关键词
