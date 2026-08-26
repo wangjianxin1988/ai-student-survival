@@ -954,7 +954,7 @@ Copy.ai提供Pro版免费试用：
     rating: 4.7,
     ratingCount: 11000,
     viewCount: 145000,
-    createdAt: '2026-09-01T00:00:00Z',
+    createdAt: '2026-05-18T00:00:00Z',
     updatedAt: '2026-05-18T00:00:00Z',
     content: `## 一、DALL-E 3 API简介
 
