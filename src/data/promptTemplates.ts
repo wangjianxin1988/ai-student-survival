@@ -2532,6 +2532,7 @@ export const promptTemplates: PromptTemplate[] = [
   {
     id: 'research-008',
     title: '用 NotebookLM + Claude Opus 5 做文献综述（5 篇 prompt 模板）',
+    imageUrl: 'https://images.unsplash.com/photo-1535378917042-10a22c95931a?w=1200&h=630&fit=crop',
     content: `你是一位[具体研究领域]的博士生，请基于我上传到 NotebookLM 的 50 篇文献，帮我生成一份 5000 字的文献综述草稿。
 
 ## 第一步：分类与时间线
@@ -2575,6 +2576,7 @@ export const promptTemplates: PromptTemplate[] = [
   {
     id: 'app-visa-001',
     title: 'F-1 / J-1 / H-1B Visa 面试准备 prompt（带 30 个高频问题）',
+    imageUrl: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=1200&h=630&fit=crop',
     content: `你是美国签证面试辅导老师。请帮我准备 [F-1 / J-1 / H-1B] 签证面试，覆盖以下 30 个高频问题。每个问题给出：
 1. 标准回答模板（150 词以内）
 2. 面试官真正想确认的点
@@ -2642,6 +2644,7 @@ export const promptTemplates: PromptTemplate[] = [
   {
     id: 'job-resume-2026-ai',
     title: '2026 北美/欧洲求职简历 prompt（AI 友好，ATS 优化，1 页）',
+    imageUrl: 'https://images.unsplash.com/photo-1581056771107-24ca5f033842?w=1200&h=630&fit=crop',
     content: `你是一位北美/欧洲 tech 公司 senior recruiter + AI 简历优化专家。我正在申请 [公司名] 的 [职位名]，请帮我重写我的简历，目标：1 页、能通过 ATS（自动筛选系统）、同时让真人 recruiter 30 秒内 get 到亮点。
 
 ## 我的背景（我填）
