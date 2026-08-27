@@ -1,6 +1,34 @@
 # CLAUDE.md - AI留学生存指南 开发配置
 
-> 版本: v1.1 | 更新: 2026-05-16 | 用途: Claude Code开发指引
+> 版本: v1.2 | 更新: 2026-08-27 | 用途: Claude Code / Hermes / Codex / 任何 AI Agent 开发指引
+
+---
+
+## 🚨 **新会话 / 新任务开工前必读**（2026-08-27 增加，P72 铁律）
+
+**任何 agent（Claude Code / Hermes / Codex / 其他）接手这个项目的**第一步**，必须按顺序读完以下文档**——**不接受任何借口**：
+
+1. **`AGENTS.md`** — Agent 入口文档（**最新**，2026-08-27 创建）
+2. **`README.md`** — 项目简介 + 快速开始
+3. **`CHANGELOG.md`** — **最新版本变更**（必读！避免重复已修复的问题）
+4. **`PROJECT_STATUS_REPORT.md`** — **项目完整状态**（必读！包含最新 commit + 数据统计 + 已知问题）
+5. **如果是 SEO/GEO/OAuth/GSC 相关任务**，额外读：
+   - `references/SEO_FIXES_2026-08-27.md` — 2026-08-27 SEO 修复总结
+   - `references/gsc-oauth-full-scope-upgrade.md` — OAuth 升级流程
+   - `references/gsc-credentials.md` — GSC 凭据管理
+6. **根目录文档目录**（不要假设文件不存在）：
+   ```bash
+   ls *.md references/*.md
+   ```
+
+**P72 铁律**（2026-08-27 实踩）：
+- ❌ **新 agent 第一件事不是写代码，是读文档**——根目录有 README/CHANGELOG/PROJECT_STATUS 完整文档
+- ❌ **不要假设"文档不存在"或"过时"**——除非 `ls` 确认
+- ❌ **不要基于记忆声称数据**——必查文档/git log/GSC API
+- ✅ **报告"已完成"前必须 `ls *.md` + 看最新 CHANGELOG + 看 PROJECT_STATUS_REPORT**
+- ✅ **如果 PROJECT_STATUS_REPORT 超过 7 天未更新，必须先更新它再继续**
+
+**事件**：2026-08-27 我犯的错——没主动读 PROJECT_STATUS_REPORT.md，**整天不知道根目录有完整文档体系**。信哥指出来后才写 `SEO_FIXES_2026-08-27.md` 总结。
 
 ---
 

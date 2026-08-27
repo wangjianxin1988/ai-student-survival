@@ -457,8 +457,9 @@ supabase secrets set KEY=VALUE --project-ref giynvpfnzzelzwpmsgtf
 
 | 文件 | 说明 |
 |------|------|
+| **AGENTS.md** | **🆕 Agent 入口文档（2026-08-27 创建）— 新会话第一步必读** |
 | README.md | 项目简介和快速开始 |
-| CLAUDE.md | Claude Code开发指引 (471行) |
+| CLAUDE.md | Claude Code开发指引 (471行 + v1.2 开工前必读章节) |
 | SPEC.md | MVP开发规范 |
 | **CHANGELOG.md** | **版本变更记录（最新 v1.0.6 SEO + GEO 修复）** |
 | P3_DESIGN.md | P3架构与长期设计 (1035行) |

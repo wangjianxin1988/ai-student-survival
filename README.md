@@ -6,6 +6,18 @@
 ![Node](https://img.shields.io/badge/node-%3E%3D18.14.1-green.svg)
 ![Astro](https://img.shields.io/badge/astro-4.15-blue.svg)
 
+## 🤖 **AI Agent / 开发者必读**
+
+**如果你是 Claude Code / Hermes / Codex 或任何 AI agent 接手这个项目，第一件事**：
+
+```bash
+cat AGENTS.md     # Agent 入口文档（必读）
+cat CHANGELOG.md  # 最新版本变更（v1.0.6 SEO + GEO 修复）
+cat PROJECT_STATUS_REPORT.md  # 项目完整状态
+```
+
+详细说明见 `AGENTS.md`。
+
 ## 项目简介
 
 AI留学生存指南是一个AI Native网站，服务中国留学生在海外使用AI工具的四大痛点：
