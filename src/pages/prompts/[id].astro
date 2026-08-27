@@ -50,6 +50,7 @@ const jsonLd = {
 <Layout
   title={`${template.title} - Prompt模板`}
   description={template.description}
+  image={(template as any).imageUrl || `https://www.mi-to-ai.com/og-image.svg`}
   jsonLd={jsonLd}
   locale={locale}
 >

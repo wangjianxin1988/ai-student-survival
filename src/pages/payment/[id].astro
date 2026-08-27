@@ -176,6 +176,7 @@ const renderedContent = renderMarkdown(solution.content);
 <Layout
   title={solution.title}
   description={solution.excerpt}
+  image={solution.imageUrl || `https://www.mi-to-ai.com/og-image.svg`}
   jsonLd={jsonLd}
 >
   <!-- Breadcrumb -->
