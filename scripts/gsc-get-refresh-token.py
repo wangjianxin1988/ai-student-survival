@@ -84,7 +84,7 @@ def main():
         'response_type': 'code',
         'client_id': client_id,
         'redirect_uri': redirect_uri,
-        'scope': 'https://www.googleapis.com/auth/webmasters.readonly',
+        'scope': 'https://www.googleapis.com/auth/webmasters',
         'access_type': 'offline',
         'prompt': 'consent',
         'include_granted_scopes': 'true',

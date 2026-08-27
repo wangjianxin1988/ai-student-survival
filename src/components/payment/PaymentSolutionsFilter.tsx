@@ -51,24 +51,43 @@ export default function PaymentSolutionsFilter({ solutions, locale = 'zh' }: Pro
   const [showFilters, setShowFilters] = useState(false);
 
   // Filter solutions based on search and category
-  const filteredSolutions = useMemo(() => {
-    return solutions.filter(solution => {
-      // Category filter
-      if (selectedCategories.length > 0 && !selectedCategories.includes(solution.category)) {
-        return false;
-      }
-
-      // Search filter
-      if (searchQuery) {
-        const searchText = `${solution.title} ${solution.excerpt} ${solution.tags.join(' ')}`.toLowerCase();
-        if (!fuzzyMatch(searchText, searchQuery)) {
+    const filteredSolutions = useMemo(() => {
+      return solutions.filter(solution => {
+        // Category filter
+        if (selectedCategories.length > 0 && !selectedCategories.includes(solution.category)) {
           return false;
         }
-      }
 
-      return true;
-    });
-  }, [solutions, searchQuery, selectedCategories]);
+        // Search filter
+        if (searchQuery) {
+          const searchText = `${solution.title} ${solution.excerpt} ${solution.tags.join(' ')}`.toLowerCase();
+          if (!fuzzyMatch(searchText, searchQuery)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+    }, [solutions, searchQuery, selectedCategories]);
+
+    // Sort: top 2 by viewCount (popular), then rest by updatedAt desc (newest first)
+    // When user filters, sort by viewCount for consistent UX
+    const sortedSolutions = useMemo(() => {
+      if (selectedCategories.length > 0 || searchQuery) {
+        return [...filteredSolutions].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0));
+      }
+      // Default: Top 2 hot + rest by updatedAt desc
+      const byDate = [...filteredSolutions].sort((a, b) => {
+        const ta = new Date(a.updatedAt || a.createdAt || 0).getTime();
+        const tb = new Date(b.updatedAt || b.createdAt || 0).getTime();
+        return tb - ta;
+      });
+      const top2 = [...filteredSolutions]
+        .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
+        .slice(0, 2);
+      const top2Ids = new Set(top2.map(s => s.id));
+      return [...top2, ...byDate.filter(s => !top2Ids.has(s.id))];
+    }, [filteredSolutions, searchQuery, selectedCategories]);
 
   // Get category counts
   const categoryCounts = useMemo(() => {
@@ -249,9 +268,9 @@ export default function PaymentSolutionsFilter({ solutions, locale = 'zh' }: Pro
       </div>
 
       {/* Solutions List */}
-      {filteredSolutions.length > 0 ? (
-        <div className="space-y-4">
-          {filteredSolutions.map((solution, index) => (
+      {sortedSolutions.length > 0 ? (
+              <div className="space-y-4">
+                {sortedSolutions.map((solution, index) => (
             <React.Fragment key={solution.id}>
               {index > 0 && index % 5 === 0 && (
                 <VirtualCardAd
