@@ -1,6 +1,7 @@
 ---
 import Layout from '@/layouts/Layout.astro';
 import SurvivalDetailClient from '@/components/survival/SurvivalDetailClient';
+import { survivalGuidesData } from '@/data/survivalGuides';
 import { type Locale, getLocaleFromUrl } from '@/i18n';
 
 export const prerender = false;
@@ -12,11 +13,14 @@ export function getStaticPaths() {
 
 const { id } = Astro.params;
 const locale: Locale = getLocaleFromUrl(Astro.url);
+const guide = survivalGuidesData.find(g => g.id === id);
+const guideImage = (guide as any)?.imageUrl || `https://www.mi-to-ai.com/og-image.svg`;
 ---
 
 <Layout
   title={locale === 'zh' ? '指南详情' : 'Guide Details'}
   description={locale === 'zh' ? '查看防坑防骗指南详情' : 'View survival guide details'}
+  image={guideImage}
   breadcrumbs={[
     { name: locale === 'zh' ? '首页' : 'Home', href: locale === 'zh' ? '/' : '/en/' },
     { name: locale === 'zh' ? '防坑指南' : 'Survival Guides', href: locale === 'zh' ? '/survival' : '/en/survival' },

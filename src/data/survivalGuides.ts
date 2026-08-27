@@ -2677,6 +2677,7 @@ I made this mistake. My grades suffered, I was exhausted all the time, and I end
     title: 'AI 代写作业的"红线"在哪里？2026 年 8 月美国 50 所大学最新政策',
     titleZh: 'AI 代写作业的"红线"在哪里？2026 年 8 月美国 50 所大学最新政策',
     category: 'legal',
+    imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=1200&h=630&fit=crop',
     content: [
       'In August 2026, the line between "using AI to help" and "AI cheating" is more confusing than ever. This guide gives you the exact rules from 50 US universities + 10 European universities, plus how to use AI without getting expelled.\n' +
       '\n' +
@@ -2963,6 +2964,7 @@ I made this mistake. My grades suffered, I was exhausted all the time, and I end
     title: '2026 年美国银行/银行账号诈骗新花样：Zelle、Chime、PayPal 全军覆没',
     titleZh: '2026 年美国银行/银行账号诈骗新花样：Zelle、Chime、PayPal 全军覆没',
     category: 'scam',
+    imageUrl: 'https://images.unsplash.com/photo-1601597111158-2fceff292cdc?w=1200&h=630&fit=crop',
     content: [
       'In 2026, US banking scams have evolved to target international students specifically. Here is what is new + how to protect yourself.\n' +
       '\n' +

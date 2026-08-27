@@ -24,6 +24,9 @@ REFRESH_JSON = Path(__file__).parent.parent / 'references' / 'gsc-refresh-token.
 REPORTS_DIR = Path(__file__).parent.parent / 'references' / 'gsc-reports'
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
+# sitemap 全 URL（用于解析 URL）
+sitemap_url = 'https://www.mi-to-ai.com/sitemap.xml'
+
 
 def get_access_token():
     """用 refresh_token 换 access_token"""
@@ -90,6 +93,37 @@ def fetch_sitemaps(access_token, site_url):
     encoded_site = urllib.parse.quote(site_url, safe='')
     return gsc_api(f'/sites/{encoded_site}/sitemaps', access_token)
 
+
+
+def submit_sitemap(access_token, site_url, sitemap_path):
+    """重新提交 sitemap 到 GSC（需要 webmasters full scope，不是 readonly）"""
+    encoded_site = urllib.parse.quote(site_url, safe='')
+    encoded_path = urllib.parse.quote(sitemap_path, safe='')
+    url = f'https://www.googleapis.com/webmasters/v3/sites/{encoded_site}/sitemaps/{encoded_path}'
+
+    req = urllib.request.Request(
+        url, headers={'Authorization': f'Bearer {access_token}'}, method='PUT'
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return True, json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode()[:200]
+        return False, f'HTTP {e.code}: {body}'
+
+
+def fetch_sitemap_pending_urls(access_token, site_url):
+    """从 sitemap 数据源找出所有 URL（用于对比 Google 索引状态）"""
+    import re
+    try:
+        req = urllib.request.Request(sitemap_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            content = resp.read().decode()
+        urls = re.findall(r'<loc>([^<]+)</loc>', content)
+        return urls
+    except Exception as e:
+        print(f'❌ Failed to fetch sitemap: {e}')
+        return []
 
 def fetch_url_inspection(access_token, site_url, url):
     """检查 URL 索引状态（仅前 2000 条/天）"""
@@ -218,19 +252,40 @@ def main():
         report_lines.append(f"| CTR | {metrics['current']['ctr']:.2f}% | {metrics['previous']['ctr']:.2f}% | {metrics['changes']['ctr_pct']:+.1f}% |")
         report_lines.append('')
 
-        # Sitemap 状态
+        # Sitemap 状态 + 自动 resubmit
         sitemaps = fetch_sitemaps(access_token, site)
         if sitemaps:
             report_lines.append('### Sitemap 状态')
             report_lines.append('')
-            report_lines.append('| Sitemap | 最近抓取 | 警告 | 错误 |')
-            report_lines.append('|---------|----------|------|------|')
+            report_lines.append('| Sitemap | Last Submitted | Indexed | Warnings | Errors |')
+            report_lines.append('|---------|----------------|---------|----------|--------|')
             for sm in sitemaps.get('sitemap', []):
-                path = sm['path'].replace('https://www.mi-to-ai.com', '')
-                last = sm.get('lastSubmitted', '?')[:10]
+                path_disp = sm['path'].replace('https://www.mi-to-ai.com', '')
+                last_sub = sm.get('lastSubmitted', '?')[:19]
                 warnings = sm.get('warnings', '0')
                 errors = sm.get('errors', '0')
-                report_lines.append(f"| `{path}` | {last} | {warnings} | {errors} |")
+                # Indexed
+                indexed = 'N/A'
+                submitted = 'N/A'
+                for c in sm.get('contents', []):
+                    if 'web' in c.get('type', ''):
+                        indexed = c.get('indexed', 'N/A')
+                        submitted = c.get('submitted', 'N/A')
+                report_lines.append(f"| `{path_disp}` | {last_sub} | {indexed}/{submitted} | {warnings} | {errors} |")
+                
+                # 自动 resubmit：如果 indexed < submitted 且 lastSubmitted > 7 天前
+                if last_sub != '?':
+                    last_date = datetime.strptime(last_sub[:10], '%Y-%m-%d')
+                    days_old = (datetime.now() - last_date).days
+                    if days_old > 7:
+                        print(f'  🔄 Resubmitting sitemap (last submitted {days_old} days ago)...')
+                        ok, result = submit_sitemap(access_token, site, sm['path'])
+                        if ok:
+                            print(f'  ✅ Sitemap resubmitted')
+                            report_lines.append(f"  - ✅ Auto-resubmitted at {datetime.now().isoformat()[:19]}")
+                        else:
+                            print(f'  ❌ Resubmit failed: {result[:100]}')
+                            report_lines.append(f'  - ❌ Resubmit failed: {result[:100]}')
             report_lines.append('')
 
         if alerts:
