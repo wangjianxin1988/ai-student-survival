@@ -141,3 +141,14 @@ deep_test_results_v3.json
 references/gcp-oauth-client.json
 references/gsc-refresh-token.json
 references/gsc-credentials.md
+
+
+# Hermes runtime files
+.hermes/
+.hermes-cron/
+
+# Skill reference files (contain credentials)
+references/
+
+# Skills directory (auto-managed by Hermes)
+skills/

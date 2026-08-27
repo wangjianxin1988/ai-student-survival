@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
-import { toolsData } from '@/data/toolsData';
+import { staticTools } from '@/data/static-tools';
+import { survivalGuidesData } from '@/data/survivalGuides';
 import { policiesData } from '@/data/policies';
 import { promptTemplates } from '@/data/promptTemplates';
 import { paymentSolutionsData } from '@/data/paymentSolutions';
@@ -60,7 +61,7 @@ function latestDate(dates: string[]): string {
 const FALLBACK_DATE = '2026-06-01';
 
 const toolLastmod: Record<string, string> = Object.fromEntries(
-  toolsData.map(t => [t.slug, latestDate([t.updatedAt, t.createdAt])])
+  staticTools.map(t => [t.slug, latestDate([t.updatedAt, t.createdAt])])
 );
 
 const policyLastmod: Record<string, string> = Object.fromEntries(
@@ -125,8 +126,20 @@ export const GET: APIRoute = async () => {
     })),
   ];
 
+const survivalLastmod: Record<string, string> = Object.fromEntries(
+  survivalGuidesData.map(g => [g.id, latestDate([g.updatedAt, g.createdAt])])
+);
+
+const survivalRoutes = survivalGuidesData.map(g => {
+    const lm = survivalLastmod[g.id] || FALLBACK_DATE;
+    return [
+      { url: `/survival/${g.id}`, priority: '0.7', changefreq: 'weekly', lastmod: lm },
+      { url: `/en/survival/${g.id}`, priority: '0.7', changefreq: 'weekly', lastmod: lm },
+    ];
+  }).flat();
+
   // Dynamic tool routes — use real updatedAt from data
-  const toolSlugs = toolsData.map(t => t.slug).filter(Boolean);
+  const toolSlugs = staticTools.map(t => t.slug).filter(Boolean);
   const toolRoutes = toolSlugs.flatMap(slug => {
     const lm = toolLastmod[slug] || FALLBACK_DATE;
     return [

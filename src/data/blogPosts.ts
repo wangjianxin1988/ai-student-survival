@@ -3115,7 +3115,8 @@ A：可以参考我们的 [支付解决方案](/payment)，覆盖支付宝、礼
     slug: 'ai-models-august-2026-ultimate-showdown',
     title: '2026年8月 AI 模型终极对决：Claude Opus 5 凭什么登顶？GPT-5.6/Gemini 3.7 怎么选？',
     titleEn: 'August 2026 AI Model Showdown: Why Claude Opus 5 Tops the Charts, and How to Pick Between GPT-5.6 & Gemini 3.7',
-    excerpt: 'Claude Opus 5 在 Artificial Analysis Intelligence Index 拿 61 分（史上最高），GPT-5.6 系列稳态运行，Gemini 3.7 Flash 8月13日强化 STEM。8月14日 Qwen3.8-Max + GLM-5.3 同日上线。本文从"留学实际使用"角度对比，告诉你不同场景选哪个最划算。',
+    excerpt: 'Claude Opus 5 在 Artificial Analysis Intelligence Index 拿 61 分（史上最高），GPT-5.6 系列稳态运行，Gemini 3.7 Flash 8月13日强化 STEM。8月14日 Qwen3.8-Max + GLM-5.3 同日上线。本文从"留学实际使用"角度对比，告诉你不同场景选哪个最划算。',    imageUrl: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&h=630&fit=crop',
+
     content: `
 # 2026年8月 AI 模型终极对决：Claude Opus 5 凭什么登顶？GPT-5.6/Gemini 3.7 怎么选？
 
@@ -3252,7 +3253,8 @@ AI 模型现在最大的问题不是"哪个最强"，而是"哪个最适合你�
     slug: 'fall-2026-ai-course-advisor-strategy',
     title: '2026 Fall 选课/选 Advisor 攻略：用 AI 帮你做研究生申请季最关键的两个决定',
     titleEn: 'Fall 2026 Course & Advisor Selection: Use AI to Make the Two Most Important Grad School Decisions',
-    excerpt: '9 月开学季，AI 帮你做两件事：① 用 Claude/GPT 分析 syllabus、ratemyprofessors、教授近 3 年发表，挑选适合的课和 advisor ② 用 NotebookLM/Gemini 把目标教授的 50 篇论文做成速读，决定要不要 follow。本文给出 5 个 prompt 模板 + 完整工作流。',
+    excerpt: '9 月开学季，AI 帮你做两件事：① 用 Claude/GPT 分析 syllabus、ratemyprofessors、教授近 3 年发表，挑选适合的课和 advisor ② 用 NotebookLM/Gemini 把目标教授的 50 篇论文做成速读，决定要不要 follow。本文给出 5 个 prompt 模板 + 完整工作流。',    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop',
+
     content: `
 # 2026 Fall 选课/选 Advisor 攻略：用 AI 帮你做研究生申请季最关键的两个决定
 
@@ -3429,7 +3431,8 @@ AI 不会替你做学术，但会用 AI 的研究生，**比不会用的，每�
     slug: 'chinaguide-ai-china-travel-2026',
     title: 'ChinaConnect 推出 ChinaGuide AI：留学生回国探亲/旅游必备的免费 AI 助手',
     titleEn: 'ChinaConnect Launches ChinaGuide AI: The Free AI Assistant Every International Student Needs for China Trips',
-    excerpt: '我们团队（mi-to-ai 留学指南的姊妹站 ChinaConnect）上线了 chinaengage.org/ai。中国旅行 AI 助手，覆盖 35 城 1750 餐厅 6300 酒店 1750 景点，支持 11 种语言。本文介绍它能帮你做什么、怎么用、未来路线图。',
+    excerpt: '我们团队（mi-to-ai 留学指南的姊妹站 ChinaConnect）上线了 chinaengage.org/ai。中国旅行 AI 助手，覆盖 35 城 1750 餐厅 6300 酒店 1750 景点，支持 11 种语言。本文介绍它能帮你做什么、怎么用、未来路线图。',    imageUrl: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200&h=630&fit=crop',
+
     content: `
 # ChinaConnect 推出 ChinaGuide AI：留学生回国探亲/旅游必备的免费 AI 助手
 

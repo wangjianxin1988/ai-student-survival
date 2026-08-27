@@ -3,7 +3,7 @@ import { onAuthStateChange, initAuth, type DemoUser } from '@/lib/auth';
 import { getAuthHeaders } from '@/lib/auth';
 import { isSupabaseConfigured, isDemoMode } from '@/lib/supabase';
 import { getAuthLoginHref } from '@/lib/i18n';
-import { toolsData } from '@/data/toolsData';
+import { staticTools } from '@/data/static-tools';
 import { paymentSolutionsData } from '@/data/paymentSolutions';
 import { policiesData } from '@/data/policies';
 import { promptTemplates } from '@/data/promptTemplates';
@@ -43,7 +43,7 @@ const translations = {
 function getFavoriteItem(type: string, id: string): { name: string; description?: string; href: string } | null {
   switch (type) {
     case 'tool': {
-      const tool = toolsData.find(t => t.id === id);
+      const tool = staticTools.find(t => t.id === id);
       if (tool) {
         return {
           name: tool.name,
