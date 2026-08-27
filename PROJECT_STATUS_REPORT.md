@@ -1,6 +1,6 @@
 # AI留学生存指南 - 项目完整状态报告
 
-> 生成时间: 2026-05-28 16:48
+> 生成时间: 2026-08-27 17:50 (最后 SEO + GEO 修复后)
 > 项目路径: D:\suoyouxiangmu\ai-student-survival
 
 ---
@@ -10,7 +10,7 @@
 | 项目 | 值 |
 |------|-----|
 | 项目名 | AI留学生存指南 (ai-student-survival) |
-| 版本 | v1.0.5 |
+| **版本** | **v1.0.6** (2026-08-27 SEO + GEO 修复大版本) |
 | 描述 | AI Native website for Chinese international students |
 | 许可证 | MIT |
 | Node.js要求 | >= 18.14.1 |
@@ -18,8 +18,9 @@
 | 生产URL | https://mi-to-ai.com |
 | Pages URL | https://mi-to-ai-new.pages.dev |
 | GitHub | git@github.com:wangjianxin1988/ai-student-survival.git |
-| 最新Git Tag | v1.0.5 |
-| 最新Commit | f5d409e "ci: deploy with new API token" |
+| 最新Git Tag | v1.0.6 (待推送) |
+| **最新Commit** | `86c2e0f` "fix: replace 2 more broken Unsplash images found by P70 verify script" |
+| **SEO 状态** | sitemap 572 URLs / 14 个新 URL 全部 Discovered / Indexed 0/572 (3-7 天内大幅增长) |
 
 ---
 
@@ -277,19 +278,23 @@ PUBLIC_TURNSTILE_SITE_KEY=1x00000000000000000000AA
 
 | 版本 | 日期 | 主要变更 |
 |------|------|---------|
+| **v1.0.6** | **2026-08-27** | **SEO + GEO 修复大版本**（8 个 commit）：OAuth full scope 升级 / sitemap 572 URLs + no-cache / 14 个新内容全部 Discovered / Unsplash 图 404 修复（P70 永久方案）/ Payment 排序修复（P71）/ 删除 toolsData.ts 死代码 / P66-P71 pitfall 写入 skill。完整报告：`references/SEO_FIXES_2026-08-27.md` |
 | v1.0.5 | 2026-05-23 | 全面E2E测试, 修复ESLint/代码质量 |
 | v1.0.3 | 2026-05-23 | ESLint配置, 修复未使用变量 |
 | v1.0.2 | 2026-05-23 | QA测试修复 |
 | v1.0.1 | 2026-05-23 | 移除硬编码联系方式, 环境变量化 |
 | v1.0.0 | 2026-05-19 | 初始生产版本 |
 
-### Git最新Commits
+### Git最新Commits（2026-08-27 SEO 修复）
 ```
-f5d409e ci: deploy with new API token
-d19123e ci: trigger deployment with Global API Key
-11ef260 fix(search): direct modal manipulation instead of window.openSearch
-91dbcfe ci: trigger deployment with updated Cloudflare token
-9be782f fix(deploy): correct Cloudflare Pages project name to mi-to-ai-new
+86c2e0f fix: replace 2 more broken Unsplash images found by P70 verify script
+a2ede58 fix: replace broken Unsplash image for gpt-5-6-sol (404)
+c852d5e fix: payment list sort - top 2 by viewCount (popular) + rest by updatedAt desc
+5ef1d6a fix: add imageUrl to 3 new prompts (research-008, app-visa-001, job-resume-2026-ai)
+4fed389 fix: og:image for survival + prompts + sitemap no-cache headers + GSC daily auto-resubmit
+9a3c30d fix: add survivalRoutes to allRoutes (was missing from sitemap)
+dba2406 fix: pass imageUrl to Layout for blog/payment/prompts og:image
+293e175 refactor: consolidate AI tools data to static-tools.ts + add Unsplash + survival sitemap
 ```
 
 ---
@@ -455,15 +460,20 @@ supabase secrets set KEY=VALUE --project-ref giynvpfnzzelzwpmsgtf
 | README.md | 项目简介和快速开始 |
 | CLAUDE.md | Claude Code开发指引 (471行) |
 | SPEC.md | MVP开发规范 |
-| CHANGELOG.md | 版本变更记录 |
+| **CHANGELOG.md** | **版本变更记录（最新 v1.0.6 SEO + GEO 修复）** |
 | P3_DESIGN.md | P3架构与长期设计 (1035行) |
 | ISSUE_ANALYSIS.md | 问题分析与修复清单 (51项全通过) |
 | FINAL_TEST_REPORT_v105.md | v1.0.5最终测试报告 |
 | CUSTOM-DOMAIN-SETUP.md | 自定义域名配置指南 |
 | PASSWORD_SETUP.md | 密码保护配置指南 |
 | SETUP_INSTRUCTIONS.md | Cloudflare环境变量配置指南 |
+| **PROJECT_STATUS_REPORT.md** | **项目完整状态报告（最新更新 2026-08-27 v1.0.6）** |
 | docs/FEATURE_EXPANSION_PLAN.md | 功能拓展规划 |
 | docs/POLICY_UPDATE_GUIDE.md | 大学政策数据更新指南 |
+| **references/SEO_FIXES_2026-08-27.md** | **2026-08-27 SEO + GEO 修复完整总结** |
+| **references/gsc-oauth-full-scope-upgrade.md** | **GSC OAuth full scope 升级流程文档** |
+| **references/gsc-credentials.md** | **GSC 凭据管理（路径 + 权限，不复制 token）** |
+| **scripts/verify-unsplash-images.py** | **Unsplash 图可达性验证脚本（P70 永久方案）** |
 | .supabase-schema/index.md | 数据库Schema索引 |
 | .supabase-schema/relationships.json | 外键关系 |
 | .supabase-schema/functions.md | 数据库函数 |

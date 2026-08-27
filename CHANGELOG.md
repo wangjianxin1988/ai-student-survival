@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.6] - 2026-08-27
+
+### SEO + GEO 修复大版本
+
+**8 个 commit 全部 deploy SUCCESS**。完整修复总结见 [`references/SEO_FIXES_2026-08-27.md`](references/SEO_FIXES_2026-08-27.md)
+
+### OAuth 升级
+- GSC OAuth scope 从 `webmasters.readonly` 升级到 **`webmasters` (full)**
+- 现在能 PUT resubmit sitemap + Request Indexing
+- sitemap 81 天没动 → 现在 Google 1 秒内下载新版
+
+### sitemap 修复
+- 从 498 URLs → **572 URLs**（修复 survivalRoutes 22+22 个）
+- 加 `Cache-Control: no-cache`（避免 CDN 缓存 stale 版）
+
+### 新内容索引
+- 14 个新内容（4 tools + 3 blog + 2 payment + 2 survival + 3 prompts）
+- 全部 P68 5 项验证通过：size + keywords + og:image + sitemap + title
+- 14/14 URL Inspection 从 "Unknown to Google" → "Discovered"
+
+### Unsplash 图修复（P70）
+- 修复 4 处 Unsplash 404 图（GPT-5.6 Sol + 1 支付 + 2 篇博客）
+- 新增 `scripts/verify-unsplash-images.py` 永久检测脚本
+- 全 37 张图 HTTP 200
+
+### Payment 列表排序（P71）
+- Top 2 = viewCount 最高（热门）
+- Top 3+ = updatedAt 倒序（最新优先）
+- 用户筛选时按 viewCount 排（UX 一致）
+
+### Dead Code 删除
+- `src/data/toolsData.ts` 724 行删除（所有引用已迁移到 staticTools）
+
+### Skill 经验沉淀
+- P66-P71 全部写入 `mi-to-ai-operations` skill
+- OAuth 升级文档：`references/gsc-oauth-full-scope-upgrade.md`
+
+### 验证结果
+- 核心页面 10/10 HTTP 200
+- sitemap 572 URLs + no-cache
+- robots.txt: GPTBot / ClaudeBot / PerplexityBot / CCBot 全部 Allowed
+- llms.txt / llms-full.txt: 9.4KB 总（AI 引擎可读）
+- JSON-LD: 详情页 2-6 blocks / 首页 4 blocks
+- GSC 7 天: 5 clicks / 530 imp / 90 天: 72 clicks / 4,753 imp
+
 ## [1.0.5] - 2026-05-23
 
 ### Testing & QA
