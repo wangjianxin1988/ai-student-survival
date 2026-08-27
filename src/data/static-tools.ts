@@ -2245,7 +2245,7 @@ export const staticTools: Tool[] = [
     category: 'productivity', subcategory: 'ai-assistant', pricing: 'paid',
     priceDetail: { monthly: 200, yearly: 2400, currency: 'USD' },
     url: 'https://chat.openai.com',
-    imageUrl: 'https://images.unsplash.com/photo-1676277791608-ac54b4c1c95f?w=800&h=400&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=400&fit=crop', // 2026-08-27: switched from photo-1676277791608-ac54b4c1c95f which is now 404 on Unsplash
     rating: 4.9, ratingCount: 22300,
     dimensions: { easeOfUse: 4.6, features: 4.9, value: 4.3 },
     tags: ['OpenAI', 'GPT-5.6', 'Sol', 'STEM', '研究', '1M上下文', 'Sora', 'FrontierMath'],
