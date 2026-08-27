@@ -129,6 +129,7 @@ export default function SurvivalCard({ guide, locale = 'zh', showDetails = false
                   .replace(/^📞 /gm, '<li class="ml-4 text-blue-600">📞 ')
                   .replace(/^🏥 /gm, '<li class="ml-4 text-red-600">🏥 ')
                   .replace(/^🆘 /gm, '<li class="ml-4 text-red-600">🆘 ')
+                  .replace(/```([\s\S]*?)```/g, '<pre class="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4 text-sm"><code>$1</code></pre>')
                   .replace(/\n\n/g, '</p><p class="mb-4">')
                   .replace(/\n/g, '<br/>')
               }}
