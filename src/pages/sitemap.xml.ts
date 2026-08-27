@@ -205,6 +205,7 @@ const survivalRoutes = survivalGuidesData.map(g => {
     ...paymentRoutes,
     ...offerRoutes,
     ...blogRoutes,
+    ...survivalRoutes,
   ];
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
