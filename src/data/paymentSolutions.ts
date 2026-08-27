@@ -5493,7 +5493,7 @@ A：Perplexity 30 天内不满意可全额退款。
     title: 'ChatGPT Go / Plus 订阅 2026 最新指南：GPT-5.6 Luna/Terra 怎么选？',
     category: 'regional_pricing',
     excerpt: 'ChatGPT 2026 年 7 月起订阅版大改：Go $8/月（GPT-5.6 Luna 速度版）、Plus $20/月（GPT-5.6 Terra 均衡版）、Pro $200/月（GPT-5.6 Sol 旗舰）。本文讲解各档差异、虚拟卡订阅流程、+ 留学场景如何省最多。',
-    imageUrl: 'https://images.unsplash.com/photo-1676277791608-ac54b4c1c95f?w=1200&h=630&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&h=630&fit=crop', // 2026-08-27: photo-1676277791608-ac54b4c1c95f was 404
     toolIds: ['chatgpt', 'gpt-5-6-sol'],
     difficulty: 'easy',
     reliability: 'high',

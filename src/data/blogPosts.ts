@@ -2342,7 +2342,7 @@ WAIC 2026 看上去是个产业大会，但 5 个趋势都在改变留学生的�
 
 > 一句话结论：补充文书取消 ≠ 申请变容易。GPA / 课程难度 / SAT / 主文书 / 活动列表每一个的权重都在涨。AI 文书能用，但只能用于"打磨"和"反检查"，不能用于"代写"。耶鲁官方调研显示 91% 的大四学生用过 AI 写作业，其中 48.5% 用在毕业论文上 —— 招生官完全知道这件事。
 
-![2027 Fall 申请季美国大学](https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop)
+![2027 Fall 申请季美国大学](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=630&fit=crop)
 
 ## 一、这次"取消补充文书"到底是真动作还是假动作
 
@@ -2494,7 +2494,7 @@ WAIC 2026 看上去是个产业大会，但 5 个趋势都在改变留学生的�
       'AI 写作检测',
     ],
     readTime: 13,
-    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=630&fit=crop',
   },
   // ============================================================
   // Post: Gemini Pro 学生免费 2026 年 8 月实测 — 攻"Gemini 学生免费 / Google AI Pro 学生 / edu 优惠"长尾词
@@ -3253,14 +3253,14 @@ AI 模型现在最大的问题不是"哪个最强"，而是"哪个最适合你�
     slug: 'fall-2026-ai-course-advisor-strategy',
     title: '2026 Fall 选课/选 Advisor 攻略：用 AI 帮你做研究生申请季最关键的两个决定',
     titleEn: 'Fall 2026 Course & Advisor Selection: Use AI to Make the Two Most Important Grad School Decisions',
-    excerpt: '9 月开学季，AI 帮你做两件事：① 用 Claude/GPT 分析 syllabus、ratemyprofessors、教授近 3 年发表，挑选适合的课和 advisor ② 用 NotebookLM/Gemini 把目标教授的 50 篇论文做成速读，决定要不要 follow。本文给出 5 个 prompt 模板 + 完整工作流。',    imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop',
+    excerpt: '9 月开学季，AI 帮你做两件事：① 用 Claude/GPT 分析 syllabus、ratemyprofessors、教授近 3 年发表，挑选适合的课和 advisor ② 用 NotebookLM/Gemini 把目标教授的 50 篇论文做成速读，决定要不要 follow。本文给出 5 个 prompt 模板 + 完整工作流。',    imageUrl: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=630&fit=crop',
 
     content: `
 # 2026 Fall 选课/选 Advisor 攻略：用 AI 帮你做研究生申请季最关键的两个决定
 
 > 适用对象：北美/英国/欧洲/香港/新加坡的硕博士生，2026 Fall 入学/在读。
 
-![研究生选课与导师匹配 - 学术氛围](https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop)
+![研究生选课与导师匹配 - 学术氛围](https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200&h=630&fit=crop)
 
 ## 一、为什么这件事要现在做？
 
