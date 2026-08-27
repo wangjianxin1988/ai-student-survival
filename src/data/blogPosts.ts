@@ -3103,8 +3103,486 @@ A：可以参考我们的 [支付解决方案](/payment)，覆盖支付宝、礼
       'AI工具预算',
     ],
     createdAt: '2026-07-03',
-    updatedAt: '2026-07-03',
+    updatedAt: '2026-08-26',
     readTime: 12,
+    viewCount: 0,
+  },
+  // ============================================================
+  // Post 16: 2026-08 AI 模型终极对决（Claude Opus 5 vs GPT-5.6 vs Gemini 3.6/3.7）
+  // ============================================================
+  {
+    id: 'ai-models-august-2026-ultimate-showdown',
+    slug: 'ai-models-august-2026-ultimate-showdown',
+    title: '2026年8月 AI 模型终极对决：Claude Opus 5 凭什么登顶？GPT-5.6/Gemini 3.7 怎么选？',
+    titleEn: 'August 2026 AI Model Showdown: Why Claude Opus 5 Tops the Charts, and How to Pick Between GPT-5.6 & Gemini 3.7',
+    excerpt: 'Claude Opus 5 在 Artificial Analysis Intelligence Index 拿 61 分（史上最高），GPT-5.6 系列稳态运行，Gemini 3.7 Flash 8月13日强化 STEM。8月14日 Qwen3.8-Max + GLM-5.3 同日上线。本文从"留学实际使用"角度对比，告诉你不同场景选哪个最划算。',
+    content: `
+# 2026年8月 AI 模型终极对决：Claude Opus 5 凭什么登顶？GPT-5.6/Gemini 3.7 怎么选？
+
+> 截至 2026-08-26。每月新模型都在出，本文聚焦"现在留学生能用、性价比最高的"那几款。
+
+![AI 模型对比 - 多个品牌的发光图标](https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=1200&h=630&fit=crop)
+
+## 一、一句话结论
+
+- **写论文/读 PDF/做长任务** → Claude Opus 5（Pro $20/mo 起，能力天花板最高）
+- **日常作业/STEM/编程/性价比** → GPT-5.6 Terra（Plus $20/mo） 或 DeepSeek V4-Pro（API $0.14/M）
+- **多模态作业/免费用** → Gemini 3.6/3.7 Flash（免费版 + Google AI Studio）
+- **AI 替代生活助理/Action 执行** → Manus 1.6 Lite 或 Claude Sonnet 5 Free
+
+免费组合拳：ChatGPT Free (GPT-5.6 Luna) + Gemini Free (3.7 Flash) + Claude Sonnet 5 Free + DeepSeek V4 + Qwen 3.7 Max API（200 免费请求/天）。**月支出 $0**。
+
+## 二、Claude Opus 5：为什么登顶？
+
+7 月 24 日发布的 Opus 5 是 Anthropic 首次让一个模型同时霸榜三个独立榜单：
+
+| 榜单 | Opus 5 分数 | 第二名 |
+|------|-------------|--------|
+| Artificial Analysis Intelligence Index | **61** | GPT-5.6 Sol（56） |
+| Agentic Index | **55.3** | GPT-5.6 Sol（54.0） |
+| LM Arena Agent (任务成功率) | **0.176** | Claude Fable 5（0.142） |
+
+**实际意义**：
+- **长任务不中断**：Opus 5 能连续跑 30 小时不崩，对写论文、做多步研究、写代码 review 这种"一次给一坨活"的场景直接起飞
+- **PDF/论文阅读**：1M 上下文可以一次性塞进 100 篇论文，提问时给你"跨论文对比"
+- **Cowork / Skills**：8 月新增的虚拟助手生态，能在你 Excel/PowerPoint 里直接干活
+
+**价格**：
+- Claude.ai：Free（含 Sonnet 5） / Pro $20/mo（含 Opus 5） / Max $200/mo（5× Opus 5 配额）
+- API：Opus 5 输入 $5/M、输出 $25/M（贵但比 Opus 4 降了 75%）
+
+**对留学生的取舍**：
+- 写硕士论文、博士开题、做 literature review → Pro $20/mo 值得
+- 只写平时作业、应付 deadline → Plus $20 (GPT-5.6) 或 Sonnet 5 Free 够用
+
+## 三、GPT-5.6 系列：分层清晰，免费版都好用
+
+7 月 9 日 Sol 发布后，OpenAI 用了 4 周把整条产品线推到稳态：
+
+| 版本 | ChatGPT 默认 | API 价格 (per M) | 适用 |
+|------|--------------|------------------|------|
+| GPT-5.6 Luna | Free / Go $8 | $1 / $4 | 日常写作、低成本 |
+| GPT-5.6 Terra | Plus $20 | $5 / $25 | 编程、STEM、性价比 |
+| GPT-5.6 Sol | Pro $200 | $15 / $60 | 数学奥赛、研究 |
+| GPT-5.6-Cyber | API only | $3 / $12 | 编程专用 |
+
+**新动向**：
+- **Sign in with ChatGPT**：OpenAI 测试第三方登录，未来可能成为新的 OAuth 协议
+- **App 生态**：ChatGPT 已经有 220+ 应用（13 个类别），其中 85+ 是消费类（Expedia/Instacart/Zillow）
+- **8 月 31 日**：Sonnet 5 介绍期定价结束，API 输入从 $2 → $3（涨 50%），tokenizer 调整后实际可能涨 35%
+
+## 四、Gemini 3.6/3.7 Flash：免费版的王者
+
+Google 把"免费但能用"做到了极致：
+
+- **3.6 Flash**（7-21）：输入 $1.50/M、输出 $7.50/M，1M 上下文
+- **3.7 Flash**（8-13）：进一步强化 STEM，3.5 Flash-Lite（输入 $0.30/M）做超低延迟
+- **免费版**：Gemini App + AI Studio 都跑 3.6/3.7 Flash，留学生**零成本**就能用
+
+**特色功能**：
+- **NotebookLM**：把 50 个来源（PDF/网页/YouTube 字幕）做成 AI 笔记 + 思维导图 + 音频总结 → 写 literature review 神器
+- **Nano Banana**：Google 自家图像生成，跟 ChatGPT 的 Sora 对位
+- **Personal Intelligence**（1 月）：让 Gemini 直接读你的 Gmail / 相簿 / YouTube 历史（要主动开启）
+
+## 五、其他不能忽略的玩家
+
+- **DeepSeek V4-Pro-0813**（8-13）：API $0.14/M（MIT 许可证），SWE Marathon #1，**API 性价比之王**
+- **Qwen3.8-Max**（8-3）：2.4T 参数，WAIC 上承诺开放权重，但 8 月底还没放出 HuggingFace 仓库
+- **Qwen3.8-27B**（8-14）：开源 27B，可以本地跑
+- **GLM-5.3**（8-14）：智谱 AI，国产 Claude 替代
+- **Kimi K3**（7-21）：Moonshot，128k 上下文
+- **Grok 4.6**（8-11）：xAI，免费版有但限制多
+- **Muse Spark 1.2 / Muse Glimmer**（8-10）：Meta，多模态
+
+**8 月 31 日重要截止**：
+- kimi-k2.5 / moonshot-v1 系列（8k/32k/128k/auto） → 必须迁到 kimi-k3
+
+## 六、不同身份的留学生怎么选？
+
+**本科生（预算紧、作业多）**：
+1. ChatGPT Free (GPT-5.6 Luna) — 日常
+2. Gemini Free (3.7 Flash) — 多模态
+3. Claude Sonnet 5 Free — 长 PDF 阅读
+4. DeepSeek V4 API — 编程
+
+**硕士生（写论文为主）**：
+1. Claude Pro $20/mo — Opus 5 长任务 + PDF
+3. ChatGPT Plus $20/mo — Terra STEM
+4. NotebookLM 免费 — 文献综述
+
+**博士生 / 研究者**：
+1. Claude Max $200/mo — Opus 5 不限量
+2. ChatGPT Pro $200/mo — GPT-5.6 Sol
+3. Qwen3.8 API — 等开放权重后本地跑
+
+**预算为零**：
+- 全部用免费组合，输出质量可以接受 90% 场景
+
+## 七、避坑提醒
+
+- **不要同时订阅 3 套付费**：Opus 5 + GPT-5.6 + Gemini 3 Pro 每月 $240，学生用不上
+- **看清订阅层级**：Plus ≠ Pro，Pro 是 $200/mo 不是 $20
+- **8 月 31 日后 Sonnaet 5 API 涨价**：如果是 project 用 API 来跑论文批量处理，预算要提前留
+- **WAIC 8 月底还有 Qwen3.8-Max 发布会**：如果它真放出开源权重，本地跑 7B/27B 模型就完全 free
+
+![AI 模型架构对比图](https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=400&fit=crop)
+
+## 八、写在最后
+
+AI 模型现在最大的问题不是"哪个最强"，而是"哪个最适合你的场景"。免费组合已经能覆盖 80% 日常需求，剩下的 20%（写论文 / 做研究 / 写代码 review）才需要付费。
+
+别被排行榜绑架 —— 你写一篇 essay 不需要 Intelligence Index 61 分，需要的是语法对、引用准、不被 AIGC 检测抓。
+
+**问题**：你现在订阅了哪个 AI 模型？够用吗？欢迎评论区聊。
+`,
+    tags: ['AI 模型', 'Claude Opus 5', 'GPT-5.6', 'Gemini 3.7', 'DeepSeek V4', 'Qwen3.8', 'AI 工具对比'],
+    category: 'AI 工具实战',
+    relatedToolIds: ['47', '48', '49'],
+    seoKeywords: ['Claude Opus 5', 'GPT-5.6 Sol Terra Luna', 'Gemini 3.6 3.7 Flash', 'Qwen3.8-Max', 'DeepSeek V4-Pro', 'AI 模型对比', 'AI 模型 2026 8 月'],
+    createdAt: '2026-08-26',
+    updatedAt: '2026-08-26',
+    readTime: 13,
+    viewCount: 0,
+  },
+  // ============================================================
+  // Post 17: 开学季 AI 选课 / 选 advisor 攻略（9 月开学 = 紧贴热点）
+  // ============================================================
+  {
+    id: 'fall-2026-ai-course-advisor-strategy',
+    slug: 'fall-2026-ai-course-advisor-strategy',
+    title: '2026 Fall 选课/选 Advisor 攻略：用 AI 帮你做研究生申请季最关键的两个决定',
+    titleEn: 'Fall 2026 Course & Advisor Selection: Use AI to Make the Two Most Important Grad School Decisions',
+    excerpt: '9 月开学季，AI 帮你做两件事：① 用 Claude/GPT 分析 syllabus、ratemyprofessors、教授近 3 年发表，挑选适合的课和 advisor ② 用 NotebookLM/Gemini 把目标教授的 50 篇论文做成速读，决定要不要 follow。本文给出 5 个 prompt 模板 + 完整工作流。',
+    content: `
+# 2026 Fall 选课/选 Advisor 攻略：用 AI 帮你做研究生申请季最关键的两个决定
+
+> 适用对象：北美/英国/欧洲/香港/新加坡的硕博士生，2026 Fall 入学/在读。
+
+![研究生选课与导师匹配 - 学术氛围](https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1200&h=630&fit=crop)
+
+## 一、为什么这件事要现在做？
+
+每年 8 月底-9 月初，是研究生"选下学期课 + 跟 advisor 谈 research direction"的最关键窗口。**前 4 周定方向**，后面的学期就会顺；前 4 周瞎选，整个学期都在补锅。
+
+但问题是：
+- 一份 syllabus 50+ 页，没时间每份都精读
+- RateMyProfessors 的评分系统主观且过载
+- 教授发表的论文一搜就 100+ 篇，读不完
+
+**AI 能帮你做的**：5 分钟内把 5 个候选 advisor 全部摸透，把 8 门候选课的 workload + 难度可视化对比。
+
+## 二、5 个核心 prompt 模板
+
+### Prompt 1：解析 syllabus（通用）
+
+上传 PDF 到 Claude / ChatGPT（Pro 版支持 PDF 上传）：
+
+\`\`\`
+你是一名资深研究生助教。请帮我分析这份 [课程名] 的 syllabus，输出：
+1. 课程定位（intro/advanced/seminar）
+2. 周 workload 估算（小时数）
+3. 期末评估占比（作业/期中/期末/project）
+4. 适合什么背景的学生（前修课要求）
+5. 雷区（哪些作业容易挂）
+6. 与 [我计划的其他课程] 是否冲突
+输出格式：Markdown 表格 + 一句话结论。
+\`\`\`
+
+### Prompt 2：RateMyProfessors 评分去噪
+
+\`\`\`
+以下是 [教授名] 的 RateMyProfessors 评分（粘贴页面文本）：
+- Overall Quality: X.X / 5.0
+- Difficulty: X.X / 5.0
+- 热门 tags: ...
+- 最近 10 条评论（粘贴文本）
+
+请帮我：
+1. 去掉明显情绪化/报复性差评
+2. 提取最常被提到的 3 个优点 + 3 个缺点
+3. 判断这位教授是否适合 [我的背景，如：本专业本科生/转专业/已有研究经验]
+4. 给一个 1-10 的"我会选他吗"评分 + 理由
+\`\`\`
+
+### Prompt 3：教授发表论文速读（NotebookLM 神器）
+
+把教授最近 3 年 50 篇论文的 PDF/链接全部上传到 NotebookLM：
+
+\`\`\`
+你是这个领域 [XX 领域] 的研究生。请基于以上 50 篇论文回答：
+- 这位教授的核心 research agenda 有哪 3 条主线？
+- 他现在最关注的方向是？
+- 他跟谁合作最紧密？（潜在的合作者/审稿人）
+- 他的方法偏好是实验 / 理论 / 实证？
+- 适合找他做 [我感兴趣的方向] 的研究吗？
+- 给我 5 个"第一次 office hour 应该问的具体问题"
+\`\`\`
+
+### Prompt 4：给 advisor 写第一封 Cold Email
+
+\`\`\`
+我想给 [教授名] 发一封 cold email 表达读 PhD/做 research 的兴趣。
+
+我的背景：
+- [学校] [专业] 大三/硕士在读
+- GPA X.X / 5.0
+- 核心课程：[列出 3-5 门]
+- 研究经历：[1-2 段]
+- 已发表/在投：[列出]
+- 技能：Python/PyTorch/R/...
+
+教授背景：
+- [学校] [系] 教授
+- 最近论文方向：[3 条]
+- 招生偏好（我从他实验室网页推断）：[列出]
+
+请写一封 300 词以内的 email，要求：
+1. 开头直接说为什么联系他（不要"我是您忠实的读者"）
+2. 1 段展示我对他的哪篇具体论文有想法（不是泛泛"我很感兴趣"）
+3. 1 段展示我能为他贡献什么
+4. 1 段问具体问题（他实验室有没有 open position，要不要先做 rotation）
+5. 结尾有 call-to-action（明确请求 15 分钟 Zoom）
+语气：专业 + 真热情 + 不卑不亢。
+\`\`\`
+
+### Prompt 5：对比 5 门候选课
+
+\`\`\`
+我下学期候选 5 门课：
+1. [课程 A 名字 + 教授]
+2. [课程 B 名字 + 教授]
+3. [课程 C 名字 + 教授]
+4. [课程 D 名字 + 教授]
+5. [课程 E 名字 + 教授]
+
+我的背景：[专业 + 兴趣 + 已有课程]
+下学期的总学分上限：[X 学分]
+我期望的周 workload：[X 小时]
+
+请帮我：
+1. 评估这 5 门课的 workload 是否可行（哪门最容易超载）
+2. 按"对我长期目标的价值"排序
+3. 标出"雷区课程"（drop 风险高 / 评分严苛 / 跟其他课冲突）
+4. 给我一个 3+2 的推荐组合 + 备选方案
+\`\`\`
+
+## 三、完整工作流（90 分钟搞定）
+
+| 阶段 | 时间 | 工具 | 动作 |
+|------|------|------|------|
+| **Step 1** | 30 min | Claude Opus 5 / Gemini 3.7 | 把 5 个候选 advisor 的论文喂 NotebookLM，让 AI 生成"3 条主线 + 适合方向"摘要 |
+| **Step 2** | 20 min | ChatGPT Plus + Claude Pro | 用 Prompt 2 处理 RateMyProfessors 评分，筛掉 2 个明显不合适的 |
+| **Step 3** | 15 min | ChatGPT | 用 Prompt 4 给剩下 3 个 advisor 各生成一封 cold email（不要直接发，先改改） |
+| **Step 4** | 15 min | NotebookLM | 把 8 门候选课的 syllabus 都上传，让 AI 给你一个对比表 |
+| **Step 5** | 10 min | Claude / ChatGPT | 用 Prompt 5 让 AI 给你 3+2 选课组合建议 |
+
+**总耗时**：90 分钟，**准确度**：比瞎选高 5 倍。
+
+## 四、避坑提醒
+
+- **AI 不能替代你做决定**：AI 说"教授 A 不错"不代表真不错，要交叉验证 1-2 篇你读得懂的论文
+- **不要完全相信 RateMyProfessors**：评分被某门课的难度扭曲，需要看具体评论内容
+- **cold email 不要让 AI 写到底稿**：AI 帮你起草，但结尾那句话、那个问题必须是你自己的
+- **选课不要贪多**：3 门 heavy + 2 门 light 的组合永远比 5 门 heavy 强
+- **advisor 不是越多越好**：1 个主 advisor + 1 个 committee member 就够，多了管理成本反而高
+
+## 五、开学后第一周还应该做的
+
+1. **Office hour 必去**：哪怕你已经决定选这门课，第一周 office hour 是 sign-up sheet 的黄金期
+2. **读完第一周 reading**：用 NotebookLM 把它做成 5 分钟音频总结，复习 + 通勤两不误
+3. **跟 advisor 一对一**：第一周就约 30 分钟 Zoom，定下学期 OKR（要做什么 deliverable）
+4. **建 research log**：Notion 或 Obsidian，每周 update 1 次你的 progress + blocker
+
+## 六、AI 工具组合推荐
+
+- **写邮件 + 论文阅读** → Claude Opus 5（Pro $20/mo）
+- **多模态 + PDF** → Gemini 3.7 Flash（免费版够用）
+- **编程 + STEM 作业** → GPT-5.6 Terra（Plus $20/mo）或 DeepSeek V4-Pro（API $0.14/M）
+- **文献综述** → NotebookLM（免费）
+- **听论文** → NotebookLM Audio Overview（免费，AI 给你两个虚拟主持人对谈）
+
+## 七、写在最后
+
+AI 不会替你做学术，但会用 AI 的研究生，**比不会用的，每周多出 8-10 小时**（来源：Stanford HAI 2025 年研究）。
+
+这 8-10 小时，你可以用来：
+- 多读 3 篇 literature
+- 多写 1 个 research proposal
+- 多睡 1 小时（更现实）
+
+问题：你开学第一周准备怎么用 AI？评论区聊聊。
+`,
+    tags: ['研究生', '选课', 'Advisor', 'Cold Email', 'NotebookLM', 'AI 工具', '开学季'],
+    category: '申请策略',
+    relatedToolIds: ['47', '49', '45'],
+    seoKeywords: ['研究生选课', '选 advisor', 'cold email 模板', 'RateMyProfessors', 'NotebookLM', '研究生申请', 'Fall 2026'],
+    createdAt: '2026-08-26',
+    updatedAt: '2026-08-26',
+    readTime: 10,
+    viewCount: 0,
+  },
+  // ============================================================
+  // Post 18: ChinaConnect 中国旅行 AI 工具革命（联动 chinaengage.org）
+  // ============================================================
+  {
+    id: 'chinaguide-ai-china-travel-2026',
+    slug: 'chinaguide-ai-china-travel-2026',
+    title: 'ChinaConnect 推出 ChinaGuide AI：留学生回国探亲/旅游必备的免费 AI 助手',
+    titleEn: 'ChinaConnect Launches ChinaGuide AI: The Free AI Assistant Every International Student Needs for China Trips',
+    excerpt: '我们团队（mi-to-ai 留学指南的姊妹站 ChinaConnect）上线了 chinaengage.org/ai。中国旅行 AI 助手，覆盖 35 城 1750 餐厅 6300 酒店 1750 景点，支持 11 种语言。本文介绍它能帮你做什么、怎么用、未来路线图。',
+    content: `
+# ChinaConnect 推出 ChinaGuide AI：留学生回国探亲/旅游必备的免费 AI 助手
+
+> **重要更新**：8 月 26 日我们的姊妹项目 ChinaConnect（chinaengage.org）正式上线 AI 助手。它跟 mi-to-ai 一样 free，今天这篇文章介绍它能帮你做什么、怎么用、未来计划。
+
+![中国旅行 - 故宫与胡同](https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=1200&h=630&fit=crop)
+
+## 一、为什么要做 ChinaGuide AI？
+
+做了 3 年 mi-to-ai 留学指南后，我们团队最常收到的私信是：
+
+> "我下个月回国探亲 2 周，第一次带爸妈去北京，怎么规划路线？"
+
+> "暑假去上海实习，住哪个区方便？"
+
+> "在西安转机一天，怎么把兵马俑 + 大雁塔 + 回民街都塞进去？"
+
+> "我妈想去成都吃火锅、看熊猫，我不想踩坑。"
+
+**传统攻略网站的问题**：
+- 信息过载（小红书 1 万篇笔记 = 没笔记）
+- 时效性差（攻略写的是 2019 年，2024 年店早关了）
+- 不懂你的具体场景（"我带爸妈" ≠ "我跟朋友" ≠ "我一个人"）
+
+**AI 助手能解决的**：
+- 对话式询问，按你的时间和兴趣生成路线
+- 11 种语言（中/英/日/韩/泰/越/俄/法/德/阿/波斯）
+- 数据来自本地博主 + 米其林 + 黑珍珠 + 大众点评 + TripAdvisor
+- 紧急情况下（丢护照/生病/迷路）能直接给 110/120/大使馆电话
+
+## 二、它能帮你做什么（按留学场景）
+
+### 场景 1：回国探亲（带爸妈 7-14 天）
+
+\`\`\`
+用户：我爸妈第一次回国，从多伦多飞北京，待 10 天。
+我妈腿脚不太好，不能暴走。
+我爸只对历史感兴趣（已经读过易中天）。
+我想吃烤鸭、涮羊肉、爆肚，但不要太贵的（人均 200 以内）。
+
+AI：北京 10 天父母友好路线
+- Day 1-3：故宫深度（VIP 通道 + 休息区）+ 王府井
+- Day 4-5：颐和园（游船代替走路）+ 圆明园
+- Day 6：八达岭长城（缆车上下）+ 昌平温泉
+- Day 7：胡同游（什刹海/南锣鼓巷 + 黄包车）
+- Day 8-9：天津 1 日游（高铁 30 分钟 + 五大道 + 意式风情区）
+- Day 10：798 艺术区 + 机场免税店
+\`\`\`
+
+### 场景 2：暑假实习（上海/北京 1-3 个月）
+
+- **住宿**：根据公司位置 + 预算推荐具体小区 + 真实租金范围
+- **通勤**：地铁/打车时间 + 月卡方案
+- **同事社交**：本地餐厅推荐（按口味偏好）
+- **周末活动**：展览/演出/徒步
+- **应急**：医院/大使馆/银行开户流程
+
+### 场景 3：毕业旅行（5-10 个城市）
+
+- 城市间最佳交通（高铁/飞机/自驾对比）
+- 每个城市的 3-5 个 must-see
+- 行李寄存点（火车站/机场）
+- 现金需求 vs 移动支付（外卡能用吗？）
+
+### 场景 4：父母来探亲（爸妈第一次出国→回国）
+
+- 机场接送（中文标识 vs 英文）
+- 移动支付开通（教爸妈用支付宝/微信）
+- 紧急联系（大使馆、医院、家附近派出所）
+- 行程不要太累（每天最多 2 个景点 + 1 小时午休）
+
+### 场景 5：紧急情况
+
+- 护照丢了怎么办？
+- 手机被偷了（已锁屏）怎么买机票回国？
+- 在医院怎么挂号/付费？
+- 跟警察/出租车司机语言不通怎么办？
+
+## 三、11 种语言支持
+
+chinaengage.org 默认中文，但你可以：
+
+\`\`\`
+URL 加 ?lang=en / ?lang=ja / ?lang=ko / ?lang=th / ?lang=vi
+           / ?lang=ru / ?lang=fr / ?lang=de / ?lang=ar / ?lang=fa
+           / ?lang=zh-CN / ?lang=zh-TW
+\`\`\`
+
+AI 助手会跟着 UI 语言切：
+- 日语版：推荐"日本人常去"的餐厅（如建国饭店、北京饭店等老牌）
+- 阿拉伯语版：清真餐厅标注、祈祷室位置、Halal 认证
+- 法语版：法语导游、使馆活动、留学预科班推荐
+- 俄语版：哈尔滨中俄友好区、远东旅游路线
+
+## 四、数据规模
+
+| 类别 | 数量 | 数据源 |
+|------|------|--------|
+| 城市 | 35 | 国务院行政区划 + ChinaConnect 自有数据 |
+| 餐厅 | 1,750 | 米其林 + 黑珍珠 + 大众点评 4.5+ + 本地博主 |
+| 酒店 | 6,300 | Booking + 美团 + TripAdvisor + 自营验证 |
+| 景点 | 1,750 | 携程 + 官方景区 + TripAdvisor |
+| 紧急联系 | 479 | 110/120/119 + 各地大使馆 + 主要医院 |
+
+**数据更新频率**：每周一次批量抓取 + 每日用户反馈纠错。
+
+## 五、怎么用
+
+1. 打开 https://chinaengage.org/ai
+2. 选语言（默认中文）
+3. 直接问："我在纽约读书，暑假想带爸妈去西安 5 天，他们没来过中国"
+4. AI 会反问你 2-3 个细节（预算、兴趣、体能）
+5. 生成完整路线（每天分段 + 推荐餐厅 + 交通 + 紧急预案）
+
+**或用结构化表单**（不喜欢对话的用户）：
+
+\`\`\`
+[城市] [天数] [人数 + 关系] [预算] [兴趣标签]
+[必去景点] [不能吃/不能去] [语言] [其他需求]
+\`\`\`
+
+## 六、未来路线图（公开承诺）
+
+- **2026 Q3**：北京/上海/广州/西安/成都/杭州/重庆 + 香港 + 澳门 9 城深度优化
+- **2026 Q4**：加 26 个二线城市 + 攻略视频化 + AI 行程一键导出 Google Calendar
+- **2027 H1**：跟 Trip.com / 携程集成，直接在 AI 助手界面订机酒
+- **2027 H2**：跟小红书合作，让中国旅行博主直接给外国游客写攻略
+
+## 七、跟其他旅行 AI 工具的对比
+
+| 工具 | 中国数据 | 多语言 | Free | 推荐 |
+|------|---------|--------|------|------|
+| **ChinaGuide AI (chinaengage)** | ⭐⭐⭐⭐⭐ | 11 种 | ✅ | 留学+探亲首选 |
+| Trip.com AI | ⭐⭐⭐⭐ | 10+ | ✅ | 全球通用，中国深度一般 |
+| Booking AI Trip Planner | ⭐⭐⭐ | 40+ | ✅ | 偏酒店 |
+| Google Gemini Travel | ⭐⭐⭐ | 100+ | ✅ | 通用性强，但中国数据弱 |
+| 小红书 AI 助手 | ⭐⭐⭐⭐⭐ | 中文 | ✅ | 中国深度强，但外国用户难用 |
+
+## 八、写在最后
+
+ChinaGuide AI 是我们团队"让中国人跟世界无缝沟通"的另一个方向 —— mi-to-ai 是从中国看世界，ChinaConnect 是从世界看中国。
+
+未来我们会让两个站点数据互通：你在 mi-to-ai 写留学经验时，可以一键分享给 chinaengage 上想了解中国留学的外国朋友。
+
+**问题**：你回国探亲/旅游最关心什么？AI 助手能帮你解决吗？评论区告诉我们，会直接影响我们的开发优先级。
+`,
+    tags: ['ChinaConnect', 'chinaengage', 'ChinaGuide AI', '中国旅行', '回国探亲', 'AI 助手', '留学生'],
+    category: 'AI 工具实战',
+    relatedToolIds: ['50', '1', '2'],
+    seoKeywords: ['ChinaConnect AI', '中国旅行 AI 助手', '回国探亲', '留学生 中国旅游', 'chinaengage', 'ChinaGuide AI', '免费 AI 旅行'],
+    createdAt: '2026-08-26',
+    updatedAt: '2026-08-26',
+    readTime: 9,
     viewCount: 0,
   },
 ];

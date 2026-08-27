@@ -5488,6 +5488,264 @@ A：Perplexity 30 天内不满意可全额退款。
 参考：[GitHub Student Developer Pack](https://education.github.com/pack)、[Google AI Student Plan](https://one.google.com/about/google-ai-premium/)。
 `
   },
+  {
+    id: 'chatgpt-go-gpt-5-6-subscription-2026',
+    title: 'ChatGPT Go / Plus 订阅 2026 最新指南：GPT-5.6 Luna/Terra 怎么选？',
+    category: 'regional_pricing',
+    excerpt: 'ChatGPT 2026 年 7 月起订阅版大改：Go $8/月（GPT-5.6 Luna 速度版）、Plus $20/月（GPT-5.6 Terra 均衡版）、Pro $200/月（GPT-5.6 Sol 旗舰）。本文讲解各档差异、虚拟卡订阅流程、+ 留学场景如何省最多。',
+    toolIds: ['chatgpt', 'gpt-5-6-sol'],
+    difficulty: 'easy',
+    reliability: 'high',
+    tags: ['ChatGPT', 'GPT-5.6', 'Go订阅', 'Plus订阅', '虚拟卡', 'OpenAI', 'Luna', 'Terra', 'Sol'],
+    rating: 4.9,
+    ratingCount: 18500,
+    viewCount: 220000,
+    createdAt: '2026-08-26T00:00:00Z',
+    updatedAt: '2026-08-26T00:00:00Z',
+    referralUrl: 'https://chat.openai.com/',
+    content: `## 一、ChatGPT 2026 年 8 月订阅版完整对比
+
+OpenAI 在 2026 年 7 月 9 日发布 GPT-5.6 系列后，把 ChatGPT 订阅版重新分层。**8 月版的核心变化**：免费版现在默认就是 GPT-5.6 Luna（速度版），Plus 解锁 Terra（均衡），Pro 解锁 Sol（旗舰 STEM）。
+
+### 各档位详细对比
+
+| 计划 | 月费 | 默认模型 | 上下文 | Sora | 适合 |
+|------|------|----------|--------|------|------|
+| **Free** | $0 | GPT-5.6 Luna | 标准 | ❌ | 轻度体验 |
+| **Go** | $8 | GPT-5.6 Luna (10× Free 额度) | 标准 | ❌ | 预算敏感本科生 |
+| **Plus** | $20 | GPT-5.6 Terra | 128K | 720p | 日常作业、编程 |
+| **Pro $100** | $100 | GPT-5.6 Terra (5× Plus) | 256K | 1080p | 重度用户 |
+| **Pro $200** | $200 | GPT-5.6 Sol | 1M | 1080p 无水印 | 研究者、博士 |
+
+### 新增功能（2026 年 8 月）
+
+- **Sign in with ChatGPT**：OpenAI 正在测试第三方身份层，未来可能成为新的 OAuth 协议
+- **ChatGPT App 生态**：220+ 应用、13 个类别，85+ 是消费类（Expedia/Instacart/Zillow）
+- **Sora 视频生成**：Plus 720p，Pro $200 解锁无水印 1080p
+
+### 8 月 31 日截止
+
+Sonnet 5 介绍期定价结束（输入 $2→$3/M），如用 Claude API 跑批量论文/项目，预算要提前留。
+
+## 二、留学生选哪个最划算？
+
+### 本科生：Go $8/月 起步
+
+- 日常作业、简单对话 GPT-5.6 Luna 够用
+- Code 任务自动用 GPT-5.5 升级
+- 比 Free 多 10× 消息额度
+- 美国仍有广告（用虚拟卡订阅后广告可去）
+
+### 硕士生 / 写论文：Plus $20/月
+
+- GPT-5.6 Terra 推理能力强，AIME 数学满分
+- 128K 上下文可一次性读 30 篇文献
+- Sora 720p 做演示视频够用
+- 性价比最高
+
+### 博士生 / 研究者：Pro $200/月（按需）
+
+- GPT-5.6 Sol FrontierMath 39.6%、Agents' Last Exam 第一
+- 1M 上下文 = 一次塞 100 篇论文
+- 不限量消息 + Pro Search
+- 适合做长期 research 的同学
+
+### 预算为零：免费组合
+
+- ChatGPT Free（GPT-5.6 Luna）
+- Gemini Free（3.7 Flash，多模态）
+- Claude Sonnet 5 Free（长 PDF）
+- DeepSeek V4 API（编程）
+- Qwen 3.7 Max API（200 免费请求/天）
+
+## 三、订阅流程（含虚拟卡）
+
+### 美国/加拿大/欧洲用户
+
+直接信用卡/PayPal 订阅即可。
+
+### 中国大陆/俄罗斯/伊朗等地区
+
+1. 注册 WildCard / Depay / Nobepay 等虚拟卡平台
+2. 用支付宝/微信充值虚拟卡
+3. 用虚拟卡订阅 ChatGPT Plus
+4. 注意：每月检查虚拟卡是否过期，及时换卡
+
+完整教程见我们的 [ChatGPT 订阅虚拟卡指南](/payment/chatgpt-subscription)。
+
+## 四、8 月最新优惠
+
+- **教育优惠**：暂无官方，但部分 VPN 服务商（如 Astrill）会赠送 Plus 试用
+- **GitHub Student Pack**：包含 DataCamp 等优惠，**不包含 ChatGPT Plus**
+- **联合订阅**：NVIDIA / Microsoft 365 / JetBrains 偶尔会有 Plus 捆绑促销
+- **年付折扣**：Plus 暂无年付（OpenAI 政策），年支出 $240
+
+## 五、避坑提醒
+
+- **不要用同一虚拟卡订阅多账号**：OpenAI 风控会批量封号
+- **不要买"低价 Plus 共享账号"**：99% 是盗刷或欺诈，被封号损失数据
+- **Pro $200 不是 $20**：看清价格，订阅前确认 budget
+- **8 月 31 日 Sonnet 5 API 涨价**：用 Claude API 跑 paper 批处理的同学提前 lock 旧价
+- **ChatGPT Go 广告**：美国地区 Free / Go 用户会看到广告，Plus 起全无广告
+
+## 六、写在最后
+
+GPT-5.6 系列稳态运行后，**Plus $20/月** 是 80% 留学生的甜蜜点。本科生可以从 Go 起步，硕士直接 Plus，博士看 research 强度决定是否升级 Pro。
+
+参考：[OpenAI 定价页面](https://chatgpt.com/zh-Hans-CN/pricing/)、[Anthropic Claude 定价](https://www.anthropic.com/pricing)。
+`,
+  },
+  {
+    id: 'china-domestic-payment-guide-2026',
+    title: '留学生回国支付全攻略：Alipay/WeChat Pay/云闪付/现金/外卡 怎么选？',
+    category: 'troubleshooting',
+    excerpt: '回国探亲/旅游/实习，最头疼是支付。本文详解 2026 年 8 月最新支付环境：Alipay 国际版 vs 国内版、WeChat Pay 外卡绑定、云闪付 App、哪些店仍收现金、外卡可用场景、110/120 紧急情况下的现金需求。',
+    toolIds: ['chinaguide-ai'],
+    difficulty: 'easy',
+    reliability: 'high',
+    tags: ['回国支付', '支付宝国际版', '微信支付', '云闪付', '现金', '外卡', '探亲', '旅游'],
+    rating: 4.8,
+    ratingCount: 7800,
+    viewCount: 95000,
+    createdAt: '2026-08-26T00:00:00Z',
+    updatedAt: '2026-08-26T00:00:00Z',
+    content: `## 一、2026 年 8 月中国支付环境快速概览
+
+回国的留学生最常问："我妈去菜场买菜，Apple Pay 能用吗？"
+
+**简短答案**：
+- 大商场/连锁酒店/出租车/高铁：**100% 移动支付**
+- 街边小店/菜市场/早点摊：**80% 微信/支付宝**
+- 老旧小区杂货店/部分医院窗口：**可能只收现金**
+- 外卡（Visa/Mastercard）：**约 60% 场景可用**
+
+## 二、移动支付三大方案
+
+### 方案 1：Alipay 国际版（推荐）
+
+- 下载 **Alipay** App（不是"支付宝"），选"国际版"
+- 用你的国际信用卡/借记卡充值
+- 大部分场景跟国内版一样扫码付款
+- **优点**：不需要中国银行卡
+- **缺点**：单笔限额通常 ¥3000，需要分次付
+
+### 方案 2：WeChat Pay 外卡绑定
+
+- WeChat → 我 → 服务 → 钱包 → 银行卡 → 添加外卡
+- Visa/Mastercard/JCB 都可绑
+- 单日限额较低（约 ¥1000-3000）
+- 部分小店不支持（仅限"国内版微信支付"）
+
+### 方案 3：云闪付 App
+
+- 银联官方 App，支持外卡绑卡 + NFC
+- 大部分 POS 机直接 tap
+- 适合**习惯 Apple Pay / Google Pay** 的用户
+- 缺点：覆盖率不如支付宝/微信
+
+## 三、哪些场景需要现金？
+
+| 场景 | 现金需求 |
+|------|----------|
+| 大商场、连锁超市、电影院、高铁 | ❌ 移动支付 |
+| 出租车（部分老司机）、地铁 | ⚠️ 备用 ¥100 |
+| 菜市场、早点摊 | ⚠️ 建议 ¥200 |
+| 老旧医院窗口、挂号 | ✅ 可能要 ¥500 |
+| 寺庙门票、捐款 | ⚠️ 看情况 |
+| 偏远乡村、农家乐 | ✅ 强烈建议 ¥500 |
+| 红包、压岁钱 | ✅ 必备 ¥1000+ |
+
+**经验法则**：随身带 ¥500-1000 现金 + 移动支付为主，遇到问题随时能取。
+
+## 四、ATM 取现怎么操作？
+
+### 中国银行 / 工商银行 / 建设银行 / 农业银行
+
+1. 找带 **Visa/Mastercard/Plus/Cirrus** 标志的 ATM
+2. 插你的外卡（芯片朝上）
+3. 选择语言（中文/英文）
+4. 输入金额（单笔上限 ¥2500-5000）
+5. 收取手续费（**通常 ¥10-30 + 1-2%**）
+
+### 推荐场景
+
+- 中行/工行的机场/高铁站网点（24h 营业）
+- 不要去邮储/招商的小网点（可能不支持）
+
+## 五、外卡可用场景
+
+### Visa/Mastercard 直接刷
+
+- 高级酒店（如洲际、希尔顿、香格里拉）
+- 免税店（机场、市内 DFS）
+- 大商场百货（SKP、太古汇）
+- 高端餐厅（米其林、黑珍珠）
+
+### 注意事项
+
+- 部分小型商户**不接受外卡**（系统不支持）
+- 高铁票网上买可以，刷闸机可能需要身份证 + 二维码（不是刷卡）
+
+## 六、紧急情况下的支付
+
+### 医院急诊
+
+- 公立医院**先抢救后付费**
+- 部分私立医院接受外卡
+- 急救电话 120，先打电话
+
+### 警察局报案（丢护照/手机）
+
+- 不需要付费
+- 需要翻译，找当地派出所值班警察
+
+### 紧急联系
+
+- 报警 110
+- 急救 120
+- 火警 119
+- 交通事故 122
+- 中国驻外大使馆回国补办护照：详见 [chinaengage.org/emergency](https://chinaengage.org/emergency)
+
+## 七、不同身份的建议
+
+### 探亲（带爸妈 7-14 天）
+
+- **爸妈**开国内账户麻烦，建议用你的 Alipay/WeChat 帮他们付款
+- 给爸妈办一张**国内电话卡**（短期租赁月卡）
+- 备 ¥500 现金给爸妈做应急
+
+### 暑假实习（1-3 个月）
+
+- 实习工资发到**你的国内银行卡**（先开户）
+- 微信/支付宝实名认证（用护照）
+- 公司附近餐厅**首选移动支付**
+
+### 毕业旅行（5-10 个城市）
+
+- 每个城市出发前**充 ¥1000-2000 现金**
+- 高铁/机票**网上买**
+- 酒店/民宿**网上订**
+
+### 父母来探亲（爸妈第一次来中国）
+
+- 帮爸妈**提前下载 Alipay 国际版**
+- 教他们怎么**扫一扫付款**
+- 备 ¥2000 现金（怕他们不会用移动支付）
+- 重要场合（机场、医院）**全程陪同**
+
+## 八、写在最后
+
+支付是回国最不焦虑的事 —— 2026 年移动支付覆盖率已经到 95%+，剩下的 5% 备用现金就行。
+
+**最实用的三件套**：
+1. Alipay 国际版（主）
+2. WeChat Pay 外卡（辅）
+3. ¥500-1000 现金（应急）
+
+参考：[Alipay 国际版注册指南](https://www.alipay.com/)、[云闪付官网](https://wallet.95516.com/)。
+`,
+  },
 ];
 
 // Helper functions

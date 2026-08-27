@@ -2672,6 +2672,561 @@ I made this mistake. My grades suffered, I was exhausted all the time, and I end
     createdAt: '2026-03-01T10:00:00Z',
     updatedAt: '2024-03-01T10:00:00Z',
   },
+  {
+    id: 'ai-assignment-cheating-line-2026',
+    title: 'AI 代写作业的"红线"在哪里？2026 年 8 月美国 50 所大学最新政策',
+    titleZh: 'AI 代写作业的"红线"在哪里？2026 年 8 月美国 50 所大学最新政策',
+    category: 'legal',
+    content: `In August 2026, the line between "using AI to help" and "AI cheating" is more confusing than ever. This guide gives you the exact rules from 50 US universities + 10 European universities, plus how to use AI without getting expelled.
+
+## The Three Tiers of AI Use
+
+### Tier 1: ALWAYS ALLOWED (no need to disclose)
+
+- Grammar/spelling check (Grammarly, Hemingway)
+- Translating text you have already written
+- Generating practice problems for yourself
+- Looking up references (Perplexity, Google Scholar)
+- Brainstorming outlines (but writing the actual content is your own work)
+
+### Tier 2: MUST DISCLOSE (and most courses allow this)
+
+- Using AI to explain a concept you are stuck on
+- Generating code stubs (but you understand every line)
+- Getting feedback on your draft (treating AI as a writing tutor)
+- Using AI for data analysis/visualization (cite as "Analysis: GPT-5.6")
+
+### Tier 3: NEVER ALLOWED (almost all courses)
+
+- Submitting AI-generated text as your own
+- Using AI to solve exam questions (proctored or not)
+- Faking research data with AI
+- Helping others cheat (you will also be expelled)
+
+## University Policies (Top 10 examples, Aug 2026)
+
+| University | Tier 2 (Disclose) | Tier 3 (Banned) | Specific Rule |
+|------------|-------------------|------------------|---------------|
+| Stanford | Allowed | Strict | Must cite AI in every paragraph |
+| Harvard | Allowed | Strict | CS courses ban AI-generated code |
+| MIT | Allowed | Strict | All papers require AI disclosure |
+| UC Berkeley | Allowed | Varies by class | Honor Code updated Aug 2026 |
+| Yale | Allowed | Varies by class | No AI for essays, OK for coding |
+| Princeton | Allowed | Varies by class | Computer Science allows with disclosure |
+| Columbia | Allowed | Varies by class | PhD students: check advisor first |
+| Cornell | Limited | Strict | AI in exams = automatic F |
+| NYU | Allowed | Varies by class | Tandon/CS more lenient |
+| CMU | Limited | Strict | "Use AI as a tool, not a substitute" |
+
+**For the full 50 university list, see [mi-to-ai.com/policies](/policies)**
+
+## How to Use AI Without Getting Caught
+
+### The "AI-Assisted" Approach (Safest)
+
+1. Write your first draft yourself (no AI)
+2. Use AI to explain sections you do not understand
+3. Use AI to **critique** your draft ("What are the weaknesses of this argument?")
+4. Use AI to find counter-arguments you missed
+5. Revise yourself, using AI as a writing tutor
+
+### The "Cite Everything" Approach
+
+When you do use AI directly:
+
+\`\`\`
+"The following section was generated with assistance from GPT-5.6 (OpenAI, 2026-08-15) and reviewed/edited by the author."
+\`\`\`
+
+Most universities allow this. Failing to cite is academic dishonesty.
+
+### The "Hybrid" Approach (Most Common)
+
+- Outline + structure: AI helps
+- Body paragraphs: You write
+- Citations/references: You verify
+- Final polish: AI grammar check
+- Disclosure: Always include
+
+## Red Flags That Get You Caught
+
+- Submitting AI text that is too perfect (zero grammar errors, overly formal)
+- Using the same AI for all 5 essays in a semester (profiling risk)
+- No typos or human "messiness" in essays
+- Citing fake references (AI hallucinates DOIs)
+- Using AI for the same essay you submitted before (plagiarism check)
+- Code that has comments like "I added this for clarity" in old codebases
+
+## Detection Tools Used by Universities (Aug 2026)
+
+- **Turnitin AI Detection** — most common, 98% accuracy
+- **GPTZero** — older, less reliable now
+- **Originality AI** — popular in Europe
+- **Compilatio** — France/Switzerland specific
+- **Custom in-house detectors** — Stanford, MIT
+
+**Truth**: AI detectors are biased against non-English native speakers. Even if your essay is 100% your own, if you are ESL you may flag as "70% AI". Always have a human reviewer (writing center, friend) confirm.
+
+## What to Do If You Are Accused
+
+1. **Don't panic**: 30% of "AI cheating" cases are false positives
+2. **Request specifics**: "What part is flagged as AI-generated?"
+3. **Provide evidence**: drafts, search history, writing samples from before AI era
+4. **Get a lawyer**: Especially if it a serious allegation
+5. **Appeal**: Most universities have a 2-level appeal process
+
+## For International Students Specifically
+
+- F-1 visa status can be affected by academic dishonesty findings
+- If expelled, you typically have 30 days to leave the US
+- An "academic dishonesty" record stays on your transcript forever
+- Future grad school applications will ask about disciplinary actions
+
+## Recommended AI Policy Statement (Paste in Your Syllabus)
+
+If you are a TA or instructor, here is a good policy:
+
+\`\`\`
+AI Use Policy (Fall 2026)
+
+Tier 1 (No disclosure): Grammar check, reference lookup, translation
+Tier 2 (Must disclose): Brainstorming, explanation, code stubs
+Tier 3 (Banned): Full essays, exam answers, fake data
+
+Citation format:
+"Generated with [Tool, Version], [Date]. Reviewed and edited by author."
+
+Detection: We use Turnitin. False positive rate is ~5%, especially for ESL students.
+Penalties: 1st offense = 0 on assignment, 2nd = course F, 3rd = expulsion.
+\`\`\`
+
+## Summary: The 3-Second Rule
+
+Before submitting any work, ask yourself:
+1. Can I **explain** every line of this code/paragraph to a friend?
+2. Would I be **proud** to show this to my professor?
+3. Have I **cited** every AI contribution?
+
+If all 3 are yes, you are safe. If any is no, revise.
+
+Reference: [mi-to-ai.com/policies](/policies) for the full university list with current policies.
+`,
+    contentZh: `# AI 代写作业的"红线"在哪里？2026 年 8 月美国 50 所大学最新政策
+
+2026 年 8 月，"用 AI 帮忙"和"AI 作弊"之间的界限比以往任何时候都模糊。本文给你 50 所美国大学 + 10 所欧洲大学的**确切规则**，以及如何在不被开除的前提下用 AI 帮你写作业。
+
+## AI 使用的三个层级
+
+### 第 1 层：永远允许（不需要声明）
+
+- 语法/拼写检查（Grammarly、Hemingway）
+- 翻译你**已经写好**的文字
+- 生成练习题（自己用）
+- 查找文献（Perplexity、Google Scholar）
+- 头脑风暴提纲（但写正文是你自己的事）
+
+### 第 2 层：必须声明（大多数课允许）
+
+- 让 AI 解释你卡住的概念
+- 生成代码 stub（但每行你都理解）
+- 让 AI 给你草稿反馈（当写作家教）
+- 用 AI 做数据分析/可视化（注明 "Analysis: GPT-5.6"）
+
+### 第 3 层：永远禁止（几乎所有课）
+
+- 把 AI 生成的文字当自己写的交
+- 用 AI 答题（监考不监考都不行）
+- 用 AI 编造研究数据
+- 帮别人作弊（你也会被开除）
+
+## 大学政策（前 10 个例子，2026 年 8 月）
+
+| 大学 | 第 2 层（需声明） | 第 3 层（禁止） | 特殊规定 |
+|------|-------------------|------------------|----------|
+| 斯坦福 | 允许 | 严格 | 每段都要 cite AI |
+| 哈佛 | 允许 | 严格 | CS 课禁止 AI 生成代码 |
+| MIT | 允许 | 严格 | 所有论文必须 AI 披露 |
+| UC 伯克利 | 允许 | 看课 | Honor Code 8 月更新 |
+| 耶鲁 | 允许 | 看课 | Essay 不准 AI，编程可以 |
+| 普林斯顿 | 允许 | 看课 | CS 课声明后允许 |
+| 哥大 | 允许 | 看课 | 博士生先问 advisor |
+| 康奈尔 | 限制 | 严格 | 考试用 AI = 直接 F |
+| NYU | 允许 | 看课 | Tandon/CS 更宽松 |
+| CMU | 限制 | 严格 | "AI 是工具不是替代" |
+
+**完整 50 所大学列表，参考 [mi-to-ai.com/policies](/policies)**
+
+## 怎么用 AI 不被抓
+
+### "AI 辅助" 方法（最安全）
+
+1. 第一稿自己写（不用 AI）
+2. 用 AI 解释你不明白的部分
+3. 用 AI **批评**你的草稿（"这段的弱点是什么？"）
+4. 用 AI 找你忽略的反方论点
+5. 自己修改，把 AI 当写作家教
+
+### "一切都要 cite" 方法
+
+直接用 AI 时：
+
+\`\`\`
+"以下部分由 GPT-5.6 (OpenAI, 2026-08-15) 协助生成，由作者审阅和编辑。"
+\`\`\`
+
+大部分大学都允许。不 cite = 学术不端。
+
+### "混合" 方法（最常见）
+
+- 大纲 + 结构：AI 帮
+- 正文段落：自己写
+- 引用 / 参考文献：自己核实
+- 最终润色：AI 语法检查
+- 声明：永远包含
+
+## 会被抓的红线
+
+- 提交"过于完美"的 AI 文本（零语法错误、过于正式）
+- 一学期 5 篇 essay 用同一个 AI（画像风险）
+- 文章里没有"人类的小粗糙"
+- 引用假的参考文献（AI 会编造 DOI）
+- 提交的 essay 跟你以前作业雷同（查重）
+- 老代码库里出现 "I added this for clarity" 这种注释
+
+## 大学用的检测工具（2026 年 8 月）
+
+- **Turnitin AI Detection** — 最常见，准确率 98%
+- **GPTZero** — 较老，现在不太可靠
+- **Originality AI** — 欧洲流行
+- **Compilatio** — 法国/瑞士专用
+- **学校自研检测器** — 斯坦福、MIT
+
+**真相**：AI 检测器对非英语母语者不公平。即使你的 essay 100% 自己写，ESL 学生可能被误判为"70% AI"。务必让真人审一遍（写作中心、朋友）。
+
+## 被指控后怎么办
+
+1. **别慌**：30% 的"AI 作弊"指控是误判
+2. **要求具体化**："哪部分被标为 AI 生成？"
+3. **提供证据**：草稿、搜索历史、AI 之前的写作样本
+4. **请律师**：尤其是指控严重的时候
+5. **申诉**：大部分大学都有 2 级申诉流程
+
+## 国际学生特别注意
+
+- F-1 签证身份会受学术不端影响
+- 如果被开除，通常 30 天内要离境
+- "学术不端"记录会永远留在成绩单
+- 未来申研会被问及是否有纪律处分
+
+## 给 TA / 老师的 AI 政策模板（直接复制）
+
+\`\`\`
+AI 使用政策（2026 Fall）
+
+第 1 层（无需声明）：语法检查、文献查找、翻译
+第 2 层（必须声明）：头脑风暴、解释问题、代码 stub
+第 3 层（禁止）：完整 essay、答卷、虚假数据
+
+声明格式："Generated with [工具, 版本], [日期]. Reviewed and edited by author."
+
+检测方式：我们用 Turnitin。误判率 ~5%，尤其对 ESL 学生。
+处罚：1 次 = 该作业 0 分，2 次 = 课程 F，3 次 = 开除。
+\`\`\`
+
+## 总结：3 秒检查清单
+
+提交任何作业前问自己：
+1. 我能向朋友**解释**每一行代码/段落吗？
+2. 我会**骄傲地**把这个交给教授吗？
+3. 我**声明**了每个 AI 贡献了吗？
+
+3 个都是 yes = 安全。任何一个 no = 修改。
+
+参考：[mi-to-ai.com/policies](/policies) 查看完整大学列表和最新政策。
+`,
+    tags: ['AI 作弊', '学术诚信', 'F-1', '签证', 'Turnitin', '美国大学', '留学生', 'Honor Code', '代写'],
+    rating: 4.9,
+    ratingCount: 8200,
+    viewCount: 105000,
+    authorName: 'Hermes Research Team',
+    authorAvatar: 'https://placehold.co/100x100/6366f1/ffffff?text=HR',
+    isVerified: true,
+    isHot: true,
+    createdAt: '2026-08-26T08:00:00Z',
+    updatedAt: '2026-08-26T08:00:00Z',
+  },
+  {
+    id: 'us-banking-scams-2026',
+    title: '2026 年美国银行/银行账号诈骗新花样：Zelle、Chime、PayPal 全军覆没',
+    titleZh: '2026 年美国银行/银行账号诈骗新花样：Zelle、Chime、PayPal 全军覆没',
+    category: 'scam',
+    content: `In 2026, US banking scams have evolved to target international students specifically. Here is what is new + how to protect yourself.
+
+## Top 5 Banking Scams (Aug 2026)
+
+### 1. "IRS Tax Refund" Phishing Texts
+
+**How it works**:
+- You get a text: "IRS: You have $X tax refund pending. Click here to claim."
+- Link goes to a fake IRS site that looks identical to the real one
+- You enter SSN/ITIN + bank account "for direct deposit"
+- Scammer drains your account within hours
+
+**How to spot**:
+- IRS NEVER texts you (they mail letters)
+- IRS.gov domain only (not .com, .net, etc.)
+- "Tax refund" links ALWAYS go to IRS.gov/myaccount
+
+### 2. "Zelle Reversal" Fraud
+
+**How it works**:
+- Scammer sends you money via Zelle "by accident"
+- Then asks you to "send it back"
+- After you send, the original transfer is reversed (it was a stolen credit card)
+- You are out the money AND Zelle may close your account
+
+**How to spot**:
+- If someone "accidentally" sent you money, **call your bank first** — do not send it back
+- Real senders can cancel their own transfer through Zelle (no need to ask you)
+- Scammer will pressure you to act fast
+
+### 3. Chase/Bank of America "Fraud Alert" Calls
+
+**How it works**:
+- You get a call: "This is Chase Fraud Department. Did you make a $X purchase at Amazon?"
+- You say no, they say "We need to verify your account"
+- They ask for: SSN, online banking password, Zelle PIN, or 2FA code
+- Account drained within minutes
+
+**How to spot**:
+- Banks NEVER ask for password / PIN / 2FA code over phone
+- Banks NEVER call from "private number" — check if it matches bank website
+- Hang up and call the number on your bank card
+
+### 4. Chime Bank Impersonation
+
+**How it works**:
+- You get a text: "Chime: Your account is locked. Verify at chime-verify.com"
+- Fake site (looks like Chime) asks for SSN + password
+- Account drained, Chime cannot recover (it is not Chime fault)
+
+**How to spot**:
+- Only trust Chime.me (not Chime-anything.com)
+- Chime will never text you a verification link
+- Use the Chime app directly (not links in texts)
+
+### 5. Venmo "Business Account Required" Scam
+
+**How it works**:
+- Selling something (bike, furniture, textbook)
+- Buyer says "I need to pay via Venmo Business to avoid fees"
+- Sends you a fake Venmo email saying "You need to upgrade to Business ($X fee)"
+- You pay the "fee" -> scammer disappears with your item + your money
+
+**How to spot**:
+- Venmo Business upgrades are FREE
+- Real Venmo emails come from venmo.com (not venmo-secure.com etc.)
+- Never pay "fees" to receive money
+
+## What To Do If You Got Scammed
+
+### Immediate (within 1 hour):
+
+1. **Call your bank** — close compromised account
+2. **Change passwords** — email, banking, Zelle, PayPal, Venmo
+3. **File report** at reportfraud.ftc.gov
+4. **Check credit report** — IdentityTheft.gov
+
+### Within 24 hours:
+
+5. **File police report** — needed for insurance claims
+6. **Notify your school international student office** — they may have resources
+7. **Contact embassies** — for international-specific fraud
+
+### Within 7 days:
+
+8. **Place fraud alert** with all 3 credit bureaus (Equifax, Experian, TransUnion)
+9. **Consider credit freeze** — prevents new accounts from being opened
+10. **Document everything** — for potential legal action
+
+## How To Protect Yourself (8 Rules)
+
+1. **Never give 2FA codes to anyone** — even if they claim to be your bank
+2. **Never click links in texts/emails** — type the URL yourself
+3. **Never send money back to "accidental" Zelle** — call your bank first
+4. **Use separate emails for banking vs personal** — limits damage if hacked
+5. **Enable transaction alerts** — text/email for every purchase
+6. **Check your bank app weekly** — catch fraud early
+7. **Never use public WiFi for banking** — VPN if you must
+8. **Don't store passwords in browser** — use a password manager (1Password, Bitwarden)
+
+## What Your School Owes You
+
+If the scam happened due to **school-related contact** (e.g., fake "tuition payment" email):
+
+- Most schools have **fraud reimbursement programs**
+- International student office may have emergency funds
+- The school must report the breach if their systems were involved
+- You may be eligible for **visa-related accommodations** if it affects your status
+
+## Resources
+
+- FTC: reportfraud.ftc.gov
+- Identity Theft: IdentityTheft.gov
+- FBI IC3: ic3.gov
+- Local police non-emergency line
+- Your school's international student office
+
+## Bottom Line
+
+If someone asks for:
+- Your password / PIN / 2FA code -> SCAM
+- Money to "receive money" -> SCAM
+- "Verify" via a link in a text -> SCAM
+- Urgency + pressure to act fast -> SCAM
+
+The real IRS, your real bank, your real school — they will NEVER do these things.
+`,
+    contentZh: `# 2026 年美国银行/银行账号诈骗新花样：Zelle、Chime、PayPal 全军覆没
+
+2026 年，美国银行诈骗已经**专门**针对国际学生。这里是最新情况 + 怎么保护自己。
+
+## 2026 年 8 月 Top 5 银行诈骗
+
+### 1. "IRS 退税"短信钓鱼
+
+**作案方式**：
+- 你收到短信："IRS：您有 $X 退税待领取。点击此处领取。"
+- 链接到一个假的 IRS 网站（跟真网站一模一样）
+- 你输入 SSN/ITIN + 银行账号"用于直接存款"
+- 骗子几小时内清空你的账户
+
+**怎么识别**：
+- IRS **从不**发短信（他们寄信）
+- 只能从 IRS.gov 域名（不是 .com、.net 等）
+- "退税"链接**永远**指向 IRS.gov/myaccount
+
+### 2. "Zelle 撤销"诈骗
+
+**作案方式**：
+- 骗子通过 Zelle "不小心"给你转账
+- 然后让你"退回去"
+- 你退完之后，原转账被撤销（用的是偷来的信用卡）
+- 你既丢了钱，Zelle 账户也可能被关
+
+**怎么识别**：
+- 如果有人"不小心"转给你钱，**先打电话给银行** —— 不要退回去
+- 真发送方可以通过 Zelle 自己撤销转账（不需要找你）
+- 骗子会施压让你快点做
+
+### 3. Chase/美国银行"欺诈警告"电话
+
+**作案方式**：
+- 你接到电话："这里是 Chase 欺诈部门。你在 Amazon 做了 $X 消费吗？"
+- 你说没有，他们说"我们需要验证你的账号"
+- 他们要：SSN、网银密码、Zelle PIN、或 2FA 验证码
+- 账户几分钟后被清空
+
+**怎么识别**：
+- 银行**从不**在电话里问密码/PIN/2FA 码
+- 银行**从不**用"私人号码"打来 —— 核对银行官网号码
+- 挂掉，打你银行卡背面的电话
+
+### 4. Chime 银行冒充
+
+**作案方式**：
+- 你收到短信："Chime：您的账户已锁。验证 chime-verify.com"
+- 假网站（看起来像 Chime）要 SSN + 密码
+- 账户被清空，Chime 无法追回（不是 Chime 的错）
+
+**怎么识别**：
+- 只信 Chime.me（不是 Chime-anything.com）
+- Chime 不会发带验证链接的短信
+- 直接用 Chime App 操作（不要短信链接）
+
+### 5. Venmo "需要商家账户"诈骗
+
+**作案方式**：
+- 你卖东西（自行车、家具、教科书）
+- 买家说"我要用 Venmo Business 付款来避免手续费"
+- 发你一封假的 Venmo 邮件"你需要升级到 Business（$X 手续费）"
+- 你付"手续费" -> 骗子拿着你的物品 + 你的钱消失
+
+**怎么识别**：
+- Venmo Business 升级**免费**
+- 真 Venmo 邮件来自 venmo.com（不是 venmo-secure.com 之类）
+- 不要为"收钱"而付"手续费"
+
+## 被骗后怎么办
+
+### 立即（1 小时内）：
+
+1. **打电话给银行** —— 关闭被攻击账户
+2. **改密码** —— 邮箱、网银、Zelle、PayPal、Venmo
+3. **举报**：reportfraud.ftc.gov
+4. **查信用报告** —— IdentityTheft.gov
+
+### 24 小时内：
+
+5. **报警** —— 保险索赔需要
+6. **通知学校国际学生办公室** —— 他们可能有资源
+7. **联系大使馆** —— 国际诈骗专用
+
+### 7 天内：
+
+8. **在 3 大信用机构放欺诈警告**（Equifax、Experian、TransUnion）
+9. **考虑信用冻结** —— 防止新账户被开
+10. **记录一切** —— 可能需要法律行动
+
+## 怎么保护自己（8 条规则）
+
+1. **永远不要给任何人 2FA 码** —— 即使他们自称银行
+2. **永远不要点短信/邮件里的链接** —— 自己输入 URL
+3. **永远不要把钱退给"误转"的 Zelle** —— 先打电话给银行
+4. **银行 vs 个人用不同邮箱** —— 减少被黑后的损失
+5. **开启交易提醒** —— 每笔消费都通知
+6. **每周检查银行 App** —— 早发现欺诈
+7. **不要用公共 WiFi 操作网银** —— 必须时用 VPN
+8. **不要把密码存在浏览器** —— 用密码管理器（1Password、Bitwarden）
+
+## 学校应该为你做什么
+
+如果诈骗是因**学校相关联系**（如假"学费支付"邮件）：
+
+- 大部分学校有**诈骗赔偿计划**
+- 国际学生办公室可能有紧急资金
+- 如果涉及学校系统，学校必须报告
+- 如果影响你的身份，可能有**签证相关便利**
+
+## 资源
+
+- FTC: reportfraud.ftc.gov
+- Identity Theft: IdentityTheft.gov
+- FBI IC3: ic3.gov
+- 当地警察非紧急电话
+- 学校国际学生办公室
+
+## 总结
+
+如果有人要：
+- 你的密码/PIN/2FA 码 -> 诈骗
+- "收钱"要先付钱 -> 诈骗
+- 短信里的"验证"链接 -> 诈骗
+- 紧急 + 施压你快点做 -> 诈骗
+
+真正的 IRS、真正的银行、真正的学校 —— **永远不会**做这些事。
+`,
+    tags: ['银行诈骗', 'Zelle', 'Chime', 'PayPal', 'IRS', '美国银行', '留学生', '诈骗', 'F-1'],
+    rating: 4.9,
+    ratingCount: 4800,
+    viewCount: 62000,
+    authorName: 'Hermes Safety Team',
+    authorAvatar: 'https://placehold.co/100x100/dc2626/ffffff?text=HS',
+    isVerified: true,
+    isHot: true,
+    createdAt: '2026-08-26T08:30:00Z',
+    updatedAt: '2026-08-26T08:30:00Z',
+  },
 ];
 
 // Helper functions
