@@ -5946,9 +5946,9 @@ Google AI Pro **没有"到期自动停止"选项** —— 免费期结束后**�
   },
   {
     id: 'mastercard-ai-cashback-card-2026',
-    title: '万事达卡 AI 订阅回馈卡 2026：8 月新调查 + 留学生专属信用卡推荐（71% 把"AI 回馈"当办卡核心）',
+    title: '万事达卡 AI 订阅回馈卡 2026：留学生信用卡推荐',
     category: 'virtual_card',
-    excerpt: '万事达卡 2026-08 最新调查：台湾 71% 受访者办卡时把"AI 订阅回馈"当核心考虑因素。本文基于该报告 + 留学生实际场景（ChatGPT Plus / Claude Pro / Gemini Pro 三订阅月费 ¥400+），拆解：哪些卡回馈真的能薅到、海外哪些银行支持国内学生申请、虚拟卡方案的横向对比。**核心结论：选错卡 = 每年多花 ¥1500+；选对卡 = 一年省回半年伙食费**',
+    excerpt: '万事达卡 2026-08 调查：71% 办卡者把"AI 订阅回馈"当核心。本文拆解哪些卡回馈真能薅到、海外银行申请门槛、虚拟卡方案对比。选错卡每年多花 ¥1500+',
     imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&h=630&fit=crop',
     toolIds: ['chatgpt', 'claude', 'gemini-student-plan-2026', 'deepseek-v4-pro-0813'],
     difficulty: 'easy',
