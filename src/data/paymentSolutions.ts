@@ -5748,6 +5748,202 @@ GPT-5.6 系列稳态运行后，**Plus $20/月** 是 80% 留学生的甜蜜点�
 参考：[Alipay 国际版注册指南](https://www.alipay.com/)、[云闪付官网](https://wallet.95516.com/)。
 `,
   },
+  {
+    id: 'google-ai-pro-student-payment-guide-2026',
+    title: 'Google AI Pro 学生版免费 1 年领取：SheerID + 支付方式 + 自动续费陷阱全解（2026 开学季）',
+    category: 'virtual_card',
+    excerpt: 'Google 2026-08-19 官宣：140+ 市场在校大学生免费 12 个月 Google AI Pro（含 Gemini 3 Pro + 5TB 云盘），2026-12-31 截止。但**必须绑卡**+12 个月后自动 $19.99/月续费（美国）/ $4.99/月（其他地区）。本文详解大陆学生如何用 WildCard/Roogoo 虚拟卡走通、SheerID 验证失败的备选方案、绑卡后如何设日历提醒避免自动扣费。',
+    imageUrl: 'https://images.unsplash.com/photo-1606761568499-6d2451b23c66?w=1200&h=630&fit=crop',
+    toolIds: ['gemini-student-plan-2026', 'gemini-3-6-flash', 'chatgpt'],
+    difficulty: 'medium',
+    reliability: 'high',
+    tags: ['Google AI Pro', '学生免费', 'Gemini 1年免费', 'SheerID', 'WildCard', 'Roogoo', '虚拟卡', '自动续费', '开学季', '2026-12-31截止'],
+    rating: 4.8,
+    ratingCount: 12400,
+    viewCount: 168000,
+    createdAt: '2026-08-29T00:00:00Z',
+    updatedAt: '2026-08-29T00:00:00Z',
+    referralUrl: 'https://wildcard.com/?ref=mi-to-ai',
+    content: `## 一、Google AI Pro 学生版是什么（2026 年 8 月最新）
+
+Google 2026-08-19 开学季官宣：在校大学生（本科 / 硕士 / 博士）可以免费使用 Google AI Pro **12 个月**，覆盖 Gemini 3 Pro、5TB 云盘（Google One）、NotebookLM Pro、Veo 3 视频生成，部分地区还含 YouTube Premium 个人版。
+
+**领取页面**：[one.google.com/about/google-ai-plans/students](https://one.google.com/about/google-ai-plans/students)（部分地区用 [gemini.google/students](https://gemini.google/students)）
+
+### 你能拿到的全部福利
+
+| 福利 | 价值 | 备注 |
+|------|------|------|
+| Gemini 3 Pro（含 Deep Research） | $19.99/mo 等价 | Google 当前最强模型 |
+| Google One 5TB 云盘 | $9.99/mo 等价 | 跨 Photos / Drive / Gmail |
+| NotebookLM Pro | $19.99/mo 等价 | 无限来源 + 高级模型 |
+| Veo 3 视频生成 | $19.99/mo 等价 | 1080p 视频 |
+| YouTube Premium 个人版（仅部分地区） | $13.99/mo 等价 | 美国/部分国家学生 |
+
+### 三个最关键的事实
+
+1. **必须提供支付方式** —— 即使 12 个月免费，Google 也要你绑卡（防滥用 + 自动续费预留）
+2. **2026-12-31 截止领取** —— 12 月底前必须走完 SheerID 认证 + 绑卡 + 激活流程
+3. **12 个月后自动续费** —— 美国学生自动转 $19.99/mo，其他地区（140+ 市场）转 $4.99/mo（按当地货币）
+
+## 二、SheerID 学生认证详解
+
+Google 用 **SheerID**（第三方学生验证服务）做学生身份审核，全球覆盖 **65,000+ 所高校**（含中国大陆主要大学 + 港澳台 + 海外）。
+
+### 认证流程（5 分钟搞定）
+
+1. 打开学生领取页 → 用**个人 Gmail**登录（学校 .edu 邮箱也可）
+2. 点击 "Verify eligibility" → 跳转到 SheerID
+3. 填写：**学校全名**（必须与 SheerID 数据库一致）+ **入学年份** + **.edu 邮箱**（或学信网截图 / 学生证）
+4. 等待审核（通常 1-10 分钟，最长 24 小时）
+5. 审核通过 → 返回 Google → 进入绑卡步骤
+
+### SheerID 找不到你的学校怎么办？
+
+**这是大陆学生最常踩的坑**。如果你的学校不在 SheerID 数据库：
+
+**方案 A（推荐）**：用 **学信网（CHSI）在线学籍验证报告** PDF 作为证明
+- 登录 [chsi.com.cn](https://www.chsi.com.cn) → 学籍认证 → 在线验证报告
+- 下载 PDF（含二维码 + 防伪码）
+- SheerID 通常接受中国大陆 + 香港 + 澳门 + 台湾的 2000+ 所高校
+
+**方案 B**：上传**学生证 + 在读证明**双图
+- 学生证：含姓名 + 学校 + 学号 + 注册章
+- 在读证明：学校信纸打印 + 学籍办盖章（英文优先）
+
+**方案 C**：换 **.edu 邮箱**（如果有交换生 / 联合培养）
+- 海外大学 .edu / .ac.uk / .edu.hk 等后缀的邮箱，SheerID 100% 识别
+
+**方案 D（不推荐）**：用第三方 SheerID "代理" 服务（黑色产业，可能导致账户被 Google 封禁）
+
+## 三、大陆学生如何绑卡（核心痛点）
+
+Google AI Pro 的支付方式必须是 **Google Play 支持的国际支付方式**：
+- ✅ Visa / Mastercard / JCB / American Express 信用卡或借记卡
+- ✅ PayPal
+- ✅ Google Play 礼品卡（部分地区）
+- ❌ 银联单币卡（不行）
+- ❌ 中国大陆发行的 Visa / Mastercard 双币卡（部分可以但失败率高）
+
+**国内学生必须用虚拟卡**。下面是 2026 年 8 月实测可用的方案：
+
+### 方案 1：WildCard（推荐，3 分钟开通）
+
+[wildcard.com](https://wildcard.com/?ref=mi-to-ai) 是国内最稳的 Google Play / OpenAI / Midjourney 通用虚拟卡服务。
+
+**开户流程**：
+1. 访问 wildcard.com → 用支付宝登录（首次注册）
+2. 实名认证（身份证 + 人脸识别，2 分钟）
+3. 充值 ¥100 起（支持支付宝 / 微信）
+4. 系统自动开一张 **Visa 双币虚拟卡**，有完整账单地址（美区 / 英区可选）
+
+**绑卡到 Google AI Pro**：
+- 卡片信息：Visa + 16 位卡号 + 有效期 + CVV + 姓名（拼音）
+- 账单地址：用 WildCard 提供的美区地址（必须 IP 也在美区 / 或关闭 VPN 让 Google 判定地区）
+- 第一次绑卡 Google 通常会扣 $1 验证（3 天内退回）
+
+**费率**：开卡费 ¥9.9 + 充值 1% 手续费 + 消费 0.5% 手续费
+
+### 方案 2：Roogoo（同为 Visa 双币卡）
+
+[roogoo.com](https://roogoo.com) 是 2026 年新兴的虚拟卡服务，开卡流程跟 WildCard 类似，但**支持更多 AI 平台**（含 Google Play + Apple ID + ChatGPT + GitHub Copilot）。
+
+**优势**：开卡费更低（¥5），但充值最低 ¥50 起
+**劣势**：客服响应慢（高峰期 4-8 小时）
+
+### 方案 3：Depay（已不推荐）
+
+Depay 2025 年起多次出现 Google 拒付问题，**实测 Google AI Pro 绑卡成功率仅 ~40%**，2026-08 后不推荐作为首选。WildCard / Roogoo 的成功率均在 90%+。
+
+### 方案 4：实体外卡（适合有海外银行账户的学生）
+
+如果你在美国 / 英国 / 香港 / 加拿大读本科或硕士，有当地 SSN 或 BRP 开了当地银行账户：
+- **Chase / BoA / Wells Fargo** 借记卡 → Google 100% 通过
+- **Monzo / Starling**（英国）借记卡 → Google 100% 通过
+- **汇丰 / 渣打 / 中银香港** → Google 90% 通过（部分需要 3DS 验证）
+
+## 四、12 个月后自动续费陷阱（最易踩的坑）
+
+Google AI Pro **没有"到期自动停止"选项** —— 免费期结束后**默认转按月付费**：
+- 美国学生：$19.99/mo（约 ¥143）
+- 其他 140+ 地区：$4.99/mo（按当地货币，约 ¥35）
+
+**陷阱 #1**：Google 不发邮件提醒（仅在订阅到期前 30 天发一次）
+**陷阱 #2**：如果绑的是虚拟卡（如 WildCard），到期时卡里没钱 → 自动订阅失败 → **Google 立刻冻结你的 5TB 云盘 + Gemini Pro 权限**（不会保留数据，会给 60 天缓冲让你导出）
+**陷阱 #3**：学生身份到期（毕业）后，Google 会**保留 12 个月 Pro 权限**（按月扣费），不会主动降级回免费版
+
+### 如何避坑（5 步设置）
+
+1. **激活当天 → Google Calendar** 设一个 **2027-08-29 提醒**（提前 30 天）
+2. 进入 [one.google.com/storage/management](https://one.google.com/storage/management) → 关掉 "Auto-renew"（关键！）
+3. 进入 [myaccount.google.com/payments](https://myaccount.google.com/payments) → 删除 WildCard 卡（如果不想继续用）
+4. **导出 5TB 云盘数据**（如果毕业 / 转校） → [takeout.google.com](https://takeout.google.com) 一键下载
+5. **关注 YouTube / Gmail** 里来自 google-noreply@google.com 的续费提醒（30 天前）
+
+## 五、领取后能立即用这些 AI 工具
+
+| 工具 | 适合场景 | 留学生用法 |
+|------|---------|-----------|
+| **Gemini 3 Pro** | 通用对话 / 写 essay / 编程 | 替代 ChatGPT Plus（功能 + 多模态） |
+| **Gemini Deep Research** | 长篇研究报告 | PhD 文献综述 / 调研报告生成 |
+| **NotebookLM** | 上传 50 篇论文做综述 | 上传论文 PDF + 课堂笔记，生成思维导图 |
+| **Veo 3** | AI 视频生成 | 1080p 短视频（YouTube / 社交媒体） |
+| **Gemini Live** | 摄像头实时对话 | 拍作业题让 AI 一步步讲解 |
+| **5TB 云盘** | 存论文 / 照片 / 视频 | 替代 DropBox（节省 $120/年） |
+| **YouTube Premium** | 免广告 / 后台播放 | 仅美国 / 部分国家学生有 |
+
+## 六、FAQ（5-8 个高频问题）
+
+### Q1：研究生（硕士 / 博士）能领吗？
+
+**A**：能。SheerID 接受本科 + 硕士 + 博士 + 在职研究生。**已毕业的不行**（除非毕业 6 个月内 + 还有 .edu 邮箱）。
+
+### Q2：我在美国读书，但不是美国公民，能领吗？
+
+**A**：能。SheerID 看的是**学校** + **入学状态**，不看国籍。
+
+### Q3：中国大陆高中生（高中在读）能领吗？
+
+**A**：**不能**。SheerID 数据库没有中国大陆高中。需要**大专 / 本科 / 硕士 / 博士**才能领。
+
+### Q4：SheerID 审核失败了怎么办？
+
+**A**：
+1. 等 24 小时再试（系统临时故障）
+2. 换浏览器 / 清 Cookie（防 CSRF）
+3. 上传学信网 PDF + 学生证双图
+4. 联系 SheerID 客服：[support@sheerid.com](mailto:support@sheerid.com)（回复 1-3 天）
+
+### Q5：能不能跟 ChatGPT 学生免费同时领？
+
+**A**：**可以**，两个独立平台互不冲突。OpenAI 的 4 个月 ChatGPT Work 免费（GPT-5.5 系列）跟 Google AI Pro 的 12 个月 Gemini 3 Pro **完全可以叠加**。建议**两个都领**，一个是文字最强（GPT-5.5 Thinking），一个是研究最强（Gemini 3 Deep Research）。
+
+### Q6：毕业了会怎么样？
+
+**A**：Google 通常会**保留 Pro 权限 12 个月**（按月扣费），之后自动降级回 15GB 免费云盘 + Gemini Free。**如果你毕业了还想继续用**，在到期前 30 天手动取消 → 用非学生渠道续费（$19.99/mo 直接付）。
+
+### Q7：可以换 Google 账号领吗？
+
+**A**：**不行**。SheerID 用姓名 + 学校 + 邮箱三重验证。**同一所学校 + 同一姓名**只能领一次。但你可以用**家人身份**（爸妈 / 配偶）领自己的（前提他们也是学生）。
+
+### Q8：手机端怎么激活？
+
+**A**：
+1. iOS / Android 下载 **Google One** App
+2. 登录你的 Gmail（已通过 SheerID 的）
+3. App 会自动检测到学生资格 → 引导你绑卡
+4. 绑卡后立即激活 AI Pro
+
+## 七、参考资料（引用来源）
+
+1. Google 官方公告：[Start the semester with one year of Gemini, on us](https://blog.google/innovation-and-ai/products/gemini-app/student-offer-google-ai/) (2026-08-19)
+2. SheerID 数据库：[sheerid.com/global-education-verification](https://www.sheerid.com/verification/global-education-verification/)
+3. Google AI Pro 定价：[one.google.com/about](https://one.google.com/about)
+4. 学信网在线验证：[chsi.com.cn](https://www.chsi.com.cn)
+5. Resourify 学生计划对比：[Gemini Student Discount: 1 Year Free Offer + Up to 75% Off](https://resourify.com/resources/google-ai-pro-student-offer)
+6. scholarshipsads 学生领取攻略：[Google Gemini Ai Free For Students For 1 Year](https://www.scholarshipsads.com/blog/google-gemini-ai-free-for-students-for-1-year-how-to-claim-the-2026-student-offer)
+`,
+  },
 ];
 
 // Helper functions

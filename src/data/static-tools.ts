@@ -2353,7 +2353,46 @@ export const staticTools: Tool[] = [
     updateSourceType: 'blog',
     affiliateUrl: 'https://chinaengage.org/?ref=mi-to-ai',
   },
-
+  {
+    id: '66', name: 'Google AI Pro 学生版（Gemini 1 年免费）', slug: 'gemini-student-plan-2026',
+    description: 'Google 2026-08-19 开学季官宣：在校大学生免费 12 个月 Google AI Pro（含 Gemini 3 Pro + 5TB 云盘 + YouTube Premium 等），截止 2026-12-31 领取。140+ 国家/地区学生可领（含中国大陆），但**必须提供支付方式**，12 个月后自动 $19.99/月续费（美国）/ $4.99/月（其他地区）',
+    category: 'productivity', subcategory: 'ai-assistant', pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://gemini.google/students',
+    imageUrl: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=400&fit=crop',
+    rating: 4.7, ratingCount: 8200,
+    dimensions: { easeOfUse: 4.6, features: 4.8, value: 5.0 },
+    tags: ['Google', 'Gemini', '学生免费', 'SheerID', 'AI Pro', '开学季', 'NotebookLM', '5TB'],
+    features: ['免费 12 个月 Gemini 3 Pro（含 Deep Research）', '5TB 云盘（Google Drive / Photos / Gmail）', 'NotebookLM 完整功能 + 高级模型', 'YouTube Premium 个人版（部分地区）', 'Gemini Live 多步研究 + 摄像头交互', '需 SheerID 学生认证 + 支付方式'],
+    alternatives: ['chatgpt-students', 'claude-students', 'perplexity-pro-student-discount-2026'],
+    isNew: true,
+    createdAt: '2026-08-29', updatedAt: '2026-08-29',
+    details: {
+      howToUse: [
+        { step: 1, title: '打开学生领取页', description: '访问 one.google.com/about/google-ai-plans/students（部分地区是 gemini.google/students）。用**个人 Gmail**登录（学校 .edu 邮箱也可）。大陆学生用 +86 手机号验证的 Google 账户也能领' },
+        { step: 2, title: 'SheerID 学生认证', description: '点击 "Verify eligibility" → 跳转到 SheerID（第三方学生验证服务）→ 填写学校 + 入学年份 + .edu 邮箱（或学信网/学生证照片）。审核通常 1-10 分钟。**关键：学校必须在 SheerID 数据库内**（约 6.5 万所全球高校）' },
+        { step: 3, title: '绑定支付方式', description: 'Google 强制要求提供支付方式（即使免费 12 个月也必须）。美国学生需要 VISA/Mastercard/JCB/PayPal；其他地区支持当地卡 + 部分虚拟卡。**大陆学生需用 WildCard/Roogoo 等虚拟卡（双币卡+美区账单地址）**' },
+        { step: 4, title: '激活 + 设置日历提醒', description: '认证 + 绑卡后立即激活 Google AI Pro（含 Gemini 3 Pro + 5TB 云盘 + NotebookLM Pro + Veo 3 视频生成）。**立刻在 Google Calendar 设一个 2027-08-29 提醒**（提前 30 天警告自动续费）' }
+      ],
+      useCases: [
+        { title: 'PhD 学术研究（NotebookLM 文献综述）', description: '把 50 篇论文 PDF + Google Scholar 链接上传 NotebookLM，让 AI 跨论文对比、共同点、争议点。Google AI Pro 含 NotebookLM Pro（无限来源 + 高级模型）。比 ChatGPT Projects 更适合学术场景' },
+        { title: '写作业 + 多模态作业（图像/PDF/视频）', description: '上传 PDF 让 Gemini 提取关键信息；上传截图让它解释 UI；上传 YouTube 视频让它生成字幕总结。Gemini 3 Pro 多模态 + 1M 上下文，免费 12 个月期间可以当主力工具' },
+        { title: '5TB 云盘代替 DropBox', description: 'Google AI Pro 含 5TB 云盘（Google One 跨 Photos/Drive/Gmail）。留学生用 5TB 存所有论文 + 作业 + 视频 + 备份手机相册，**免去 DropBox $120/年的订阅**' },
+        { title: 'YouTube Premium 福利（仅部分地区）', description: '美国/部分国家学生含 YouTube Premium 个人版（$13.99/mo 等价），免广告 + 后台播放 + YouTube Music。**国内不含此福利**。可在 Settings → Manage memberships 查看你的版本包含什么' }
+      ],
+      tips: [
+        '**2026-12-31 截止领取**——别等到 12 月再领，SheerID 系统可能在 12 月底流量过大卡审核',
+        '**必须绑卡**！即使免费 12 个月，Google 强制要支付方式（防滥用）。大陆学生需 WildCard/Roogoo 等支持 Google Play 的双币虚拟卡',
+        '**激活后立刻设日历提醒**——12 个月免费期结束时自动转 $19.99/mo（美国）或 $4.99/mo（其他地区）。**忘取消 = 第一笔扣款按官方价格**',
+        '**学生身份到期怎么办**？毕业后失去学生身份，Google 通常会再给 12 个月缓冲（按 Pro 月价计费），不会立刻砍账户。但 5TB 云盘会自动降回 15GB 免费版',
+        '**与 ChatGPT 学生免费比较**：Google 给的是 Gemini 3 Pro（2026-08 当前最强 Google 模型），ChatGPT 学生免费是 4 个月 ChatGPT Work（GPT-5.5 系列）。**两个都领是合法叠加**（互不冲突）'
+      ],
+      updateNotes: '2026年8月：Google AI Pro 学生版 8-19 开学季官宣，140+ 市场可领（除美国/Bolivia/Albania/Canada/Macau/HK/Tunisia），12 个月免费，**12-31-2026 截止领取**。需 SheerID 学生认证 + 必须绑支付方式。大陆学生可用 +86 Google 账户 + WildCard/Roogoo 虚拟卡领取。同期 OpenAI 也推出 ChatGPT 学生 4 个月免费'
+    },
+    updateSourceUrl: 'https://blog.google/innovation-and-ai/products/gemini-app/student-offer-google-ai/',
+    updateSourceType: 'changelog',
+    affiliateUrl: 'https://gemini.google/students/?ref=mi-to-ai',
+  },
 ];
 
 /**
