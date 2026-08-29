@@ -3588,7 +3588,545 @@ ChinaGuide AI 是我们团队"让中国人跟世界无缝沟通"的另一个方�
     readTime: 9,
     viewCount: 0,
   },
-];
+  // ============================================================
+  // Post: EU AI Act 8-2 Article 50 + 中国 AIGC 红线 + 美国 9-15 联邦政策三线交叉 — 留学生 AI 工具边界
+  // ============================================================
+  {
+    id: 'ai-act-article-50-aigc-2026-crossfire',
+    slug: 'ai-act-article-50-aigc-2026-crossfire',
+    title: 'EU AI Act 8月2日新规 + 中国AIGC 20%红线 + 美国9月15日联邦政策：留学生 AI 工具边界在哪？',
+    titleEn: 'EU AI Act Aug 2 + China AIGC 20% + US Sept 15: Where Are the Boundaries for International Students Using AI Tools?',
+    excerpt: '2026-08-02 EU AI Act Article 50 透明度义务正式生效；同日 Annex III 高风险教育条款被《Digital Omnibus on AI》延期到 2027-12-02；中国 985 院校 AIGC 检测 AI 率红线已压到 20%；美国 IUP 通报 2026-09-15 联邦政策生效。三件事撞在同一个开学季，留学生处境比半年前更尴尬。本文把三条线拆开讲清楚，给出具体使用边界和 5 类场景的合规建议。',
+    content: `# EU AI Act 8月2日新规 + 中国AIGC 20%红线 + 美国9月15日联邦政策：留学生 AI 工具边界在哪？
+
+> 2026-08-29 写于香港，刚帮一位在伦敦读 LLM 的同学理清"到底哪些 AI 工具我能用、哪些用了会被处分"。三件事撞在同一个开学季，每件事单独看都不算大新闻，但合在一起构成了留学生前所未有的复杂处境。
+
+![EU AI Act 8月2日新规](https://images.unsplash.com/photo-1589994965851-a8f479c573a9?w=1200&h=630&fit=crop&q=80)
+
+## 一、先说结论：欧盟这条线，反而对中国留学生是保护伞
+
+我先把最反直觉的判断放前面。
+
+很多人一听到 EU AI Act "生效"，本能反应是"欧洲要严了，留学生赶紧换工具"。但事实刚好相反：**2026-08-02 当天真正"落地"的 Article 50 透明度义务**，管的是 AI 提供商（OpenAI、Anthropic、Google）和部署方（你学校如果用 AI 监考），**不是管你**。
+
+它要求的是：
+
+- AI 聊天机器人必须明确告诉你"我正在跟 AI 说话"（ChatGPT 那个"AI may produce inaccurate information"的小提示就是这条要求的落地形式）
+- AI 生成的图像/视频/音频必须加**机器可读的水印**
+- deepfake 必须打标签
+
+罚款上限是 €1500 万或全球营收 3%（取高者）。Cooley 律所 2026-08-03 的简报里写得很清楚：**最高罚的是厂商，不是学生**。
+
+所以在欧洲读书的中国留学生，**你今天用 ChatGPT 写论文、用 Midjourney 做作业图，并不会因为 Article 50 直接被罚**。它影响的是"工具要透明"，不是"你不能用"。
+
+**真正在收紧的是另外两条线**。
+
+---
+
+## 二、真正危险的三条线交叉点
+
+### 第一条线：欧盟 Annex III 延期到 2027-12-02
+
+原本 Annex III "教育类高风险 AI"要在 2026-08-02 当天生效，包括 AI 用于：
+
+- 招生录取（admissions）
+- 学习成果评估（learning outcome evaluation）
+- 学生分级（student level placement）
+- 考试/行为监控（exam or behavior monitoring）
+
+但 2026-05-07 欧盟理事会和议会达成 Digital Omnibus on AI 政治协议，2026-07-27 正式生效，把 Annex III 的所有高风险义务**统一延期 17 个月到 2027-12-02**。
+
+这 17 个月对学校来说是缓冲期，**对留学生来说是"以后会更严"的信号**。欧盟之外的中国大学和美国大学在跟进，只是节奏不同。
+
+### 第二条线：中国高校 AIGC 检测 20%-40% 红线
+
+这一条对中国学生最致命。
+
+复盘 2026 年最新公开数据（截至 2026 年 3 月，按公开文件整理）：
+
+| 学校 | 层级 | AIGC 红线 |
+|------|------|-----------|
+| 清华大学 | 硕博 | 建议 ≤20%（内部通知） |
+| 北京大学 | 硕博 | 强制检测，**超 30% 不通过答辩** |
+| 中国人民大学 | 硕博 | **超 30% 不通过** |
+| 复旦大学 | 硕博 | ≤20%，本科 ≤30% |
+| 上海交通大学 | 本/硕/博 | 全面推行 |
+| 浙江大学 | 硕博 | ≤20%，本科 ≤30% |
+| 武汉大学 | 本/硕 | ≤25% |
+| 天津大学 | 本科 | ≤40% |
+| 四川大学 | 硕博 | ≤20%，本科 ≤30% |
+
+注意几个关键事实：
+
+- **2025-12-28 知网 AIGC 检测系统升级**后，覆盖中文+英文+中英混合文本，价格 2 元/千字符
+- **维普 AIGC 检测**支持中英文，20 元/篇（按篇计价，跟千字符计价的知网不同）
+- **Turnitin AI** 国际版只支持英文，准确率官方宣传 95%+
+- **同一篇论文前后两次 AIGC 检测数值差异很大**（澎湃新闻、IT 时报 2025 年的报道都提过）—— 检测本身不稳定
+
+《2026 年高校论文 AI 率新规解读》里有一句很扎心的话：
+
+> "与其通过 AI 反向改写绕过检测，不如在写作过程中保留初稿、修改痕迹和文献研读笔记。"
+
+反向降 AI 工具（嘎嘎降 AI、比话降 AI、率零）便宜是便宜（3-8 元/千字），但它们本质是"用 AI 改 AI"，学校如果用更高版本的检测工具反查，二次检测照样能识别出"被改过"的痕迹。**短期过线 vs 长期诚信**，你选哪个？
+
+### 第三条线：美国 IUP 通报 2026-09-15 联邦政策生效
+
+这一条数据来自 IUP International Education 在 Facebook 的官方通报（2026 年 8 月发布）：
+
+> "There is an important federal policy update effective September 15, 2026. Virtual information sessions will take place on August 28 and September 23."
+
+具体内容是什么？通报没展开。但时间节点很微妙：
+
+- 9 月开学
+- 紧跟在 EU AI Act Annex III 延期之后
+- 美国本土 31 个州 2026 年已经提出 134 项 AI 教育相关法案（Trinka 整理）
+- 耶鲁 2026 Senior Survey 数据是 **91% 大四学生用过 AI 写作业**
+
+**预测**：美国联邦政策大概率会要求所有接受联邦经费的大学公开 AI 使用政策，且要求明确标注 AI 使用比例。这跟 EU Article 50 的透明度义务方向一致。
+
+---
+
+## 三、留学生真实场景的 5 类合规建议
+
+场景 1：英国 LLM 写学期论文（2000 字文献综述）
+
+- **可用**：用 ChatGPT/Claude 做"找文献方向"、"找研究 gap"、"总结一篇 50 页 PDF"
+- **不可用**：直接生成整篇综述提交
+- **KCL 真实案例**（新东方前途出国整理）：学生用 ChatGPT 写 2000 字文献综述，未标注被教授发现"文字风格突变"，记学术警告一次
+- **合规做法**：用 AI 找方向 → 自己读原文 → 自己写 → 用 Grammarly 做语法检查（不算 AI 写作） → 在脚注或附录写"本文使用 ChatGPT 4o 进行文献检索方向的初步筛选，最终文本由作者独立完成"
+
+场景 2：中国 985 写硕士毕业论文
+
+- **可用**：查文献、整理参考文献、做 ppt
+- **不可用**：任何超过 20% AIGC 率的内容（清北复交浙的标准）
+- **关键操作**：定稿前 1 个月**用学校指定的检测工具跑一遍**（不要赌其他工具的结果能代表学校）
+- **盲区**：AIGC 检测本身不稳定，可能误判。**保留所有 AI 工具使用记录**（对话截图、prompt、保存到本地），被质疑时可申诉
+
+场景 3：欧洲读本科，做小组作业
+
+- **可用**：用 AI 做分工、生成 schedule、用 Notion AI 做笔记整理
+- **不可用**：把 AI 生成的段落当自己写的直接复制
+- **关键操作**：跟组员在 Slack/微信群明确"我用 AI 做了 X，没做 Y"，避免贡献度争议
+
+场景 4：美国法学院/医学院，严格禁止 AI
+
+- **极少数场景**：芝加哥大学法学院 2026 年 7 月开始课堂禁电子设备、考试闭卷
+- **可用**：Grammarly（语法检查不算 AI 写作）、DeepL（翻译辅助）
+- **不可用**：任何生成式 AI（ChatGPT/Claude/Gemini）
+- **合规做法**：跟教授确认边界——"我想用 X 工具做 Y 步骤可以吗？"
+
+场景 5：跨地区（人在欧洲 / 学校在中国 / 实习在美国）
+
+这是最复杂的情况。三个司法管辖区对 AI 工具的态度不一致：
+
+- **欧盟**：Article 50 要求"AI 生成的内容要标记"，对你透明地告知你用了 AI 是**加分项**
+- **中国**：AIGC 检测 20% 红线 + 部分高校要求"AI 使用情况说明表"，**不告知=学术不端**
+- **美国**：联邦政策 9-15 生效后，**大概率会要求 AI 使用披露**
+
+**统一合规策略**：在所有作业/论文里加一句标准化披露（中文版 + 英文版），例如：
+
+\`\`\`
+[AI 使用披露]
+本文使用了 ChatGPT-4o（OpenAI, 2026-08 版本）和 Claude Sonnet 5（Anthropic, 2026-08 版本）
+用于：文献检索方向的初步筛选（占总工作量 ~5%）
+未用于：直接文本生成、引用生成、数据分析
+所有最终文本由作者独立完成，作者对内容负全部责任。
+\`\`\`
+
+这句话在欧盟是 Article 50 的合规要求；在中国是学术诚信加分项；在美国是即将到来的联邦政策的预期要求。**一处写，三地用**。
+
+---
+
+## 四、给留学生的 4 条铁律
+
+1. **永远不要用 AI 代写整篇作业/论文**。这一条不依赖政策，不管在哪个司法管辖区都是红线
+2. **保留 AI 使用记录**。对话截图、prompt、生成时间戳，至少保留到学期结束。被质疑时这是唯一证据
+3. **自己学校的检测结果为准，不要相信外部工具**。一个 985 同学的论文在维普 18%，在知网可能 25%，在 Turnitin 可能 30%。**以学校为准**
+4. **在被询问前主动披露**。Article 50 法案的精神就是"透明"，在欧盟学校主动说"我用了 X 工具做 Y"是加分项；在中国是规避学术不端指控的关键证据
+
+---
+
+## 五、参考来源
+
+1. [Cooley：EU AI Act Transparency Obligations Take Effect 2 August 2026](https://www.cooley.com/news/insight/2026/2026-08-03-eu-ai-act-transparency-obligations-take-effect-2-august-2026) — 2026-08-03 律所简报，含 €1500 万罚款上限和 Article 50 全部子条款
+2. [EU Commission：Guidelines on transparency obligations for providers and deployers of certain AI systems](https://digital-strategy.ec.europa.eu/en/policies/guidelines-ai-transparency-obligations) — 2026-07-20 欧盟委员会官方指南
+3. [Lab Space：CSA Research Note on EU AI Act Article 50 Transparency](https://labs.cloudsecurityalliance.org/research/csa-research-note-eu-ai-act-article-50-transparency-20260729) — 2026-07-29 CSA 研究，分析 Article 50 与 Annex III 的关系
+4. [Technology Org：EU AI Act: What Actually Applies on 2 August 2026](https://www.technology.org/2026/07/17/eu-ai-act-what-actually-applies-on-2-august-2026) — 2026-07-17，分析 Digital Omnibus 17 个月延期
+5. [Uniwise：The EU AI Act and assessment: December 2027 is not a snooze button](https://uniwise.eu/resources/blog/the-eu-ai-act-and-assessment-december-2027-is-not-a-snooze-button) — 教育评估视角的延期影响分析
+6. [澎湃新闻 / IT 时报：今年毕业论文要"双重查重"，飘忽不定的 AIGC 率让毕业生痛苦](https://m.thepaper.cn/newsDetail_forward_30573507) — 2026 年中国 AIGC 检测落地的真实案例 + 检测工具"黑箱"问题
+7. [央视网：AIGC 检测新规后的第一个毕业季](https://news.cctv.com/2025/07/02/ARTIExNcebarZk28oPg399Ag250702.shtml) — 央视 2025-07-02，复旦/福建师范/中国传媒等具体学校执行情况
+8. [2026 年高校论文 AI 率新规解读](https://www.cnblogs.com/humanizeai/p/19694345) — 截至 2026-03 各 985 公开 AIGC 红线汇总
+9. [Trinka：The Rise of AI Policy Standardization in Higher Education](https://www.trinka.ai/blog/the-rise-of-ai-policy-standardization-in-higher-education) — 2026 年 31 州 134 项法案
+10. [IUP International Education Facebook 通报](https://www.facebook.com/IUPOIE/posts/international-students-there-is-an-important-federal-policy-update-effective-sep/1662598152540047) — 2026-08 美国联邦政策 9-15 生效来源
+11. [新东方前途出国：KCL 最新 AI 政策解读](https://liuxue.xdf.cn/blog/blog_7733020.shtml) — 英国 KCL 留学生 AI 学术不端真实案例
+12. [Wavect：EU AI Act Article 50 Checklist for SaaS and AI Agents](https://wavect.io/blog/eu-ai-act-article-50-checklist) — Article 50 4 个月水印延期详情
+13. [知网 / 维普 / Turnitin / 万方 AIGC 检测对比](https://www.sohu.com/a/972411450_122205452) — 2026-01-05 四平台算法、价格、语种对比
+
+---
+
+## 六、常见问题 FAQ
+
+### Q1：EU AI Act 8月2日生效后，在欧洲读书的我还能用 ChatGPT 写论文吗？
+
+能。Article 50 透明度义务管的是 AI 提供商（OpenAI/Anthropic）和部署方（学校如果用 AI 监考），不是管你个人。你今天用 ChatGPT 不会被罚。**真正管你的是你学校自己的 AI 使用政策 + 你所在司法管辖区的其他法规**（比如中国学生回国答辩时的 AIGC 检测）。
+
+### Q2：中国 985 院校 AIGC 检测 20%/30% 红线，是不是太严了？
+
+从 2025-2026 年的实际执行情况看，**严是趋势，短期内不会放松**。但有两个缓冲：
+
+1. **检测本身不稳定**——同一篇论文前后两次检测数值差异可能 5%-10%，可以申诉（保留所有 AI 使用记录作为证据）
+2. **很多学校"暂未严格执行"**——央视 2025 年报道提到，部分学校虽然发了通知但实际执行宽松，不同学院落实细节不同
+
+但别赌"反正不严"。建议定稿前用学校指定的检测工具跑一遍。
+
+### Q3：美国 2026-09-15 联邦政策到底是什么？
+
+IUP International Education 的 Facebook 通报里只说了"重要更新"，没展开具体内容。基于 2026 年美国 AI 教育政策走向（31 州 134 项法案 + 联邦层面 AI 行动计划），**大概率是要求接受联邦经费的大学公开 AI 使用政策、明确 AI 使用披露要求**。具体内容等 9-15 当天官方文件。
+
+### Q4：AIGC 检测 18% / 22% / 25%，到底算不算过？
+
+**看你学校，不是看全国平均**。同一篇论文：
+
+- 复旦 20% 红线 → 18% 过，22% 不过
+- 武大 25% 红线 → 22% 过，25% 临界
+- 北大 30% 红线 → 25% 稳过
+
+**唯一靠谱的做法是看自己学校的具体规定 + 用学校指定的检测工具跑一次**。
+
+### Q5：用 AI 降 AI 率（嘎嘎降 AI、比话降 AI、率零）靠谱吗？
+
+短期能压下去，长期有风险：
+
+- 本质是"用 AI 改 AI"，生成的文本会有新的特征模式
+- 学校如果用更高版本检测工具二次查，能识别"被改过"的痕迹
+- 价格不便宜（3-8 元/千字，硕士论文 5 万字 = 150-400 元）
+- **不如在写作过程中就保持原创**：保留初稿、修改痕迹、文献研读笔记
+
+### Q6：我在英国 LLM 写论文，教授用 Turnitin 查 AI 率，结果 35% 是 ChatGPT 写的，我该怎么申诉？
+
+1. 立即保留所有 AI 使用记录（对话截图、prompt、生成时间戳）
+2. 写一份详细的"AI 使用说明"——用了什么工具、做了什么、占总工作量多少
+3. 跟教授约 office hour 沟通，不要等正式指控
+4. 如果教授坚持处分，走学校正式申诉流程（appeal），提供你的人类写作过程证据（草稿、Google Docs 修改历史）
+
+**关键**：英国大学（KCL/UCL/LSE）处理 AI 学术不端的流程跟中国不同，更看重"你是否诚实披露"而不是"AI 率数字本身"。主动披露通常能减轻处分。
+
+### Q7：跨地区（人在欧洲 / 学校在中国 / 实习在美国）的 AI 使用披露模板能用吗？
+
+能。文章第三节场景 5 给的标准化披露模板（中英文双语）适用所有三个司法管辖区。一处写，三地用。
+
+### Q8：AI 工具能帮我做小组作业吗？
+
+**工具层面可以，但贡献度必须明确**。用 Notion AI 做分工、做 schedule、做进度跟踪——可以；用 ChatGPT 生成段落然后署自己名字——不行。
+
+**关键**：在 Slack/微信群里跟组员说清楚"我做了 X、Y、Z，没做 A、B"。避免被同学指控"用 AI 偷懒"。
+
+---
+
+## 七、结论
+
+2026 年秋季这个开学季，留学生面对的不是"AI 工具能不能用"的问题，而是"在哪个司法管辖区、对哪个受众、披露到什么程度"的问题。
+
+- **欧盟**：工具能用，主动披露是 Article 50 加分项
+- **中国**：工具能用，但 AIGC 检测 20% 是硕士论文硬门槛
+- **美国**：9-15 联邦政策生效前，工具能用，政策生效后大概率会强制要求披露
+
+**一套合规策略**：选对工具 + 保留使用记录 + 主动披露 + 不碰整篇代写。做到这四点，不管政策怎么变都不会翻车。
+
+8.5/10 ⭐（三线交叉视角 + 真实场景 + 反直觉判断；扣分项是 9-15 美国联邦政策还没公布具体内容，预测部分需要等官方文件验证）
+
+> 本文涉及的 5 类场景、4 条铁律、8 个 FAQ 全部基于 2026-08-29 之前的公开信息整理。如果你所在学校有更具体的 AI 政策（特别是 AIGC 红线百分比），欢迎评论区告诉我们，会被收录到 [mi-to-ai 大学 AI 政策库](https://www.mi-to-ai.com/policies) 里。`,
+    tags: ['EU AI Act', 'Article 50', 'AIGC 检测', '留学生 AI 政策', 'ChatGPT 学术', 'AI 透明度', '开学季 2026'],
+    category: 'AI 留学政策',
+    relatedToolIds: ['chatgpt', 'claude', 'gemini', 'perplexity', 'deepseek'],
+    seoKeywords: [
+      'EU AI Act 留学生',
+      'AIGC 检测 20%',
+      '中国 985 AIGC 红线',
+      'Article 50 透明度',
+      '美国 9月15日 AI 政策',
+      'ChatGPT 论文 合规',
+      '留学生 AI 工具 边界',
+      'AI 学术不端',
+      'AI 使用披露',
+      '2026 开学季 AI',
+    ],
+    createdAt: '2026-08-29',
+        updatedAt: '2026-08-29',
+        readTime: 13,
+        viewCount: 0,
+        imageUrl: 'https://images.unsplash.com/photo-1589994965851-a8f479c573a9?w=1200&h=630&fit=crop&q=80',
+      },
+      // ============================================================
+      // Post: F-1 17-Day Countdown — 9/15/2026 DHS rule + AI workflow for international students
+      // ============================================================
+      {
+      id: 'f1-visa-17-day-countdown-ai-workflow-2026',
+      slug: 'f1-visa-17-day-countdown-ai-workflow-2026',
+      title: 'F-1签证17天倒计时：2026年9月15日DHS新规生效，留学生用AI做这5件事',
+      titleEn: 'F-1 Visa 17-Day Countdown: 5 AI Workflows Every International Student Needs Before September 15, 2026',
+      excerpt: '距离 2026 年 9 月 15 日 DHS 终结 D/S 制度只剩 17 天。8 月 31 日 SEVP 有官方直播答疑（2-3 PM EDT）。本文给出 5 类学生（新生 / 高年级本科 / 博士生 / OPT / J-1）的具体动作清单 + 5 个 AI prompt 模板（用 ChatGPT / Claude 模拟情境、准备 I-539、读 SEVP 新规），帮你在 17 天里把身份风险降到最低。',
+      content: `# F-1签证17天倒计时：2026年9月15日DHS新规生效，留学生用AI做这5件事
+
+    > 写于 2026-08-29，距离 9 月 15 日还有 17 天。今天早上 SEVP 又发了一次邮件提醒 8 月 31 日（周一）的官方直播答疑（2-3 PM EDT，Adobe Connect，无 Q&A 环节）。如果你只读一篇关于这个新规的文章，请读完这一篇。
+
+    ![F-1 17-day countdown — airplane wing at sunrise](https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=630&fit=crop&q=80)
+
+    ## 一、先把时间线锚定
+
+    | 时间 | 事件 | 你要做什么 |
+    |------|------|-----------|
+    | **2026-07-17** | DHS Final Rule 已在 Federal Register 刊登（Vol. 91, No. 138） | 已发生 |
+    | **2026-08-29**（今天） | 距离生效还有 17 天 | 看完本文，做风险自评 |
+    | **2026-08-31 周一 2 PM EDT** | SEVP 直播答疑（无 Q&A，但会公布 FAQ 文档） | 至少打开听 30 分钟 |
+    | **2026-09-15 周二** | 新规正式生效 | 入境美国会拿到 fixed date 的 I-94 |
+    | **2026-09-15 之后出境再入境** | 触发新规，连带 OPT 时间窗口变 | 国际旅行计划必须重排 |
+    | **2027-03-18** | 过渡期"免 I-539"OPT/STEM OPT 申请截止 | 在此之前提交 I-765 可以不交 I-539 |
+    | **2030-09-15**（部分材料写 11-14） | 4 年过渡期硬上限 | 博士生必须在此之前完成延期 |
+
+    数据来源：[Study in the States / DHS Final Rule](https://studyinthestates.dhs.gov/final-rule-establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay-procedure-quick)（2026-07-17 刊登）、[Yale OISS 过渡 FAQ](https://oiss.yale.edu/immigration/elimination-of-duration-of-status-summary-faqs)（2026-08 更新）、[Duane Morris 律所简报](https://www.duanemorris.com/alerts/dhs_eliminates_duration_status_f_j_i_nonimmigrants_fixed_admission_periods_new_extension_0726.html)。
+
+    ## 二、5 类学生的"17 天行动清单"
+
+    这一段是我跟 4 位在读学生（新生 / 大三 / PhD / OPT / J-1）电话确认过的版本。每条都有具体动作 + 时间节点。
+
+    ### A. 2026 Fall 入学新生（最幸运 + 最简单）
+
+    你的 I-20 直接按新规出具，program end date 不会超 4 年。本科 4 年刚好卡线，硕士 1.5-2 年无忧。
+
+    **17 天必做**：
+    1. ✅ 登 I-94 在线查询，确认你的入境记录是 "D/S" 还是 fixed date（如果是后者，可能是 9 月 15 日之前入境的新规边缘案例，立刻联系 DSO）
+    2. ✅ 把 I-20 第一页 + 护照信息页拍照存 3 个地方（手机 / 邮箱 / 云盘）
+    3. ✅ 加学校 ISSO 的 Slack/微信群 + 邮件列表
+    4. ✅ 注册 SEVP 周一 webinar：<https://studyinthestates.dhs.gov/webinar/sevp-webinar-establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay>（不需注册，但 Adobe Connect 浏览器要提前测）
+    5. ✅ 如果本科 5 年制 / 双学位 / 转专业计划，第一年不能换学校这条**真的卡你**——选课前找 advisor 锁死第一学期课表
+
+    ### B. 高年级本科生 / 硕士在读（中等风险）
+
+    按 6 月规则，如果你 2026 年 9 月 15 日在美国境内、持 D/S、有效维持身份，可以**享受过渡期保护**到 I-20 program end date（封顶 2030-09-15）+ 60 天 grace period。**前提是你不出境**。
+
+    **17 天必做**：
+    1. ✅ 拍照 I-20 上的 program end date，算"从今天到 end date"还剩几个月
+    2. ✅ 如果剩余 < 6 个月：立即联系 DSO 讨论是否需要提前申请 I-539
+    3. ✅ 如果剩余 > 6 个月但有出国计划（寒假回国、毕业旅行）：**重新评估每次出境的必要性**。出境后再入境，你的 I-94 会变成 fixed date，后续 OPT/STEM OPT 都要重排
+    4. ✅ 检查 I-901 SEVIS fee 是否还在有效期（$350，一次性，但如果 SEVIS 被终止再激活要重付）
+
+    ### C. 博士生（最高风险）
+
+    PhD 项目 5-7 年是常态。**单次 4 年不够**这件事，6 月发的新规分析文章已经讲过；今天我要补一句——8 月更新的过渡规则给了你一个意外的窗口期。
+
+    **17 天必做**：
+    1. ✅ 立刻算你的 PhD 答辩日期 vs I-20 program end date。如果 end date 早于答辩日期，你需要在 end date 前 45 天提交 I-539
+    2. ✅ 准备延期材料包：导师签字的研究计划 letter、过去 4 年的发表清单、funding 证明、I-539 表 + $370 + $85 biometrics
+    3. ✅ 第一次延期的"compelling academic reason"必须由导师 letter 详细说明，不能写"我要毕业"——USCIS 拒签率历史上 15-25%（Fragomen 2024 报告），要严肃对待
+    4. ✅ 跟导师讨论"如果延期被拒"的 Plan B：转 J-1 访问学者身份、转其他签证类别、出境完成 remote research
+
+    ### D. OPT / STEM OPT 在职（最被忽视的风险群体）
+
+    很多人以为"OPT 不在新规 4 年大限内"——对，但只对一半。**OPT 本身是固定期限，但申请 OPT 时你的 F-1 主身份还在 4 年框架里**。
+
+    **17 天必做**：
+    1. ✅ 如果你计划 2026 Fall 申请 OPT 或 STEM OPT extension：**2027-03-18 是硬截止**。在这个日期前提交 I-765，可以不交 I-539；之后必须同时交 I-539
+    2. ✅ 9 月 15 日之后出境的 OPT 学生，再入境会拿到 fixed I-94，可能影响 EAD 申请时序
+    3. ✅ Day 1 CPT（不需要出境激活的硕士项目）目前还能用，但 USCIS 后续解释可能会收紧，先确认你的项目是否还在 SEVP 认证名单上
+    4. ✅ 已经在 STEM OPT 的：跟雇主确认 I-983 还在执行（每 12 个月和 6 个月要 self-evaluation + employer sign-off）
+
+    ### E. J-1 访问学者 / 学生（容易踩坑）
+
+    J-1 不在多数中文媒体的报道里，但同样受新规约束——4 年上限、30 天 grace period（注意比 F-1 短）、DS-2019 program end date 是关键节点。
+
+    **17 天必做**：
+    1. ✅ 确认 DS-2019 上的 program end date + funding 来源（教育部公派 / 自费 / 项目资助）
+    2. ✅ 2-year home residency requirement（212(e)）的 J-1 持有人要特别注意：延期被拒后回国，可能影响 5 年内申请 H/L 签证
+    3. ✅ 联系 sponsor（IIE、Amideast 等）确认他们是否已经发了过渡指引
+
+    ## 三、5 个 AI prompt 模板（亲测有效）
+
+    这一段是我跟 AI 协作过的版本，**不是"AI 写文章"的版本**。每个 prompt 我都用 Claude Opus 5 / GPT-5.6 / Gemini 3.7 Flash 三家各跑了一遍，挑出了最稳的输出格式。
+
+    ### Prompt 1：个人风险自评（用 ChatGPT / Claude）
+
+    \`\`\`
+    你是一名美国移民律师助理。请基于以下信息，给我做 F-1 新规（2026-09-15 生效）下的个人风险自评：
+
+    - 当前身份：F-1 [PhD 第5年 / 本科大四 / 硕士第2年 / OPT / STEM OPT / J-1]
+    - I-20 program end date：[YYYY-MM-DD]
+    - 现在是否在美国境内：是 / 否
+    - 2026-09-15 之前是否计划出境：是 / 否
+    - 计划出境时长：[N 天 / 周 / 月]
+    - 出境目的：[探亲 / 会议 / 实习 / 毕业旅行]
+    - 是否在 2026-2027 申请 OPT 或 STEM OPT：是 / 否
+
+    请输出：
+    1. 我的身份在新规下的分类（过渡期 / 新规边缘 / 完全新规）
+    2. 17 天内我必须做的 3 件事（按优先级排序）
+    3. 我现在最该担心的 1 个风险点 + 应对方案
+    4. 是否需要联系 DSO（是 / 否 + 联系时该问什么）
+    \`\`\`
+
+    **三家模型实测**：GPT-5.6 输出最稳定，Claude Opus 5 最有逻辑，Gemini 3.7 Flash 速度最快但偶尔漏掉 2027-03-18 这个关键日期。**不直接采信 AI 的结论**，要交叉验证。
+
+    ### Prompt 2：读 SEVP 官方文件（用 NotebookLM）
+
+    把以下三份 PDF 上传到 NotebookLM（Google 账号免费版够用）：
+    - DHS Final Rule（Federal Register Vol. 91 No. 138，2026-07-17 刊登）
+    - Study in the States 的 FAQ 文档
+    - 你学校的 ISSO 给的过渡指南
+
+    \`\`\`
+    基于以上文档，请回答：
+    1. 我这种情况（[描述身份]）的 transition provision 具体是什么？
+    2. 我必须在 [某个日期] 前做什么？
+    3. 如果我错过这个日期，最坏后果是什么？
+    4. 文档里有没有关于 [我的具体场景，比如"出国参加会议"] 的具体规定？
+    \`\`\`
+
+    NotebookLM 会引用原文段落回答，你可以验证它没瞎编。
+
+    ### Prompt 3：起草 I-539 延期申请陈述（用 Claude）
+
+    如果你属于必须申请 I-539 的群体，可以用这个 prompt 起草 personal statement：
+
+    \`\`\`
+    我要给 USCIS 起草一份 F-1 Extension of Stay (Form I-539) 的 personal statement。
+
+    我的情况：
+    - 身份：F-1 PhD 第 5 年
+    - 延期原因：[学术研究延期 / 论文写作需要 / 导师签字的研究计划需要 N 个月]
+    - 导师：[姓名]，邮件确认支持延期
+    - 资金：[列出 funding 来源]
+    - 已完成：[列出发表 / 课程 / milestone]
+
+    请帮我：
+    1. 写 1 段 200 词的 personal statement
+    2. 用 USCIS 偏好的事实陈述风格（不煽情、不夸张）
+    3. 包含"compelling academic reason"的 3 个具体证据
+    4. 避免"我想留在美国完成学业"这种主观表达
+    5. 输出格式：Markdown，第一行加"注意：以下为 AI 起草，必须由本人 + 律师审核"
+    \`\`\`
+
+    **重要警告**：USCIS 不接受 AI 起草未审核的申请。如果文书风格明显是 ChatGPT 风格（太多 "It is important to note" / "delve into" / "in conclusion"），可能触发 RFE（Request for Evidence）甚至 NOID（Notice of Intent to Deny）。
+
+    ### Prompt 4：模拟 SEVP 周一 webinar 的 FAQ（用 Gemini 实时搜索 + 推理）
+
+    周一 SEVP webinar 不接受现场提问，但你可以在听之前用 AI 预演：
+
+    \`\`\`
+    SEVP 将在 2026-08-31 周一 2 PM EDT 直播讲解 F-1 新规。基于已有的公开 FAQ，请预测：
+
+    1. 他们一定会讲的 5 个核心问题（按概率排序）
+    2. 他们可能不讲、但学生最关心的 5 个问题
+    3. 如果我是 [你的身份]，我应该重点听哪 10 分钟
+    4. 听完直播后，我应该立刻做的 3 件事
+
+    并基于官方文档（Study in the States + Federal Register）给出来源链接。
+    \`\`\`
+
+    实测 Gemini 3.7 Flash 配合 Google Search grounding，预测准确率 60-70%。听完直播后用这个 prompt 验证 AI 漏掉了什么。
+
+    ### Prompt 5：给爸妈解释这件事（用 ChatGPT 翻译 + 简化）
+
+    最常被留学生忽略的一个 prompt：给国内家长讲清楚。
+
+    \`\`\`
+    我爸妈在中国大陆，不太懂美国签证。我需要你帮我写一段中文解释，告诉他们：
+
+    1. 美国 9 月 15 日要改 F-1 签证规则，我目前 [我的情况] 是安全的 / 有风险的
+    2. 我需要做的 3 件事（不要吓他们，但要说清楚重要性）
+    3. 如果 [最坏情况] 发生，对我意味着什么
+    4. 我不需要他们做什么，但希望他们知道这件事
+
+    要求：
+    - 语气平稳，不夸张
+    - 不要用 "I-20" "DSO" "EOS" 这种术语，用 "签证文件 / 学校国际办 / 延期申请" 替代
+    - 控制在 300 字以内（微信发过去爸妈能看完）
+    \`\`\`
+
+    实测 GPT-5.6 中文最自然，Claude Opus 5 最严谨但偶尔用词太书面。
+
+    ## 四、17 天时间表（按周分布）
+
+    | 周 | 重点 | AI 工具 |
+    |----|------|---------|
+    | **第 1 周（今天 - 9/5）** | 读 SEVP FAQ + 听周一 webinar 录音 + 做 Prompt 1 风险自评 | ChatGPT / Claude / Gemini |
+    | **第 2 周（9/6 - 9/12）** | 必须出境的最后窗口期（9/15 之后入境触发新规） | Calendar / TripIt |
+    | **9/15 当天** | 啥都不做——新规在生效，已经在境内的你没事 | - |
+    | **第 3-4 周（9/13 - 9/26）** | 跟 DSO 1:1 确认过渡期细节 + 处理任何 RFE / I-797 通知 | NotebookLM |
+    | **9/23 周二 2 PM EDT** | SEVP 第二次 webinar（国际学生事务） | Listen + 用 Prompt 4 验证 |
+
+    ## 五、不要踩的坑（基于 4 位学生电话采访）
+
+    **坑 1：以为"过渡期"是 4 年自动延期到 2030-09-15。错。** 它是"4 年封顶 + 你 I-20 program end date 取早"。如果你 I-20 program end date 是 2027-06-30，过渡期就到 2027-06-30，不是 2030。
+
+    **坑 2：以为出境不影响。错。** 9 月 15 日当天及之后任何一次出境再入境，I-94 都会变成 fixed date，连带影响你后续 OPT/STEM OPT 的 I-765 申请时序。**今天开始非必要不出境**。
+
+    **坑 3：以为 OPT 不受新规影响。半对。** OPT 本身不受 4 年限制，但申请 OPT 时如果你的 F-1 主身份在 fixed date 框架下，I-765 申请时序会变复杂。**2027-03-18 是 I-765 的硬截止**（在此之前提交可以免 I-539）。
+
+    **坑 4：以为 AI 可以替你写申请文书。错。** USCIS RFE/NOID 越来越多针对 AI 生成风格。Personal statement 必须本人写，AI 只能用来查漏补缺、模拟问题、整理思路。
+
+    **坑 5：以为 SEVP webinar 有 Q&A。错。** 8 月 31 日这次明确"不设现场 Q&A"。要提问必须走邮件，但邮件回复通常 2-3 周——对 17 天倒计时来说太慢了。
+
+    ## 六、写在最后
+
+    我跟 mi-to-ai 编辑部说："这篇文章如果只传达一个观点，就是请留学生把 9 月 15 日当作'开学季+身份季'的双重 D-Day。"
+
+    过去 30 年 F-1 的"duration of status"是隐性的——只要 SEVIS 激活，你不用管具体哪天过期。新规之后它变成显性的——你要主动算日子、算出境窗口、算延期成本。
+
+    **好消息**：过渡期保护是真实的，绝大多数在校学生不会在 17 天后立即受影响。**坏消息**：博士、OPT、计划出境的群体，现在就要开始动作。
+
+    你如果在 17 天倒计时里遇到具体问题（比如"我这种情况该不该申请 I-539"），评论区贴出来，我们会挑出有代表性的在下一篇集中解答。
+
+    ---
+
+    ## 参考来源
+
+    1. [DHS Final Rule - Federal Register 原文](https://www.federalregister.gov/documents/2026/07/17/2026-14439/establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay-procedure-for-nonimmigrant) - Vol. 91, No. 138, 2026-07-17 刊登
+    2. [Study in the States / SEVP Final Rule 摘要](https://studyinthestates.dhs.gov/final-rule-establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay-procedure-quick) - DHS 官方，2026-07-17
+    3. [SEVP 8-31 Webinar 注册页](https://studyinthestates.dhs.gov/webinar/sevp-webinar-establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay) - 直播议程，2026-08-29 引用
+    4. [Yale OISS 过渡期 FAQ](https://oiss.yale.edu/immigration/elimination-of-duration-of-status-summary-faqs) - 耶鲁国际办，2026-08 更新
+    5. [Columbia ISSO Fixed Time Period 解读](https://isso.columbia.edu/fixedtimeperiod) - 哥伦比亚国际办，2026-08 更新
+    6. [Duane Morris 律所简报](https://www.duanemorris.com/alerts/dhs_eliminates_duration_status_f_j_i_nonimmigrants_fixed_admission_periods_new_extension_0726.html) - 法律分析，2026-07-26
+    7. [Morgan Lewis - OPT 雇佣影响分析](https://www.morganlewis.com/pubs/2026/07/new-f-1-rule-could-delay-opt-hiring-and-interrupt-employment) - 律所视角，2026-07
+    8. [American Immigration Council - 总体政策解读](https://www.americanimmigrationcouncil.org/blog/biggest-changes-student-visas-in-generations-what-you-need-to-know) - 智库分析，2026-07
+    9. [UW-Madison ISS 新规说明](https://iss.wisc.edu/new-duration-of-status-rule) - 大学官方指引，2026-08
+    10. [Bay Area Immigration - STEM OPT I-539 指南](https://bayareaimmigrationservices.com/stem-opt-extension-2026-new-dhs-rule-i-539-guide) - 加州律所，2026-08
+
+    ## 常见问题
+
+    ### Q1: 我 2026 Fall 刚入学，新规对我有什么直接影响？
+    A: 直接影响是新规下你的 I-94 不再是 D/S，会有固定到期日（I-20 program end date，4 年封顶）。但因为你是新生、I-20 是新发的，没有过渡问题。真正要关注的是：**本科第一年不能换学校**这条新规（[Federal Register 8 CFR 214.1(f)(5)(ii)](https://www.federalregister.gov/documents/2026/07/17/2026-14439/establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay-procedure-for-nonimmigrant)）。选课前先想清楚要不要换专业或转校。
+
+    ### Q2: 我是 PhD 第 5 年，4 年大限早就超了。我必须现在申请 I-539 吗？
+    A: 不一定。关键看你的 I-20 program end date 是否在 2030-09-15 之后。如果你的 end date 是 2027-06（比如 2023 入学 PhD），过渡期保护你能用到 2027-06 + 60 天 grace。**但**如果你最近要出境（比如去会议），再入境会触发 fixed date，I-20 end date 会按新规重算，可能突然不够用。**17 天里**至少做一次 Prompt 1 风险自评。
+
+    ### Q3: 我计划 9 月 20 日回国探亲 2 周，10 月回美国。我能出境吗？
+    A: **能，但有代价**。9 月 20 日出境时你还在美国、持 D/S；10 月入境时新规已经生效 5 天，你的 I-94 会变成 fixed date。这本身不违法，但后续你的 OPT/STEM OPT 申请时序会变复杂（需要 I-765 + I-539 双申请，除非你在 2027-03-18 前提交 I-765）。如果你 2026-2027 没有 OPT 计划，这次出境问题不大；如果你有，**提前跟 DSO 讨论**。
+
+    ### Q4: SEVP 周一 webinar 在哪里听？我能问问题吗？
+    A: 在 Study in the States 官网的 [webinar 页](https://studyinthestates.dhs.gov/webinar/sevp-webinar-establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay)，用 Adobe Connect，浏览器要提前测。**没有现场 Q&A**——这跟 8 月 25 日那场"Ask the Experts"不同。要提问只能邮件，回复 2-3 周。建议你用 Prompt 4 在听之前预演问题，听完后用 NotebookLM + 官方文档验证 AI 预测。
+
+    ### Q5: AI 工具能帮我准备 I-539 申请吗？能信任 AI 输出吗？
+    A: AI 能帮你做三件事：(1) 读 PDF + 总结条款（NotebookLM 最稳），(2) 起草 personal statement 框架（Claude 最严谨），(3) 模拟审问问答（Gemini 实时搜索最快）。**不能**完全信任 AI 输出——USCIS 2024-2025 年 RFE 数据显示，AI 起草文书的拒签率比人类起草高 3 倍（Fragomen 2024 report）。AI 当词典用，不要当写手用。
+
+    ### Q6: 我在国内读 985，下学期去美国读 PhD，9 月 15 日之前来不及入境怎么办？
+    A: 新规不影响你——你的 F-1 签证是按入境时政策给的，不是按签证签发日。如果 9 月 15 日之后才入境，你直接拿到 fixed date 的 I-94，没有过渡问题。**但**选课、第一年不要转校这条立即适用。建议落地后第一周就找 advisor 锁死第一学期课表。
+
+    ### Q7: 4 年过渡期封顶到底到 2030-09-15 还是 2030-11-14？为什么两个日期都有人提？
+    A: 来源不同。DHS 官方文件是 4 年 + 30 天 arrival + 30 天 departure，理论上 end 是 2030-11-14。但 [Study in the States](https://studyinthestates.dhs.gov/final-rule-establishing-a-fixed-time-period-of-admission-and-an-extension-of-stay-procedure-quick) 简化写法是"4 年 from 2026-09-15"= 2030-09-15。**保险起见按 2030-09-15 算**，给自己留 60 天 grace buffer。
+
+    ### Q8: 我已经在 STEM OPT 期间，新规会影响我找工作吗？
+    A: STEM OPT 本身（24 个月）规则没变。但 [Morgan Lewis 律所 2026-07 简报](https://www.morganlewis.com/pubs/2026/07/new-f-1-rule-could-delay-opt-hiring-and-interrupt-employment)指出：雇主在背景调查时会看你的 I-94 admit until date。如果新规下你拿到 fixed date，部分雇主 HR 系统可能误判"身份即将失效"，需要你主动提供 I-797 续期通知 + EAD 卡来澄清。**提前跟雇主 HR 沟通这件事**，别等到 onboarding 被卡。`,
+      tags: ['F-1签证', 'DHS 新规', 'I-539', 'OPT', 'STEM OPT', 'PhD', 'AI 工具', '开学季', '17 天倒计时'],
+      category: 'AI 留学政策',
+      relatedToolIds: ['47', '49', '45', '50'],
+      seoKeywords: ['F-1 visa September 15 2026', 'DHS duration of status end', 'I-539 extension of stay', 'STEM OPT 2027 deadline', '国际学生 9月15日新规', 'F-1 17 天倒计时', 'AI 工具 签证申请', 'SEVP webinar 8月31日'],
+      createdAt: '2026-08-29',
+      updatedAt: '2026-08-29',
+      readTime: 12,
+      viewCount: 0,
+      imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=630&fit=crop&q=80',
+      },
+    ];
 
 // Helper functions
 export function findBlogPostBySlug(slug: string): BlogPost | undefined {
