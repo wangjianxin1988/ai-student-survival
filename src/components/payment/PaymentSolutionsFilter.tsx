@@ -284,7 +284,19 @@ export default function PaymentSolutionsFilter({ solutions, locale = 'zh' }: Pro
               className="block bg-white p-5 rounded-xl border border-gray-200 hover:shadow-md hover:border-primary-200 transition-all group"
             >
               <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
+                {solution.imageUrl && (
+                  <div className="sm:w-40 sm:flex-shrink-0">
+                    <img
+                      src={solution.imageUrl}
+                      alt={solution.title}
+                      loading="lazy"
+                      width="160"
+                      height="120"
+                      className="w-full h-32 sm:h-28 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     {/* Category Badge */}
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs border ${

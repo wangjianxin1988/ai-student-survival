@@ -20,6 +20,8 @@ export interface PaymentSolutionData {
   updatedAt: string;
   /** Referral / affiliate link for this payment platform. */
   referralUrl?: string;
+  /** Optional hero/cover image URL (used by list cards & detail header). */
+  imageUrl?: string;
 }
 
 export const paymentSolutionsData: PaymentSolutionData[] = [

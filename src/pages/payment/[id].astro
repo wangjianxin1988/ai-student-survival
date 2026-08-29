@@ -198,6 +198,18 @@ const renderedContent = renderMarkdown(solution.content);
       <article class="lg:col-span-2">
         <!-- Header -->
         <header class="mb-8">
+          {solution.imageUrl && (
+            <div class="mb-6 -mx-6 md:-mx-8">
+              <img
+                src={solution.imageUrl}
+                alt={solution.title}
+                width="1200"
+                height="630"
+                loading="eager"
+                class="w-full h-48 md:h-64 object-cover rounded-xl"
+              />
+            </div>
+          )}
           <div class="flex items-center gap-2 mb-3 flex-wrap">
             <span class={`badge ${
               solution.difficulty === 'easy' ? 'bg-green-100 text-green-700' :

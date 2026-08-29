@@ -152,3 +152,6 @@ references/
 
 # Skills directory (auto-managed by Hermes)
 skills/
+
+# Backup files (timestamped P73 bugfix-style backups)
+*.bak.*
