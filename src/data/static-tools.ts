@@ -2393,6 +2393,53 @@ export const staticTools: Tool[] = [
     updateSourceType: 'changelog',
     affiliateUrl: 'https://gemini.google/students/?ref=mi-to-ai',
   },
+  {
+    id: '67',
+    name: 'DeepSeek-V4-Pro-0813',
+    slug: 'deepseek-v4-pro-0813',
+    description: 'DeepSeek 2026-08-13 正式发布 V4-Pro-0813：1M 上下文 + 384K 输出 + 原生图像理解，Agent 能力大幅跃升（Terminal Bench 2.1 从 69.8→87.9，DeepSWE 12.8→62.7），价格仅 ¥3/¥6 每百万 token（输入/输出）。MIT 开源协议，对留学生完全免费 + 中文理解力最强 + 无需任何支付方式。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'free',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'CNY' },
+    url: 'https://chat.deepseek.com',
+    imageUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&h=400&fit=crop',
+    rating: 4.7,
+    ratingCount: 9600,
+    dimensions: { easeOfUse: 4.7, features: 4.7, value: 5.0 },
+    tags: ['DeepSeek', '开源', 'MIT协议', '中文', '免费', '1M上下文', 'Agent', '代码', '图像理解', '无门槛'],
+    features: ['1M 上下文窗口（一次处理 75 万字）', '384K 最大输出（一次性生成整本书）', '原生图像理解（看图干活）', 'MIT 开源协议（免费商用）', '低/中/高/Max 四档思考强度', 'OpenAI Responses API 兼容', '中文理解力领先所有模型'],
+    alternatives: ['chatgpt', 'claude', 'gemini', 'kimi'],
+    isNew: true,
+    createdAt: '2026-08-29',
+    updatedAt: '2026-08-29',
+    details: {
+      howToUse: [
+        { step: 1, title: '零门槛注册（手机或邮箱）', description: '访问 chat.deepseek.com 用手机号或邮箱注册。**无任何支付方式要求**，注册即用。免费版每日有调用配额（足够日常作业+写作+编程），高峰期偶尔排队。无需绑卡、无需身份验证、无需 SheerID 学生认证' },
+        { step: 2, title: '选对话模式', description: '默认开启"深度思考（R1）"模式 —— 适合写 essay、解数学题、写代码。左上角可切换"V4-Pro"非思考模式（响应更快，适合日常对话）或"V4-Flash"（最快速度，答简单问题）' },
+        { step: 3, title: '上传图片 + 文件', description: '点击附件按钮上传 PDF、Word、图片、Excel。**V4-Pro-0813 起原生支持图像理解**，可以拍照传数学题让 AI 一步步讲解。最大 1M 上下文窗口 = 一次可上传 50 篇论文' },
+        { step: 4, title: '调用 API（编程学生）', description: '访问 platform.deepseek.com → 创建 API Key → 调用 deepseek-chat 模型。**价格 ¥3 输入 / ¥6 输出 每百万 token**（约 $0.40/$0.80，GPT-5.5 的 1/100）。MIT 协议允许自部署、本地微调、商用' }
+      ],
+      useCases: [
+        { title: '日常作业 + Essay 写作（最强中文）', description: 'V4-Pro 中文写作质量优于 GPT-5.5/Claude 4.8。免费版即够用 —— 写 essay 不会"AI 腔"、不会生造数据、能引用上下文连贯。**对留学生中文 essay + 英文 essay 双向翻译都很稳**' },
+        { title: '代码 Agent（编程课 + 毕业项目）', description: 'V4-Pro-0813 在 Terminal Bench 2.1 拿到 87.9（vs 预览版 69.8），DeepSWE 12.8→62.7（**5 倍跃升**）。可一次性生成完整可运行的项目代码、debug 多文件工程、写测试用例。Claude Code / Codex CLI 已原生适配' },
+        { title: '看图干活（数学题 + 截图 + 手写笔记）', description: 'V4-Pro-0813 起**首次原生支持图像理解**。拍照数学题让 AI 一步步推导；上传课堂板书让 AI 转成笔记；上传 UI 截图让 AI 生成对应代码；上传报错截图让 AI debug。**完全免费**' },
+        { title: '本地微调 + 二次开发（计算机系学生）', description: 'MIT 开源协议 + Hugging Face 上完整权重开放 → 可以下载到本地 GPU 微调、做 LoRA 适配、做 RAG、做 Agent 框架。无需付费 API 即可商用。**对想做 AI 项目 + 论文的留学生极其友好**' }
+      ],
+      tips: [
+        '**免绑卡 = 真免费** —— DeepSeek 网页版全程无支付环节，不像 Google AI Pro 学生版需要绑卡才能领（虽然不扣费但绑卡有自动续费风险）',
+        '**1M 上下文实战用法**：一次性上传一整本教材 PDF（75 万字）让它总结；上传 50 篇论文 PDF 让它做 literature review；上传整个 GitHub 仓库让它读懂架构',
+        '**V4-Pro-0813 的"低/中/高/Max"思考档位**：简单问题用 low（秒回），essay 写作用 high，复杂代码 Agent 用 max。**max 档推理质量最高但响应慢**',
+        '**API 价格窗口期**：DeepSeek 2026-08-06 预告"近期计划整体上调 API 定价"，但 0813 版本暂未涨价。**想薅羊毛现在就用 + 调用 API 写脚本**，预计 Q4 涨价 50-100%',
+        '**配合 Claude Code / Codex CLI**：把 base_url 改成 api.deepseek.com + 替换 model name 为 deepseek-chat，可以把 Claude Code 接到 DeepSeek（成本降低 90%）。详细配置见 DeepSeek API 文档',
+        '**别再用 Kimi/豆包了** —— V4-Pro-0813 中文能力 + 代码能力 + 图像理解 + 价格全面领先国内同类，**唯一短板是网页版响应速度有时比 ChatGPT 慢 1-2 秒**'
+      ],
+      updateNotes: '2026-08-13：DeepSeek 官方 API 文档与定价页悄然切换到 V4-Pro-0813（fp_v4pro_20260812），标志 V4 Pro 正式版发布。从预览版（2026-04-24）到正式版历时 111 天。核心升级：1M 上下文 + 384K 输出 + 原生图像理解 + 低中高 Max 四档思考强度 + OpenAI Responses API 兼容。Agent 基准测试全面跃升（Terminal Bench 87.9 vs 预览 69.8）。价格维持 ¥3/¥6 每百万 token（输入/输出）'
+    },
+    updateSourceUrl: 'https://api-docs.deepseek.com/zh-cn/updates',
+    updateSourceType: 'changelog',
+    affiliateUrl: 'https://chat.deepseek.com/?ref=mi-to-ai',
+  },
 ];
 
 /**
