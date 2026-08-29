@@ -3865,7 +3865,7 @@ IUP International Education 的 Facebook 通报里只说了"重要更新"，没�
       slug: 'f1-visa-17-day-countdown-ai-workflow-2026',
       title: 'F-1签证17天倒计时：2026年9月15日DHS新规生效，留学生用AI做这5件事',
       titleEn: 'F-1 Visa 17-Day Countdown: 5 AI Workflows Every International Student Needs Before September 15, 2026',
-      excerpt: '距离 2026 年 9 月 15 日 DHS 终结 D/S 制度只剩 17 天。8 月 31 日 SEVP 有官方直播答疑（2-3 PM EDT）。本文给出 5 类学生（新生 / 高年级本科 / 博士生 / OPT / J-1）的具体动作清单 + 5 个 AI prompt 模板（用 ChatGPT / Claude 模拟情境、准备 I-539、读 SEVP 新规），帮你在 17 天里把身份风险降到最低。',
+      excerpt: '距离 2026 年 9 月 15 日 DHS 终结 D/S 制度只剩 17 天。8 月 31 日 SEVP 有官方直播答疑。本文给 5 类学生 + 5 个 AI prompt 模板，帮你在 17 天里把身份风险降到最低。',
       content: `# F-1签证17天倒计时：2026年9月15日DHS新规生效，留学生用AI做这5件事
 
     > 写于 2026-08-29，距离 9 月 15 日还有 17 天。今天早上 SEVP 又发了一次邮件提醒 8 月 31 日（周一）的官方直播答疑（2-3 PM EDT，Adobe Connect，无 Q&A 环节）。如果你只读一篇关于这个新规的文章，请读完这一篇。
