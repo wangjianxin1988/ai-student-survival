@@ -16,6 +16,7 @@ export interface BlogPost {
   updatedAt: string;
   readTime: number; // minutes
   viewCount: number;
+  imageUrl?: string; // P73: Unsplash 封面图 (1200×630)
 }
 
 export const blogPosts: BlogPost[] = [
@@ -151,6 +152,7 @@ A：目前ChatGPT没有专门的学生折扣，但GitHub Education等平台提�
     updatedAt: '2026-06-04',
     readTime: 8,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?w=1200&h=630&fit=crop',
   },
 
   // ============================================================
@@ -326,6 +328,7 @@ Claude Opus 4.8是一次**实质性升级**，尤其在推理和编程方面。�
     updatedAt: '2026-06-04',
     readTime: 10,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1712002641088-9d76f9080889?w=1200&h=630&fit=crop',
   },
 
   // ============================================================
@@ -517,6 +520,7 @@ A：会。工作场景下 EU AI Act 影响更大，建议工作前了解 Article
     updatedAt: '2026-06-22',
     readTime: 13,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1200&h=630&fit=crop',
   },
 
   // ============================================================
@@ -817,6 +821,7 @@ GitHub Education认证后免费使用，这是**学生最值得申请的福利�
     updatedAt: '2026-06-22',
     readTime: 16,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?w=1200&h=630&fit=crop',
   },
   {
     id: 'top-25-ai-tools-2026',
@@ -972,6 +977,7 @@ Google出品的AI设计工具，每月550次免费生成，输出质量可与付
     updatedAt: '2026-06-15',
     readTime: 12,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=630&fit=crop',
   },
   {
     id: 'china-ai-usage-guide-2026',
@@ -1066,6 +1072,7 @@ AI工具适用于文本、图像、音频、视频、代码的生成、改写、
     updatedAt: '2026-06-15',
     readTime: 8,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=1200&h=630&fit=crop',
   },
   {
     // Post 7: 美国 F-1 签证 4 年大限（2026 年 9 月新规） — 2026-07-03 追加 7 月最新进展章节
@@ -1398,6 +1405,7 @@ DHS 这项规则的核心冲击不是"4 年"这个数字本身，而是把所有
     updatedAt: '2026-08-01',
     readTime: 16,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1200&h=630&fit=crop',
   },
   {
     // Post 8: 2026 中国大学 AIGC 检测红黑榜
@@ -1655,6 +1663,7 @@ A：取决于具体学校。建议提前和你所在学院教务办确认，避�
     updatedAt: '2026-08-01',
     readTime: 13,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1581093450021-4a7360e9a6b5?w=1200&h=630&fit=crop',
   },
   {
     // Post 9: Claude Fable 5 / Mythos 5 评测
@@ -1908,6 +1917,7 @@ Claude Fable 5 是个明确的进步：
     updatedAt: '2026-06-22',
     readTime: 14,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=1200&h=630&fit=crop',
   },
   {
     // Post 10: DeepSeek V4-Pro 永久降价
@@ -2167,6 +2177,7 @@ DeepSeek V4-Pro 永久降价 75% 是 2026 年 AI API 市场的转折点：
     updatedAt: '2026-06-22',
     readTime: 11,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&h=630&fit=crop',
   },
   // ============================================================
   // Post: WAIC 2026 留学生趋势 — 攻"WAIC 2026 / AI 大学课堂 / 留学生 AI 趋势"长尾词
@@ -3106,6 +3117,7 @@ A：可以参考我们的 [支付解决方案](/payment)，覆盖支付宝、礼
     updatedAt: '2026-08-26',
     readTime: 12,
     viewCount: 0,
+    imageUrl: 'https://images.unsplash.com/photo-1531746790731-6c087fecd65a?w=1200&h=630&fit=crop',
   },
   // ============================================================
   // Post 16: 2026-08 AI 模型终极对决（Claude Opus 5 vs GPT-5.6 vs Gemini 3.6/3.7）
