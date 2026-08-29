@@ -33,6 +33,12 @@ jobs:
       - name: Check payment images (P73)
         run: pnpm check:payment-images || node scripts/check-payment-images.js
 
+      - name: Check tool images (P73)
+        run: pnpm check:tool-images || node scripts/check-tool-images.js
+
+      - name: Check blog images (P73)
+        run: pnpm check:blog-images || node scripts/check-blog-images.js
+
       - name: Build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
@@ -73,6 +79,12 @@ jobs:
 
       - name: Check payment images (P73)
         run: pnpm check:payment-images || node scripts/check-payment-images.js
+
+      - name: Check tool images (P73)
+        run: pnpm check:tool-images || node scripts/check-tool-images.js
+
+      - name: Check blog images (P73)
+        run: pnpm check:blog-images || node scripts/check-blog-images.js
 
       - name: Build
         env:

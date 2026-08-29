@@ -12,7 +12,9 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,astro,css}\"",
     "test": "vitest",
     "check:payment-images": "node scripts/check-payment-images.js",
-    "check:all": "pnpm check:payment-images"
+    "check:tool-images": "node scripts/check-tool-images.js",
+    "check:blog-images": "node scripts/check-blog-images.js",
+    "check:all": "pnpm check:payment-images && pnpm check:tool-images && pnpm check:blog-images"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
