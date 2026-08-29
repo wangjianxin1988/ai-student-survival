@@ -30,6 +30,9 @@ jobs:
       - name: Run lint
         run: pnpm lint || true
 
+      - name: Check payment images (P73)
+        run: pnpm check:payment-images || node scripts/check-payment-images.js
+
       - name: Build
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
@@ -67,6 +70,9 @@ jobs:
 
       - name: Type check
         run: pnpm check || true
+
+      - name: Check payment images (P73)
+        run: pnpm check:payment-images || node scripts/check-payment-images.js
 
       - name: Build
         env:

@@ -10,7 +10,9 @@
     "check": "astro check",
     "lint": "eslint src --ext .ts,.tsx,.astro",
     "format": "prettier --write \"src/**/*.{ts,tsx,astro,css}\"",
-    "test": "vitest"
+    "test": "vitest",
+    "check:payment-images": "node scripts/check-payment-images.js",
+    "check:all": "pnpm check:payment-images"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.9",
