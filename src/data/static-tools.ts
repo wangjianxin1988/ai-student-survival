@@ -2440,7 +2440,118 @@ export const staticTools: Tool[] = [
     updateSourceType: 'changelog',
     affiliateUrl: 'https://chat.deepseek.com/?ref=mi-to-ai',
   },
-];
+  {
+    id: '68',
+    name: 'OpenRouter',
+    slug: 'openrouter',
+    description: 'OpenRouter 是模型聚合网关：一个 API Key 调 500 多个模型，覆盖 OpenAI、Anthropic、Google、Meta、DeepSeek、Qwen 等。对没有美国信用卡的留学生最实际的是付款方式——它收支付宝、信用卡和 USDC，$5 起充；信用卡和支付宝收 5.5%（最低 $0.80），加密收 5%。推理本身不加价，跟各家官方价一致。免费模型每天 50 次请求，累计充过 $10 后提到 1000 次。缺点也说清楚：手续费不退、余额一年不用可能过期、加密充值一律不退。',
+    category: 'coding',
+    subcategory: 'api-gateway',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://openrouter.ai',
+    imageUrl: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&h=630&fit=crop',
+    rating: 4.7,
+    ratingCount: 14200,
+    dimensions: { easeOfUse: 4.6, features: 4.9, value: 4.8 },
+    tags: ['API 聚合', '支付宝', 'USDC', '多模型', 'OpenAI 兼容', '免费模型', '留学生开发', '无美国信用卡'],
+    features: [
+      '500+ 模型一个 Key（OpenAI / Anthropic / Google / Meta / DeepSeek / Qwen / Mistral）',
+      '支付宝 / 信用卡 / USDC 三种充值方式，$5 起，单笔上限 $25,000',
+      '推理价格不加价，按提供商原价透传',
+      '供应商报错自动 fallback 到下一家',
+      'OpenAI SDK 兼容，改 base_url 就能跑现有代码',
+      '支持文本、图片、PDF 输入；:floor 挑最便宜、:nitro 挑最快'
+    ],
+    alternatives: ['chatgpt', 'claude', 'gemini', 'deepseek-v4-1-flash-1017'],
+    isNew: true,
+    createdAt: '2026-10-18',
+    updatedAt: '2026-10-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '注册：Google / GitHub / 邮箱，不需要手机号和 SSN', description: '在 openrouter.ai 首页点注册，可以选 Google、GitHub 或邮箱。整个过程不填手机号、不填 SSN、没有身份验证环节，这一点跟 OpenAI 平台和 Anthropic 平台不同——那两家开 API 要过支付方式验证，OpenRouter 只要你有 credits 就能调。注册完可以先玩免费模型，不用先充钱。' },
+        { step: 2, title: '充值：支付宝 / 信用卡 / USDC，$5 起', description: '进 Settings → Credits 选金额，最低 $5、单笔最高 $25,000。付款方式有三条：信用卡、支付宝、USDC 加密。费率要说清楚——信用卡和支付宝收 5.5%（最低 $0.80），加密收 5%。也就是说充 $5 走卡实际扣 $5.28，充 $100 扣 $105.5。加密充值的好处是费率低 0.5 个点，坏处是一旦充值不能退款，先小额试通再上量。' },
+        { step: 3, title: '建 Key，顺手设 monthly limit', description: 'Keys → Create Key，起个名字（比如 thesis-agent），设一个月度上限 $20。这个上限是给自己兜底的：Agent 写死循环一次能烧掉几美元，有限额最多损失上限那点钱。Key 只显示一次，丢了只能删掉重建——建完存进本地 .env，不要贴到聊天或 commit 里。' },
+        { step: 4, title: '调 API：OpenAI SDK 只改两行', description: '现有 OpenAI 代码改两个地方：base_url 换成 https://openrouter.ai/api/v1，model 换成带厂商标识的全名，比如 deepseek/deepseek-v4.1-flash-1017、anthropic/claude-opus-5、google/gemini-3.1-pro。返回值格式跟 OpenAI 一致，stream 和工具调用都能用，所以课程项目从官方 SDK 迁过来通常 10 分钟。' }
+      ],
+      useCases: [
+        { title: '没有美国信用卡，也要交编程课作业', description: '很多国内本科出来的同学第一学期没有美国卡，选修课的实验又要调 API。OpenRouter 用支付宝充 $10 就能开工，按 $10 估算够一门课的全部作业用量（每次作业几千到两万 token 的量级，具体看你怎么用）。比借同学的卡省事，也不用碰虚拟卡的风控。' },
+        { title: '写论文时一次对比四家模型', description: '统计或 NLP 课常要求比较不同模型在同一批样本上的表现。传统做法是开四个账号、四张卡、四个 Key。用 OpenRouter 就是一个 for 循环换 model 名，其余代码不动，输出还能对着账单核成本。真要压成本，把便宜的放前面跑批量，只把少数样本丢给贵的旗舰模型。' },
+        { title: '把 Claude Code / Codex 接到非官方模型', description: 'Claude Code 和 Codex CLI 都支持自定义 base_url 和模型名。把它们指到 OpenRouter，就能在官方订阅之外用上别家的模型，月底按 token 结账而不是按月付固定订阅。适合那种一个月只用几天的场景——短期冲刺比订一个月 $20 便宜。' },
+        { title: '免费额度当兜底', description: '带 :free 后缀的模型每天 50 次请求，累计充值超过 $10 后提到 1000 次。这个量做 demo、跑课堂演示、验证 prompt 格式够用。但别把它当交作业的主通道：免费池排队，赶 deadline 的时候卡住比多花两美元难受得多。' }
+      ],
+      tips: [
+        '充 $10 是个分水岭：免费模型限额从 50 次/天跳到 1000 次/天。长期用就把这 10 美元先充上',
+        '加密（USDC）费率 5%，比卡和支付宝低 0.5 个点，但加密充值不可退款。先小额信用卡/支付宝试通，确认能用再上大额',
+        '余额不是永久的：条款写明一年未使用可过期。别一次囤几百美元',
+        'BYOK（自带 provider key）在 pay-as-you-go 下每月 $25,000 等值以内不收额外费，超出部分收 5%',
+        '要快要稳就用 :nitro 变体（按吞吐排供应商），要便宜用 :floor。答辩演示和录屏别用默认路由',
+        '免费模型的 50 次/天是按账号算的，别开小号刷——触发风控整个账号的 API 都可能受限',
+        '想查某家模型到底哪家供应商在接：模型页会列 endpoint 和实时吞吐，选之前看一眼比闭眼调省事'
+      ],
+      updateNotes: '2026-10-18 对照官方 FAQ 核对：信用卡与支付宝充值收 5.5%（最低 $0.80），加密（USDC）收 5%；充值下限 $5、单笔上限 $25,000；未使用余额按条款可在一年后过期；加密货币支付不可退款。免费模型 50 次/天，累计充值 ≥ $10 后 1000 次/天；BYOK 在 pay-as-you-go 下每月 $25,000 等值以内不额外收费，超出部分 5%。'
+    },
+    updateSourceUrl: 'https://openrouter.ai/docs/faq',
+    updateSourceType: 'changelog',
+    affiliateUrl: 'https://openrouter.ai/?ref=mi-to-ai',
+  },
+  {
+    id: '69',
+    name: 'DeepSeek V4.1-Flash-1017',
+    slug: 'deepseek-v4-1-flash-1017',
+    description: 'DeepSeek 2026-10-17 推的 V4.1-Flash-1017，模型名还是 deepseek-flash。1M 上下文、384K 输出、能读图，价格每百万 token $0.30 输入（cache miss）/ $1.20 输出，错峰时段直接半价到 $0.15 / $0.60。DeepSWE v1.1 跑到 77.0，比自家九月版本 74.2 高 2.8 分，也压过 Claude Opus 5 的 74.0；但 Terminal-Bench 4.0 只有 42.3，Claude Opus 5 是 51.8，长链路终端任务还是 Claude 稳。网页版和 App 免费，不用绑卡。',
+    category: 'communication',
+    subcategory: 'chatbot',
+    pricing: 'freemium',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://chat.deepseek.com',
+    imageUrl: 'https://images.unsplash.com/photo-1516110833967-0b5716ca1387?w=1200&h=630&fit=crop',
+    rating: 4.8,
+    ratingCount: 6800,
+    dimensions: { easeOfUse: 4.6, features: 4.8, value: 5.0 },
+    tags: ['DeepSeek', '开源模型', 'Agent', '1M 上下文', '错峰半价', '读图', 'Search API', '留学生省钱'],
+    features: [
+      '1M 上下文 + 384K 最大输出',
+      '支持图像输入（同门的 v4-pro 不支持，只有 flash 有）',
+      '思考 / 非思考双模式，思考强度 1-100 可调',
+      '错峰半价：非高峰 $0.15 输入 / $0.60 输出（每百万 token）',
+      'Search / Fetch API，$0.75 每千次成功请求，5 QPS',
+      'OpenAI 格式与 Anthropic 格式双端点',
+      '九月 V4.1-Flash 权重是 MIT 协议可自部署（1017 权重未公开）'
+    ],
+    alternatives: ['deepseek-v4-pro-0813', 'chatgpt', 'claude', 'gemini', 'openrouter'],
+    isNew: true,
+    createdAt: '2026-10-18',
+    updatedAt: '2026-10-18',
+    details: {
+      howToUse: [
+        { step: 1, title: '网页版先用，一分钱不用花', description: 'chat.deepseek.com 和 App 里直接选模型就能用，2026-10-17 上线当天网页端已经是 1017 版本。不绑卡、不填支付方式、不需要学生认证。写 essay、读 PDF、解数学题这些日常活儿用它就够，先用两周再决定要不要接 API——大多数人不需要 API。' },
+        { step: 2, title: '要接 API：模型名写 deepseek-flash', description: '在 platform.deepseek.com 充值后建 Key，model 参数填 deepseek-flash（就是 V4.1-Flash-1017）。旧名字 deepseek-v4-flash 和 deepseek-v4-flash-vision-exp 仍然能用，请求会路由到 1017 并按 Flash 价格计费，所以老脚本不用改。OpenAI 格式端点是 https://api.deepseek.com，Anthropic 格式是 https://api.deepseek.com/anthropic。' },
+        { step: 3, title: '把批量任务挪到错峰时段跑', description: '高峰是美国东部工作日 21:00-24:00 和 02:00-06:00（对应 UTC 01:00-04:00、06:00-10:00），北京时间的周二到周五 09:00-12:00、14:00-18:00。其余时间全部半价。批处理脚本挂在这些时段之后跑，同样的活账单直接砍一半——这是这台模型最容易被忽略的一条。' },
+        { step: 4, title: '接 Claude Code / Codex 或自己写 Agent', description: 'Anthropic 格式端点意味着 Claude Code 只要改 ANTHROPIC_BASE_URL 和模型名就能接；DeepSeek 官方推荐 DeepSeek Harness v0.2.1-rc.1 以上。走这三条路（Harness / Claude Code / Codex）时，服务端工具调用打到的 Search / Fetch API 目前免费，2026-11-01 00:00（北京时间）开始按 $0.75/千次计费。' }
+      ],
+      useCases: [
+        { title: '整本教材、50 篇论文一次喂进去', description: '1M 上下文意味着可以一次放进去一整本七八百页的教材，或者一个学期的几十篇 reading。384K 的输出上限也够它写出长综述而不是挤成三段。实操建议：先让它按章节出摘要，再单独问细节——一次性把 1M 塞满再追问，每轮都要重新计费，账单比你想的厚。' },
+        { title: '截图报错的 debug 场景', description: '这是 1017 跟同门 v4-pro 的关键差别：flash 支持图像输入，v4-pro 不支持。实验课的 matplotlib 报错截图、导师红笔批注的照片、手写推导拍下来丢进去都行。写代码的活它 DeepSWE 77.0 已经够看，读图这块反而是选它的理由。' },
+        { title: '毕设 Agent 的便宜后端', description: '跑多轮工具调用的 Agent 最烧钱，1017 在 Automation-Bench 拿 60.5、Agents’ Last Exam 拿 35.4，这类任务上性价比很突出。但要说清楚：Terminal-Bench 4.0 它 42.3，Claude Opus 5 是 51.8；长链路终端操作、复杂仓库改造，还是要往贵的那边走。便宜模型干 80% 的活、贵模型兜最后 20%，账单最省。' },
+        { title: '自建搜索 + 抓取的 Agent', description: 'DeepSeek 同期把 Search / Fetch 两个 API 对全部开发者开放，POST /v1/tools/search 和 /v1/tools/fetch，返回结果带 0-3 的 rerank 分和 0-4 的权威度分级。做一个「查资料 + 读原文」的课程项目，不用再拼第三方搜索和爬虫，一个 Key 从头到尾。' }
+      ],
+      tips: [
+        'model 名就写 deepseek-flash；旧名 deepseek-v4-flash 还能用，会自动路由到 1017 并按 Flash 价格算',
+        'cache hit 便宜得离谱：高峰 $0.006/百万 token。把固定的 system prompt 和背景资料放最前面复用，比压缩 prompt 省得多',
+        '错峰是白捡的 50%：美国白天、北京晚上和周末都是半价，批处理脚本定时到这些时段',
+        '要读图只能选 flash，v4-pro 不支持视觉——别在需要看截图的场景选 pro',
+        'Search / Fetch 限 5 QPS，且 2026-11-01 起收费；做高频检索要在本地加缓存层',
+        '别迷信 1M：上下文越长每轮越贵。先摘要成 5K，再在这个基础上追问，成本差一个数量级',
+        '本地部署要看清版本：MIT 权重是九月那版 V4.1-Flash（763B / FP8），1017 权重没公开，别指望当天复现'
+      ],
+      updateNotes: '2026-10-17：DeepSeek-V4.1-Flash-1017 上线，模型名 deepseek-flash。11 项自测基准比九月 V4.1-Flash 高 2.0-11.1 分：DeepSWE v1.1 77.0（原 74.2，Claude Opus 5 为 74.0）、Terminal-Bench 4.0 42.3（原 31.2，Claude Opus 5 为 51.8）、Automation-Bench 60.5、Agents’ Last Exam 35.4、Apex Bench 72.1、ProgramBench 29.1、NL2Repo 68.2、HLE 42.6、BabyVision 92.5。架构为 552B 主干 + 196B Engram，每 token 激活 8B（prefill）/ 16B（decode）。同期开放 Search / Fetch API：$0.75 / 千次成功请求、5 QPS；经 DeepSeek Harness / Claude Code / Codex 的服务端工具调用在 2026-11-01 00:00 北京时间前免费。'
+    },
+    updateSourceUrl: 'https://api-docs.deepseek.com/quick_start/pricing',
+    updateSourceType: 'changelog',
+    affiliateUrl: 'https://chat.deepseek.com/?ref=mi-to-ai',
+  },
+  ];
 
 /**
  * 按 slug 查找工具

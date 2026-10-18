@@ -6202,7 +6202,123 @@ Capital One Venture X 年费 $395，但返 $300 旅行抵扣。**如果你不旅
 8. **ChatGPT Plus 订阅价格**：[OpenAI Pricing](https://openai.com/pricing)
 `,
   },
-];
+  {
+    id: 'chatgpt-back-to-school-4-months-free-2026',
+    title: 'ChatGPT Plus 学生免费 4 个月：2026 秋季留学生领取攻略（10 月 31 日截止）',
+    category: 'regional_pricing',
+    excerpt: 'OpenAI 2026 Back to School：美国在读学生（含 F-1 留学生）可领 4 个月 ChatGPT Plus，价值 $80，2026-10-31 截止。要过 SheerID 和学校邮箱，新用户得先绑支付方式。',
+    imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1200&h=630&fit=crop',
+    toolIds: ['chatgpt'],
+    difficulty: 'easy',
+    reliability: 'high',
+    tags: ['ChatGPT', 'OpenAI', '学生优惠', 'Back to School', 'SheerID', '学校邮箱', 'F-1 留学生', '免费 4 个月', '2026 秋季', 'edu 邮箱'],
+    rating: 4.9,
+    ratingCount: 4200,
+    viewCount: 8600,
+    createdAt: '2026-10-18T00:00:00Z',
+    updatedAt: '2026-10-18T00:00:00Z',
+    referralUrl: '',
+    content: `## 一、先说结论：这 4 个月值 80 美元，代价是 5 分钟和一个学校邮箱
+
+OpenAI 2026 年的 Back to School 活动，给**在美国 degree-granting 学校在读的学生** 4 个计费周期的 ChatGPT Plus，官方标价 $80（Plus 是 $20/月）。申请截止 **2026 年 10 月 31 日**，入口在 chatgpt.com/students/2026。
+
+不是阉割版，就是那个 $20/月的 Plus：GPT-6 系列推理、Deep Research、ChatGPT Work、ChatGPT Sites、语音对话都在里面。已经在付订阅的人也能领，免费月份会叠在你现在的订阅上。
+
+截止日只剩 13 天。这一篇不讲虚的，只讲三件事：你够不够资格、5 步怎么点、4 个月后怎么不被自动扣 $20。
+
+## 二、资格：写的是"美国在读学生"，没有写国籍
+
+官方措辞是 *current full-time or part-time students at eligible US degree-granting institutions*。三个关键词拆开看：
+
+| 条件 | 具体含义 | 留学生要注意什么 |
+|---|---|---|
+| 在美国的 degree-granting 学校 | 能发学位的大学/研究生院 | 社区大学、语言项目、部分证书项目不一定在名单里，由 SheerID 判定 |
+| 全日制或非全日制都算 | part-time 硕士也算 | 交换生看具体注册状态 |
+| 通过 SheerID 验证在读 | 学校记录 / 学校 SSO / 上传证明材料 | 需要**学校发的邮箱**做验证这一步 |
+
+**没有写国籍限制。** 也就是说，在美国读本科或研究生的 F-1、J-1 学生，资格条件上是符合条件的——决定你过不过的是 SheerID 能不能查到你的在读状态，不是护照。
+
+这里必须诚实：我们没法替你保证 100% 通过。能自动查到的学校（大多数州立大学、常春藤、大型私立）基本秒过；查不到的要你上传在读证明（Enrollment Verification Letter，学校注册办公室网站一般能自助下载）。如果你学校连 SheerID 的学校列表都没有，走它的 support 表单提交学校信息，通常一两天。
+
+⚠️ 一个容易踩的点：**ChatGPT 账号本身用哪个邮箱都行，但 SheerID 验证那一步要用学校邮箱**。很多人卡在这里，以为账号必须是 .edu。
+
+## 三、5 步领到手（全程大约 5 分钟）
+
+**第 1 步：确认你在对的账号上**
+先在浏览器登录你**想领福利的那个** ChatGPT 账号。福利发给"领取时正在登录的账号"，领错账号没法转移。
+
+**第 2 步：打开 chatgpt.com/students/2026**
+页面上有 "Claim free offer" 按钮。如果按钮显示不了或者提示地区不支持，先确认你的网络出口在美国（校园网、学校 VPN）。
+
+**第 3 步：过 SheerID**
+点按钮后跳 SheerID 流程，三选一：
+- 直接匹配到学校记录 → 秒过
+- 让你用学校 SSO 登录（Shibboleth / Okta / 学校账号）→ 登一次就过
+- 要求上传材料 → 传 Enrollment Verification Letter，别传 I-20（那是签证文件，不是学籍证明）
+
+**第 4 步：加支付方式**
+新用户这一步绕不开：要绑一张卡才能激活。**4 个月内扣 $0**，第 5 个月起 $20/月。国内双币 Visa/Mastercard 有概率过，也有概率被 3DS 或风控拦；被拦了就换一张，别在一个卡上反复试。虚拟卡（WildCard、Depay 这类）成功率不稳定，别把它当唯一方案。
+
+**第 5 步：立刻设提醒**
+手机日历设一个 2027-02-10 的提醒（按你领取日 +110 天算）。原因在下一节。
+
+## 四、4 个月之后会发生什么（这段最容易被忽略）
+
+- **自动续费 $20/月**，除非你提前在 Settings → Subscription 里取消。
+- **中途取消会怎样**：免费权益保留到当前计费周期结束，**剩下的免费月份作废**。所以别领完第二天就取消，那样等于只用掉 1 个月。
+- **App Store / Google Play 订阅的不行**：必须是 OpenAI 直接扣款的订阅才能叠加。在苹果商店订的 Plus，得先取消、等当前周期结束，再回来领（能不能领到取决于那时活动还在不在）。
+- **取消后余额清零**：取消不影响你已产生的聊天记录，但 Plus 专属功能（Deep Research、Sites 之类）当天失效。
+
+一句话：**领完就用满 4 个月，第 110 天设提醒取消。**
+
+## 五、不在美国读书怎么办（三条替代路线）
+
+| 你的情况 | 可用的优惠 | 力度 |
+|---|---|---|
+| 在加拿大读书 | Google AI Plus 学生版（Handshake 发放） | 免费 1 年 |
+| 在美国或加拿大 | Google AI Plus 学生版 | 免费 1 年，比 ChatGPT 这 4 个月更长 |
+| 英国 / 澳洲 / 其他 | Perplexity Education Pro | 学生 50% 折扣，长期有效 |
+| 在中国国内读书 | 豆包 / 通义 / Kimi 学生价 | 各家 9-38 元/月不等 |
+
+值得说一句反直觉的：**如果你在美国读书，Google AI Plus 那 1 年免费其实比 ChatGPT 这 4 个月更划算**——如果你只用得上基础对话和 Gemini 的长上下文。两个都能领，不冲突，先把两个都领了再决定续哪个。
+
+## 六、常见问题
+
+### Q1：我是 F-1，能领吗？
+资格条件写的是"在美国 degree-granting 学校注册的全日制或非全日制学生"，没有国籍限制，F-1/J-1 在读生符合条件。实际能不能过看 SheerID 能不能验证到你的在读状态，用学校邮箱做验证，查不到就上传 Enrollment Verification Letter。
+
+### Q2：已经在付 $20 的 Plus，能叠加吗？
+能。前提是你的订阅由 OpenAI 直接扣款（不是 App Store / Google Play）。登录那个账号后走同样的领取流程，4 个免费周期会加到现有订阅上。
+
+### Q3：没有美国信用卡，怎么过"加支付方式"这步？
+最稳的是自己名下的美国借记卡/信用卡。国内双币 Visa/Mastercard 有一定比例能过，被 3DS 拦就换卡。虚拟卡成功率不稳定，建议先试真卡。先确认 $0 扣款成功再放心用。
+
+### Q4：领了之后马上取消，会怎样？
+不建议。免费权益只保留到当前计费周期结束，剩下的免费月份直接作废。按 4 个月用满，第 110 天再取消。
+
+### Q5：SheerID 一直验证不过怎么办？
+三条路：一，用学校 SSO 而不是邮箱验证（成功率最高）；二，上传 Enrollment Verification Letter；三，走 SheerID 的 support 表单提交"我们学校不在列表里"，附学校官网学籍页链接。
+
+### Q6：交换一学期，算在读吗？
+算，只要交换期间你在对方学校注册为 full-time 或 part-time 学生且能出示学籍证明。但交换结束后 SheerID 复查可能失效，4 个月免费期通常在你交换期内，问题不大。
+
+### Q7：领这个会影响我以后申请 OpenAI 的其他优惠吗？
+不会。这是一次性的促销活动，跟 API 额度、Codex 学生额度是两套体系，互不冲突。
+
+### Q8：4 个月后不想付，除了取消还有别的办法吗？
+没有官方降级通道会自动保留 Plus。到期后要么付 $20/月，要么回到免费版（免费版依然能用 GPT-6 Instant 的基础额度）。学生预算紧的话，用免费版 + DeepSeek 网页版组合，日常够用。
+
+## 七、来源
+
+1. [OpenAI Help Center：ChatGPT Back to School offer](https://help.openai.com/en/articles/20001493-chatgpt-back-to-school-offer-for-students) — 官方资格说明与 SheerID 流程（2026-10 核对）
+2. [chatgpt.com/students/2026](https://chatgpt.com/students/2026/) — 官方活动入口，Claim 按钮与 FAQ
+3. [SheerID 官网](https://www.sheerid.com/) — 学生身份验证机制说明
+4. [ChatGPT 定价页](https://openai.com/chatgpt/pricing/) — Plus $20/月 官方价格
+5. [本站：AI 工具学生折扣计划汇总](/payment/student-discount-programs) — 各家学生优惠横向对比
+6. [本站：Google AI Pro 学生版支付指南](/payment/google-ai-pro-student-payment-guide-2026) — 1 年免费的领取方式
+`,
+  },
+  ];
 
 // Helper functions
 export function getPaymentSolutionsByCategory(category: string): PaymentSolutionData[] {
