@@ -6207,7 +6207,7 @@ Capital One Venture X 年费 $395，但返 $300 旅行抵扣。**如果你不旅
     title: 'ChatGPT Plus 学生免费 4 个月：2026 秋季留学生领取攻略（10 月 31 日截止）',
     category: 'regional_pricing',
     excerpt: 'OpenAI 2026 Back to School：美国在读学生（含 F-1 留学生）可领 4 个月 ChatGPT Plus，价值 $80，2026-10-31 截止。要过 SheerID 和学校邮箱，新用户得先绑支付方式。',
-    imageUrl: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=1200&h=630&fit=crop',
+    imageUrl: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&h=630&fit=crop',
     toolIds: ['chatgpt'],
     difficulty: 'easy',
     reliability: 'high',
