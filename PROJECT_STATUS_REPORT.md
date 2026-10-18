@@ -1,6 +1,7 @@
 # AI留学生存指南 - 项目完整状态报告
 
 > 生成时间: 2026-08-27 17:50 (最后 SEO + GEO 修复后)
+> 最近更新: 2026-10-18 (weekly cron：新增 2 个 AI 工具 + 1 篇支付指南，sitemap 590)
 > 项目路径: D:\suoyouxiangmu\ai-student-survival
 
 ---
@@ -19,8 +20,8 @@
 | Pages URL | https://mi-to-ai-new.pages.dev |
 | GitHub | git@github.com:wangjianxin1988/ai-student-survival.git |
 | 最新Git Tag | v1.0.6 (待推送) |
-| **最新Commit** | `86c2e0f` "fix: replace 2 more broken Unsplash images found by P70 verify script" |
-| **SEO 状态** | sitemap 572 URLs / 14 个新 URL 全部 Discovered / Indexed 0/572 (3-7 天内大幅增长) |
+| **最新Commit** | `e6db8bf` "fix(payment): swap student guide hero to student-themed Unsplash (P73 主题匹配)" |
+| **SEO 状态** | sitemap **590** URLs / 工具 69 个 / 支付攻略 50 篇（2026-10-18 weekly cron 后） |
 
 ---
 
