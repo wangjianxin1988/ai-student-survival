@@ -45,10 +45,12 @@ const jsonLd = [
     },
     "offers": {
       "@type": "Offer",
-      "price": tool.priceDetail.monthly?.toString() || "0",
-      "priceCurrency": tool.priceDetail.currency,
       "availability": "https://schema.org/InStock",
-      "priceType": "starting from"
+      ...(tool.priceDetail.monthly > 0 ? {
+        "price": tool.priceDetail.monthly.toString(),
+        "priceCurrency": tool.priceDetail.currency,
+        "priceType": "starting from"
+      } : {})
     },
     "aggregateRating": {
       "@type": "AggregateRating",
@@ -116,7 +118,9 @@ const jsonLd = [
             ? `${tool.name}目前完全免费使用。`
             : tool.pricing === 'freemium'
               ? `${tool.name}提供免费版和付费版。免费版包含基础功能，付费版（$${tool.priceDetail.monthly}/月起）解锁更多高级特性，包括更强的模型能力、更高的使用额度和优先访问权。`
-              : `${tool.name}是付费工具，$${tool.priceDetail.monthly}/月起，提供完整功能体验。`
+              : tool.priceDetail.monthly > 0
+                    ? `${tool.name}是付费工具，$${tool.priceDetail.monthly}/月起，提供完整功能体验。`
+                    : `${tool.name}没有月费订阅，纯按实际消耗计费（按 token 计价），具体单价见官网定价页。`
         }
       },
       {
@@ -695,7 +699,9 @@ const jsonLd = [
                   ? `${tool.name}目前完全免费使用。`
                   : tool.pricing === 'freemium'
                     ? `${tool.name}提供免费版和付费版。免费版包含基础功能，付费版（$${tool.priceDetail.monthly}/月起）解锁更多高级特性，包括更强的模型能力、更高的使用额度和优先访问权。`
-                    : `${tool.name}是付费工具，$${tool.priceDetail.monthly}/月起，提供完整功能体验。`
+                    : tool.priceDetail.monthly > 0
+                    ? `${tool.name}是付费工具，$${tool.priceDetail.monthly}/月起，提供完整功能体验。`
+                    : `${tool.name}没有月费订阅，纯按实际消耗计费（按 token 计价），具体单价见官网定价页。`
                 }
               </div>
             </details>
@@ -739,7 +745,7 @@ const jsonLd = [
                 tool.pricing === 'paid' ? 'badge-paid' : 'badge-freemium'
               }`}>
                 {tool.pricing === 'free' ? '免费' :
-                 tool.pricing === 'paid' ? `¥${tool.priceDetail.monthly}/月` : '免费+付费'}
+                 tool.pricing === 'paid' ? (tool.priceDetail.monthly > 0 ? `¥${tool.priceDetail.monthly}/月` : '按量计费') : '免费+付费'}
               </span>
             </div>
             <a

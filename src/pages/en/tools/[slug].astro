@@ -42,10 +42,12 @@ const jsonLd = [
     },
     "offers": {
       "@type": "Offer",
-      "price": tool.priceDetail.monthly?.toString() || "0",
-      "priceCurrency": tool.priceDetail.currency,
       "availability": "https://schema.org/InStock",
-      "priceType": "starting from"
+      ...(tool.priceDetail.monthly > 0 ? {
+        "price": tool.priceDetail.monthly.toString(),
+        "priceCurrency": tool.priceDetail.currency,
+        "priceType": "starting from"
+      } : {})
     },
     "aggregateRating": {
       "@type": "AggregateRating",
@@ -119,7 +121,9 @@ const jsonLd = [
             ? `${tool.name} is completely free to use.`
             : tool.pricing === 'freemium'
               ? `${tool.name} offers a free tier with basic features. Paid plans start at $${tool.priceDetail.monthly}/month, unlocking advanced capabilities, higher usage limits, and priority access.`
-              : `${tool.name} is a paid tool starting at $${tool.priceDetail.monthly}/month with full feature access.`
+              : tool.priceDetail.monthly > 0
+              ? `${tool.name} is a paid tool starting at $${tool.priceDetail.monthly}/month with full feature access.`
+              : `${tool.name} has no monthly subscription; it is billed purely by usage (per token). See the official pricing page for rates.`
         }
       },
       {
@@ -494,7 +498,7 @@ const jsonLd = [
                 tool.pricing === 'paid' ? 'badge-paid' : 'badge-freemium'
               }`}>
                 {tool.pricing === 'free' ? 'Free' :
-                 tool.pricing === 'paid' ? `$${tool.priceDetail.monthly}/mo` : 'Free + Paid'}
+                 tool.pricing === 'paid' ? (tool.priceDetail.monthly > 0 ? `$${tool.priceDetail.monthly}/mo` : 'Pay-as-you-go') : 'Free + Paid'}
               </span>
             </div>
             <a
