@@ -2551,6 +2551,64 @@ export const staticTools: Tool[] = [
     updateSourceType: 'changelog',
     affiliateUrl: 'https://chat.deepseek.com/?ref=mi-to-ai',
   },
+  {
+    id: '70',
+    name: 'Gemini 4 Carbon',
+    slug: 'gemini-4-carbon',
+    description: 'Google DeepMind 11-10 全量放开的 Gemini 4 Carbon，现在是 Artificial Analysis 智能指数 v5.0 的第一名（59 分）。CursorBench 4.0、Perplexity 的 WANDR、Zapier 的 AutomationBench 三个榜都排第一，官方说的是单任务成本比第二名低 2 倍以上。安全这块更极端：Gray Swan 的间接提示注入测试，攻击成功率 0.0%，上一代 Argon 是 0.7%。但有两个坑得提前知道：一是它没有免费层，一个 token 都不送，在 AI Studio 里想看效果就得先开付费；二是 11-30 之前是 $2/$10 的促销价，12-01 零时起翻到 $4/$20。想零成本摸的话，只能用 AI Ultra 订阅那一条路。',
+    category: 'coding',
+    subcategory: 'code-model',
+    pricing: 'paid',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://aistudio.google.com/prompts/new_chat?model=gemini-4-carbon',
+    imageUrl: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&h=630&fit=crop',
+    rating: 4.8,
+    ratingCount: 3600,
+    dimensions: { easeOfUse: 3.8, features: 4.9, value: 3.9 },
+    tags: ['Google', '前沿模型', '长链路 Agent', '网络安全', '跨文件 debug', '计费档', '12月涨价', '无免费层'],
+    features: [
+      'Artificial Analysis 智能指数 v5.0 第一，59 分',
+      'CursorBench 4.0 / Perplexity WANDR / Zapier AutomationBench 三个第一，单任务成本比第二名低 2 倍以上',
+      'SEC-bench Pro 88.2% / ExploitGym 54.8% / CWE-bench 71.0%，漏洞发现-验证-修补三段都领先',
+      'WebDev Arena 第 4（1768 分），比上一代 +89 elo',
+      'Gray Swan 间接提示注入攻击成功率 0.0%（上一代 Argon 0.7%）',
+      'Terminal-Bench 4.0 作弊率压到 0.0%，内部高严重度失准告警降约 80%',
+      '1M 长输出（long-decode），支持 Standard / Batch / Flex / Priority 四档计费',
+      '没有免费层：思考 token、工具调用的系统指令都计费'
+    ],
+    alternatives: ['gemini', 'claude-opus-5', 'gpt-5-6-sol', 'deepseek-v4-pro-0813', 'deepseek-v4-1-flash-1017', 'openrouter'],
+    isNew: true,
+    createdAt: '2026-11-11',
+    updatedAt: '2026-11-11',
+    details: {
+      howToUse: [
+        { step: 1, title: '先确认它不在免费层，别花时间找白嫖', description: 'Carbon 和上一代 Argon 都不在 Gemini API 免费层里。你在 AI Studio 的模型下拉里能看到它，也能点进去试一句话，但只要正经跑就要求付费档。两条合法路径：一是在 aistudio.google.com 的 Billing 页开 Prepay 账户充钱（信用卡或借记卡，官方不收预付卡）；二是订 Google AI Ultra，Carbon 已经推到 Ultra 订阅的 Gemini App、AI Mode 和 Antigravity 里。学生想先摸一下效果，现实做法是去 Gemini 3.8 Flash 的免费层把逻辑跑通，把 Carbon 留给真正卡住的那几轮。' },
+        { step: 2, title: '选 Prepay 还是 Postpay，先算清你的用量', description: 'AI Studio 的 Billing 页管 Prepay（预付池），Google Cloud Console 的 Billing 页管 Postpay（月底出账单）。做课程项目、用量能估算的，用 Prepay 更安全：充 $20 封顶，跑完就停，不会半夜被自动续扣。做开源项目或者导师能报销的，Postpay 省事，但必须绑一张支持自动扣款的卡。这里有个容易踩的坑：Prepay 开了 auto-reload 之后同样要求有一张有效的 Primary 支付方式；卡一失效，整个 Cloud Billing 账户会被挂起，连带 Prepay 里的余额也一起用不了。' },
+        { step: 3, title: '认准四个计费档，Batch 和 Flex 直接半价', description: '同一个 Carbon，官方给四档价：Standard、Batch、Flex、Priority。11-30 之前 Standard 是 $2 输入 / $10 输出；Batch 和 Flex 都是 $1 / $5，直接砍一半；Priority 加价到 $3.60 / $18 换响应速度。Batch 适合「挂一夜、明天看结果」的活，Flex 适合能等几十秒的异步任务。做期末项目那种批量跑数据、批量改代码的场景，把 Standard 改成 Batch，账单立刻少一半——这条比换模型省得还多，但大部分人根本没注意到有这档。' },
+        { step: 4, title: '重活尽量放在 11-30 之前跑完', description: '12-01 零时开始，Standard 从 $2/$10 涨到 $4/$20，Batch 从 $1/$5 涨到 $2/$10，缓存从 $0.10 涨到 $0.20，Priority 从 $3.60/$18 涨到 $7.20/$36——全线翻倍。如果 12 月有 due 的项目，把吃 token 的那部分（全仓库重构、批量生成测试用例、几十篇文献的清洗对齐）提前到 11 月最后两周跑。要纠正一个常见误解：提前充值锁不住价格。Prepay 存的是美元余额，你 12 月拿这笔钱跑任务，照样按 $4/$20 扣，涨的是每 token 单价，不是账户余额。' }
+      ],
+      useCases: [
+        { title: '跨文件、跨子系统的 debug', description: 'Google 给 Carbon 的定位就是「跑到死胡同里也撑得住」的长链路任务：在大型代码库里定位跨模块的隐蔽 bug、把根因补丁打对。基准上看，SEC-bench Pro 88.2% 是「找到真漏洞」，CWE-bench 71.0% 是「把漏洞改成能跑的补丁」。放到课程场景：编译报错在前端、根因在后端序列化层、你 grep 三个小时没找到的那种，丢给它跑 build-verify 循环更合适。费用得说清楚——它会大量用 token 探索，一次深挖可能吃掉几十万 token，所以这类不着急的活要用 Batch 档跑，按 Standard 跑一次课设能烧掉十几美元。' },
+        { title: '安全方向的课程作业和 CTF', description: '这是 Carbon 相对其他前沿模型最不对称的一块。ExploitGym 54.8%（判断漏洞能不能真被利用）、Gray Swan 间接提示注入 0.0%、Terminal-Bench 4.0 作弊率 0.0%。做网络安全课的大作业、或者打 CTF 需要写 PoC 的时候，它的优势不在「知道更多漏洞名字」，而在愿意顺着一条链一路验证下去。Google 自己的 Project Fortify 用它做扫描，内部基准上扫描召回 100%、分诊精度 95%，开源仓库测试里相对 Argon 召回再涨 25%。要提醒一句：它读的是代码逻辑，不是替你去扫真实目标，拿它打未授权系统后果自负。' },
+        { title: '前端 + 3D 作品集', description: 'WebDev Arena 上 Carbon 冲到第 4（1768 分），比上一代 +89 elo。官方演示里它用 Antigravity 的 /swarm 把埃菲尔铁塔 1887-1889 的建造过程做成了可交互的 Three.js 3D 展，还把一个 18 世纪古钢琴按 CAD 图纸和 X 光片重建进音乐厅的三维模型里、带座位级声学。对做作品集的人来说，这类「设计稿到能跑的前端」的活它明显比上一代强。省钱的做法：别一次让它做整站，先只管组件和交互逻辑，视觉另外一轮单独调，比一把梭便宜也更好改。' },
+        { title: '深研和长文献清洗', description: 'Google 和 Artificial Analysis 新做的 Multimodal Knowledge Agent 基准上，Carbon 排第 2，但单任务平均成本比第一名低 6 倍以上。这个组合对写文献综述的人才有意义：几十篇带图表的 PDF 一起丢进去，让它跨文件对齐数据、把互相矛盾的地方标出来。它 1M 的长输出也能一次写出完整综述而不是挤成三段。省钱的用法是先让它出结构化摘要，再单独追问细节——每一轮都重新计费，反复追问同一份长上下文是最烧钱的用法。' }
+      ],
+      tips: [
+        'Prepay 存的是美元余额，不是价格锁：12 月用同一笔钱跑，照样按 $4/$20 扣',
+        'Batch 和 Flex 都是 $1/$5，比 Standard 便宜一半，能等就换档',
+        '它没有免费层，想零成本摸效果先去 Gemini 3.8 Flash 的免费层（12-31 前是 $0.75/$3.75）',
+        '缓存只支持 implicit caching，不支持显式缓存；把固定的 system prompt 和背景资料放最前面蹭命中',
+        'Grounding with Google Search 每月送 5,000 次，超出 $14/千次，还有 1,500 次/天的硬上限',
+        '不想碰 API 计费的话，Google AI Ultra 订阅已经能在 Gemini App、AI Mode、Antigravity 里用 Carbon',
+        'Argon 和 Carbon 同价，但 Argon 每轮 token 更少；日常活先用 Argon，卡住了再换 Carbon',
+        '思考 token 也计费，把它当成「按输出算钱」就不会算漏'
+      ],
+      updateNotes: '2026-10-28：Gemini 4 Carbon 先以 Fairwind Program 定向开放给网络安全防御方，同时公布 Artificial Analysis 智能指数 v5.0 第一（59 分）、SEC-bench Pro 88.2%、ExploitGym 54.8%、CWE-bench 71.0%、WebDev Arena 第 4（1768 分，+89 elo）、Gray Swan 间接提示注入成功率 0.0%、Terminal-Bench 4.0 作弊率 0.0%。2026-11-10：全量开放给开发者（AI Studio / Android Studio 付费档）、企业（Gemini Enterprise）、Google AI Ultra 订阅用户（Gemini App / AI Mode / Antigravity），同期科学家计划参与者也能用。新增三个第一：CursorBench 4.0、Perplexity WANDR、Zapier AutomationBench，单任务成本比第二名低 2 倍以上；Multimodal Knowledge Agent 第 2，成本低 6 倍以上。价格：11-30 前 $2/$10（缓存 $0.10），12-01 起 $4/$20（缓存 $0.20）。'
+    },
+    updateSourceUrl: 'https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/',
+    updateSourceType: 'changelog',
+    affiliateUrl: 'https://aistudio.google.com/?ref=mi-to-ai',
+  },
   ];
 
 /**

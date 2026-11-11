@@ -6318,6 +6318,139 @@ OpenAI 2026 年的 Back to School 活动，给**在美国 degree-granting 学校
 6. [本站：Google AI Pro 学生版支付指南](/payment/google-ai-pro-student-payment-guide-2026) — 1 年免费的领取方式
 `,
   },
+  {
+    id: 'gemini-4-carbon-api-payment-2026',
+    title: 'Gemini 4 Carbon 付费攻略：11 月 30 日 $2，12 月 1 日 $4，提前充钱锁不住价',
+    category: 'troubleshooting',
+    excerpt: 'Carbon 没有免费层，11-30 前 $2/$10，12-01 起翻倍到 $4/$20。这篇算清四档价格的差、说明提前充值为什么锁不住价，以及国内卡和虚拟卡过不了 Google 付款校验的三个真实原因。',
+    imageUrl: 'https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&h=630&fit=crop',
+    toolIds: ['gemini-4-carbon', 'gemini'],
+    difficulty: 'medium',
+    reliability: 'high',
+    tags: ['Gemini 4 Carbon', 'Gemini API', '涨价', 'Prepay', 'Batch API', '信用卡被拒', 'Google Cloud Billing', '留学生'],
+    rating: 4.6,
+    ratingCount: 1240,
+    viewCount: 3860,
+    createdAt: '2026-11-11T00:00:00Z',
+    updatedAt: '2026-11-11T00:00:00Z',
+    referralUrl: '',
+    content: `## 一、我朋友 11 月充了 $50，以为囤住了 $2 的价
+
+上周一个在 CMU 读研的朋友跟我说，他看到 Gemini 4 Carbon 是每百万 token 输入 $2、输出 $10，又看到 12 月 1 日要涨到 $4/$20，就先往 AI Studio 里充了 $50「囤着」。我让他把 Billing 页打开一起看了两分钟——Prepay 存的只是美元余额，涨价涨的是每 token 的单价。他 12 月拿这 50 美元去跑同样的任务，能跑的 token 数直接减半。
+
+这件事如果没人点破，很容易白高兴一场。所以这篇先把账算清楚，再讲付款那一堆坑。
+
+## 二、官方价格表：11-30 和 12-01 是两条完全不同的账
+
+Google 在 Gemini API 定价页上给 Carbon 和同门的 Argon 标了完全一样的价，并且写死了切换日期。四个计费档的价格如下（单位：每百万 token，美元）：
+
+| 计费档 | 11-30 前 输入 | 11-30 前 输出 | 12-01 起 输入 | 12-01 起 输出 | 适用场景 |
+|---|---|---|---|---|---|
+| Standard | $2.00 | $10.00 | $4.00 | $20.00 | 交互式、要立刻看到结果 |
+| Batch | $1.00 | $5.00 | $2.00 | $10.00 | 挂一夜、明天看结果 |
+| Flex | $1.00 | $5.00 | $2.00 | $10.00 | 能等几十秒的异步任务 |
+| Priority | $3.60 | $18.00 | $7.20 | $36.00 | 要速度、要稳定吞吐 |
+
+上下文缓存也跟着翻倍：Standard 档从 $0.10 涨到 $0.20，Batch / Flex 从 $0.05 涨到 $0.10。要注意 Carbon 只支持 implicit caching（隐式缓存），官方不支持显式建缓存——这跟 3.8 Flash 那种能手工建缓存池的模型不一样。
+
+另外两件容易被漏掉的事：
+
+- **Carbon 和 Argon 都不在免费层。** 一个 token 都不送，思考 token、工具调用时的系统指令和函数声明也都计费。AI Studio 里能点开试一句，但正经跑就要求付费档。
+- **Grounding with Google Search 每月送 5,000 次**，超出部分 $14 / 千次，而且有 1,500 次 / 天的硬上限。做检索类 Agent 的时候这条上限比价格更容易卡住你。
+
+## 三、锁价锁的不是余额，是「你什么时候把活干完」
+
+把计费模型想清楚就不会被骗：
+
+1. 你充进 Prepay 的是**美元**，不是 token。
+2. 每次调用按**当期单价 × 消耗 token 数**从余额里扣。
+3. 12 月 1 日起单价翻倍，同样的活扣的钱就翻倍，余额本身一分没变。
+
+所以「提前充值锁价」这个说法在 Google 这边不成立。唯一能真正省到的方法，是**把吃 token 的活挪到 11 月 30 日之前跑完**。
+
+哪些活属于「吃 token」：全仓库级别的重构和跨模块 debug、批量生成测试用例、几十篇文献的清洗和对齐、长 PDF 逐页抽取。哪些不属于：日常问一句改个函数、调 CSS、写一段 SQL。前者提前跑，后者什么时候跑都无所谓。
+
+## 四、三条真正能省钱的路径
+
+**第一条，换计费档，直接省 50%。** 同一个 Carbon，从 Standard 换成 Batch 或者 Flex，单价立刻从 $2/$10 掉到 $1/$5。Batch 走的是异步批处理，结果不要求立刻返回；Flex 是弹性档，延迟高一点但快得多。做课设批量跑数据这种，改一个参数的事，比换模型省得还多。这是最被忽略的一条，很多人根本不知道有这档。
+
+**第二条，换模型，而不是硬上 Carbon。** Argon 和 Carbon 同价，但 Argon 每轮消耗的 token 明显更少——官方自己的说法是「大多数软件工程和知识工作的理想选择」，Carbon 是留给「把模型智力逼到极限」的任务。日常活先用 Argon，卡住了再上 Carbon。再往下一档，Gemini 3.8 Flash 有免费层，付费档在 12 月 31 日前是 $0.75/$3.75，比 Carbon 便宜到不像话。
+
+**第三条，别反复追问同一份长上下文。** 每一轮对话都从头计费。把一整本教材塞进上下文再问十个问题，比先让它出结构化摘要、再基于摘要追问，成本差一个数量级。另外固定不变的 system prompt 和背景资料要放在最前面——implicit caching 靠前缀重复命中，命中的部分按缓存价算。
+
+## 五、付款方式：Google 收什么，不收什么
+
+这是国内学生最容易卡住的一步。Google Cloud Billing 官方支持清单写得很明确：
+
+| 接受 | 不接受 |
+|---|---|
+| American Express、MasterCard、Visa | 预付卡（prepaid cards） |
+| 带 Visa / MasterCard 标志的借记卡 | 需要二次验证（短信 OTP）才能交易的借记卡 |
+| Discover（仅美国）、JCB（仅日本和美国）、Visa Electron（美国外） | 只支持出账的银行账户 |
+| 银行账户（部分国家，且需要已有账单历史） | Prepay 账户和 threshold billing 的电汇 |
+| PayPal（仅西班牙、意大利、墨西哥） | — |
+
+**银联不在这个清单里。** 这是很多人反复失败又找不到原因的根源：卡面是 Visa/MasterCard 双币，但发卡行是国内银行，Google 付款系统在第一次授权时就会拒。
+
+两种典型报错，含义完全不同：
+
+- Your card does not support automatic recurring payments
+  → 发卡行不允许这张卡做订阅自动扣款。国内很多借记卡和大半虚拟卡属于这一类，因为短信验证码要求「人在场」，而自动续费发生时你不在场。
+- General decline of the card. No other information was provided by the issuing bank.
+  → 发卡行直接拒了，不给理由。常见于跨境风控、卡段被 Google 拉黑、或者账单地址和 IP 地区严重不一致。
+
+还有一条容易被忽略的规则：**Prepay 账户开了 auto-reload 之后，同样要求账户里至少有一个有效的 Primary 支付方式**。一旦这张卡失效或者被移除，整个 Cloud Billing 账户会被挂起，所有关联到该计费账户的项目 API 全部停止——包括你之前用 Prepay 余额付的那些服务。也就是说，余额还在，但用不了。
+
+## 六、Prepay 和 Postpay 怎么选（学生版）
+
+| | Prepay（预付） | Postpay（后付） |
+|---|---|---|
+| 在哪管 | aistudio.google.com/billing | Google Cloud Console 的 Billing |
+| 扣款方式 | 先充钱，按用量从余额扣 | 月底按实际用量出账单 |
+| 适合谁 | 课设、毕设、用量能估算 | 开源项目、导师能报销、长期运行 |
+| 风险 | 余额跑完就停（这其实是优点） | 忘记限额可能一夜烧掉几百美元 |
+| 共同要求 | auto-reload 需要有效 Primary 卡 | 部分国家/币种需要先做一次性预付才能激活 |
+
+我的建议很直接：**做课程项目和毕设一律用 Prepay**，充 $20 或 $50 封顶，跑完就停。Google 不会因为余额没了给你发道歉信，只会返回报错——这对学生来说恰恰是最安全的模式。
+
+如果你导师能报销、或者项目要长期跑，Postpay 更省事，但一定去 Cloud Console 里设预算告警（Budget & alerts），不然一次批量跑挂在那里，月底账单能让你沉默。
+
+## 七、常见问题
+
+### Q1：我不是美国学生，在国内能用 Gemini 4 Carbon 吗？
+技术上取决于账号所在地区和网络环境，Gemini API 本身按 Google 账号和计费账户走的。要注意两点：一是 Google Cloud Billing 的币种和支持的支付方式跟账单地址所在国家绑定，选错国家会直接拿不到某些支付方式；二是用代理跑 API 时，请求 IP 和账单地址地区差太远会提高风控概率。这不是「能不能用」的问题，是「付款会不会被拒」的问题。
+
+### Q2：先充 $50 囤着，12 月是不是就按 $2 扣了？
+不是。Prepay 里的钱是美元余额，12 月跑任务按当期单价 $4/$20 扣，能跑的 token 数直接减半。想省这 50%，唯一办法是 11 月 30 日之前把吃 token 的活干完。
+
+### Q3：为什么我的虚拟卡在 OpenAI 能过，在 Google 这边过不了？
+两家的风控不是一套。Google Cloud 明确把预付卡排除在外，而且会检查发卡行是否允许订阅自动扣款。能过 OpenAI 月付的卡，不一定能过 Google 的 Billing 校验——后者的检测链更长，还会看账单地址、卡段历史和使用地区。
+
+### Q4：Carbon 有免费额度吗？我只想试两句。
+没有。Carbon 和 Argon 都不在免费层，免费层是指定的几个模型（例如 3.8 Flash）。想零成本摸一下效果，可以先用 3.8 Flash 的免费层把逻辑跑通，把 Carbon 留给真正卡住的那几轮。或者订 Google AI Ultra，Carbon 已经在 Ultra 的 Gemini App、AI Mode、Antigravity 里可用。
+
+### Q5：Batch 和 Flex 都是 $1/$5，有区别吗？
+价格一样，调度策略不同。Batch 是异步批处理，适合「提交完关掉、明天回来看结果」；Flex 是弹性算力档，延迟比 Batch 低得多但仍高于 Standard。要立刻看到结果的交互式调用，只能用 Standard。
+
+### Q6：Billing 账户被挂起了，Prepay 里的余额会退吗？
+余额不会消失，但服务会停。官方说法是 Postpay 账户关停时未使用的预付款会退还；而账户被判定为支付方式无效而挂起时，所有关联项目的 API、服务、资源都会停止，包括用 Prepay 余额支付的那些。所以保持那张卡有效，比余额多少更重要。
+
+### Q7：Carbon 和 Argon 一个价，那我干脆一直用 Carbon？
+不建议。Carbon 是为了「把模型逼到极限」设计的，它会用更多 token 去探索、推理、跑验证循环。同一个任务，Carbon 的 token 消耗明显高于 Argon。日常写代码、改文档、答问题用 Argon；只有跨文件 debug、复杂安全分析、长链路 Agent 这类硬活才换 Carbon。
+
+### Q8：12 月之后还有更便宜的选择吗？
+看你干什么。纯文本批量任务，DeepSeek V4.1-Flash 错峰时段是 $0.15/$0.60，便宜一个数量级；要前沿能力但不想按 Carbon 的价格付费，用 OpenRouter 这类网关按需切模型，也能控制成本。Carbon 的不可替代之处集中在长链路 agent 和安全方向——那些活换便宜模型，往往是返工几次反而更贵。
+
+## 八、来源
+
+1. [Gemini 4 Carbon is now available — Google 官方博客](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-4-carbon-now-available/) — 2026-11-10 全量开放、价格脚注、各基准数字
+2. [Gemini 4 Carbon: our next frontier model — Google 官方博客](https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-carbon/) — 2026-10-28 首次公布、安全基准
+3. [Gemini Developer API pricing — AI Studio 官方定价页](https://aistudio.google.com/docs/pricing) — 四档计费、11-30 / 12-01 切换日期
+4. [Cloud Billing 支持的支付方式 — Google Cloud 官方文档](https://docs.cloud.google.com/billing/docs/how-to/payment-methods) — 卡片类型清单、预付卡与 2FA 借记卡限制、Prepay / Postpay 账户说明
+5. [本站：Google Gemini API 完整指南](/payment/gemini-api-google-payment) — API Key 申请、免费额度等基础流程
+6. [本站：AI 工具 · Gemini 4 Carbon](/tools/gemini-4-carbon) — 模型能力、适用场景与省钱用法
+`,
+  },
   ];
 
 // Helper functions
