@@ -3875,10 +3875,12 @@ IUP International Education 的 Facebook 通报里只说了"重要更新"，没�
       {
       id: 'f1-visa-17-day-countdown-ai-workflow-2026',
       slug: 'f1-visa-17-day-countdown-ai-workflow-2026',
-      title: 'F-1签证17天倒计时：2026年9月15日DHS新规生效，留学生用AI做这5件事',
+      title: 'F-1签证17天倒计时：2026年9月15日DHS新规生效，留学生用AI做这5件事（新规已被法院叫停）',
       titleEn: 'F-1 Visa 17-Day Countdown: 5 AI Workflows Every International Student Needs Before September 15, 2026',
       excerpt: '距离 2026 年 9 月 15 日 DHS 终结 D/S 制度只剩 17 天。8 月 31 日 SEVP 有官方直播答疑。本文给 5 类学生 + 5 个 AI prompt 模板，帮你在 17 天里把身份风险降到最低。',
       content: `# F-1签证17天倒计时：2026年9月15日DHS新规生效，留学生用AI做这5件事
+
+    > **2026-11-11 更正**：这条新规**没有生效**。2026-09-14，麻州联邦地方法院法官 F. Dennis Saylor IV 批准全国范围初步禁令，DHS 与 ICE 在诉讼期间不得实施，规则至今全国停摆。以下内容保留为 2026-08-29 的原样记录，其中"9 月 15 日生效"的表述已过时；当前状态和 OPT 新收费提案请看[这篇最新解读](https://www.mi-to-ai.com/blog/opt-70000-fee-f1-rule-blocked-2026)。
 
     > 写于 2026-08-29，距离 9 月 15 日还有 17 天。今天早上 SEVP 又发了一次邮件提醒 8 月 31 日（周一）的官方直播答疑（2-3 PM EDT，Adobe Connect，无 Q&A 环节）。如果你只读一篇关于这个新规的文章，请读完这一篇。
 
@@ -4133,7 +4135,7 @@ IUP International Education 的 Facebook 通报里只说了"重要更新"，没�
       relatedToolIds: ['47', '49', '45', '50'],
       seoKeywords: ['F-1 visa September 15 2026', 'DHS duration of status end', 'I-539 extension of stay', 'STEM OPT 2027 deadline', '国际学生 9月15日新规', 'F-1 17 天倒计时', 'AI 工具 签证申请', 'SEVP webinar 8月31日'],
       createdAt: '2026-08-29',
-      updatedAt: '2026-08-29',
+      updatedAt: '2026-11-11',
       readTime: 12,
       viewCount: 0,
       imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1200&h=630&fit=crop&q=80',
