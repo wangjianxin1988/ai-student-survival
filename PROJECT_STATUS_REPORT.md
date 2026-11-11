@@ -1,7 +1,7 @@
 # AI留学生存指南 - 项目完整状态报告
 
 > 生成时间: 2026-08-27 17:50 (最后 SEO + GEO 修复后)
-> 最近更新: 2026-10-18 (weekly cron：新增 2 个 AI 工具 + 1 篇支付指南，sitemap 590)
+> 最近更新: 2026-11-11 (weekly cron：新增 Gemini 4 Carbon + Gemini API 12月涨价付费攻略，70 工具 / 51 支付，sitemap 596)
 > 项目路径: D:\suoyouxiangmu\ai-student-survival
 
 ---
