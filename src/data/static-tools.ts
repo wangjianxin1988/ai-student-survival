@@ -2609,6 +2609,64 @@ export const staticTools: Tool[] = [
     updateSourceType: 'changelog',
     affiliateUrl: 'https://aistudio.google.com/?ref=mi-to-ai',
   },
+  {
+    id: '71',
+    name: 'Claude Fable 5.2',
+    slug: 'claude-fable-5-2',
+    description: 'Anthropic 11 月 9 日放出的 Fable 5.2，同一底层模型的受限版本叫 Mythos 5.2。官方基准里 FrontierCode 2.0 跑到 49.1%（Xhigh），比上一代 5.1 的 32.4% 高 16.7 个点；OSWorld 2.1 是 89.3%，RoboDojo 的机器人控制 64.9%（GPT-6 Astra 29.8%）。价格是这次最实在的改动：输入 $8、输出 $40 每百万 token，比 5.1 便宜 20%，输出速度快 30%，还能开 Fast mode 再快 2.5 倍（$16/$80）。但有句实话得说在前头——Anthropic 自己在发布文里建议日常写代码先用 Opus 5.5，卡住了再往上换。因为 Fable 的输入价是 Opus 5.5 的两倍，一个活全程按 Fable 跑，账单就是两倍。它真正值得开的时候，是那种一次要跑几个小时、跨十几个文件、你不确定到底能不能跑通的任务。',
+    category: 'coding',
+    subcategory: 'code-model',
+    pricing: 'paid',
+    priceDetail: { monthly: 0, yearly: 0, currency: 'USD' },
+    url: 'https://www.anthropic.com/claude-fable-and-mythos-5-2',
+    imageUrl: 'https://images.unsplash.com/photo-1508830524289-0adcbe822b40?w=1200&h=630&fit=crop',
+    rating: 4.8,
+    ratingCount: 3100,
+    dimensions: { easeOfUse: 3.7, features: 5.0, value: 3.5 },
+    tags: ['Anthropic', '前沿模型', 'Agentic Coding', '长链路任务', 'Fast mode', '按 token 计费', 'Pro 不含 Fable', '11月发布'],
+    features: [
+      'FrontierCode 2.0 49.1%（Xhigh 档），高于 GPT-6 Astra 的 42.8% 和 Gemini 4 Carbon 的 41.1%',
+      'FrontierSWE v2 69.9%，比 5.1 的 56.3% 高 13.6 个百分点',
+      '输出速度比 5.1 快 30%，价格降 20%：$8 输入 / $40 输出 每百万 token',
+      'Fast mode 可开到 2.5 倍生成速度，价格翻倍到 $16 / $80',
+      '1,000 个子 agent 连跑 8 天，从空目录做出一个能开机启动的系统；费马大定理形式化从 11 天压到 30 小时',
+      'RoboDojo 机器人控制 64.9%、OSWorld 2.1 是 89.3%、WANDR 82.1%',
+      '在 Claude Code 里能当 Advisor（让 Opus / Sonnet 卡住时上来问它）或 Orchestrator（把简单活分给更小的模型）',
+      '网页订阅：Pro 走 usage credits，Max / Ultra 含最多 50% 周额度'
+    ],
+    alternatives: ['claude-opus-5', 'claude-code', 'claude', 'gemini-4-carbon', 'gpt-5-6-sol', 'deepseek-v4-pro-0813'],
+    isNew: true,
+    createdAt: '2026-11-15',
+    updatedAt: '2026-11-15',
+    details: {
+      howToUse: [
+        { step: 1, title: '先确认你的 Claude Code 版本够新', description: 'Fable 5.2 在 Claude Code 里要 2.1.321 或更新的版本（5.1 要 2.1.255，5 要 2.1.170）。终端里跑 claude --version 看一眼，版本低就 claude update。网页、桌面、手机端直接从模型下拉菜单里选 Fable 5.2 就行，不需要额外配置；Cowork 里用需要 Claude Desktop 是最新版。切模型不会改你的默认模型，用完记得切回去——这是最容易忘的一步，第二天打开还是 Fable，钱已经在走了。' },
+        { step: 2, title: '定好走哪条路：订阅额度、usage credits，还是 API', description: 'Max 和 Ultra 的 Fable 是包在订阅里的，最多用掉周额度的 50%，超出之后要么继续用 credits，要么切回别的模型继续吃周额度。Pro 和 Team 标准席位不一样：Fable 从第一天起就走 usage credits，按 API 原价扣，不占你的周额度（11 月 9 到 16 号那周是发布促销，例外）。用 API 的话不存在额度问题，$8 / $40 直接按 token 计费，适合挂在脚本里跑。' },
+        { step: 3, title: '把花费上限先设上，再切模型', description: '这一步比选模型重要。Settings 里的 Usage 页能开 usage credits 并设月度上限，先设 $10，跑完一个项目再决定要不要加。官方文档写得很清楚：credits 不可退，取消订阅也不退，2026 年 12 月 7 日之后买的还有 12 个月有效期。也就是说这不是充进去能躺着的钱。Auto-reload 建议先关掉，你不想某天半夜它自己续上一笔。' },
+        { step: 4, title: '算清四档价，重活挪到 Batch 里跑', description: '同一个 Fable 5.2，Standard 是 $8 / $40，Batch 直接对折到 $4 / $20，Fast mode 反过来加价到 $16 / $80，缓存命中只有 $0.20 每百万 token。一个 20 万输入 + 4 万输出的任务，Standard 跑 $3.20，Batch 跑 $1.60。期末周那种晚上挂上去、第二天看结果的活，切 Batch 立刻省一半；赶 deadline 才值得开 Fast mode。缓存这块只支持官方那套隐式缓存规则，把固定的 system prompt 和背景资料放最前面，命中率会明显高。' }
+      ],
+      useCases: [
+        { title: '跨十几个文件的重构和迁移', description: 'Anthropic 自己拿它干的第一件事就是把一个关键生产服务从 Python 迁到 Rust，迁移完之后启动快了大约 26 倍。更极端的例子是让一个工程师从空文件夹开始，用 1,000 个子 agent 连跑 8 天，最后做出一个能在笔记本上开机、自带内核和网卡驱动的操作系统。放到课程里，这对应的是那种"改一处、报错十处"的大作业：三个模块互相依赖、构建脚本是学长留下的、你 grep 一下午找不到根因。这类活丢给 Fable 有意义，因为它在长链路里不容易半路放弃。代价要认：它会大量用 token 试探，一个活跑掉几十万 token 很正常，所以这种不急的活用 Batch 档，按 Standard 跑几次课设能烧掉十几美元。' },
+        { title: '数学和证明类毕设', description: 'Anthropic 在发布文里给了一个很硬的例子：费马大定理的 Lean 形式化，之前用未发布的研究版 Claude、配专用工具链和人工指导花了 11 天；这次用 1,000 个 Fable 5.2 agent 只花 30 小时，用的 action token 量只有第一次的三分之一，生成的证明短了 7 倍。同期 Opus 5.5 在同样的 1,000 agent 配置下跑 18 小时只完成 26%。做形式化验证、定理证明、需要严格可检验结果的方向，这是目前最不对称的一档能力。要提醒一点：它给你的是"机器能检查过的证明"，不是"教授会认可的思路"，选题和方向还得你自己扛。' },
+        { title: '硬件 / 电子课设', description: 'Anthropic 和做电路板的 Diode 合作，用一段话的提示让它设计三台带自制电路板、3D 打印外壳和软件的电子设备：一个家用语音助手、一个 USB 会议音箱、一个掌上电子宠物。它自己写规格、从美国分销商选元件、布四层板、做 CAD 外壳、写固件，每块板子不到一天就能进制造，三台设备通电就能用，一次电气改动都不需要。BenchCAD 2.1 上 Fable 5.2 拿 83.5，Opus 5.5 是 65.3。电子、机电、机器人方向做毕设的人，这个能力比"多写几行代码"值钱得多。' },
+        { title: '长审计、跨文档对账', description: 'Uber 的工程师让它跑了一次 10 到 12 小时的安全审计，它派出去大约 170 个 reviewer agent，回来交的是报告 + 修复 PR + 一份策略建议，中间没有在"看起来完成"的地方停下。Oracle 的测试更接地气：给一组国家债务和还款记录做 SQL 汇总，另外两个模型也能跑通，但把国家级汇总项重复相加，算出来是正确值的 5 到 8 倍。做论文的数据清洗、把几十份 PDF 里的数字对齐、查自己算错的账，这类活它的价值不在"快"，在于愿意一路核对到你不想核对的粒度。' }
+      ],
+      tips: [
+        '日常用 Opus 5.5，卡住了才切 Fable：输入价差两倍，输出价也差两倍',
+        'Batch 档 $4 / $20，比 Standard 便宜一半，能等就换档',
+        '缓存命中 $0.20 每百万 token，固定的 system prompt 和资料放最前面',
+        'Fast mode（$16 / $80）只在真的赶 deadline 时开，别当默认档',
+        'Pro 订阅不含 Fable，只有 11 月 9 到 16 日那一周是促销，之后走 credits',
+        'Max / Ultra 的 Fable 最多用掉周额度的 50%，额度不会因此变多',
+        '网络安全、生物类请求会被安全分类器拦下，回落到 Opus 4.8（网安）或 Opus 5（生物）；官方说 5.2 的误拦比 5.1 少约 55%',
+        '官方支持区域名单里没有中国大陆、香港、澳门和俄罗斯，人在这些地区使用属于违规'
+      ],
+      updateNotes: '2026-11-09：Anthropic 发布 Claude Fable 5.2 与 Claude Mythos 5.2，同一底层模型，Mythos 保留网安和生物能力、只对通过 Cyber / Life Sciences 验证计划的组织开放。价格 $8 输入 / $40 输出每百万 token（比 5.1 便宜 20%），输出速度比 5.1 快 30%，Fast mode $16 / $80 可再快 2.5 倍。当日同步在 AWS、Google Cloud、Microsoft Azure 上线，API 模型名 claude-fable-5-2。基准：FrontierCode 2.0 49.1%（Xhigh）、FrontierSWE v2 69.9%、AutomationBench 51.4%、Terminal-Bench-Science 74.6%（Mythos 75.3%）、OSWorld 2.1 89.3%、WANDR 82.1%、HLE 含工具 74.2%、RoboDojo 64.9%、BenchCAD 2.1 83.5。2026-11-09 至 11-16：Pro 与 Team 标准席位在周额度内可使用最多 50% 跑 Fable 模型，另送一次 Fable limit reset；Max / Ultra / Team 高级席位按订阅时长送 1 到 3 次 reset，有效期到 2027-03-08。2026-11-11：官方修正形式化一节中关于提供给模型信息的表述。2026-11-13：Anthropic 更新支持区域政策，明确人在不支持地区使用、以及不支持地区实体控股的公司使用均属违规；中国大陆、香港、澳门、俄罗斯不在名单内。'
+    },
+    updateSourceUrl: 'https://www.anthropic.com/claude-fable-and-mythos-5-2',
+    updateSourceType: 'changelog',
+    affiliateUrl: 'https://www.anthropic.com/claude-fable-and-mythos-5-2?ref=mi-to-ai',
+  },
   ];
 
 /**

@@ -6451,6 +6451,149 @@ Google 在 Gemini API 定价页上给 Carbon 和同门的 Argon 标了完全一�
 6. [本站：AI 工具 · Gemini 4 Carbon](/tools/gemini-4-carbon) — 模型能力、适用场景与省钱用法
 `,
   },
+  {
+    id: 'claude-fable-5-2-payment-2026',
+    title: 'Claude Fable 5.2 付费攻略：Pro 白送的一周 11 月 17 日截止，日常该买哪一档',
+    category: 'troubleshooting',
+    excerpt: 'Fable 5.2 比 5.1 便宜 20%，但它不在 Pro 的周额度里——11 月 9 到 16 日那一周是发布促销，北京时间 11 月 17 日 15:59 结束。这篇把 Pro / Max / Ultra 和 API 原价摊开算，附 11 月 13 日收紧的地区名单和付款排查顺序。',
+    imageUrl: 'https://images.unsplash.com/photo-1556742031-c6961e8560b0?w=1200&h=630&fit=crop',
+    toolIds: ['claude-fable-5-2', 'claude', 'claude-code'],
+    difficulty: 'medium',
+    reliability: 'high',
+    tags: ['Claude Fable 5.2', 'Claude Pro', 'Claude Max', 'usage credits', '支持区域', '信用卡被拒', '留学生', 'API 计费'],
+    rating: 4.7,
+    ratingCount: 960,
+    viewCount: 1480,
+    createdAt: '2026-11-15T00:00:00Z',
+    updatedAt: '2026-11-15T00:00:00Z',
+    referralUrl: '',
+    content: `## 一、11 月 10 号，在 NYU 读研的朋友问我 Fable 是不是以后都免费用了
+
+他 11 月 9 号（周一）打开 Claude 的模型下拉菜单，发现多了个 Fable 5.2，切过去用了两天，明显比之前快。到 13 号，Settings 的 Usage 页跳出一句 "Now using credits"，他才反应过来这事不是白给的。
+
+真实情况分两层。第一层：Pro 订阅的周额度里本来就不含 Fable——今年 7 月那次 Fable 5 促销在 7 月 19 日就结束了，官方帮助中心写得很清楚，Fable 5.2 和 5.1 从来没进过那个促销。第二层：这次是 Fable 5.2 发布附带的临时活动，覆盖 11 月 9 日到 11 月 16 日 23:59（美西时间），换算成北京时间是 11 月 17 日 15:59。过了这个点，Pro 用户再用 Fable 就是走 usage credits，按 API 原价单独扣钱。
+
+后面所有的账都建立在这条时间线上，先把它记住。
+
+## 二、四档价签摊开：同样的 Fable，不同计划完全不同的付法
+
+| 档位 | 月费 | Fable 怎么算 | 附带 API credits |
+|---|---|---|---|
+| Free | $0 | 不可用 | 无 |
+| Pro | $20 月付；年付 $200 一次性（官方标 $17/月） | 不含，只走 usage credits；11/9 到 11/16 促销周例外 | 无 |
+| Max | $100 | 含，最多用到周额度的 50% | $100/月 |
+| Ultra | $200 | 含，同样最多 50% 周额度；另有无 5 小时窗口限制、周额度 10 倍 | $200/月 |
+
+usage credits 的价格就是 API 原价，官方原话是"按标准 API 费率计费"。这张表是 11 月 15 日从官方定价文档读的：
+
+| 模型 | 输入 | 输出 | 缓存命中 | 5 分钟缓存写 |
+|---|---|---|---|---|
+| Fable 5.2 / Mythos 5.2 | $8 | $40 | $0.20 | $10 |
+| Fable 5.1 | $10 | $50 | $0.25 | $12.50 |
+| Opus 5.5 | $4 | $20 | $0.20 | $5 |
+| Sonnet 5.5 | $2 | $10 | $0.10 | $2.50 |
+
+（单位都是每百万 token，美元。Batch 档全部对折，Fable 5.2 变成 $4 输入 / $20 输出；Fast mode 反过来加价买速度，Fable 5.2 是 $16 / $80，Opus 5.5 是 $8 / $40。）
+
+看这张表能看出一件事：Fable 5.2 的输入价正好是 Opus 5.5 的两倍，输出价也是两倍。同一个活，默认模型选错，账单直接翻倍。Anthropic 自己在发布文里也这么说——日常写代码和知识类任务先用 Opus 5.5，需要的时候往上换。
+
+## 三、拿一个真实的长任务算钱，分界线很干脆
+
+设一个"跑起来停不下来"的活：20 万输入 token（十几个源文件 + 报错日志 + 需求），4 万输出 token（改完的代码 + 说明）。按官方单价：
+
+| 怎么跑 | 单次成本 |
+|---|---|
+| Fable 5.2，Standard 档 | $3.20 |
+| Fable 5.2，Batch 档 | $1.60 |
+| Opus 5.5，Standard 档 | $1.60 |
+| Sonnet 5.5，Standard 档 | $0.80 |
+| Fable 5.2，其中 15 万输入命中缓存 | $2.03 |
+
+再摊到一个月（按 52 周除以 12 算）：
+
+- 每周跑 1 个：$13.87/月，Pro 订阅加上后合计约 **$33.87**
+- 每周跑 3 个：$41.60/月，Pro 订阅加上后合计约 **$61.60**
+- Max 是 $100/月，比 Pro 多 $80，但送 $100/月 的 API credits
+
+结论：**为了 Fable 每月掏的 credits 超过 $80，就上 Max；不超过 $80，Pro 加按需开 credits 更省。** 一个学期只写两三次大项目的人，基本都在 $80 以下。
+
+还有一个比换模型更省的点：Batch 档对折，$3.20 直接变 $1.60。代价是拿不到即时返回。期末周那种晚上挂上去、早上看结果的任务，切到 Batch 就省一半——大多数人根本不知道有这么一档。
+
+## 四、11 月 13 日那份名单改了，这决定你能不能用
+
+Anthropic 在 11 月 13 日更新了 supported-regions 政策页。我写了脚本去拉官方名单逐条比对：**中国大陆、香港、澳门、俄罗斯都不在名单里**；台湾、新加坡、日本、韩国、马来西亚、印度、美国、英国、加拿大在名单里。
+
+更关键的是页面顶部那三条限制，它把"人在哪"和"公司在哪"分开了：
+
+1. 人在不支持地区境内使用，算违规——哪怕账号本身在支持地区注册；
+2. 公司注册地或总部在不支持地区，其人员在支持地区使用，也算违规；
+3. 被不支持地区主体直接或间接控股、控制的公司，同样算违规。
+
+对留学生的实际含义，说白一点：
+
+- 在美国、新加坡、日本、英国、加拿大读书：在名单里，正常用；
+- 回国过寒假：人落在不支持地区，严格按第 1 条就是违规的；
+- 港校（HKU / CUHK / HKUST）：香港不在名单上，这条比很多人以为的严。
+
+不建议为了付款把账单地址改成某个"看起来能用"的国家。真被判定违规封停时，usage credits 是明确不退的，官方 FAQ 写得很直白。
+
+## 五、付不了款按这四层查，不要一上来就换卡
+
+1. **人在不在名单里**。服务端先查这个，不在名单里，换十张卡都没用。
+2. **卡的类型**。官方原文：网页订阅"只接受信用卡或借记卡"。预付卡、礼品卡因此在网页付款这条路上走不通，礼品卡只能走 iOS / Android 内购那条路，内购的支付方式由 App Store 或 Google Play 决定。
+3. **发卡国和账单地址对不对得上**。学生最常卡在这一层：卡是家里在国内办的副卡，账单地址填学校宿舍，两边国家不一致，风控直接拒。
+4. **默认卡被拒时，账户里其他存过的卡可能被自动尝试**。这条也写在官方 FAQ 里。不想被扣的那张，先去 Settings 的 Billing 页删掉。
+
+另外两件容易被忽略的事：
+
+- **usage credits 是单独一笔账**，不并进 $20 的订阅 invoice。看到账单上多出 $3.47，不是重复收费。
+- **credits 不可退**。2026 年 12 月 7 日之后买的有效期 12 个月，这之前买的不设过期；取消订阅后余额还在，但只有付费计划能用。
+
+## 六、按预算给三种买法
+
+- **预算 $0**：Free 加 Sonnet 5.5 或 Haiku 5.5，Fable 先不用想。写课程作业够用。
+- **预算 $20**：Pro。年付 $200（官方标 $17/月）比月付省 $40。Fable 只在卡住时开：先把 usage credits 打开，月度上限设 $10，跑完一个活去 Usage 页看一眼。
+- **预算 $100**：Max。真正值钱的是 $100/月 API credits 加 Fable 能用 50% 周额度。有长期跑 agent 的习惯（比如每周都在改同一个项目），Max 的账划算。
+- **不建议个人学生上 Ultra**：$200 买到的核心是周额度 10 倍加没有 5 小时窗口。如果你不是一天十几个小时连着压 agent，这钱花不出效果。
+
+## 七、FAQ
+
+### Q1：Pro 订阅到底含不含 Fable？
+平时不含。Pro 的周额度只覆盖 Opus / Sonnet / Haiku 那几档，Fable 从第一天起就走 usage credits。唯一的例外是 11 月 9 日到 16 日的发布促销，那一周最多可以用 50% 周额度跑 Fable。
+
+### Q2：促销周没用完的 50% 额度，能留到下周吗？
+不能。官方 FAQ 明说未用完的部分不结转，没用掉的 Fable reset 也在 11 月 16 日 23:59（美西）过期。Pro 的这次 reset 只有这一个窗口。
+
+### Q3：Fable limit reset 会把我的额度上限提高吗？
+不会。它只做两件事：把你已经花在 Fable 上的周额度还回来；如果你的账号有 5 小时窗口限制，把那个窗口整个填满（包括花在别的模型上的部分）。上限本身不变。
+
+### Q4：Max 送的 1 到 3 次 reset 什么时候过期？
+2027 年 3 月 8 日 23:59（美西时间）。次数按付费订阅时长算：不满 6 个月 1 次，6 到 12 个月 2 次，超过 12 个月 3 次。中途取消再回来，从第一张付费账单算，不清零。
+
+### Q5：人在国内能订吗？
+不能。中国大陆、香港、澳门都不在官方支持区域名单里，而且 11 月 13 日的更新明确把"人在不支持地区使用"也算违规。这不是支付问题，换卡解决不了。
+
+### Q6：走 iOS 内购会不会更便宜？
+价格由 Apple 决定，通常含平台费，不一定比网页便宜。但它能用 App Store 礼品卡余额付款，对没有国际信用卡的人是现实路径。内购的订阅在 App Store 里管理，退款和取消也在那边。
+
+### Q7：usage credits 能退吗？
+不能。官方原文：credits 购买后不可退，包括取消订阅和删号的情况。删号时余额直接作废。所以别一次充太多。
+
+### Q8：Claude Code 里怎么切到 Fable 5.2？
+先看版本，Fable 5.2 要求 2.1.321 或更新。终端里跑 claude --version，低了就更新。然后用 /model 或者在模型选择器里挑 Fable 5.2。注意切换不改默认模型，跑完记得切回 Opus 5.5，否则下一次开终端还是它。
+
+## 八、来源
+
+1. [Anthropic 官方发布文：Claude Fable 5.2 and Mythos 5.2](https://www.anthropic.com/claude-fable-and-mythos-5-2)（2026-11-09，11-11 有更正）
+2. [Claude 定价页：Free / Pro / Max / Ultra](https://claude.com/pricing)
+3. [Anthropic API 定价文档：逐模型单价表](https://platform.claude.com/docs/en/about-claude/pricing)
+4. [Claude Fable 5.2 launch offers（促销规则、reset 细则）](https://support.claude.com/en/articles/17506494)
+5. [Claude Fable models on your plan（哪些计划含 Fable）](https://support.claude.com/en/articles/15424964)
+6. [Paid plan billing FAQs（付款方式、发票）](https://support.claude.com/en/articles/8325618-paid-plan-billing-faqs)
+7. [Anthropic Supported Regions Policy（2026-11-13 更新）](https://www.anthropic.com/legal/supported-regions)
+8. [CNBC：Anthropic releases Claude Fable 5.2 and Claude Mythos 5.2 ahead of IPO](https://www.cnbc.com/2026/11/09/anthropic-claude-fable-5-2-mythos-5-2.html)（2026-11-09）
+`
+  },
   ];
 
 // Helper functions
