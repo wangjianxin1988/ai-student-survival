@@ -1,7 +1,7 @@
 # AI留学生存指南 - 项目完整状态报告
 
 > 生成时间: 2026-08-27 17:50 (最后 SEO + GEO 修复后)
-> 最近更新: 2026-11-11 (weekly cron：新增 Gemini 4 Carbon + Gemini API 12月涨价付费攻略，70 工具 / 51 支付，sitemap 596)
+> 最近更新: 2026-11-15 (weekly cron：新增 Claude Fable 5.2 + Fable 付费/地区政策攻略，71 工具 / 52 支付，sitemap 600)
 > 项目路径: D:\suoyouxiangmu\ai-student-survival
 
 ---
@@ -20,8 +20,8 @@
 | Pages URL | https://mi-to-ai-new.pages.dev |
 | GitHub | git@github.com:wangjianxin1988/ai-student-survival.git |
 | 最新Git Tag | v1.0.6 (待推送) |
-| **最新Commit** | `e6db8bf` "fix(payment): swap student guide hero to student-themed Unsplash (P73 主题匹配)" |
-| **SEO 状态** | sitemap **590** URLs / 工具 69 个 / 支付攻略 50 篇（2026-10-18 weekly cron 后） |
+| **最新Commit** | `abb84a8` "feat: weekly update - Claude Fable 5.2 工具 + 付费/地区政策攻略" |
+| **SEO 状态** | sitemap **600** URLs / 工具 71 个 / 支付攻略 52 篇（2026-11-15 weekly cron 后） |
 
 ---
 
