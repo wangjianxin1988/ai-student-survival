@@ -6593,88 +6593,7 @@ Anthropic 在 11 月 13 日更新了 supported-regions 政策页。我写了脚�
 7. [Anthropic Supported Regions Policy（2026-11-13 更新）](https://www.anthropic.com/legal/supported-regions)
 8. [CNBC：Anthropic releases Claude Fable 5.2 and Claude Mythos 5.2 ahead of IPO](https://www.cnbc.com/2026/11/09/anthropic-claude-fable-5-2-mythos-5-2.html)（2026-11-09）
 `
-  },
-  ];
-
-// Helper functions
-export function getPaymentSolutionsByCategory(category: string): PaymentSolutionData[] {
-  return paymentSolutionsData.filter(s => s.category === category);
-}
-
-export function getPaymentSolutionById(id: string): PaymentSolutionData | undefined {
-  // First try exact match
-  const exactMatch = paymentSolutionsData.find(s => s.id === id);
-  if (exactMatch) return exactMatch;
-
-  // Try slug-based match (e.g., 'depay-guide' -> 'depay-complete-guide')
-  const slugLower = id.toLowerCase();
-  return paymentSolutionsData.find(s =>
-    s.id.toLowerCase().includes(slugLower) ||
-    s.title.toLowerCase().replace(/\s+/g, '-').includes(slugLower)
-  );
-}
-
-export function getRelatedSolutions(solution: PaymentSolutionData, limit: number = 3): PaymentSolutionData[] {
-  // Get related solutions by same category, then by shared toolIds
-  return paymentSolutionsData
-    .filter(s => s.id !== solution.id)
-    .map(s => ({
-      ...s,
-      relevanceScore: (
-        (s.category === solution.category ? 3 : 0) +
-        s.toolIds.filter(t => solution.toolIds.includes(t)).length * 2
-      )
-    }))
-    .filter(s => s.relevanceScore > 0)
-    .sort((a, b) => b.relevanceScore - a.relevanceScore || b.rating - a.rating)
-    .slice(0, limit)
-    .map(({ relevanceScore, ...s }) => s);
-}
-
-// Get solutions by tag
-export function getSolutionsByTag(tag: string): PaymentSolutionData[] {
-  return paymentSolutionsData.filter(s =>
-    s.tags.some(t => t.toLowerCase().includes(tag.toLowerCase()))
-  );
-}
-
-// Get all unique tags
-export function getAllPaymentTags(): string[] {
-  const tags = new Set<string>();
-  paymentSolutionsData.forEach(s => s.tags.forEach(t => tags.add(t)));
-  return [...tags].sort();
-}
-
-// Search solutions by keyword
-export function searchPaymentSolutions(query: string): PaymentSolutionData[] {
-  const lowerQuery = query.toLowerCase();
-  return paymentSolutionsData.filter(s =>
-    s.title.toLowerCase().includes(lowerQuery) ||
-    s.excerpt.toLowerCase().includes(lowerQuery) ||
-    s.content.toLowerCase().includes(lowerQuery) ||
-    s.tags.some(t => t.toLowerCase().includes(lowerQuery))
-  );
-}
-
-// Get popular solutions (by view count)
-export function getPopularSolutions(limit: number = 5): PaymentSolutionData[] {
-  return [...paymentSolutionsData]
-    .sort((a, b) => b.viewCount - a.viewCount)
-    .slice(0, limit);
-}
-
-// Get latest solutions
-export function getLatestSolutions(limit: number = 5): PaymentSolutionData[] {
-  return [...paymentSolutionsData]
-    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
-    .slice(0, limit);
-}
-
-export const paymentCategories = [
-  { value: 'virtual_card', label: '虚拟卡', icon: '💳', description: '虚拟信用卡服务，可绑定各种支付方式' },
-  { value: 'gift_card', label: '礼品卡', icon: '🎁', description: '各大平台的礼品卡购买和使用教程' },
-  { value: 'regional_pricing', label: '地区定价', icon: '🌍', description: '利用不同地区价格差异节省费用' },
-  { value: 'troubleshooting', label: '问题解答', icon: '❓', description: '常见支付问题解决方案' },
+  },
   {
     id: 'glm-coding-plan-payment-2026',
     title: 'GLM Coding Plan 怎么付：国内 ¥118 和海外 $18 现在只差 2 块钱，可国区点不进去',
@@ -6789,4 +6708,85 @@ A: UTC+8，和北京时间一致。周一到周五 14:00 到 18:00 是高峰，�
 `
   },
 
+  ];
+
+// Helper functions
+export function getPaymentSolutionsByCategory(category: string): PaymentSolutionData[] {
+  return paymentSolutionsData.filter(s => s.category === category);
+}
+
+export function getPaymentSolutionById(id: string): PaymentSolutionData | undefined {
+  // First try exact match
+  const exactMatch = paymentSolutionsData.find(s => s.id === id);
+  if (exactMatch) return exactMatch;
+
+  // Try slug-based match (e.g., 'depay-guide' -> 'depay-complete-guide')
+  const slugLower = id.toLowerCase();
+  return paymentSolutionsData.find(s =>
+    s.id.toLowerCase().includes(slugLower) ||
+    s.title.toLowerCase().replace(/\s+/g, '-').includes(slugLower)
+  );
+}
+
+export function getRelatedSolutions(solution: PaymentSolutionData, limit: number = 3): PaymentSolutionData[] {
+  // Get related solutions by same category, then by shared toolIds
+  return paymentSolutionsData
+    .filter(s => s.id !== solution.id)
+    .map(s => ({
+      ...s,
+      relevanceScore: (
+        (s.category === solution.category ? 3 : 0) +
+        s.toolIds.filter(t => solution.toolIds.includes(t)).length * 2
+      )
+    }))
+    .filter(s => s.relevanceScore > 0)
+    .sort((a, b) => b.relevanceScore - a.relevanceScore || b.rating - a.rating)
+    .slice(0, limit)
+    .map(({ relevanceScore, ...s }) => s);
+}
+
+// Get solutions by tag
+export function getSolutionsByTag(tag: string): PaymentSolutionData[] {
+  return paymentSolutionsData.filter(s =>
+    s.tags.some(t => t.toLowerCase().includes(tag.toLowerCase()))
+  );
+}
+
+// Get all unique tags
+export function getAllPaymentTags(): string[] {
+  const tags = new Set<string>();
+  paymentSolutionsData.forEach(s => s.tags.forEach(t => tags.add(t)));
+  return [...tags].sort();
+}
+
+// Search solutions by keyword
+export function searchPaymentSolutions(query: string): PaymentSolutionData[] {
+  const lowerQuery = query.toLowerCase();
+  return paymentSolutionsData.filter(s =>
+    s.title.toLowerCase().includes(lowerQuery) ||
+    s.excerpt.toLowerCase().includes(lowerQuery) ||
+    s.content.toLowerCase().includes(lowerQuery) ||
+    s.tags.some(t => t.toLowerCase().includes(lowerQuery))
+  );
+}
+
+// Get popular solutions (by view count)
+export function getPopularSolutions(limit: number = 5): PaymentSolutionData[] {
+  return [...paymentSolutionsData]
+    .sort((a, b) => b.viewCount - a.viewCount)
+    .slice(0, limit);
+}
+
+// Get latest solutions
+export function getLatestSolutions(limit: number = 5): PaymentSolutionData[] {
+  return [...paymentSolutionsData]
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, limit);
+}
+
+export const paymentCategories = [
+  { value: 'virtual_card', label: '虚拟卡', icon: '💳', description: '虚拟信用卡服务，可绑定各种支付方式' },
+  { value: 'gift_card', label: '礼品卡', icon: '🎁', description: '各大平台的礼品卡购买和使用教程' },
+  { value: 'regional_pricing', label: '地区定价', icon: '🌍', description: '利用不同地区价格差异节省费用' },
+  { value: 'troubleshooting', label: '问题解答', icon: '❓', description: '常见支付问题解决方案' },
 ];
