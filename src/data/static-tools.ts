@@ -2667,6 +2667,67 @@ export const staticTools: Tool[] = [
     updateSourceType: 'changelog',
     affiliateUrl: 'https://www.anthropic.com/claude-fable-and-mythos-5-2?ref=mi-to-ai',
   },
+  {
+    id: '72',
+    name: 'GLM-5.4',
+    slug: 'glm-5-4',
+    description: '智谱 11 月 23 日发布的 GLM-5.4，是第一个把 Loop Transformer 用在旗舰上的模型：78 层权重里第 27 到 54 层跑两遍，一次前向算出 106 次层计算，官方说这是让约 750B 参数去对打 2-3T 级模型的办法。第三方 KingBench 4 上它拿 33.2/60（55.3%），比上一代 GLM-5.3 的 27.5 高 5.7 分，是所有开源模型里的最高分。但两件事得先说清楚：它不是快的那一个——同一个测试集里它跑了 431 分钟、1128 步，Gemini 4 Neon 只用了 109 分钟、244 步；而且到 2026-11-25 它还没有 API，只能挂在 Coding Plan 里用（$18/月起）。它最值的用法不是当主力，是当第二个审查者：工具调用失败率 1.56%，失败后有 66% 会自己换个写法重试成功，比同批测过的所有 Claude 和 Codex 都高。',
+    category: 'coding',
+    subcategory: 'code-model',
+    pricing: 'freemium',
+    priceDetail: { monthly: 18, yearly: 151.2, currency: 'USD' },
+    url: 'https://z.ai/subscribe',
+    imageUrl: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?w=1200&h=630&fit=crop',
+    rating: 4.6,
+    ratingCount: 2400,
+    dimensions: { easeOfUse: 3.9, features: 4.7, value: 4.5 },
+    tags: ['智谱', 'Z.ai', '国产开源模型', 'Loop Transformer', 'Claude Code 兼容', '1M 上下文', 'Coding Plan', '11月发布'],
+    features: [
+      'KingBench 4（AICodeKing 独立跑测）33.2/60 = 55.3%，开源模型第一，比 GLM-5.3 的 27.5 高 5.7 分',
+      'Loop Transformer：78 层权重里第 27-54 层跑两遍，一次前向共 106 次层计算，官方称约 750B 参数可对打 2-3T 级模型',
+      '30B 同参数对照实验（只多约 10% 训练算力）：AIME25 19.17→30.42、GPQA-Diamond 47.58→56.26、AA-LCR 40.33→47.67',
+      '1M 上下文 / 128K 输出；输入支持文本、图片、视频、文件',
+      '速度：非高峰 200 tokens/s，高峰 70-80 tokens/s（单 token 不慢，慢在步数多）',
+      '缓存命中率高：KingBench 4 全套 98.4%，多轮 agent 热会话 90-92%',
+      '工具调用：31/31 全部通过严格 schema 校验，原生并行调用一轮发 3-4 个',
+      '接入面：Claude Code、ZCode、Codex、OpenCode、Cursor、Cline 等 20+ 工具；模型名 glm-5.4，要 1M 上下文写成 glm-5.4[1m]',
+      '截至 2026-11-25 仍无官方 API、无开源权重、不在 OpenRouter 上（官方说法是安全评估之后再放）'
+    ],
+    alternatives: ['claude-code', 'claude-opus-5', 'deepseek-v4-pro-0813', 'kimi', 'openrouter', 'cursor'],
+    isNew: true,
+    createdAt: '2026-11-26',
+    updatedAt: '2026-11-26',
+    details: {
+      howToUse: [
+        { step: 1, title: '先搞清买哪一区、哪一档，这一步决定后面所有事', description: '2026-11-26 的价格：海外 z.ai 是 $18 / $80 / $168 一个月，年付打 7 折变成 $12.6 / $56 / $117.6；国区 bigmodel.cn 是 ¥118 / ¥538 / ¥1078 一个月，包季 8 折、包年 7 折，三个档位每周积分分别是 10,000 / 60,000 / 140,000。国区页面当天显示的是「无法订阅升级」加「预约开售通知」，也就是现在点不进去，只能留手机号或邮箱等开售。所以人在国外、手上有一张能过外币订阅的卡，实际路径就是海外版；人在国内就先挂个预约，顺便看看能不能开中国发票报销。' },
+        { step: 2, title: '建 Key，把 Claude Code 指过来', description: '在 z.ai 后台订阅成功后新建一个 API Key。用 Claude Code 的话要改用户目录下的 .claude/settings.json，加四个环境变量：ANTHROPIC_BASE_URL 指向 https://api.z.ai/api/anthropic，ANTHROPIC_AUTH_TOKEN 填刚建的 key，API_TIMEOUT_MS 设 3000000，CLAUDE_CODE_AUTO_COMPACT_WINDOW 设 1000000。然后把 Opus、Sonnet、Haiku 三个模型槽位全写成 glm-5.4[1m]——注意要带方括号那个后缀才有 1M 上下文，只写 glm-5.4 是小窗口。改完在终端敲 /status 确认真的切过去了，切换不会作用到已经开着的会话。' },
+        { step: 3, title: '把 effort 从默认的 max 调到 high', description: 'z.ai 给的 Claude Code 配置默认 effort 是 max。第三方把四档都跑了一遍：一个 180 秒限时的五任务测试里，low 只用了 33 个推理 token、66.5 秒就把 25 项检查全过；medium 过了 24 项但要 174.6 秒；high 和 max 都只过 20 项，因为两个都在「想」的阶段撞上 180 秒、没写出代码。可换成完整套六应用测试，max 拿 55.3%、high 48.0%、low 42.0%。结论很朴素：短脚本用 low，几个文件以上的活开到 high，只有跑整项目时才值得上 max。命令是 /effort。' },
+        { step: 4, title: '把大活排到非高峰，配额直接对折', description: '高峰时段是周一到周五 14:00 到 18:00（UTC+8，就是北京时间下午两点到六点），这段扣 100% 配额；其余时间扣 50%。期末周那种晚上挂上去、第二天早上看结果的活，本来就该排到非高峰，顺手省一半额度。5 小时额度和周额度是两套规则：5 小时的按消耗后滚动 5 小时刷新，周额度每 7 天重置一次。另外官方在 2026-11-24 到 12-24 期间把 GLM-5.3-Flash 的计费也砍到 50%，等于额度翻倍——拿它打草稿、最后一步换 GLM-5.4 复核，是这一个月里最划算的组合。' }
+      ],
+      useCases: [
+        { title: '提交前找 bug：把它当第二个审查者', description: 'AICodeKing 的原话是「我用过最谨慎的模型」——它在测试的应用里翻出了别的模型漏掉的 bug 和安全漏洞，包括 Claude Fable 5.2 漏掉的那些。工具调用失败率 1.56%，在他测的 17 个模型里排第 11，但这 1.56% 里有 66% 会被它自己换个写法重试成功，比所有 Claude 和 Codex 模型都高。放到课程作业和毕设里，这个特性对应的场景很具体：你写完了、测试也过了，但你不确定边界有没有漏。这时候另开一个会话让它专门读你的 diff，比让它从零重写一遍有用得多。' },
+        { title: '跨十几个文件的长活，它能一路跑下来', description: '同一套测试里，GLM-5.4 干了 431 分钟、1128 步，Gemini 4 Neon 是 109 分钟、244 步，步均耗时差不多，差距全在愿不愿意继续想。结果上：Rust 写的 Game Boy/DS 模拟器 153 个测试全过、零 clippy 警告，还带 CGB 调色板和双核 ARM9/ARM7；宝可梦红版从真新镇一路打到小刚拿石头徽章，能存能读；3D 房间设计器塞进 20 种家具、94 个物体仍然 60fps。翻译成人话：多模块互相依赖、构建脚本是学长留下的那种大作业，它不会半路说「已完成」。代价就是慢，别在 deadline 前两小时才开它。' },
+        { title: '预算卡得死的时候，$18 这一档怎么用', description: 'Claude Pro 是 $20 一个月，GLM Coding Plan Lite 是 $18，年付 $12.6。数字上只差两美元，但省的不是这点：GLM-5.4 的输出计费系数是 16，GLM-5.3 是 24，同一个套餐跑 5.4 大约能多出 1.5 倍的有效 token。再加一条官方给的数：95% 缓存命中率下 Lite 一周能用 72 到 146M tokens。一个学生一学期写两三门课的代码，这个量基本用不完。要提醒的是额度只能在支持的工具里用——Cursor、Claude Code、ZCode、OpenCode、Cline 都算，但你要是拿它喂自己的网站或小程序，那是另一份合同，得买标准 API。' },
+        { title: '不只是写代码：3D、机械、视频都在射程里', description: '智谱这次推的概念叫「泛 Coding」——把代码当工具去驱动别的软件。博客里给的四个例子都挺具体：用 FreeCAD 做六轴机械臂的工程级 CAD 建模；用纯数学几何加自写 GLSL shader 做一个能互动的 3D 观鸟场景；一个自带角色移动、物理、地图、战斗系统和美术素材的完整游戏；还有一段自己配乐自己剪的 Hello World MV。机械、电子、工业设计方向做课设的人，这比多写几行 Python 值钱。限制也明摆着：安全边界类的活（处理不受信任的压缩包、符号链接逃逸、沙箱挂载）它和 Fable 5.2、Gemini 4 Neon 一样卡在同一个上限。' }
+      ],
+      tips: [
+        '默认 effort 是 max，先降到 high：180 秒短任务下 high 和 max 都在想的阶段超时，high 才是甜点',
+        '短脚本用 low：受控测试里 low 用 33 个推理 token、66.5 秒跑完 25/25 检查，high 和 max 反而只过 20/25',
+        '非高峰配额只扣 50%：高峰是周一到周五 14:00-18:00（UTC+8），写大作业尽量挪到晚上和周末',
+        'GLM-5.4 输出系数 16、GLM-5.3 是 24，同套餐跑 5.4 大约多 1.5 倍 token 量，别拿 5.3 干 5.4 的活',
+        '2026-11-24 到 12-24，GLM-5.3-Flash 按原配额 50% 计费，额度翻倍，适合当草稿模型',
+        '套餐额度只能在官方支持的工具里用，写自己的网站/机器人/SaaS 会违规，那种场景要买标准 API',
+        '一个账号只能一个人用，共享或拼车被风控命中会限流、减额度甚至收回剩余配额',
+        '在 Claude Code 里用要改 base_url 和三个模型槽位，槽位写 glm-5.4[1m] 才有 1M 上下文',
+        '官方自己承认它会陷进过长的 marathon thinking 循环，长会话记得开 Compact 别等它自己想通'
+      ],
+      updateNotes: '2026-11-23：智谱发布 GLM-5.4，第一个用 Loop Transformer 的旗舰——78 层权重里第 27 到 54 层循环跑两遍，一次前向共 106 次层计算；同日对 GLM Coding Plan 全档开放，Claude Code / ZCode / Codex / OpenCode / Cursor / Cline 等 20+ 工具可用，API 与开源权重的官方说法是安全评估之后再放。官方同时给出 30B 同参数对照实验（只多约 10% 训练算力）：AIME25 19.17 到 30.42、GPQA-Diamond 47.58 到 56.26、AA-LCR 40.33 到 47.67、MMLU-Pro 71.65 到 75.05、IFBench 50.20 到 53.47，输出长度反而短了 2% 到 14.9%。速度上非高峰 200 tokens/s、高峰 70-80 tokens/s。2026-11-24：官方文档更新计费系数，GLM-5.4 输入 4.6 / 缓存 1.1 / 输出 16，比 GLM-5.3 的 6.9 / 1.7 / 24 省三分之一；同时宣布 11-24 至 12-24 期间 GLM-5.3-Flash 按原配额 50% 计费。2026-11-24 至 11-25：第三方陆续放出完整 KingBench 4 榜，Claude Fable 5.2 42.0、Gemini 4 Neon 37.9、GPT-6.2 Sol 37.0、Claude Opus 5.5 34.7、GLM-5.4 33.2（开源第一，上一代 GLM-5.3 为 27.5、并列第 16）。截至 2026-11-26，官方 API、开源权重、OpenRouter 渠道都还没有。'
+    },
+    updateSourceUrl: 'https://z.ai/blog/glm-5.4',
+    updateSourceType: 'changelog',
+    affiliateUrl: 'https://z.ai/subscribe?ref=mi-to-ai',
+  },
+
   ];
 
 /**
