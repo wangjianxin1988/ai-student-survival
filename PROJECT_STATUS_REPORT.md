@@ -1,7 +1,7 @@
 # AI留学生存指南 - 项目完整状态报告
 
 > 生成时间: 2026-08-27 17:50 (最后 SEO + GEO 修复后)
-> 最近更新: 2026-11-15 (weekly cron：新增 Claude Fable 5.2 + Fable 付费/地区政策攻略，71 工具 / 52 支付，sitemap 600)
+> 最近更新: 2026-11-26 (3day-blog cron：新增 UC $1.2M/ChatGPT Edu + 雪城 AI 初审申请材料深度文，23 博客 / 72 工具 / 53 支付，sitemap 606)
 > 项目路径: D:\suoyouxiangmu\ai-student-survival
 
 ---
@@ -20,8 +20,8 @@
 | Pages URL | https://mi-to-ai-new.pages.dev |
 | GitHub | git@github.com:wangjianxin1988/ai-student-survival.git |
 | 最新Git Tag | v1.0.6 (待推送) |
-| **最新Commit** | `abb84a8` "feat: weekly update - Claude Fable 5.2 工具 + 付费/地区政策攻略" |
-| **SEO 状态** | sitemap **600** URLs / 工具 71 个 / 支付攻略 52 篇（2026-11-15 weekly cron 后） |
+| **最新Commit** | `33aa745` "feat(blog): UC 120万美元买ChatGPT Edu + 雪城AI初审申请材料" |
+| **SEO 状态** | sitemap **606** URLs / 工具 72 个 / 支付攻略 53 篇 / 博客 23 篇（2026-11-26 后） |
 
 ---
 
